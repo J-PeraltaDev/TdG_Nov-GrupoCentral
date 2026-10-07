@@ -1,0 +1,95 @@
+import { expect, test } from '@playwright/test'
+import {
+  HAY_CLAVE,
+  ingresarComo,
+  llenarIngreso,
+  menuVisible,
+  MOTIVO_SIN_CLAVE,
+  USUARIOS,
+} from './apoyo/usuarios.js'
+
+// CU-01 · Iniciar y cerrar sesión (RF-01). Corre contra una base con el seed de prueba.
+test.describe('CU-01 · Iniciar y cerrar sesión', () => {
+  test('RF-01 / CU-01 2a (01-D): sin conexión, el primer ingreso informa que necesita internet', async ({
+    page,
+    context,
+  }) => {
+    await page.goto('/ingresar')
+    await context.setOffline(true)
+
+    await expect(page.getByText('Sin conexión', { exact: true })).toBeVisible()
+    await expect(
+      page.getByText('El primer ingreso en este teléfono necesita internet', { exact: false }),
+    ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Ingresar' })).toBeDisabled()
+  })
+
+  test.describe('con los usuarios de prueba', () => {
+    test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
+
+    for (const rol of ['reportante', 'aprobador', 'director', 'administrador']) {
+      test(`RF-01 / CU-01 curso normal: el ${rol} ingresa y ve el menú de su rol`, async ({
+        page,
+      }) => {
+        const usuario = await ingresarComo(page, rol)
+
+        await expect(page).toHaveURL(new RegExp(`${usuario.inicio}$`))
+        const menu = menuVisible(page)
+        for (const opcion of usuario.menu) {
+          await expect(menu.getByRole('link', { name: opcion })).toBeVisible()
+        }
+      })
+    }
+
+    test('RF-01 / CU-01 4a (01-B): credenciales incorrectas; sigue en el formulario', async ({
+      page,
+    }) => {
+      await llenarIngreso(page, USUARIOS.reportante.correo, 'una-contrasena-equivocada')
+
+      await expect(page.getByRole('alert')).toHaveText(
+        'Correo o contraseña incorrectos. Revisa los datos e intenta de nuevo.',
+      )
+      await expect(page).toHaveURL(/\/ingresar$/)
+      await expect(page.getByLabel('Contraseña', { exact: true })).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
+      await expect(page.getByLabel('Correo', { exact: true })).toHaveValue(
+        USUARIOS.reportante.correo,
+      )
+    })
+
+    test('RF-01 / CU-01 4b (01-C): a un usuario desactivado se le niega el acceso', async ({
+      page,
+    }) => {
+      await llenarIngreso(page, USUARIOS.desactivado.correo)
+
+      await expect(page.getByRole('alert')).toHaveText(
+        'Tu usuario está desactivado. Si crees que es un error, comunícate con un administrador.',
+      )
+      await expect(page).toHaveURL(/\/ingresar$/)
+    })
+
+    test('RF-18: el guardián de rol devuelve a cada quien a su inicio', async ({ page }) => {
+      await ingresarComo(page, 'reportante')
+
+      await page.goto('/bandeja')
+
+      await expect(page).toHaveURL(/\/novedades$/)
+    })
+
+    test('RF-01 / CU-01 5 y 6: cerrar la sesión vuelve al ingreso y ya no deja entrar', async ({
+      page,
+    }) => {
+      await ingresarComo(page, 'reportante')
+
+      await page.goto('/cuenta')
+      await expect(page.getByText(USUARIOS.reportante.nombre).first()).toBeVisible()
+      await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+
+      await expect(page).toHaveURL(/\/ingresar$/)
+      await page.goto('/novedades')
+      await expect(page).toHaveURL(/\/ingresar$/)
+    })
+  })
+})
