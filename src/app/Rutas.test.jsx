@@ -1,8 +1,22 @@
 import 'fake-indexeddb/auto'
 import { screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
 import { Rutas } from './Rutas.jsx'
+
+// Las pantallas del reportante consultan el servidor: aquí solo interesan las rutas.
+vi.mock('../core/supabase/repositorios/novedades.js', () => ({
+  NOVEDADES_POR_PAGINA: 20,
+  listarNovedades: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  contarNovedades: vi.fn().mockResolvedValue(0),
+  registrarNovedad: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
+  listarAreas: vi.fn().mockResolvedValue([
+    { id: 'area-m', nombre: 'Mantenimiento' },
+    { id: 'area-s', nombre: 'Sistemas' },
+  ]),
+}))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
 
@@ -94,6 +108,23 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
       expect(await screen.findByRole('heading', { level: 1, name: titulo })).toBeVisible()
     },
   )
+
+  it('RF-05: el registro va sin las barras de navegación del teléfono (pantalla 05)', async () => {
+    abrir('/registrar', 'reportante')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Registrar novedad' }),
+    ).toBeVisible()
+    // Solo queda el menú de la barra lateral (escritorio); la barra inferior no se pinta.
+    expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(1)
+    expect(screen.getByRole('link', { name: 'Cerrar sin registrar' })).toBeVisible()
+  })
+
+  it('RF-06: la constancia sin una novedad recién registrada lleva a Mis novedades', async () => {
+    abrir('/registrar/recibida', 'reportante')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mis novedades' })).toBeVisible()
+  })
 
   it('el reportante ve su finca y su razón social en la barra superior', async () => {
     abrir('/novedades', 'reportante')

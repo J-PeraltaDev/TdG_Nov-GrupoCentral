@@ -11,6 +11,9 @@ import { Pendiente } from './paginas/Pendiente.jsx'
 // El ingreso va en el paquete inicial; todo lo que necesita sesión se carga bajo demanda
 // (RNF-05). Las pantallas de cada rol van en su propio paquete, con `React.lazy`.
 const Marco = lazy(() => import('./Marco.jsx'))
+const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
+const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
+const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 
 // Página de componentes: solo existe en desarrollo. En el build de producción esta
 // condición es falsa y el módulo ni siquiera se empaqueta.
@@ -54,14 +57,7 @@ export function Rutas() {
         <Route element={<RequiereSesion />}>
           <Route element={<Marco />}>
             <Route element={<GuardianDeRol roles={[ROL.REPORTANTE]} />}>
-              <Route
-                path="/novedades"
-                element={<Pendiente titulo="Mis novedades" sprint="Sprint 1" />}
-              />
-              <Route
-                path="/registrar"
-                element={<Pendiente titulo="Registrar novedad" sprint="Sprint 1" />}
-              />
+              <Route path="/novedades" element={<MisNovedades />} />
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.APROBADOR_AREA]} />}>
@@ -115,6 +111,14 @@ export function Rutas() {
 
             <Route path="/avisos" element={<Pendiente titulo="Avisos" sprint="Sprint 5" />} />
             <Route path="/cuenta" element={<Cuenta />} />
+          </Route>
+
+          {/* Registro y constancia: en el teléfono van sin las barras de navegación. */}
+          <Route element={<Marco enfocado />}>
+            <Route element={<GuardianDeRol roles={[ROL.REPORTANTE]} />}>
+              <Route path="/registrar" element={<RegistrarNovedad />} />
+              <Route path="/registrar/recibida" element={<NovedadRecibida />} />
+            </Route>
           </Route>
         </Route>
 
