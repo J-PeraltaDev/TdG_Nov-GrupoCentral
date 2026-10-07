@@ -22,7 +22,9 @@ const TAMANO_ESCRITORIO = 'h-10 px-4 text-etiqueta-fuerte'
 /** @type {Record<TamanoBoton | 'adaptable', string>} */
 const TAMANOS = {
   movil: TAMANO_MOVIL,
-  escritorio: TAMANO_ESCRITORIO,
+  // Forzado a 40 px (botones dentro de un aviso o junto a un dato): el área táctil se amplía
+  // a 48 px con un pseudoelemento, sin cambiar el tamaño visible.
+  escritorio: `${TAMANO_ESCRITORIO} relative after:absolute after:inset-x-0 after:-inset-y-1`,
   // 48 px en el teléfono (uso táctil) y 40 px desde lg.
   adaptable: `${TAMANO_MOVIL} lg:h-10 lg:px-4 lg:text-etiqueta-fuerte`,
 }

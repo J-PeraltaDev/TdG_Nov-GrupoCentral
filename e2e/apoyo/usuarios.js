@@ -29,6 +29,12 @@ export const USUARIOS = {
     inicio: '/bandeja',
     menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
   },
+  aprobadorSistemas: {
+    correo: 'aprobador.sistemas@novedades.test',
+    nombre: 'Aprobador de prueba Sistemas',
+    inicio: '/bandeja',
+    menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
+  },
   director: {
     correo: 'director@novedades.test',
     nombre: 'Director de prueba',
@@ -74,4 +80,31 @@ export async function ingresarComo(page, rol) {
   await llenarIngreso(page, usuario.correo)
   await page.waitForURL(`**${usuario.inicio}`)
   return usuario
+}
+
+/**
+ * Lee de la API con la sesión que tiene la página, igual que lo haría la aplicación: la clave
+ * publicable y el token del usuario que ingresó. Así las pruebas comprueban lo que cada rol
+ * puede ver sin usar ninguna clave privilegiada.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} consulta Ruta de PostgREST, por ejemplo `v_novedad?select=id&codigo=eq.12`.
+ * @returns {Promise<any>}
+ */
+export function leerDeLaApi(page, consulta) {
+  return page.evaluate(
+    async ({ url, clave, ruta }) => {
+      const guardada = Object.keys(localStorage).find((k) => /^sb-.+-auth-token$/.test(k))
+      const { access_token: token } = JSON.parse(localStorage.getItem(guardada))
+      const respuesta = await fetch(`${url}/rest/v1/${ruta}`, {
+        headers: { apikey: clave, Authorization: `Bearer ${token}` },
+      })
+      return respuesta.json()
+    },
+    {
+      url: process.env.VITE_SUPABASE_URL,
+      clave: process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      ruta: consulta,
+    },
+  )
 }

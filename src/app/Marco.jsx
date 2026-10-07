@@ -47,7 +47,7 @@ function BarraSuperiorDelTelefono({ perfil, enLinea }) {
   const subtitulo = perfil.finca?.razon_social?.nombre ?? descripcionDelPerfil(perfil)
 
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-1 border-b border-borde bg-superficie py-1 pr-1 pl-4 lg:hidden">
+    <header className="sticky top-0 z-10 flex h-15 items-center gap-1 border-b border-borde bg-superficie pr-1 pl-4 lg:hidden">
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="truncate text-subtitulo text-texto">{titulo}</p>
         <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
@@ -185,8 +185,14 @@ function NavegacionInferior({ items }) {
   )
 }
 
-/** Layout de las rutas con sesión. Va dentro de `RequiereSesion`. */
-export default function Marco() {
+/**
+ * Layout de las rutas con sesión. Va dentro de `RequiereSesion`.
+ *
+ * @param {object} props
+ * @param {boolean} [props.enfocado] Pantallas de una sola tarea (05 y 06): en el teléfono no
+ *   llevan la barra superior ni la inferior; cada una pone su propia cabecera.
+ */
+export default function Marco({ enfocado = false }) {
   const { perfil } = useSesion()
   const navegar = useNavigate()
   const enLinea = useEnLinea()
@@ -208,14 +214,16 @@ export default function Marco() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} />
+        {enfocado ? null : <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} />}
         <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
           <Outlet />
         </main>
 
-        <NavegacionInferior items={items.filter((item) => !item.soloEscritorio)} />
+        {enfocado ? null : (
+          <NavegacionInferior items={items.filter((item) => !item.soloEscritorio)} />
+        )}
       </div>
     </div>
   )
