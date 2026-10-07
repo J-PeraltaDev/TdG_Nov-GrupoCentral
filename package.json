@@ -21,7 +21,13 @@
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/core/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/core/supabase/database.types.ts",
+    "staging:push": "node scripts/staging.mjs push",
+    "staging:reset": "node scripts/staging.mjs reset",
+    "staging:test": "node scripts/staging.mjs test",
+    "staging:types": "node scripts/staging.mjs types",
+    "staging:advisors": "node scripts/staging.mjs advisors",
+    "staging:usuarios": "node scripts/staging.mjs usuarios"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.0",
