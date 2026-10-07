@@ -1,7 +1,8 @@
 # 0005 · Base de datos local para desarrollar; «PROYECTO» es producción
 
-- **Estado:** Aceptada (plan de arranque del Objetivo 3, 6 oct 2026). La base de las vistas
-  previas sigue abierta (`docs/decisiones-pendientes.md`, punto 2).
+- **Estado:** Aceptada (plan de arranque del Objetivo 3, 6 oct 2026). **Ajustada el 7 oct 2026
+  por el [ADR 0011](0011-staging-en-lugar-de-supabase-local.md):** el equipo no usa Docker, así
+  que se desarrolla contra el proyecto «staging» y no contra Supabase local. Lo demás sigue igual.
 - **Requerimientos:** RNF-11, RNF-15, RNF-17
 
 ## Contexto
