@@ -3,25 +3,26 @@
 Dudas de diseño o de negocio que los documentos no resuelven. Ninguna bloquea: en cada una se
 tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la confirmen o la cambien.
 
-| N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide                 |
-| --- | ------------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
-| 1   | Lista oficial de fincas y razones sociales | **Recibida** (7 oct). Fuera del repo; faltan 4 nombres y cómo cargar | Wilmar Cuesta / el equipo |
-| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado. Faltan las variables de Pages        | El equipo                 |
-| 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo                 |
-| 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa                |
-| 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo                 |
-| 6   | Contraste del estado «escalada»            | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma)         |
-| 7   | Service worker propio o con Workbox        | Propio, sin dependencias nuevas                                      | El equipo                 |
-| 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo                 |
-| 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma)         |
-| 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo                 |
-| 11  | Peso de la ruta de ingreso                 | Medido: 183,8 KB de 200 KB                                           | El equipo                 |
-| 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma)         |
-| 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma)         |
-| 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma)         |
-| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo                 |
-| 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo                 |
-| 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo                 |
+| N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide         |
+| --- | ------------------------------------------ | -------------------------------------------------------------------- | ----------------- |
+| 1   | Lista oficial de fincas y razones sociales | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
+| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
+| 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo         |
+| 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa        |
+| 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
+| 6   | Contraste del estado «escalada»            | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
+| 7   | Service worker propio o con Workbox        | Propio, sin dependencias nuevas                                      | El equipo         |
+| 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
+| 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
+| 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 183,8 KB de 200 KB                                           | El equipo         |
+| 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
+| 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
+| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
+| 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
+| 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -29,14 +30,9 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 en `docs/fuentes/fincas.csv`, que no se sube al repositorio. El seed sigue usando marcadores
 («Razón social de prueba A», «Finca de prueba 01»…), nunca nombres reales.
 
-**Falta confirmar cuatro nombres**, porque la lista escrita y la tabla no coinciden:
-
-| En la lista del equipo      | En la tabla                   | Duda                                     |
-| --------------------------- | ----------------------------- | ---------------------------------------- |
-| Agropecuaria Truandó S.A.S. | Agropecuaria Gran Truandó SAS | ¿Cuál es el nombre registrado?           |
-| Agropecuaria Juanca S.A.S.  | Agrícola Juanca SAS           | ¿Cuál es el nombre registrado?           |
-| —                           | Finca «AGUAS VERDE2»          | ¿Es «Aguas Verdes 2»?                    |
-| —                           | Finca «1LA CEJA»              | ¿Es «La Ceja»? El «1» parece un descuido |
+**Nombres confirmados el 7 oct 2026.** La lista escrita y la tabla no coincidían en cuatro nombres
+(dos razones sociales y dos fincas). El equipo los aclaró y `docs/fuentes/fincas.csv` ya tiene los
+definitivos.
 
 **Falta decidir cómo se cargan en producción.** Dos caminos:
 
@@ -55,12 +51,12 @@ reportes, es un cambio al SDD que conviene decidir antes del Sprint 3.
 
 **Resuelta el 7 oct 2026.** El equipo decidió no instalar Docker y aprobó el proyecto «staging»
 (`qxjnnanjidytbyihanet`). Es la base de desarrollo, de las pruebas y de las vistas previas; el
-detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción y sigue vacío.
+detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción.
 
-**Falta una cosa, y la hace una persona:** en el proyecto de Pages, poner las variables de
-_Preview_ con la URL y la clave publicable de «staging» (pasos en
-`docs/despliegue/cloudflare-pages.md`). Sin eso, las vistas previas de los PR del Sprint 1 no
-pueden ingresar.
+El equipo puso las variables en Cloudflare Pages ese mismo día. **Producción está comprobada:**
+publica con la URL y la clave de «PROYECTO». **Las vistas previas también:** publican con las de
+«staging», y esa clave la acepta «staging» y la rechaza «PROYECTO». Solo falta que alguien ingrese
+en una vista previa con un usuario de prueba.
 
 ## 3 · Dominio de los correos de la plataforma
 
@@ -249,3 +245,35 @@ npm run test:e2e:chromium
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
 compartirla.
+
+## 18 · Primer administrador de producción
+
+«PROYECTO» tiene el esquema desde el 7 oct 2026, pero ningún usuario, así que en producción nadie
+puede ingresar. Crear usuarios es la historia RF-03 (Sprint 3), y esa pantalla la usa un
+administrador que ya debe existir: el primero hay que crearlo de otra forma.
+
+**Decidido el 7 oct 2026:** una sola cuenta de administrador en producción, que usan Mateo y Juan.
+Como la comparten, el historial no distingue cuál de los dos hizo cada cosa; sirve para arrancar,
+y con la gestión de usuarios del Sprint 3 cada uno puede tener la suya.
+
+**Falta crearla.** Son dos pasos, en el panel de Supabase de «PROYECTO»:
+
+1. **Authentication → Users → Add user → Create new user:** el correo de la cuenta y una
+   contraseña que solo conozcan los dos, con **Auto Confirm User** marcado (sin eso el ingreso
+   responde que el correo no está confirmado). Este paso lo hace una persona: la contraseña no
+   pasa por el repositorio ni por un agente.
+2. **SQL Editor:** el perfil de la aplicación, que es lo que la vuelve administrador. Se cambian
+   los dos textos en mayúsculas:
+
+   ```sql
+   insert into public.usuario (id, nombre, correo, rol_id)
+   select id, 'NOMBRE QUE SE VERÁ EN LA APLICACIÓN', email, 4
+     from auth.users
+    where email = 'CORREO_DE_LA_CUENTA';
+   ```
+
+   Debe responder que insertó una fila. Si inserta cero, el correo no coincide con el del paso 1.
+
+Después, en <https://tdg-nov-grupocentral.pages.dev/>, la cuenta debe entrar y ver el menú del
+administrador. Queda anotarlo en el reporte del sprint, porque es un cambio hecho a mano en
+producción. El correo de la cuenta depende del punto 3.
