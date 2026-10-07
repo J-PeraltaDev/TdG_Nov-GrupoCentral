@@ -6,8 +6,8 @@ El proyecto de Pages **ya existe**: `tdg-nov-grupocentral`, en
 
 **Estado al 7 oct 2026:** Pages publica `main` con las variables de «PROYECTO» y muestra la
 pantalla de ingreso. «PROYECTO» ya tiene las migraciones, pero ningún usuario, así que en
-producción todavía no se puede ingresar. Falta comprobar que una vista previa publique con las
-variables de «staging».
+producción todavía no se puede ingresar. Las vistas previas publican con las variables de
+«staging», así que en ellas sí se puede ingresar con los usuarios de prueba.
 
 Dos cosas que conviene saber, porque costaron tiempo:
 

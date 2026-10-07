@@ -6,7 +6,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide                 |
 | --- | ------------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
 | 1   | Lista oficial de fincas y razones sociales | **Recibida** (7 oct). Fuera del repo; faltan 4 nombres y cómo cargar | Wilmar Cuesta / el equipo |
-| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado; falta comprobar una vista previa     | El equipo                 |
+| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo                 |
 | 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo                 |
 | 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa                |
 | 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo                 |
@@ -59,8 +59,9 @@ reportes, es un cambio al SDD que conviene decidir antes del Sprint 3.
 detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción.
 
 El equipo puso las variables en Cloudflare Pages ese mismo día. **Producción está comprobada:**
-publica con la URL y la clave de «PROYECTO». **Falta comprobar una vista previa**, que debe
-publicar con las de «staging» y dejar ingresar con un usuario de prueba.
+publica con la URL y la clave de «PROYECTO». **Las vistas previas también:** publican con las de
+«staging», y esa clave la acepta «staging» y la rechaza «PROYECTO». Solo falta que alguien ingrese
+en una vista previa con un usuario de prueba.
 
 ## 3 · Dominio de los correos de la plataforma
 
