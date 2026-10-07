@@ -3,51 +3,68 @@
 Dudas de diseño o de negocio que los documentos no resuelven. Ninguna bloquea: en cada una se
 tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la confirmen o la cambien.
 
-| N.º | Tema                                       | Qué se hizo mientras tanto                                    | La decide                 |
-| --- | ------------------------------------------ | ------------------------------------------------------------- | ------------------------- |
-| 1   | Lista oficial de fincas y razones sociales | Marcadores en el seed local (Sprint 1)                        | Wilmar Cuesta / el equipo |
-| 2   | Base de datos de las vistas previas        | Nada creado; recomendación: proyecto «staging»                | El equipo                 |
-| 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                 | El equipo                 |
-| 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                   | La empresa                |
-| 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz     | El equipo                 |
-| 6   | Contraste del estado «escalada»            | Se dejó el color de Figma; prueba marcada como falla conocida | El equipo (Figma)         |
-| 7   | Service worker propio o con Workbox        | Propio, sin dependencias nuevas                               | El equipo                 |
-| 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                           | El equipo                 |
-| 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                            | El equipo (Figma)         |
-| 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                          | El equipo                 |
-| 11  | Peso de la ruta de ingreso                 | Medido; margen estrecho                                       | El equipo                 |
-| 12  | Borde del botón secundario                 | Se dejó el color de Figma                                     | El equipo (Figma)         |
+| N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide                 |
+| --- | ------------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
+| 1   | Lista oficial de fincas y razones sociales | **Recibida** (7 oct). Fuera del repo; faltan 4 nombres y cómo cargar | Wilmar Cuesta / el equipo |
+| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado. Faltan las variables de Pages        | El equipo                 |
+| 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo                 |
+| 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa                |
+| 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo                 |
+| 6   | Contraste del estado «escalada»            | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma)         |
+| 7   | Service worker propio o con Workbox        | Propio, sin dependencias nuevas                                      | El equipo                 |
+| 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo                 |
+| 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma)         |
+| 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo                 |
+| 11  | Peso de la ruta de ingreso                 | Medido: 183,8 KB de 200 KB                                           | El equipo                 |
+| 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma)         |
+| 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma)         |
+| 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma)         |
+| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit, en el CI             | El equipo                 |
+| 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo                 |
+| 17  | Pruebas que necesitan ingresar             | Escritas; **no se han corrido** contra «staging»                     | El equipo                 |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
-El objetivo del trabajo habla de 12 fincas, la descripción del proyecto de 13 y el SRS no da una
-cifra; se esperan 7 razones sociales. El seed local del Sprint 1 usará marcadores («Razón social
-de prueba A», «Finca de prueba 01»…), nunca nombres reales.
+**Recibida el 7 oct 2026:** 7 razones sociales y 12 fincas, con NIT, código IBM y municipio. Quedó
+en `docs/fuentes/fincas.csv`, que no se sube al repositorio. El seed sigue usando marcadores
+(«Razón social de prueba A», «Finca de prueba 01»…), nunca nombres reales.
 
-**Cuando llegue la lista** (por ejemplo `docs/fuentes/fincas.csv`, que no se sube al repo), la
-propuesta para producción es una migración de datos revisada en un PR (`rf04_carga_fincas`) con
-`insert … on conflict do nothing`, aplicada al cierre del sprint con el resto. Si los nombres de
-las fincas no deben estar en un repositorio público, la alternativa es cargarlos desde la pantalla
-30 (Fincas) con el administrador, en el Sprint 3.
+**Falta confirmar cuatro nombres**, porque la lista escrita y la tabla no coinciden:
+
+| En la lista del equipo      | En la tabla                   | Duda                                     |
+| --------------------------- | ----------------------------- | ---------------------------------------- |
+| Agropecuaria Truandó S.A.S. | Agropecuaria Gran Truandó SAS | ¿Cuál es el nombre registrado?           |
+| Agropecuaria Juanca S.A.S.  | Agrícola Juanca SAS           | ¿Cuál es el nombre registrado?           |
+| —                           | Finca «AGUAS VERDE2»          | ¿Es «Aguas Verdes 2»?                    |
+| —                           | Finca «1LA CEJA»              | ¿Es «La Ceja»? El «1» parece un descuido |
+
+**Falta decidir cómo se cargan en producción.** Dos caminos:
+
+1. **Desde la pantalla 30 (Fincas), con el administrador, en el Sprint 3.** Los nombres no pasan
+   por el repositorio, que es público. Es la opción recomendada: son 19 registros, y de paso se
+   prueba la pantalla con datos reales.
+2. **Una migración de datos** (`rf04_carga_fincas`, con `insert … on conflict do nothing`),
+   revisada en un PR y aplicada al cierre del sprint. Más rápida, pero deja los nombres de las
+   empresas y de las fincas en el historial público de GitHub.
+
+**El modelo no guarda NIT, código IBM ni municipio.** Las tablas `razon_social` y `finca` del SDD
+(Tabla 26) solo tienen nombre y estado. Si esos datos deben verse en la aplicación o en los
+reportes, es un cambio al SDD que conviene decidir antes del Sprint 3.
 
 ## 2 · Base de datos de las vistas previas
 
-Las reviews se hacen sobre la vista previa de Pages, pero las migraciones solo llegan a
-«PROYECTO» al cierre del sprint: una vista previa que apunte a producción vería una base vacía o
-desactualizada.
+**Resuelta el 7 oct 2026.** El equipo decidió no instalar Docker y aprobó el proyecto «staging»
+(`qxjnnanjidytbyihanet`). Es la base de desarrollo, de las pruebas y de las vistas previas; el
+detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción y sigue vacío.
 
-**Recomendación:** un segundo proyecto gratuito, «staging», para las variables _Preview_ de Pages.
-Las migraciones de cada PR se le aplican con el OK del equipo, y «PROYECTO» queda solo para
-_Production_. El plan gratuito permite dos proyectos activos.
-
-**Hallazgo del Sprint 0:** el equipo donde se armó el entorno no tiene Docker ni WSL, así que no
-se pudo levantar Supabase local. «staging» es también la alternativa del plan para trabajar sin
-Docker. Hace falta decidir una de dos: instalar Docker Desktop, o crear «staging» y probar las
-migraciones contra él. No se creó nada.
+**Falta una cosa, y la hace una persona:** en el proyecto de Pages, poner las variables de
+_Preview_ con la URL y la clave publicable de «staging» (pasos en
+`docs/despliegue/cloudflare-pages.md`). Sin eso, las vistas previas de los PR del Sprint 1 no
+pueden ingresar.
 
 ## 3 · Dominio de los correos de la plataforma
 
-Los correos no son buzones reales. Los usuarios de prueba del seed usarán `@novedades.test`
+Los correos no son buzones reales. Los usuarios de prueba del seed usan `@novedades.test`
 (`.test` es un dominio reservado que nunca existe en internet). Falta decidir el dominio de las
 cuentas reales.
 
@@ -102,29 +119,50 @@ primario, que tampoco está dibujado pero lo exige la accesibilidad (WCAG 2.4.7)
 
 Redactados en español de Colombia, con tuteo, para que los revisen:
 
-- Aviso de nueva versión: «Hay una versión nueva de la aplicación. Actualiza para usarla.»,
+- **Aviso de nueva versión:** «Hay una versión nueva de la aplicación. Actualiza para usarla.»,
   con los botones «Actualizar» y «Ahora no».
-- Página no encontrada: «No encontramos esta página» · «Revisa la dirección o vuelve al inicio.»
-  · «Ir al inicio».
-- App de prueba del Sprint 0 (se reemplaza en el Sprint 1): «Estamos construyendo la aplicación.
-  El ingreso llega en el Sprint 1.»
-- Manifiesto: nombre «Novedades Grupo Central», nombre corto «Novedades».
+- **Página no encontrada:** «No encontramos esta página» · «Revisa la dirección o vuelve al
+  inicio.» · «Ir al inicio».
+- **Manifiesto:** nombre «Novedades Grupo Central», nombre corto «Novedades».
+- **Pantallas que llegan en otro sprint:** «Esta pantalla llega en el Sprint N.»
+- **Cuenta** (Figma no la dibuja para el Sprint 1): «Cerrar sesión»; con pendientes, «Tienes
+  novedades sin enviar» y la explicación de que se conservan en el dispositivo (CU-01 5a).
+- **Registro, si la red falla al enviar** (Figma dibuja el caso sin conexión para el Sprint 4, no
+  este): «La novedad no se envió» · «No hay conexión. Revisa tu internet e intenta de nuevo. Lo
+  que escribiste sigue aquí.»
+- **Registro, descripción muy larga:** «Usa máximo 500 caracteres» (el campo ya no deja pasar de
+  500; es la red de seguridad).
+- **Registro, un solo faltante:** «Falta 1 dato obligatorio» (Figma solo muestra el plural).
+- **Registro, si las áreas no cargan:** «No pudimos cargar las áreas. Revisa tu conexión.» ·
+  «Reintentar».
+- **Registro, botón de cerrar:** nombre accesible «Cerrar sin registrar»; mientras envía, el
+  botón dice «Enviando…».
+- **Constancia:** al copiar, los lectores de pantalla oyen «Código NOV-0001 copiado».
+- **Lista:** «Cargando…» · «Ver más» · «No hay novedades en esta lista.» (para Por confirmar,
+  Cerradas y Rechazadas; Figma solo dibuja el vacío de Abiertas) · «N novedades resueltas
+  esperan tu confirmación» (Figma solo muestra el singular).
+- **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
+  `src/core/errores/traducir.js`.
 
 ## 11 · Peso de la ruta de ingreso (RNF-05)
 
-Presupuesto: 200 KB comprimidos. Medido el 6 oct 2026 con el build de producción:
+Presupuesto: 200 KB comprimidos. Medido el 7 oct 2026 con el build de producción, al cierre del
+Sprint 1:
 
-| Parte                                                         | Comprimido   |
-| ------------------------------------------------------------- | ------------ |
-| App de prueba del Sprint 0 (React, router y componentes base) | 85,2 KB      |
-| CSS                                                           | 4,2 KB       |
-| Fuente Public Sans                                            | 26,8 KB      |
-| Registro del service worker                                   | 2,2 KB       |
-| **Total del Sprint 0**                                        | **≈ 119 KB** |
-| `@supabase/supabase-js`, que entra en el Sprint 1             | + 55,0 KB    |
+| Parte                                                 | Comprimido     |
+| ----------------------------------------------------- | -------------- |
+| JavaScript inicial (React, router, Supabase, ingreso) | 148,6 KB       |
+| CSS                                                   | 6,2 KB         |
+| Fuente Public Sans                                    | 26,8 KB        |
+| Registro del service worker                           | 2,2 KB         |
+| **Total**                                             | **≈ 183,8 KB** |
 
-Con el ingreso del Sprint 1 la ruta quedará cerca de 185 KB. Cabe, pero con poco margen: todo lo
-que no sea del ingreso debe cargarse bajo demanda, y hay que medirlo en cada PR.
+Quedan unos 16 KB. Todo lo que tiene sesión se carga bajo demanda y no cuenta aquí: el marco
+(5,8 KB), Mis novedades (3,1 KB), Registrar (5,1 KB) y la constancia (1,7 KB).
+
+**Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
+ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
+en cada PR; si el margen se agota, habrá que decidir qué sale de la carga inicial.
 
 ## 12 · Borde del botón secundario
 
@@ -132,3 +170,79 @@ El borde `#d6dbd3` sobre blanco da 1,41:1. WCAG 1.4.11 pide 3:1 para los límite
 cuando son lo único que lo identifica; aquí el botón se reconoce por su texto, así que no es un
 incumplimiento claro. Se anota por si quieren oscurecerlo en Figma. Lo mismo pasa con el borde
 punteado de «Pendiente de sincronizar» (`#94a3b8`, 2,56:1).
+
+## 13 · Detalles de las pantallas 04, 05 y 06
+
+Puntos en los que Figma no alcanza a decidir, o en los que se contradice:
+
+- **Semana en la constancia.** El formato general es «24 sep 2026, 7:40 a. m. · Sem 39»
+  (SDD 6.1.11), pero la pantalla 06 lo escribe «24 sep 2026, 7:40 a. m. (Sem 39)». Se respetó
+  cada pantalla. Conviene unificarlo en Figma.
+- **Tarjeta de prioridad elegida.** Figma solo dibuja «Crítico» elegida (fondo rojo suave, borde
+  de 2 px del color de la prioridad). Para las otras tres se siguió la misma regla con los colores
+  suaves que existen: Alto con advertencia suave, Normal con información suave y Bajo con gris.
+- **Alto de las tarjetas de prioridad.** En Figma cada tarjeta mide lo que ocupa su texto
+  (86 y 102 px en la misma fila). En la aplicación las dos de una fila miden lo mismo.
+- **«Ver novedad» en la constancia.** El detalle llega en el Sprint 2; por ahora lleva a Mis
+  novedades. Por lo mismo, las tarjetas de la lista todavía no se pueden abrir.
+- **«Revisar» en el aviso de novedades por confirmar.** Cambia al filtro «Por confirmar». La
+  confirmación como tal (CU-15) es del Sprint 2.
+- **Cerrar el formulario con datos escritos.** La «X» sale sin preguntar y lo escrito se pierde.
+  Figma no dibuja una confirmación. Si la quieren, hay que diseñarla.
+- **Corregir un campo señalado.** Figma muestra el estado 05-C fijo. En la aplicación la señal de
+  un campo se quita apenas se corrige, y el resumen pasa de «Faltan 3…» a «Faltan 2…».
+- **Insignia de la campana.** Figma muestra un «2» sobre la campana; los avisos son del Sprint 5,
+  así que todavía no se pinta.
+
+## 14 · Pantallas 05 y 06 en el escritorio
+
+Figma dibuja el registro y la constancia solo para el teléfono, que es donde trabaja el
+reportante. En el escritorio se muestran dentro del marco (barra lateral y barra superior), en una
+columna centrada de 576 px, y el botón «Enviar novedad» cierra el formulario en lugar de quedar
+fijo abajo. Si quieren otro tratamiento, hay que dibujarlo.
+
+## 15 · WebKit no abre en los equipos de desarrollo
+
+Los navegadores de Playwright quedaron instalados (la descarga falló primero por un problema de
+IPv6 de la red; la solución está en el README). Chromium funciona. WebKit se instala, pero el
+Control de aplicaciones de Windows bloquea sus bibliotecas («Una directiva de Control de
+aplicaciones bloqueó este archivo»). No se intentó saltar ese control.
+
+Las pruebas locales corren con `npm run test:e2e:chromium`. WebKit corre en el CI (Linux), que
+todavía no se ha ejecutado porque el código no está en GitHub. **Riesgo:** RNF-04 pide Safari, y
+hasta que el CI corra no hay ninguna verificación en WebKit.
+
+## 16 · Avisos del asesor de Supabase
+
+El asesor sobre «staging» deja tres avisos (nivel _WARN_), los mismos desde el PR 1:
+
+| Aviso                                                | Por qué queda                                                                                                                                          |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `authenticated_security_definer_function_executable` | Es `registrar_novedad`. El diseño lo pide: el cliente no escribe en las tablas y la función verifica por sí misma identidad, rol y alcance (SDD 5.3.2) |
+| `auth_leaked_password_protection`                    | La comprobación de contraseñas filtradas es del plan de pago                                                                                           |
+| `auth_insufficient_mfa_options`                      | El SRS no pide segundo factor                                                                                                                          |
+
+El primero aparecerá una vez por cada función RPC que se agregue. Los otros dos son del proyecto,
+no del código, y saldrán también en «PROYECTO».
+
+## 17 · Pruebas que necesitan ingresar
+
+Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
+CU-06 y CU-07 ingresan con los usuarios de prueba. Están escritas, pero **no se han corrido contra
+«staging»**: el agente no maneja contraseñas de servicios en internet, y las de prueba las define
+cada persona (README, «Usuarios de prueba»).
+
+Qué sí está verificado: los pasos y localizadores de esas pruebas, contra un servidor simulado en
+el navegador; la función `registrar_novedad` y las políticas, con 157 aserciones pgTAP en
+«staging»; y la sesión sin conexión (RNF-10), que no necesita credenciales.
+
+Qué falta, y es lo primero que conviene hacer al revisar:
+
+```bash
+npm run staging:usuarios      # después de definir CLAVE_USUARIOS_DE_PRUEBA en .env.local
+npm run test:e2e:chromium
+```
+
+**Riesgo concreto:** el seed crea los usuarios escribiendo directamente en `auth.users` y
+`auth.identities`, como documenta Supabase, pero ese ingreso real nunca se ha probado. Si falla,
+el arreglo está en `supabase/seed.sql` y no toca el esquema.

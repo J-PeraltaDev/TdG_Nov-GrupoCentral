@@ -11,8 +11,8 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** Sprint 0 (entorno listo para construir). El avance por sprint está en
-[`docs/sprints/`](docs/sprints/).
+**Estado:** Sprint 1 (ingreso por rol, registro de la novedad con su código `NOV-####` y lista
+de novedades de la finca). El avance por sprint está en [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
 
@@ -22,15 +22,15 @@ sus razones están en [`docs/adr/`](docs/adr/).
 
 ## Requisitos
 
-| Herramienta    | Versión                                              | Para qué                               |
-| -------------- | ---------------------------------------------------- | -------------------------------------- |
-| Node.js        | 22.22 o superior (recomendada: 24 LTS, ver `.nvmrc`) | App, pruebas y Supabase CLI            |
-| npm            | El que trae Node                                     | Dependencias                           |
-| Docker Desktop | Reciente, en ejecución                               | Base de datos local (`supabase start`) |
-| Git            | Reciente                                             | Control de versiones                   |
+| Herramienta        | Versión                                              | Para qué                       |
+| ------------------ | ---------------------------------------------------- | ------------------------------ |
+| Node.js            | 22.22 o superior (recomendada: 24 LTS, ver `.nvmrc`) | App, pruebas y Supabase CLI    |
+| npm                | El que trae Node                                     | Dependencias                   |
+| Git                | Reciente                                             | Control de versiones           |
+| Cuenta de Supabase | Miembro de la organización «Trabajo de Grado»        | Base de desarrollo («staging») |
 
-Supabase CLI no se instala aparte: viene como dependencia de desarrollo y se usa con
-`npx supabase …` o con los scripts `db:*`.
+**No hace falta Docker.** Supabase CLI no se instala aparte: viene como dependencia de desarrollo
+y se usa con `npx supabase …` o con los scripts `staging:*`.
 
 ## Instalación
 
@@ -40,25 +40,56 @@ cd TdG_Nov-GrupoCentral
 npm ci
 ```
 
-## Entorno local
+## Entorno de desarrollo
 
-La base de datos de desarrollo corre en tu equipo con Supabase CLI y Docker. El proyecto remoto
-«PROYECTO» es **producción**: no se desarrolla contra él.
+Hay dos proyectos de Supabase (las razones están en
+[`docs/adr/0011`](docs/adr/0011-staging-en-lugar-de-supabase-local.md)):
+
+| Proyecto   | Referencia             | Para qué                                              |
+| ---------- | ---------------------- | ----------------------------------------------------- |
+| «staging»  | `qxjnnanjidytbyihanet` | Desarrollo, pruebas y vistas previas. Datos de prueba |
+| «PROYECTO» | `lyrdsmfalrchbdpmikmt` | **Producción.** No se desarrolla contra él            |
+
+**1. Sesión del CLI** (una vez por equipo; sirve en cualquier carpeta):
 
 ```bash
-npm run db:start       # levanta Supabase local y aplica las migraciones
-npx supabase status    # muestra la URL de la API y la clave publicable locales
+npx supabase login
 ```
 
-Copia `.env.example` como `.env.local` y pon esos dos valores:
+No hace falta `supabase link`: los scripts `staging:*` ya llevan la referencia de «staging».
+
+**2. Variables.** Copia `.env.example` como `.env.local` y complétalo:
 
 ```bash
-VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_…
+VITE_SUPABASE_URL=https://qxjnnanjidytbyihanet.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_…   # panel de «staging» → Project Settings → API Keys
+CLAVE_USUARIOS_DE_PRUEBA=…                        # la inventas tú; mínimo 8 caracteres
 ```
 
 En el cliente solo va la clave publicable. La clave secreta nunca va en `.env.local` ni en el
-repositorio, que es público.
+repositorio, que es público. `.env.local` no se sube.
+
+**3. Usuarios de prueba.** El seed los crea con una contraseña aleatoria que nadie conoce. Para
+poder ingresar, ponles la tuya:
+
+```bash
+npm run staging:usuarios
+```
+
+| Correo                                   | Rol                     | Alcance            |
+| ---------------------------------------- | ----------------------- | ------------------ |
+| `reportante.01@novedades.test`           | Reportante              | Finca de prueba 01 |
+| `reportante.03@novedades.test`           | Reportante              | Finca de prueba 03 |
+| `aprobador.mantenimiento@novedades.test` | Aprobador de área       | Mantenimiento      |
+| `aprobador.sistemas@novedades.test`      | Aprobador de área       | Sistemas           |
+| `director@novedades.test`                | Director de agricultura | Todo               |
+| `administrador@novedades.test`           | Administrador           | Todo               |
+| `desactivado@novedades.test`             | Reportante desactivado  | No puede ingresar  |
+
+Todos quedan con la misma contraseña. Como «staging» es compartido, el último que corra
+`staging:usuarios` (o `staging:reset`) deja la suya: si no puedes ingresar, vuelve a correrlo.
+
+**4. Aplicación:**
 
 ```bash
 npm run dev            # http://localhost:5173
@@ -67,32 +98,46 @@ npm run dev            # http://localhost:5173
 En desarrollo, `http://localhost:5173/_dev/componentes` muestra las 28 variantes de los
 componentes base para compararlas con Figma.
 
-Después de cada migración:
+**Después de cada migración:**
 
 ```bash
-npm run db:reset       # recrea la base local: migraciones + supabase/seed.sql
-npm run test:db        # pruebas pgTAP
-npm run db:types       # regenera src/core/supabase/database.types.ts
+npm run staging:reset     # recrea «staging»: migraciones + supabase/seed.sql (borra sus datos)
+npm run staging:usuarios  # vuelve a poner tu contraseña de prueba
+npm run staging:test      # pruebas pgTAP
+npm run staging:types     # regenera src/core/supabase/database.types.ts
+npm run staging:advisors  # asesor de seguridad y rendimiento
 ```
 
-Los datos de `supabase/seed.sql` y los usuarios de prueba son solo para el entorno local.
+`staging:reset` borra lo que haya en «staging», también lo del compañero: avisa antes. Para
+aplicar solo lo nuevo sin borrar, `npm run staging:push`. Los datos de `supabase/seed.sql` son de
+prueba y nunca llegan a producción.
 
 ## Scripts
 
-| Script                                      | Qué hace                                                        |
-| ------------------------------------------- | --------------------------------------------------------------- |
-| `npm run dev`                               | Servidor de desarrollo (sin service worker)                     |
-| `npm run build`                             | Build de producción en `dist/`, con service worker y manifiesto |
-| `npm run preview`                           | Sirve `dist/` en `http://localhost:4173` para probar la PWA     |
-| `npm run lint`                              | oxlint                                                          |
-| `npm run format` · `format:check`           | Prettier: corrige o solo verifica                               |
-| `npm run test` · `test:watch`               | Pruebas unitarias con Vitest y Testing Library                  |
-| `npm run test:db`                           | Pruebas de base de datos con pgTAP                              |
-| `npm run test:e2e`                          | Pruebas de extremo a extremo con Playwright                     |
-| `npm run db:start` · `db:stop` · `db:reset` | Supabase local                                                  |
-| `npm run db:types`                          | Tipos de la base de datos para el autocompletado                |
+| Script                                   | Qué hace                                                        |
+| ---------------------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                            | Servidor de desarrollo (sin service worker)                     |
+| `npm run build`                          | Build de producción en `dist/`, con service worker y manifiesto |
+| `npm run preview`                        | Sirve `dist/` en `http://localhost:4173` para probar la PWA     |
+| `npm run lint`                           | oxlint                                                          |
+| `npm run format` · `format:check`        | Prettier: corrige o solo verifica                               |
+| `npm run test` · `test:watch`            | Pruebas unitarias con Vitest y Testing Library                  |
+| `npm run test:e2e` · `test:e2e:chromium` | Pruebas de extremo a extremo con Playwright                     |
+| `npm run staging:reset` · `staging:push` | Reconstruye «staging» o le aplica las migraciones nuevas        |
+| `npm run staging:test`                   | Pruebas de base de datos con pgTAP, contra «staging»            |
+| `npm run staging:types`                  | Tipos de la base de datos para el autocompletado                |
+| `npm run staging:advisors`               | Asesor de seguridad y rendimiento de Supabase                   |
+| `npm run staging:usuarios`               | Pone tu contraseña a los usuarios de prueba                     |
+| `npm run db:*` · `test:db`               | Lo mismo con Supabase local; necesitan Docker (los usa el CI)   |
 
-Playwright necesita sus navegadores una sola vez: `npx playwright install chromium webkit`.
+**Pruebas de extremo a extremo.** Corren contra el build real y contra «staging». Las que
+necesitan ingresar usan `CLAVE_USUARIOS_DE_PRUEBA` y se omiten si falta. Cada corrida deja
+novedades de prueba en «staging».
+
+Playwright necesita sus navegadores una sola vez: `npx playwright install chromium webkit`. Si la
+descarga se queda colgada (pasa en redes con IPv6 defectuoso), define antes la variable de entorno
+`NODE_OPTIONS` con el valor `--dns-result-order=ipv4first`. En equipos con Control de aplicaciones
+de Windows, WebKit se instala pero no abre: usa `npm run test:e2e:chromium`; WebKit corre en el CI.
 
 ## Estructura
 
@@ -102,7 +147,8 @@ src/core/       núcleo compartido: supabase, offline, sesión, acciones, errore
 src/modules/    una carpeta por épica (e1-acceso-admin … e7-avisos)
 src/styles/     tokens de Figma (tokens.css)
 src/sw.js       service worker
-supabase/       config.toml, migraciones, pruebas pgTAP, funciones y seed local
+supabase/       config.toml, migraciones, pruebas pgTAP, funciones y seed de prueba
+scripts/        staging.mjs: la base de desarrollo sin Docker
 e2e/            pruebas de extremo a extremo, un archivo por caso de uso
 docs/           decisiones (adr), scrum, sprints, despliegue y pruebas
 ```
@@ -127,8 +173,9 @@ La Definition of Ready y la Definition of Done están en
 - **Aplicación:** Cloudflare Pages publica `main` en producción y una vista previa por cada pull
   request. Comando de build `npm run build`, salida `dist`. Pasos y variables en
   [`docs/despliegue/cloudflare-pages.md`](docs/despliegue/cloudflare-pages.md).
-- **Base de datos:** `supabase db push` hacia «PROYECTO», solo al cierre del sprint, después de la
-  review y con el visto bueno del equipo. Configuración de Auth en
+- **Base de datos:** las migraciones de cada PR se prueban en «staging»; a «PROYECTO» llegan con
+  `supabase db push`, solo al cierre del sprint, después de la review y con el visto bueno del
+  equipo. Configuración de Auth en
   [`docs/despliegue/supabase-auth.md`](docs/despliegue/supabase-auth.md).
 
 ## Licencias de terceros
