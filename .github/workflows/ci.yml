@@ -1,0 +1,65 @@
+name: CI
+
+# Corre en cada pull request y en cada push a main (RNF-17, DoD: «el CI está en verde»).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App · lint, formato, pruebas y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      - name: Formato (Prettier)
+        run: npm run format:check
+
+      - name: Pruebas unitarias (Vitest)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Valores de relleno: el build solo necesita que existan. Los reales los pone
+          # Cloudflare Pages (Production y Preview).
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
+
+  bd:
+    name: Base de datos · migraciones y pgTAP
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: supabase/setup-cli@v3
+        with:
+          # La misma versión que la dependencia `supabase` de package.json.
+          version: 2.120.0
+
+      - name: Levantar Supabase local (aplica todas las migraciones y el seed)
+        run: supabase start
+
+      - name: Pruebas de base de datos (pgTAP)
+        run: supabase test db

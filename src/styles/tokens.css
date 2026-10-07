@@ -1,0 +1,194 @@
+/*
+ * Tokens del sistema de diseño (SDD 5.2 · Figma «Novedades Grupo Central · Prototipos»,
+ * sección «00 · Sistema de diseño», nodo 1:63).
+ *
+ * Son las 47 variables de color y los 12 estilos de texto de Figma. No agregues colores ni
+ * tamaños aquí sin que existan primero en Figma: la paleta por defecto de Tailwind está
+ * deshabilitada a propósito.
+ *
+ * Nombres: los de Figma, sin tildes ni «/» (estado/atencion/texto → estado-atencion-texto).
+ * «Escritorio» es el punto de quiebre lg (1024 px) en todo el proyecto.
+ */
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fuentes/public-sans-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@theme {
+  /* Tipografía */
+  --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Colores: solo las variables de Figma */
+  --color-*: initial;
+
+  /* Marca y superficies */
+  --color-primario: #1e6b3a;
+  --color-primario-hover: #17552e;
+  --color-primario-contenedor: #dcefe2;
+  --color-sobre-primario: #ffffff;
+  --color-fondo: #f6f7f4;
+  --color-superficie: #ffffff;
+  --color-borde: #d6dbd3;
+  --color-overlay: #0f1411;
+
+  /* Texto */
+  --color-texto: #1b211d;
+  --color-texto-secundario: #56605a;
+  --color-deshabilitado: #8a948c;
+
+  /* Grises */
+  --color-gris-100: #eef1ec;
+  --color-gris-200: #e3e7e0;
+  --color-gris-300: #c5ccc3;
+
+  /* Semánticos */
+  --color-exito: #2e7d32;
+  --color-exito-suave: #e7f4ea;
+  --color-advertencia: #b45309;
+  --color-advertencia-suave: #fff4e0;
+  --color-error: #b3261e;
+  --color-error-suave: #fdecea;
+  --color-info: #1d4ed8;
+  --color-info-suave: #eaf1fe;
+
+  /* Estados de la novedad (SDD, Tabla 28): texto y fondo de cada uno */
+  --color-estado-registrada-texto: #475569;
+  --color-estado-registrada-fondo: #f1f5f9;
+  --color-estado-asignada-texto: #0e7490;
+  --color-estado-asignada-fondo: #cffafe;
+  --color-estado-atencion-texto: #6d28d9;
+  --color-estado-atencion-fondo: #ede9fe;
+  --color-estado-escalada-texto: #a16207;
+  --color-estado-escalada-fondo: #fef3c7;
+  --color-estado-aprobada-texto: #0f766e;
+  --color-estado-aprobada-fondo: #ccfbf1;
+  --color-estado-rechazada-texto: #9f1239;
+  --color-estado-rechazada-fondo: #ffe4e6;
+  --color-estado-resuelta-texto: #15803d;
+  --color-estado-resuelta-fondo: #dcfce7;
+  --color-estado-cerrada-texto: #1f2937;
+  --color-estado-cerrada-fondo: #e5e7eb;
+  --color-estado-pendiente-texto: #334155;
+  --color-estado-pendiente-fondo: #ffffff;
+  --color-estado-pendiente-borde: #94a3b8;
+
+  /* Prioridades */
+  --color-prioridad-critico: #b91c1c;
+  --color-prioridad-alto: #c2410c;
+  --color-prioridad-normal: #1d4ed8;
+  --color-prioridad-bajo: #475569;
+
+  /* Áreas: ocre para mantenimiento y azul para sistemas */
+  --color-area-mantenimiento: #a85f12;
+  --color-area-sistemas: #3b5bdb;
+
+  /* Estilos de texto «Novedades/…»: tamaño, interlineado y peso */
+  --text-display: 1.75rem;
+  --text-display--line-height: 2.125rem;
+  --text-display--font-weight: 600;
+  --text-titulo: 1.375rem;
+  --text-titulo--line-height: 1.75rem;
+  --text-titulo--font-weight: 600;
+  --text-subtitulo: 1.125rem;
+  --text-subtitulo--line-height: 1.5rem;
+  --text-subtitulo--font-weight: 600;
+  --text-cuerpo: 1rem;
+  --text-cuerpo--line-height: 1.5rem;
+  --text-cuerpo--font-weight: 400;
+  --text-cuerpo-fuerte: 1rem;
+  --text-cuerpo-fuerte--line-height: 1.5rem;
+  --text-cuerpo-fuerte--font-weight: 600;
+  --text-cuerpo-pequeno: 0.875rem;
+  --text-cuerpo-pequeno--line-height: 1.25rem;
+  --text-cuerpo-pequeno--font-weight: 400;
+  --text-etiqueta: 0.875rem;
+  --text-etiqueta--line-height: 1.25rem;
+  --text-etiqueta--font-weight: 500;
+  --text-etiqueta-fuerte: 0.875rem;
+  --text-etiqueta-fuerte--line-height: 1.25rem;
+  --text-etiqueta-fuerte--font-weight: 600;
+  --text-auxiliar: 0.75rem;
+  --text-auxiliar--line-height: 1rem;
+  --text-auxiliar--font-weight: 400;
+  --text-auxiliar-fuerte: 0.75rem;
+  --text-auxiliar-fuerte--line-height: 1rem;
+  --text-auxiliar-fuerte--font-weight: 600;
+  --text-codigo: 2.125rem;
+  --text-codigo--line-height: 2.5rem;
+  --text-codigo--font-weight: 700;
+  --text-indicador: 1.875rem;
+  --text-indicador--line-height: 2.25rem;
+  --text-indicador--font-weight: 700;
+
+  /* Radio de botones y campos (componente Botón de Figma: 10 px) */
+  --radius-control: 0.625rem;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+    /* El diseño solo tiene tema claro: los controles nativos no deben pasar a oscuro. */
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-cuerpo);
+    line-height: var(--text-cuerpo--line-height);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  /* Sin la espera del doble toque en los controles táctiles */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+
+  /* Foco visible con teclado (WCAG 2.4.7) */
+  :focus-visible {
+    outline: 2px solid var(--color-primario);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Ícono monocromo: el SVG local se usa como máscara y toma el color del texto
+ * (currentColor), así el color sale siempre de los tokens. Ver src/core/ui/Icono.jsx.
+ */
+@utility icono {
+  display: inline-block;
+  flex: none;
+  background-color: currentColor;
+  mask: var(--icono-src) center / contain no-repeat;
+}

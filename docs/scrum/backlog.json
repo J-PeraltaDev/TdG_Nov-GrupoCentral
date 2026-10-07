@@ -1,0 +1,2869 @@
+[
+  {
+    "id": "HU-01",
+    "rf": "RF-01",
+    "cu": "CU-01",
+    "titulo": "HU-01 · RF-01 · Iniciar y cerrar sesión",
+    "sprint": "S1",
+    "milestone": "S1 · 13–16 oct",
+    "epica": "E1",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E1", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe permitir que los usuarios registrados y activos ingresen con su correo y su contraseña, y que cierren su sesión.",
+    "actores": "Usuario (primario).",
+    "precondicion": "El usuario está registrado y activo en el sistema.",
+    "postcondicion": "El usuario queda autenticado con los permisos de su rol, o sin sesión si la cerró.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Solicita ingresar al sistema."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita el correo y la contraseña."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Usuario",
+        "accion": "Ingresa el correo y la contraseña."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Valida las credenciales, identifica el rol del usuario y muestra el menú correspondiente."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Usuario",
+        "accion": "Solicita cerrar la sesión."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Cierra la sesión y muestra la pantalla de ingreso."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si no hay conexión y el usuario nunca ha ingresado en ese dispositivo, el sistema informa que el primer ingreso requiere conexión. El caso de uso termina."
+      },
+      {
+        "paso": "2b",
+        "accion": "Si no hay conexión y el usuario ya ingresó antes con conexión en ese dispositivo, el sistema conserva la sesión almacenada y permite el registro y la consulta sin conexión (RNF-10). El caso de uso termina."
+      },
+      {
+        "paso": "4a",
+        "accion": "Si las credenciales son incorrectas, el sistema muestra un mensaje de error. Continúa en el paso 2."
+      },
+      {
+        "paso": "4b",
+        "accion": "Si el usuario está desactivado, el sistema niega el acceso. El caso de uso termina."
+      },
+      {
+        "paso": "5a",
+        "accion": "Si hay novedades pendientes de sincronizar, el sistema advierte que se conservarán en el dispositivo y que se enviarán cuando el mismo usuario vuelva a ingresar. Continúa en el paso 6."
+      }
+    ],
+    "pantallas_sdd": "01",
+    "pantallas": [
+      {
+        "clave": "01",
+        "nombre": "01 · Iniciar sesión",
+        "nodo": "1:351",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-351"
+      },
+      {
+        "clave": "01-B",
+        "nombre": "01-B · Credenciales incorrectas",
+        "nodo": "1:392",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-392"
+      },
+      {
+        "clave": "01-C",
+        "nombre": "01-C · Usuario desactivado",
+        "nodo": "1:435",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-435"
+      },
+      {
+        "clave": "01-D",
+        "nombre": "01-D · Sin conexión en el primer ingreso",
+        "nodo": "1:478",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-478"
+      },
+      {
+        "clave": "01-E",
+        "nombre": "01-E · Contraseña actualizada",
+        "nodo": "1:525",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-525"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-05",
+    "rf": "RF-05",
+    "cu": "CU-05",
+    "titulo": "HU-05 · RF-05 · Registrar novedad",
+    "sprint": "S1",
+    "milestone": "S1 · 13–16 oct",
+    "epica": "E2",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E2", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe permitir que el reportante registre una novedad de su finca.",
+    "actores": "Reportante (primario).",
+    "precondicion": "El reportante inició sesión al menos una vez con conexión en el dispositivo y tiene una finca asignada.",
+    "postcondicion": "La novedad queda registrada con código único y asignada a su área, o guardada en el dispositivo pendiente de sincronizar.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Reportante",
+        "accion": "Solicita registrar una novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el formulario con la finca del reportante precargada."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Reportante",
+        "accion": "Escribe la descripción, elige la prioridad (crítico, alto, normal o bajo) y el área que debe atenderla (mantenimiento o sistemas), y confirma."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Valida los datos y agrega la fecha, la hora y el usuario que registra."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Guarda la novedad en estado “registrada”."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Asigna el código y confirma la recepción al reportante (incluye CU-06)."
+      },
+      {
+        "paso": "7",
+        "ejecutor": "Sistema",
+        "accion": "Enruta la novedad al área responsable (incluye CU-07)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si el reportante desea adjuntar una fotografía, se realiza CU-08. Continúa en el paso 3."
+      },
+      {
+        "paso": "4a",
+        "accion": "Si falta la descripción, la prioridad o el área, el sistema señala los campos. Continúa en el paso 3."
+      },
+      {
+        "paso": "5a",
+        "accion": "Si no hay conexión, o si esta se pierde durante el guardado, se realiza CU-21. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "05",
+    "pantallas": [
+      {
+        "clave": "05",
+        "nombre": "05 · Registrar novedad",
+        "nodo": "2:423",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-423"
+      },
+      {
+        "clave": "05-B",
+        "nombre": "05-B · Sin conexión: guardar en el dispositivo",
+        "nodo": "2:538",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-538"
+      },
+      {
+        "clave": "05-C",
+        "nombre": "05-C · Campos obligatorios faltantes",
+        "nodo": "2:657",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-657"
+      },
+      {
+        "clave": "05-D",
+        "nombre": "05-D · Foto no válida",
+        "nodo": "2:777",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-777"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-06",
+    "rf": "RF-06",
+    "cu": "CU-06",
+    "titulo": "HU-06 · RF-06 · Asignar código y confirmar recepción",
+    "sprint": "S1",
+    "milestone": "S1 · 13–16 oct",
+    "epica": "E2",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E2", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe asignar un código consecutivo único a cada novedad guardada en el servidor y confirmar su recepción al reportante. Se ejecuta dentro de RF-05 y RF-22.",
+    "actores": "Reportante (receptor de la confirmación).",
+    "precondicion": "La novedad quedó guardada en el servidor.",
+    "postcondicion": "La novedad tiene código definitivo y el reportante tiene constancia de su recepción.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Genera un código consecutivo único y definitivo para la novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra al reportante la confirmación de recepción con el código, la fecha y el estado."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si la novedad llegó por sincronización (CU-22), el sistema muestra la confirmación en la lista de novedades del reportante. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "06",
+    "pantallas": [
+      {
+        "clave": "06",
+        "nombre": "06 · Novedad recibida",
+        "nodo": "2:887",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-887"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-07",
+    "rf": "RF-07",
+    "cu": "CU-07",
+    "titulo": "HU-07 · RF-07 · Enrutar novedad al área responsable",
+    "sprint": "S1",
+    "milestone": "S1 · 13–16 oct",
+    "epica": "E2",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E2", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe enrutar de forma automática cada novedad registrada al área seleccionada por el reportante, sin intermediarios. Se ejecuta dentro de RF-05 y RF-22.",
+    "actores": "Aprobador de área (receptor de la novedad).",
+    "precondicion": "La novedad está en estado “registrada” en el servidor.",
+    "postcondicion": "La novedad aparece en estado “asignada” en la bandeja del área (CU-09).",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Consulta el área responsable seleccionada por el reportante."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Asigna la novedad a esa área y cambia su estado a “asignada”."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Registra en el historial la creación de la novedad y su enrutamiento (incluye CU-16)."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al área (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [],
+    "pantallas_sdd": "06, 11",
+    "pantallas": [
+      {
+        "clave": "06",
+        "nombre": "06 · Novedad recibida",
+        "nodo": "2:887",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-887"
+      },
+      {
+        "clave": "11",
+        "nombre": "11 · Bandeja del área (móvil)",
+        "nodo": "3:295",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-295"
+      },
+      {
+        "clave": "11-B",
+        "nombre": "11-B · Bandeja sin conexión",
+        "nodo": "3:407",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-407"
+      },
+      {
+        "clave": "11-C",
+        "nombre": "11-C · Bandeja vacía",
+        "nodo": "3:524",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-524"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-16",
+    "rf": "RF-16",
+    "cu": "CU-16",
+    "titulo": "HU-16 · RF-16 · Registrar transición en el historial",
+    "sprint": "S1",
+    "milestone": "S1 · 13–16 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe registrar en el historial de la novedad cada cambio de estado o de área. Se ejecuta dentro de RF-07, que registra la creación y el enrutamiento de la novedad, RF-10 a RF-15 y RF-17.",
+    "actores": "Ninguno (lo ejecuta el sistema).",
+    "precondicion": "Una novedad cambió de estado o de área.",
+    "postcondicion": "El historial de la novedad incluye la transición, sin posibilidad de edición ni borrado.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Registra el estado anterior (vacío en la creación de la novedad) y el estado nuevo."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Registra el usuario que hizo el cambio, la fecha, la hora y la observación, si la hay."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Actualiza la línea de tiempo de la novedad."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si el registro de la transición falla, el sistema revierte el cambio de estado e informa el error. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "09, 15–18, 20, 22",
+    "pantallas": [
+      {
+        "clave": "09",
+        "nombre": "09 · Detalle de novedad resuelta",
+        "nodo": "2:1118",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1118"
+      },
+      {
+        "clave": "09-B",
+        "nombre": "09-B · Hoja: la falla persiste",
+        "nodo": "2:1243",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1243"
+      },
+      {
+        "clave": "09-C",
+        "nombre": "09-C · Diálogo: confirmar cierre",
+        "nodo": "2:1365",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1365"
+      },
+      {
+        "clave": "09-D",
+        "nombre": "09-D · Sin conexión: cierre bloqueado",
+        "nodo": "2:1479",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1479"
+      },
+      {
+        "clave": "15",
+        "nombre": "15 · Hoja: escalar al director",
+        "nodo": "3:1281",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1281"
+      },
+      {
+        "clave": "16",
+        "nombre": "16 · Hoja: rechazar novedad",
+        "nodo": "3:1387",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1387"
+      },
+      {
+        "clave": "17",
+        "nombre": "17 · Hoja: reasignar a otra área",
+        "nodo": "3:1499",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1499"
+      },
+      {
+        "clave": "18",
+        "nombre": "18 · Registrar solución y tipo de falla",
+        "nodo": "3:1619",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1619"
+      },
+      {
+        "clave": "18-B",
+        "nombre": "18-B · Fecha posterior a hoy",
+        "nodo": "3:1685",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1685"
+      },
+      {
+        "clave": "18-C",
+        "nombre": "18-C · Novedad aprobada por el director",
+        "nodo": "3:1754",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1754"
+      },
+      {
+        "clave": "20",
+        "nombre": "20 · Decidir sobre una novedad escalada",
+        "nodo": "4:705",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-705"
+      },
+      {
+        "clave": "20-B",
+        "nombre": "20-B · Rechazo sin observación",
+        "nodo": "4:878",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-878"
+      },
+      {
+        "clave": "20-C",
+        "nombre": "20-C · Versión móvil de la decisión",
+        "nodo": "4:1054",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1054"
+      },
+      {
+        "clave": "22",
+        "nombre": "22 · Detalle completo con línea de tiempo",
+        "nodo": "4:2093",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2093"
+      },
+      {
+        "clave": "22-B",
+        "nombre": "22-B · Sin permiso sobre la novedad",
+        "nodo": "4:2322",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2322"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-09",
+    "rf": "RF-09",
+    "cu": "CU-09",
+    "titulo": "HU-09 · RF-09 · Consultar bandeja del área",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe mostrar al aprobador de área las novedades abiertas de su área.",
+    "actores": "Aprobador de área (primario).",
+    "precondicion": "El aprobador de área inició sesión.",
+    "postcondicion": "El aprobador conoce las novedades pendientes de su área.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita ver la bandeja de su área."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Obtiene las novedades abiertas del área y las ordena por prioridad (crítico, alto, normal, bajo) y luego por antigüedad."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra de cada novedad el código, la finca, la prioridad, el estado y el tiempo transcurrido desde su registro."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Aprobador de área",
+        "accion": "Selecciona una novedad."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el detalle de la novedad (CU-18)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si no hay conexión, el sistema muestra la última versión descargada con su fecha de actualización. Continúa en el paso 3."
+      },
+      {
+        "paso": "2b",
+        "accion": "Si no hay novedades pendientes, el sistema lo informa. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "11, 12",
+    "pantallas": [
+      {
+        "clave": "11",
+        "nombre": "11 · Bandeja del área (móvil)",
+        "nodo": "3:295",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-295"
+      },
+      {
+        "clave": "11-B",
+        "nombre": "11-B · Bandeja sin conexión",
+        "nodo": "3:407",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-407"
+      },
+      {
+        "clave": "11-C",
+        "nombre": "11-C · Bandeja vacía",
+        "nodo": "3:524",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-524"
+      },
+      {
+        "clave": "12",
+        "nombre": "12 · Bandeja del área (escritorio)",
+        "nodo": "3:587",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-587"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-10",
+    "rf": "RF-10",
+    "cu": "CU-10",
+    "titulo": "HU-10 · RF-10 · Tomar novedad para atención",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el aprobador de área tome para atención una novedad asignada a su área.",
+    "actores": "Aprobador de área (primario).",
+    "precondicion": "La novedad está en estado “asignada”, pertenece al área del aprobador y hay conexión.",
+    "postcondicion": "La novedad queda “en atención” a cargo del área.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Selecciona una novedad asignada de su bandeja."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita tomarla para atención."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado de la novedad a “en atención”."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al reportante (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "13",
+    "pantallas": [
+      {
+        "clave": "13",
+        "nombre": "13 · Detalle: novedad asignada",
+        "nodo": "3:764",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-764"
+      },
+      {
+        "clave": "13-B",
+        "nombre": "13-B · Novedad tomada",
+        "nodo": "3:854",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-854"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-11",
+    "rf": "RF-11",
+    "cu": "CU-11",
+    "titulo": "HU-11 · RF-11 · Rechazar novedad",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el aprobador de área rechace una novedad de su área indicando el motivo.",
+    "actores": "Aprobador de área (primario).",
+    "precondicion": "La novedad está “asignada” o “en atención” en el área del aprobador y hay conexión.",
+    "postcondicion": "La novedad queda “rechazada” con su motivo registrado; el caso termina en ese estado final.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita rechazar la novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita el motivo del rechazo."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Aprobador de área",
+        "accion": "Escribe el motivo y confirma."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado a “rechazada” (estado final)."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al reportante (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si el motivo está vacío, el sistema no permite confirmar. Continúa en el paso 2."
+      }
+    ],
+    "pantallas_sdd": "13, 14, 16",
+    "pantallas": [
+      {
+        "clave": "13",
+        "nombre": "13 · Detalle: novedad asignada",
+        "nodo": "3:764",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-764"
+      },
+      {
+        "clave": "13-B",
+        "nombre": "13-B · Novedad tomada",
+        "nodo": "3:854",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-854"
+      },
+      {
+        "clave": "14",
+        "nombre": "14 · Detalle: novedad en atención",
+        "nodo": "3:965",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-965"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      },
+      {
+        "clave": "16",
+        "nombre": "16 · Hoja: rechazar novedad",
+        "nodo": "3:1387",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1387"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-12",
+    "rf": "RF-12",
+    "cu": "CU-12",
+    "titulo": "HU-12 · RF-12 · Escalar novedad a segunda instancia",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el aprobador de área escale al director de agricultura una novedad cuya solución exige una autorización mayor, como la compra de repuestos.",
+    "actores": "Aprobador de área (primario); Director de agricultura (receptor).",
+    "precondicion": "La novedad está “en atención” en el área del aprobador y hay conexión.",
+    "postcondicion": "La novedad queda “escalada” y visible para el director de agricultura.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita escalar la novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita la justificación del escalamiento (por ejemplo, la compra de repuestos)."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Aprobador de área",
+        "accion": "Escribe la justificación y confirma."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado a “escalada” y envía la novedad a la bandeja del director de agricultura."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al director de agricultura y al reportante (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si la justificación está vacía, el sistema no permite confirmar. Continúa en el paso 2."
+      }
+    ],
+    "pantallas_sdd": "14, 15",
+    "pantallas": [
+      {
+        "clave": "14",
+        "nombre": "14 · Detalle: novedad en atención",
+        "nodo": "3:965",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-965"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      },
+      {
+        "clave": "15",
+        "nombre": "15 · Hoja: escalar al director",
+        "nodo": "3:1281",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1281"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-14",
+    "rf": "RF-14",
+    "cu": "CU-14",
+    "titulo": "HU-14 · RF-14 · Registrar solución aplicada",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el aprobador de área registre la solución aplicada a una novedad y la clasifique por tipo de falla.",
+    "actores": "Aprobador de área (primario).",
+    "precondicion": "La novedad está “en atención” o “aprobada” a cargo del área del aprobador y hay conexión.",
+    "postcondicion": "La novedad queda “resuelta” con la solución y el tipo de falla registrados, en espera de la confirmación del reportante.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita registrar la solución."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita la descripción de la solución aplicada, la fecha de ejecución y el tipo de falla."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Aprobador de área",
+        "accion": "Escribe el tipo de falla."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Sugiere los tipos existentes que coinciden con lo escrito."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Aprobador de área",
+        "accion": "Selecciona un tipo existente o confirma uno nuevo, completa los demás datos y confirma."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado a “resuelta” y asocia el tipo de falla a la novedad."
+      },
+      {
+        "paso": "7",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "8",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al reportante y, si se creó un tipo de falla nuevo, a los administradores (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "5a",
+        "accion": "Si el tipo escrito coincide con uno existente salvo por mayúsculas o tildes, el sistema propone el existente en lugar de crear uno nuevo. Continúa en el paso 5."
+      },
+      {
+        "paso": "6a",
+        "accion": "Si la descripción o el tipo de falla están vacíos, o la fecha de ejecución es posterior a la actual, el sistema lo señala. Continúa en el paso 2."
+      }
+    ],
+    "pantallas_sdd": "14, 18",
+    "pantallas": [
+      {
+        "clave": "14",
+        "nombre": "14 · Detalle: novedad en atención",
+        "nodo": "3:965",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-965"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      },
+      {
+        "clave": "18",
+        "nombre": "18 · Registrar solución y tipo de falla",
+        "nodo": "3:1619",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1619"
+      },
+      {
+        "clave": "18-B",
+        "nombre": "18-B · Fecha posterior a hoy",
+        "nodo": "3:1685",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1685"
+      },
+      {
+        "clave": "18-C",
+        "nombre": "18-C · Novedad aprobada por el director",
+        "nodo": "3:1754",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1754"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-17",
+    "rf": "RF-17",
+    "cu": "CU-17",
+    "titulo": "HU-17 · RF-17 · Reasignar novedad a otra área",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E3",
+    "prioridad": "Media",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E3", "prioridad:media", "urgencia:puede esperar"],
+    "descripcion": "El sistema debe permitir que el aprobador de área reasigne a la otra área una novedad enrutada por error.",
+    "actores": "Aprobador de área (primario); aprobador de la otra área (receptor).",
+    "precondicion": "La novedad está “asignada” o “en atención” en el área del aprobador y hay conexión.",
+    "postcondicion": "La novedad queda en la bandeja de la otra área, en estado “asignada”.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Aprobador de área",
+        "accion": "Solicita reasignar la novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita el motivo de la reasignación."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Aprobador de área",
+        "accion": "Escribe el motivo y confirma."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Asigna la novedad al área nueva en estado “asignada”."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Notifica a la nueva área y al reportante (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si el motivo está vacío, el sistema no permite confirmar. Continúa en el paso 2."
+      }
+    ],
+    "pantallas_sdd": "13, 14, 17",
+    "pantallas": [
+      {
+        "clave": "13",
+        "nombre": "13 · Detalle: novedad asignada",
+        "nodo": "3:764",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-764"
+      },
+      {
+        "clave": "13-B",
+        "nombre": "13-B · Novedad tomada",
+        "nodo": "3:854",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-854"
+      },
+      {
+        "clave": "14",
+        "nombre": "14 · Detalle: novedad en atención",
+        "nodo": "3:965",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-965"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      },
+      {
+        "clave": "17",
+        "nombre": "17 · Hoja: reasignar a otra área",
+        "nodo": "3:1499",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1499"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-18",
+    "rf": "RF-18",
+    "cu": "CU-18",
+    "titulo": "HU-18 · RF-18 · Consultar detalle y línea de tiempo de una novedad",
+    "sprint": "S2",
+    "milestone": "S2 · 19–23 oct",
+    "epica": "E4",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E4", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe mostrar el detalle y la línea de tiempo de una novedad a los usuarios con permiso sobre ella.",
+    "actores": "Usuario (primario): reportante, aprobador de área, director de agricultura o administrador.",
+    "precondicion": "El usuario inició sesión y tiene permiso sobre la novedad.",
+    "postcondicion": "El usuario conoce el estado y el historial completo de la novedad.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona una novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Verifica que la novedad esté dentro del alcance de consulta del rol: el reportante ve las de su finca; el aprobador de área, las de su área; el director de agricultura, todas, y el administrador, todo el sistema."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el código, la finca, el área, la prioridad, la descripción y el estado actual y, si la novedad está resuelta o cerrada, el tipo de falla."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la línea de tiempo con cada transición, su usuario, su fecha y su observación."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Muestra las acciones que el rol del usuario puede ejecutar en el estado actual."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si el usuario no tiene permiso sobre la novedad, el sistema niega el acceso. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si no hay conexión, el sistema muestra la última versión descargada con su fecha de actualización. Continúa en el paso 4."
+      }
+    ],
+    "pantallas_sdd": "04, 09, 13, 14, 20–22",
+    "pantallas": [
+      {
+        "clave": "04",
+        "nombre": "04 · Mis novedades",
+        "nodo": "2:36",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-36"
+      },
+      {
+        "clave": "04-B",
+        "nombre": "04-B · Consulta sin conexión",
+        "nodo": "2:160",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-160"
+      },
+      {
+        "clave": "04-C",
+        "nombre": "04-C · Finca sin novedades abiertas",
+        "nodo": "2:291",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-291"
+      },
+      {
+        "clave": "09",
+        "nombre": "09 · Detalle de novedad resuelta",
+        "nodo": "2:1118",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1118"
+      },
+      {
+        "clave": "09-B",
+        "nombre": "09-B · Hoja: la falla persiste",
+        "nodo": "2:1243",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1243"
+      },
+      {
+        "clave": "09-C",
+        "nombre": "09-C · Diálogo: confirmar cierre",
+        "nodo": "2:1365",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1365"
+      },
+      {
+        "clave": "09-D",
+        "nombre": "09-D · Sin conexión: cierre bloqueado",
+        "nodo": "2:1479",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1479"
+      },
+      {
+        "clave": "13",
+        "nombre": "13 · Detalle: novedad asignada",
+        "nodo": "3:764",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-764"
+      },
+      {
+        "clave": "13-B",
+        "nombre": "13-B · Novedad tomada",
+        "nodo": "3:854",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-854"
+      },
+      {
+        "clave": "14",
+        "nombre": "14 · Detalle: novedad en atención",
+        "nodo": "3:965",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-965"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      },
+      {
+        "clave": "20",
+        "nombre": "20 · Decidir sobre una novedad escalada",
+        "nodo": "4:705",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-705"
+      },
+      {
+        "clave": "20-B",
+        "nombre": "20-B · Rechazo sin observación",
+        "nodo": "4:878",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-878"
+      },
+      {
+        "clave": "20-C",
+        "nombre": "20-C · Versión móvil de la decisión",
+        "nodo": "4:1054",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1054"
+      },
+      {
+        "clave": "21",
+        "nombre": "21 · Historial con filtros y exportación",
+        "nodo": "4:1189",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1189"
+      },
+      {
+        "clave": "21-B",
+        "nombre": "21-B · Rango de fechas inválido",
+        "nodo": "4:1523",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1523"
+      },
+      {
+        "clave": "21-C",
+        "nombre": "21-C · Sin resultados",
+        "nodo": "4:1862",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1862"
+      },
+      {
+        "clave": "21-D",
+        "nombre": "21-D · Historial en móvil (aprobador)",
+        "nodo": "4:1973",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1973"
+      },
+      {
+        "clave": "22",
+        "nombre": "22 · Detalle completo con línea de tiempo",
+        "nodo": "4:2093",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2093"
+      },
+      {
+        "clave": "22-B",
+        "nombre": "22-B · Sin permiso sobre la novedad",
+        "nodo": "4:2322",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2322"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-02",
+    "rf": "RF-02",
+    "cu": "CU-02",
+    "titulo": "HU-02 · RF-02 · Recuperar contraseña",
+    "sprint": "S3",
+    "milestone": "S3 · 26–30 oct",
+    "epica": "E1",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E1", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe permitir que el usuario restablezca su contraseña a través de los administradores, dado que los correos de la plataforma no corresponden a dominios reales y no admiten enlaces de recuperación.",
+    "actores": "Usuario (primario); Administrador (secundario).",
+    "precondicion": "El usuario está registrado con un correo asignado por el administrador y hay conexión.",
+    "postcondicion": "La contraseña del usuario queda actualizada.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Solicita recuperar su contraseña desde la pantalla de ingreso."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Solicita el correo registrado."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Usuario",
+        "accion": "Ingresa el correo."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Registra la solicitud en el panel de los administradores y muestra un mensaje de confirmación."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Administrador",
+        "accion": "Consulta la solicitud, verifica la identidad del usuario y solicita generar el código temporal."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Genera un código temporal de un solo uso y lo muestra una sola vez al administrador."
+      },
+      {
+        "paso": "7",
+        "ejecutor": "Administrador",
+        "accion": "Entrega el código al usuario."
+      },
+      {
+        "paso": "8",
+        "ejecutor": "Usuario",
+        "accion": "Ingresa el código temporal y la nueva contraseña."
+      },
+      {
+        "paso": "9",
+        "ejecutor": "Sistema",
+        "accion": "Valida el código, actualiza la contraseña y muestra la pantalla de ingreso."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "4a",
+        "accion": "Si el correo no corresponde a un usuario activo, el sistema muestra el mismo mensaje de confirmación sin registrar la solicitud. El caso de uso termina."
+      },
+      {
+        "paso": "9a",
+        "accion": "Si el código venció o ya se usó, el sistema informa que debe solicitarse uno nuevo. El caso de uso termina."
+      },
+      {
+        "paso": "9b",
+        "accion": "Si el código no es válido, el sistema lo informa. Continúa en el paso 8."
+      }
+    ],
+    "pantallas_sdd": "02, 03, 32",
+    "pantallas": [
+      {
+        "clave": "02",
+        "nombre": "02 · Recuperar contraseña",
+        "nodo": "1:570",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-570"
+      },
+      {
+        "clave": "02-B",
+        "nombre": "02-B · Solicitud enviada",
+        "nodo": "1:616",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-616"
+      },
+      {
+        "clave": "03",
+        "nombre": "03 · Crear contraseña con código",
+        "nodo": "1:672",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-672"
+      },
+      {
+        "clave": "03-B",
+        "nombre": "03-B · Código vencido",
+        "nodo": "1:735",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=1-735"
+      },
+      {
+        "clave": "32",
+        "nombre": "32 · Recuperación de contraseñas",
+        "nodo": "6:3317",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-3317"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-03",
+    "rf": "RF-03",
+    "cu": "CU-03",
+    "titulo": "HU-03 · RF-03 · Gestionar usuarios",
+    "sprint": "S3",
+    "milestone": "S3 · 26–30 oct",
+    "epica": "E1",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E1", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe permitir que el administrador cree, edite y desactive usuarios.",
+    "actores": "Administrador (primario).",
+    "precondicion": "El administrador inició sesión y hay conexión.",
+    "postcondicion": "El usuario queda creado, actualizado o desactivado con su rol asignado.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Administrador",
+        "accion": "Solicita gestionar usuarios."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la lista de usuarios con su rol, su finca o área y su estado."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Administrador",
+        "accion": "Elige crear un usuario o editar uno existente."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Solicita nombre, correo, contraseña inicial, rol y, según el rol, la finca (reportante) o el área (aprobador de área)."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Administrador",
+        "accion": "Ingresa o modifica los datos y confirma."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Valida los datos, guarda el usuario y actualiza la lista."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si el administrador elige desactivar un usuario, el sistema le impide el ingreso en adelante y conserva sus registros históricos. El caso de uso termina."
+      },
+      {
+        "paso": "6a",
+        "accion": "Si el correo ya está registrado, el sistema informa el error. Continúa en el paso 5."
+      },
+      {
+        "paso": "6b",
+        "accion": "Si falta un dato obligatorio o el rol no tiene la finca o el área asociada, el sistema señala los campos. Continúa en el paso 5."
+      }
+    ],
+    "pantallas_sdd": "28, 29",
+    "pantallas": [
+      {
+        "clave": "28",
+        "nombre": "28 · Usuarios",
+        "nodo": "6:867",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-867"
+      },
+      {
+        "clave": "28-B",
+        "nombre": "28-B · Diálogo: desactivar usuario",
+        "nodo": "6:1098",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-1098"
+      },
+      {
+        "clave": "29",
+        "nombre": "29 · Crear o editar usuario",
+        "nodo": "6:1343",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-1343"
+      },
+      {
+        "clave": "29-B",
+        "nombre": "29-B · Rol aprobador de área",
+        "nodo": "6:1651",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-1651"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-04",
+    "rf": "RF-04",
+    "cu": "CU-04",
+    "titulo": "HU-04 · RF-04 · Gestionar fincas",
+    "sprint": "S3",
+    "milestone": "S3 · 26–30 oct",
+    "epica": "E1",
+    "prioridad": "Alta",
+    "urgencia": "Inmediatamente",
+    "etiquetas": ["épica:E1", "prioridad:alta", "urgencia:inmediatamente"],
+    "descripcion": "El sistema debe permitir que el administrador cree, edite y desactive las fincas.",
+    "actores": "Administrador (primario).",
+    "precondicion": "El administrador inició sesión y hay conexión.",
+    "postcondicion": "La finca queda disponible para el registro de novedades, o inactiva si se desactivó.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Administrador",
+        "accion": "Solicita gestionar fincas."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la lista de fincas con su razón social y su estado."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Administrador",
+        "accion": "Elige crear una finca o editar una existente."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Solicita el nombre de la finca y la razón social a la que pertenece."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Administrador",
+        "accion": "Ingresa o modifica los datos y confirma."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Valida y guarda la finca."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si el administrador elige desactivar una finca, el sistema la oculta para nuevos registros y conserva su historial. El caso de uso termina."
+      },
+      {
+        "paso": "3b",
+        "accion": "Si la finca que se va a desactivar tiene novedades abiertas, el sistema lo advierte y pide confirmación; con la confirmación, continúa como en 3a."
+      },
+      {
+        "paso": "6a",
+        "accion": "Si ya existe una finca con ese nombre en la misma razón social, el sistema informa el error. Continúa en el paso 5."
+      }
+    ],
+    "pantallas_sdd": "30",
+    "pantallas": [
+      {
+        "clave": "30",
+        "nombre": "30 · Fincas",
+        "nodo": "6:1961",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-1961"
+      },
+      {
+        "clave": "30-B",
+        "nombre": "30-B · Formulario: nueva finca",
+        "nodo": "6:2194",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-2194"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-13",
+    "rf": "RF-13",
+    "cu": "CU-13",
+    "titulo": "HU-13 · RF-13 · Aprobar o rechazar novedad escalada",
+    "sprint": "S3",
+    "milestone": "S3 · 26–30 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el director de agricultura apruebe o rechace las novedades escaladas.",
+    "actores": "Director de agricultura (primario).",
+    "precondicion": "La novedad está “escalada”, el director inició sesión y hay conexión.",
+    "postcondicion": "La novedad queda “aprobada”, y regresa al área para ejecutar la solución (CU-14), o “rechazada”, con lo que el caso termina.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Director de agricultura",
+        "accion": "Solicita ver las novedades escaladas."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra las novedades escaladas con su justificación y su historial."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Director de agricultura",
+        "accion": "Selecciona una novedad y decide aprobarla o rechazarla."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Solicita una observación."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Director de agricultura",
+        "accion": "Escribe la observación y confirma."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado a “aprobada” o “rechazada” según la decisión."
+      },
+      {
+        "paso": "7",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "8",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al área y al reportante (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "5a",
+        "accion": "Si la decisión es rechazar y la observación está vacía, el sistema no permite confirmar. Continúa en el paso 4."
+      }
+    ],
+    "pantallas_sdd": "12, 19, 20",
+    "pantallas": [
+      {
+        "clave": "12",
+        "nombre": "12 · Bandeja del área (escritorio)",
+        "nodo": "3:587",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-587"
+      },
+      {
+        "clave": "19",
+        "nombre": "19 · Novedades escaladas",
+        "nodo": "4:547",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-547"
+      },
+      {
+        "clave": "20",
+        "nombre": "20 · Decidir sobre una novedad escalada",
+        "nodo": "4:705",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-705"
+      },
+      {
+        "clave": "20-B",
+        "nombre": "20-B · Rechazo sin observación",
+        "nodo": "4:878",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-878"
+      },
+      {
+        "clave": "20-C",
+        "nombre": "20-C · Versión móvil de la decisión",
+        "nodo": "4:1054",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1054"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-15",
+    "rf": "RF-15",
+    "cu": "CU-15",
+    "titulo": "HU-15 · RF-15 · Confirmar resolución y cerrar novedad",
+    "sprint": "S3",
+    "milestone": "S3 · 26–30 oct",
+    "epica": "E3",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E3", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir que el reportante confirme que una novedad de su finca quedó resuelta o indique que la falla persiste.",
+    "actores": "Reportante (primario).",
+    "precondicion": "La novedad está “resuelta”, pertenece a la finca del reportante y hay conexión.",
+    "postcondicion": "La novedad queda “cerrada” y no admite más cambios, salvo la corrección del tipo de falla por el administrador (CU-32), que no cambia su estado y queda anotada en su historial.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Reportante",
+        "accion": "Consulta una novedad en estado “resuelta”."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la solución registrada por el área."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Reportante",
+        "accion": "Confirma que la novedad quedó resuelta y, si lo desea, escribe una observación."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Cambia el estado a “cerrada” (estado final)."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Registra la transición en el historial (incluye CU-16)."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Notifica al área (incluye CU-30)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si no hay conexión, se realiza CU-25. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si el reportante indica que la falla persiste, escribe una observación obligatoria; el sistema devuelve la novedad a “en atención” con esa observación, registra la transición (CU-16) y notifica al área (CU-30). El caso de uso termina."
+      },
+      {
+        "paso": "3b",
+        "accion": "Si indica que la falla persiste y la observación está vacía, el sistema no permite confirmar. Continúa en el paso 3."
+      }
+    ],
+    "pantallas_sdd": "04, 09",
+    "pantallas": [
+      {
+        "clave": "04",
+        "nombre": "04 · Mis novedades",
+        "nodo": "2:36",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-36"
+      },
+      {
+        "clave": "04-B",
+        "nombre": "04-B · Consulta sin conexión",
+        "nodo": "2:160",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-160"
+      },
+      {
+        "clave": "04-C",
+        "nombre": "04-C · Finca sin novedades abiertas",
+        "nodo": "2:291",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-291"
+      },
+      {
+        "clave": "09",
+        "nombre": "09 · Detalle de novedad resuelta",
+        "nodo": "2:1118",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1118"
+      },
+      {
+        "clave": "09-B",
+        "nombre": "09-B · Hoja: la falla persiste",
+        "nodo": "2:1243",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1243"
+      },
+      {
+        "clave": "09-C",
+        "nombre": "09-C · Diálogo: confirmar cierre",
+        "nodo": "2:1365",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1365"
+      },
+      {
+        "clave": "09-D",
+        "nombre": "09-D · Sin conexión: cierre bloqueado",
+        "nodo": "2:1479",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1479"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-21",
+    "rf": "RF-21",
+    "cu": "CU-21",
+    "titulo": "HU-21 · RF-21 · Registrar novedad sin conexión",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E5",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E5", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe guardar en el dispositivo las novedades que se registran sin conexión. Se ejecuta dentro de RF-05.",
+    "actores": "Reportante (primario).",
+    "precondicion": "El reportante ingresó antes con conexión en el dispositivo y en este momento no hay conexión.",
+    "postcondicion": "La novedad queda guardada en el dispositivo, pendiente de sincronizar, aunque se cierre el navegador o se apague el dispositivo.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Genera un identificador único local para la novedad."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Guarda la novedad en el almacenamiento del dispositivo con la fecha y la hora de registro, y confirma que la escritura quedó guardada."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Marca la novedad como “pendiente de sincronizar”."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Informa al reportante que la novedad se enviará al recuperar la conexión."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Actualiza el indicador de conexión y pendientes (incluye CU-23)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si el almacenamiento del dispositivo está lleno, el sistema informa que no se pudo guardar la novedad. El caso de uso termina."
+      },
+      {
+        "paso": "2b",
+        "accion": "Si la escritura en el dispositivo falla, el sistema informa que la novedad no se guardó y pide reintentar. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "05-B, 07",
+    "pantallas": [
+      {
+        "clave": "05-B",
+        "nombre": "05-B · Sin conexión: guardar en el dispositivo",
+        "nodo": "2:538",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-538"
+      },
+      {
+        "clave": "07",
+        "nombre": "07 · Guardada en el dispositivo",
+        "nodo": "2:935",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-935"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-22",
+    "rf": "RF-22",
+    "cu": "CU-22",
+    "titulo": "HU-22 · RF-22 · Sincronizar novedades pendientes",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E5",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E5", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe enviar automáticamente al servidor las novedades pendientes cuando se restablezca la conexión.",
+    "actores": "Reportante (primario; el sistema inicia el caso al detectar la conexión).",
+    "precondicion": "La aplicación está abierta, hay novedades pendientes de sincronizar y la sesión del usuario sigue vigente.",
+    "postcondicion": "Las novedades pendientes quedan en el servidor, con código definitivo y asignadas a su área.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Detecta, al abrirse o mientras está abierto, que la conexión se restableció."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Toma las novedades pendientes en el orden en que fueron creadas."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Envía cada novedad al servidor con su identificador local y su fecha de registro."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Guarda la novedad en el servidor en estado “registrada”."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Asigna el código y confirma la recepción (incluye CU-06)."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Enruta la novedad al área responsable (incluye CU-07)."
+      },
+      {
+        "paso": "7",
+        "ejecutor": "Sistema",
+        "accion": "Marca la novedad como sincronizada y la retira de la cola de pendientes. Los pasos 3 a 7 se repiten para cada novedad pendiente."
+      },
+      {
+        "paso": "8",
+        "ejecutor": "Sistema",
+        "accion": "Actualiza el indicador de conexión y pendientes (incluye CU-23)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si la sesión venció, el sistema conserva la cola y solicita el ingreso (CU-01). El caso de uso termina."
+      },
+      {
+        "paso": "3b",
+        "accion": "Si la conexión se pierde durante el envío, el sistema conserva en la cola las novedades restantes y reintenta al volver la conexión. El caso de uso termina."
+      },
+      {
+        "paso": "4a",
+        "accion": "Si el servidor ya tiene una novedad con ese identificador local, la marca como sincronizada sin duplicarla. Continúa en el paso 7."
+      },
+      {
+        "paso": "4b",
+        "accion": "Si el servidor rechaza la novedad por una regla de negocio, como una finca o un área desactivadas, el sistema la conserva en la cola marcada con el error y continúa con la siguiente; el reportante puede reintentar su envío (CU-23). Continúa en el paso 3."
+      }
+    ],
+    "pantallas_sdd": "08, 08-B",
+    "pantallas": [
+      {
+        "clave": "08",
+        "nombre": "08 · Pendientes de sincronizar",
+        "nodo": "2:982",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-982"
+      },
+      {
+        "clave": "08-B",
+        "nombre": "08-B · Sesión vencida durante la sincronización",
+        "nodo": "2:1048",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1048"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-23",
+    "rf": "RF-23",
+    "cu": "CU-23",
+    "titulo": "HU-23 · RF-23 · Mostrar estado de conexión y pendientes",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E5",
+    "prioridad": "Media",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E5", "prioridad:media", "urgencia:puede esperar"],
+    "descripcion": "El sistema debe mostrar de forma permanente el estado de la conexión y la cantidad de novedades pendientes de sincronizar.",
+    "actores": "Usuario (primario).",
+    "precondicion": "El usuario tiene la aplicación abierta.",
+    "postcondicion": "El usuario sabe si está en línea y cuántas novedades faltan por enviar.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Detecta el estado de la conexión del dispositivo."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra un indicador de “en línea” o “sin conexión”."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la cantidad de novedades pendientes de sincronizar, si las hay."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Actualiza el indicador cuando termina una sincronización."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si una novedad falló al sincronizar, el sistema la señala con el error y permite reintentar manualmente. Continúa en el paso 4."
+      }
+    ],
+    "pantallas_sdd": "04, 07, 08, 11",
+    "pantallas": [
+      {
+        "clave": "04",
+        "nombre": "04 · Mis novedades",
+        "nodo": "2:36",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-36"
+      },
+      {
+        "clave": "04-B",
+        "nombre": "04-B · Consulta sin conexión",
+        "nodo": "2:160",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-160"
+      },
+      {
+        "clave": "04-C",
+        "nombre": "04-C · Finca sin novedades abiertas",
+        "nodo": "2:291",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-291"
+      },
+      {
+        "clave": "07",
+        "nombre": "07 · Guardada en el dispositivo",
+        "nodo": "2:935",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-935"
+      },
+      {
+        "clave": "08",
+        "nombre": "08 · Pendientes de sincronizar",
+        "nodo": "2:982",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-982"
+      },
+      {
+        "clave": "08-B",
+        "nombre": "08-B · Sesión vencida durante la sincronización",
+        "nodo": "2:1048",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1048"
+      },
+      {
+        "clave": "11",
+        "nombre": "11 · Bandeja del área (móvil)",
+        "nodo": "3:295",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-295"
+      },
+      {
+        "clave": "11-B",
+        "nombre": "11-B · Bandeja sin conexión",
+        "nodo": "3:407",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-407"
+      },
+      {
+        "clave": "11-C",
+        "nombre": "11-C · Bandeja vacía",
+        "nodo": "3:524",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-524"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-24",
+    "rf": "RF-24",
+    "cu": "CU-24",
+    "titulo": "HU-24 · RF-24 · Consultar novedades sin conexión",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E5",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E5", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir consultar sin conexión las novedades descargadas previamente en el dispositivo.",
+    "actores": "Usuario (primario).",
+    "precondicion": "El usuario abrió antes la aplicación con conexión y sus novedades quedaron descargadas en el dispositivo.",
+    "postcondicion": "El usuario consulta la información disponible en el dispositivo.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Solicita ver las novedades según su rol."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Detecta que no hay conexión."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra las novedades descargadas y las pendientes de sincronizar."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Indica la fecha y la hora de la última actualización."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona una novedad."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el detalle disponible en el dispositivo (CU-18)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si no hay novedades descargadas, el sistema informa que la primera consulta requiere conexión. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "04-B, 11-B",
+    "pantallas": [
+      {
+        "clave": "04-B",
+        "nombre": "04-B · Consulta sin conexión",
+        "nodo": "2:160",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-160"
+      },
+      {
+        "clave": "11-B",
+        "nombre": "11-B · Bandeja sin conexión",
+        "nodo": "3:407",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-407"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-25",
+    "rf": "RF-25",
+    "cu": "CU-25",
+    "titulo": "HU-25 · RF-25 · Restringir acciones sin conexión",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E5",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E5", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe impedir las acciones que modifican el estado de una novedad mientras no haya conexión, porque dependen del estado vigente en el servidor. Se ejecuta dentro de RF-10 a RF-15 y RF-17.",
+    "actores": "Aprobador de área, Director de agricultura y Reportante (quienes intentan la acción).",
+    "precondicion": "No hay conexión.",
+    "postcondicion": "Ningún cambio de estado se realiza sin conexión.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Detecta que no hay conexión."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Deshabilita las acciones de tomar, rechazar, escalar, aprobar, resolver, cerrar, indicar que la falla persiste y reasignar."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Informa que estas acciones requieren conexión porque dependen del estado vigente en el servidor."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Al restablecerse la conexión, habilita de nuevo las acciones según el rol del usuario."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si la conexión se pierde mientras se envía una acción, el sistema informa que no se aplicó y conserva el estado anterior. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "09-D, 14-B, 14-C",
+    "pantallas": [
+      {
+        "clave": "09-D",
+        "nombre": "09-D · Sin conexión: cierre bloqueado",
+        "nodo": "2:1479",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1479"
+      },
+      {
+        "clave": "14-B",
+        "nombre": "14-B · Sin conexión: acciones bloqueadas",
+        "nodo": "3:1064",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1064"
+      },
+      {
+        "clave": "14-C",
+        "nombre": "14-C · Conexión perdida durante una acción",
+        "nodo": "3:1178",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1178"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-08",
+    "rf": "RF-08",
+    "cu": "CU-08",
+    "titulo": "HU-08 · RF-08 · Adjuntar evidencia fotográfica",
+    "sprint": "S4",
+    "milestone": "S4 · 3–6 nov",
+    "epica": "E2",
+    "prioridad": "Baja",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E2", "prioridad:baja", "urgencia:puede esperar", "corte:3"],
+    "descripcion": "El sistema debe permitir que el reportante adjunte fotografías como evidencia al registrar una novedad de su finca o al consultarla mientras no esté cerrada ni rechazada.",
+    "actores": "Reportante (primario).",
+    "precondicion": "El reportante está registrando una novedad de su finca o consultando una que no está cerrada ni rechazada.",
+    "postcondicion": "La novedad tiene la fotografía asociada como evidencia.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Reportante",
+        "accion": "Solicita adjuntar una fotografía."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Permite tomar la foto con la cámara o elegirla de la galería del dispositivo."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Reportante",
+        "accion": "Toma o selecciona la fotografía."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Reduce el tamaño de la imagen y la asocia a la novedad."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "4a",
+        "accion": "Si el archivo no es una imagen o supera el tamaño permitido, el sistema lo rechaza. Continúa en el paso 2."
+      },
+      {
+        "paso": "4b",
+        "accion": "Si no hay conexión, el sistema no guarda la fotografía y lo informa; el reportante puede continuar con el registro de la novedad sin ella y adjuntarla desde el detalle cuando la novedad se sincronice. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "05, 09",
+    "pantallas": [
+      {
+        "clave": "05",
+        "nombre": "05 · Registrar novedad",
+        "nodo": "2:423",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-423"
+      },
+      {
+        "clave": "05-B",
+        "nombre": "05-B · Sin conexión: guardar en el dispositivo",
+        "nodo": "2:538",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-538"
+      },
+      {
+        "clave": "05-C",
+        "nombre": "05-C · Campos obligatorios faltantes",
+        "nodo": "2:657",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-657"
+      },
+      {
+        "clave": "05-D",
+        "nombre": "05-D · Foto no válida",
+        "nodo": "2:777",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-777"
+      },
+      {
+        "clave": "09",
+        "nombre": "09 · Detalle de novedad resuelta",
+        "nodo": "2:1118",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1118"
+      },
+      {
+        "clave": "09-B",
+        "nombre": "09-B · Hoja: la falla persiste",
+        "nodo": "2:1243",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1243"
+      },
+      {
+        "clave": "09-C",
+        "nombre": "09-C · Diálogo: confirmar cierre",
+        "nodo": "2:1365",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1365"
+      },
+      {
+        "clave": "09-D",
+        "nombre": "09-D · Sin conexión: cierre bloqueado",
+        "nodo": "2:1479",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1479"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-19",
+    "rf": "RF-19",
+    "cu": "CU-19",
+    "titulo": "HU-19 · RF-19 · Consultar historial con filtros",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E4",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E4", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe permitir consultar el historial de novedades mediante filtros.",
+    "actores": "Usuario (primario).",
+    "precondicion": "El usuario inició sesión y hay conexión.",
+    "postcondicion": "El usuario obtiene el listado de novedades filtrado.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Solicita consultar el historial."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra los filtros de finca, área, estado, rango de fechas y tipo de falla."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Usuario",
+        "accion": "Aplica uno o más filtros."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Muestra las novedades que cumplen los filtros dentro del alcance de permisos del usuario, de la más reciente a la más antigua."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona una novedad."
+      },
+      {
+        "paso": "6",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el detalle de la novedad (CU-18)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si la fecha inicial es posterior a la fecha final, el sistema lo señala. Continúa en el paso 3."
+      },
+      {
+        "paso": "4a",
+        "accion": "Si ninguna novedad cumple los filtros, el sistema lo informa. Continúa en el paso 3."
+      },
+      {
+        "paso": "4b",
+        "accion": "Si el usuario es administrador o director de agricultura, puede exportar el resultado (CU-20). Continúa en el paso 5."
+      }
+    ],
+    "pantallas_sdd": "21, 23, 26",
+    "pantallas": [
+      {
+        "clave": "21",
+        "nombre": "21 · Historial con filtros y exportación",
+        "nodo": "4:1189",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1189"
+      },
+      {
+        "clave": "21-B",
+        "nombre": "21-B · Rango de fechas inválido",
+        "nodo": "4:1523",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1523"
+      },
+      {
+        "clave": "21-C",
+        "nombre": "21-C · Sin resultados",
+        "nodo": "4:1862",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1862"
+      },
+      {
+        "clave": "21-D",
+        "nombre": "21-D · Historial en móvil (aprobador)",
+        "nodo": "4:1973",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1973"
+      },
+      {
+        "clave": "23",
+        "nombre": "23 · Panel: novedades abiertas",
+        "nodo": "5:783",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-783"
+      },
+      {
+        "clave": "26",
+        "nombre": "26 · Panel: fallas recurrentes (matriz)",
+        "nodo": "5:1862",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1862"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-20",
+    "rf": "RF-20",
+    "cu": "CU-20",
+    "titulo": "HU-20 · RF-20 · Exportar resultado de la consulta",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E4",
+    "prioridad": "Baja",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E4", "prioridad:baja", "urgencia:puede esperar", "corte:2"],
+    "descripcion": "El sistema debe permitir que el administrador y el director de agricultura exporten a CSV el resultado de una consulta.",
+    "actores": "Director de agricultura y Administrador (primarios).",
+    "precondicion": "Se realizó CU-19 con al menos un resultado.",
+    "postcondicion": "El usuario tiene un archivo CSV con el resultado de la consulta.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Director de agricultura o Administrador",
+        "accion": "Solicita exportar el resultado de la consulta."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Genera un archivo CSV con las novedades filtradas y sus datos principales."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Descarga el archivo en el dispositivo."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si el usuario no es administrador ni director de agricultura, el sistema no muestra la opción. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "21",
+    "pantallas": [
+      {
+        "clave": "21",
+        "nombre": "21 · Historial con filtros y exportación",
+        "nodo": "4:1189",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1189"
+      },
+      {
+        "clave": "21-B",
+        "nombre": "21-B · Rango de fechas inválido",
+        "nodo": "4:1523",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1523"
+      },
+      {
+        "clave": "21-C",
+        "nombre": "21-C · Sin resultados",
+        "nodo": "4:1862",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1862"
+      },
+      {
+        "clave": "21-D",
+        "nombre": "21-D · Historial en móvil (aprobador)",
+        "nodo": "4:1973",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1973"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-26",
+    "rf": "RF-26",
+    "cu": "CU-26",
+    "titulo": "HU-26 · RF-26 · Consultar novedades abiertas por finca y por área",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E6",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E6", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe mostrar en el panel de reportes las novedades abiertas agrupadas por finca y por área.",
+    "actores": "Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.",
+    "precondicion": "El usuario tiene acceso al panel de reportes y hay conexión.",
+    "postcondicion": "El usuario conoce la carga de novedades abiertas por finca y por área.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Solicita el panel de reportes."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Calcula las novedades abiertas agrupadas por finca y por área."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra los totales en gráficos y en tabla."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona una finca o un área."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el historial con ese filtro aplicado (CU-19)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si el usuario no es director de agricultura ni administrador, el sistema no muestra la opción. El caso de uso termina."
+      },
+      {
+        "paso": "2a",
+        "accion": "Si no hay novedades abiertas, el sistema muestra los totales en cero. Continúa en el paso 3."
+      }
+    ],
+    "pantallas_sdd": "23",
+    "pantallas": [
+      {
+        "clave": "23",
+        "nombre": "23 · Panel: novedades abiertas",
+        "nodo": "5:783",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-783"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-27",
+    "rf": "RF-27",
+    "cu": "CU-27",
+    "titulo": "HU-27 · RF-27 · Medir tiempos de atención",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E6",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E6", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe calcular los tiempos de atención de cada área.",
+    "actores": "Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.",
+    "precondicion": "El usuario tiene acceso al panel de reportes y hay conexión.",
+    "postcondicion": "El usuario conoce los tiempos de atención de mantenimiento y de sistemas.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona el indicador de tiempos de atención y un período."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Calcula el tiempo transcurrido de cada novedad abierta desde su registro."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Calcula el tiempo promedio entre el registro y la resolución, por área, en el período, con base en la fecha real de registro en la finca."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Muestra los resultados y destaca las novedades con más tiempo abiertas."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "3a",
+        "accion": "Si no hay novedades resueltas en el período, el sistema indica que el promedio no está disponible. Continúa en el paso 4."
+      }
+    ],
+    "pantallas_sdd": "24",
+    "pantallas": [
+      {
+        "clave": "24",
+        "nombre": "24 · Panel: tiempos de atención",
+        "nodo": "5:1087",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1087"
+      },
+      {
+        "clave": "24-B",
+        "nombre": "24-B · Sin resueltas en el período",
+        "nodo": "5:1326",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1326"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-28",
+    "rf": "RF-28",
+    "cu": "CU-28",
+    "titulo": "HU-28 · RF-28 · Calcular proporción de novedades escaladas",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E6",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E6", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe calcular qué proporción de las novedades requiere la segunda instancia de aprobación.",
+    "actores": "Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.",
+    "precondicion": "El usuario tiene acceso al panel de reportes y hay conexión.",
+    "postcondicion": "El usuario conoce qué parte de las novedades requiere la segunda instancia de aprobación.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona el indicador de escalamiento y un período."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Cuenta las novedades registradas en el período y las que pasaron por el estado “escalada”."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Calcula la proporción y la muestra por área."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si no hay novedades en el período, el sistema lo informa. Continúa en el paso 1."
+      }
+    ],
+    "pantallas_sdd": "25",
+    "pantallas": [
+      {
+        "clave": "25",
+        "nombre": "25 · Panel: escalamiento",
+        "nodo": "5:1530",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1530"
+      },
+      {
+        "clave": "25-B",
+        "nombre": "25-B · Período sin novedades",
+        "nodo": "5:1776",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1776"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-29",
+    "rf": "RF-29",
+    "cu": "CU-29",
+    "titulo": "HU-29 · RF-29 · Identificar fallas recurrentes",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E6",
+    "prioridad": "Alta",
+    "urgencia": "Hay presión",
+    "etiquetas": ["épica:E6", "prioridad:alta", "urgencia:hay presión"],
+    "descripcion": "El sistema debe mostrar la frecuencia de novedades por finca y por tipo de falla, para distinguir una falla puntual de un problema estructural.",
+    "actores": "Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.",
+    "precondicion": "El usuario tiene acceso al panel de reportes y hay conexión.",
+    "postcondicion": "El usuario identifica qué fincas repiten el mismo tipo de falla.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona el indicador de recurrencia y un período."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Cuenta las novedades resueltas y cerradas del período, agrupadas por finca y por tipo de falla."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra una matriz de finca por tipo de falla, de mayor a menor frecuencia."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Usuario",
+        "accion": "Selecciona una combinación de finca y tipo de falla."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Muestra el historial con esos filtros aplicados (CU-19)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si no hay novedades en el período, el sistema lo informa. Continúa en el paso 1."
+      },
+      {
+        "paso": "2b",
+        "accion": "Si hay novedades sin tipo de falla por estar abiertas o rechazadas, el sistema las excluye del conteo e informa cuántas quedaron por fuera. Continúa en el paso 3."
+      }
+    ],
+    "pantallas_sdd": "26, 27",
+    "pantallas": [
+      {
+        "clave": "26",
+        "nombre": "26 · Panel: fallas recurrentes (matriz)",
+        "nodo": "5:1862",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-1862"
+      },
+      {
+        "clave": "27",
+        "nombre": "27 · Panel: fallas recurrentes (móvil)",
+        "nodo": "5:2174",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=5-2174"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-30",
+    "rf": "RF-30",
+    "cu": "CU-30",
+    "titulo": "HU-30 · RF-30 · Notificar cambios dentro de la aplicación",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E7",
+    "prioridad": "Media",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E7", "prioridad:media", "urgencia:puede esperar"],
+    "descripcion": "El sistema debe notificar dentro de la aplicación los cambios de estado o de área de las novedades. Se ejecuta dentro de RF-07, RF-10 a RF-15 y RF-17.",
+    "actores": "Usuario (destinatario): reportante, aprobador de área, director de agricultura o administrador.",
+    "precondicion": "Una novedad cambió de estado o de área.",
+    "postcondicion": "Los involucrados quedan enterados del cambio.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Identifica a los destinatarios: los aprobadores del área cuando la novedad llega a su bandeja o cuando el director o el reportante actúan sobre ella; los directores cuando hay escalamiento; el reportante en cada cambio de estado o de área de su novedad, y los administradores cuando un aprobador crea un tipo de falla nuevo. Quien ejecuta la acción no recibe la notificación de su propio cambio."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Crea una notificación con el código, el estado nuevo y la fecha."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Sistema",
+        "accion": "Muestra a cada destinatario un contador de notificaciones sin leer."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Usuario",
+        "accion": "Abre una notificación."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Marca la notificación como leída y muestra la novedad (CU-18)."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si el destinatario autorizó las notificaciones push, se realiza CU-31. Continúa en el paso 3."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si el destinatario no tiene sesión abierta, el sistema conserva la notificación hasta su próximo ingreso. Continúa en el paso 3 cuando el destinatario ingresa."
+      }
+    ],
+    "pantallas_sdd": "10 y avisos de 06, 15–17, 20",
+    "pantallas": [
+      {
+        "clave": "10",
+        "nombre": "10 · Avisos",
+        "nodo": "2:1612",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1612"
+      },
+      {
+        "clave": "10-B",
+        "nombre": "10-B · Hoja: activar notificaciones push",
+        "nodo": "2:1703",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1703"
+      },
+      {
+        "clave": "10-C",
+        "nombre": "10-C · Notificación push en el teléfono",
+        "nodo": "2:1807",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1807"
+      },
+      {
+        "clave": "06",
+        "nombre": "06 · Novedad recibida",
+        "nodo": "2:887",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-887"
+      },
+      {
+        "clave": "15",
+        "nombre": "15 · Hoja: escalar al director",
+        "nodo": "3:1281",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1281"
+      },
+      {
+        "clave": "16",
+        "nombre": "16 · Hoja: rechazar novedad",
+        "nodo": "3:1387",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1387"
+      },
+      {
+        "clave": "17",
+        "nombre": "17 · Hoja: reasignar a otra área",
+        "nodo": "3:1499",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1499"
+      },
+      {
+        "clave": "20",
+        "nombre": "20 · Decidir sobre una novedad escalada",
+        "nodo": "4:705",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-705"
+      },
+      {
+        "clave": "20-B",
+        "nombre": "20-B · Rechazo sin observación",
+        "nodo": "4:878",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-878"
+      },
+      {
+        "clave": "20-C",
+        "nombre": "20-C · Versión móvil de la decisión",
+        "nodo": "4:1054",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-1054"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-32",
+    "rf": "RF-32",
+    "cu": "CU-32",
+    "titulo": "HU-32 · RF-32 · Gestionar tipos de falla",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E1",
+    "prioridad": "Media",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E1", "prioridad:media", "urgencia:puede esperar", "corte:4"],
+    "descripcion": "El sistema debe permitir que el administrador depure el catálogo de tipos de falla para evitar su fragmentación y que corrija el tipo de falla de una novedad cerrada mal clasificada.",
+    "actores": "Administrador (primario).",
+    "precondicion": "El administrador inició sesión y hay conexión.",
+    "postcondicion": "La lista de tipos de falla o la clasificación de la novedad quedan corregidas, y los indicadores del panel reflejan la agrupación corregida.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Administrador",
+        "accion": "Solicita gestionar los tipos de falla."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Muestra la lista de tipos con la cantidad de novedades asociadas a cada uno."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Administrador",
+        "accion": "Elige renombrar un tipo, fusionar dos tipos en uno o desactivar un tipo."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Sistema",
+        "accion": "Aplica el cambio: al fusionar, reasigna al tipo destino las novedades del tipo origen y retira el origen de la lista; al desactivar, conserva las novedades asociadas y deja el tipo fuera de las sugerencias; al renombrar, actualiza el nombre."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Guarda los cambios y registra quién los hizo y cuándo."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "1a",
+        "accion": "Si el administrador solicita corregir el tipo de falla desde el detalle de una novedad cerrada (CU-18), el sistema muestra los tipos activos; el administrador elige uno y el sistema lo asigna a la novedad y anota la corrección en su historial, con el tipo anterior y el nuevo, sin cambiar su estado. El caso de uso termina."
+      },
+      {
+        "paso": "3a",
+        "accion": "Si el nombre nuevo ya existe, el sistema propone fusionar los dos tipos. Continúa en el paso 3."
+      },
+      {
+        "paso": "4a",
+        "accion": "Si el tipo origen y el destino de la fusión son el mismo, el sistema no permite la fusión. Continúa en el paso 3."
+      }
+    ],
+    "pantallas_sdd": "18, 22, 31",
+    "pantallas": [
+      {
+        "clave": "18",
+        "nombre": "18 · Registrar solución y tipo de falla",
+        "nodo": "3:1619",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1619"
+      },
+      {
+        "clave": "18-B",
+        "nombre": "18-B · Fecha posterior a hoy",
+        "nodo": "3:1685",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1685"
+      },
+      {
+        "clave": "18-C",
+        "nombre": "18-C · Novedad aprobada por el director",
+        "nodo": "3:1754",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=3-1754"
+      },
+      {
+        "clave": "22",
+        "nombre": "22 · Detalle completo con línea de tiempo",
+        "nodo": "4:2093",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2093"
+      },
+      {
+        "clave": "22-B",
+        "nombre": "22-B · Sin permiso sobre la novedad",
+        "nodo": "4:2322",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=4-2322"
+      },
+      {
+        "clave": "31",
+        "nombre": "31 · Tipos de falla",
+        "nodo": "6:2438",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-2438"
+      },
+      {
+        "clave": "31-B",
+        "nombre": "31-B · Renombrar a un nombre que ya existe",
+        "nodo": "6:2734",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-2734"
+      },
+      {
+        "clave": "31-C",
+        "nombre": "31-C · Origen y destino iguales",
+        "nodo": "6:3019",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=6-3019"
+      }
+    ],
+    "puntos": null
+  },
+  {
+    "id": "HU-31",
+    "rf": "RF-31",
+    "cu": "CU-31",
+    "titulo": "HU-31 · RF-31 · Enviar notificaciones push",
+    "sprint": "S5",
+    "milestone": "S5 · 9–13 nov",
+    "epica": "E7",
+    "prioridad": "Baja",
+    "urgencia": "Puede esperar",
+    "etiquetas": ["épica:E7", "prioridad:baja", "urgencia:puede esperar", "corte:1"],
+    "descripcion": "El sistema debe enviar como notificación push las notificaciones de RF-30 a los usuarios que lo autoricen. Se ejecuta dentro de RF-30.",
+    "actores": "Servicio de notificaciones push (secundario); Usuario (destinatario).",
+    "precondicion": "El destinatario autorizó las notificaciones push.",
+    "postcondicion": "El destinatario se entera del cambio aunque no tenga la aplicación abierta.",
+    "curso_normal": [
+      {
+        "paso": "1",
+        "ejecutor": "Sistema",
+        "accion": "Toma la notificación creada en CU-30."
+      },
+      {
+        "paso": "2",
+        "ejecutor": "Sistema",
+        "accion": "Envía la notificación al servicio de notificaciones push."
+      },
+      {
+        "paso": "3",
+        "ejecutor": "Servicio de notificaciones push",
+        "accion": "Entrega la notificación en el dispositivo del destinatario."
+      },
+      {
+        "paso": "4",
+        "ejecutor": "Usuario",
+        "accion": "Abre la notificación."
+      },
+      {
+        "paso": "5",
+        "ejecutor": "Sistema",
+        "accion": "Abre la aplicación en la novedad correspondiente."
+      }
+    ],
+    "cursos_alternos": [
+      {
+        "paso": "2a",
+        "accion": "Si el envío falla, el sistema conserva la notificación dentro de la aplicación. El caso de uso termina."
+      }
+    ],
+    "pantallas_sdd": "10, 10-B, 10-C",
+    "pantallas": [
+      {
+        "clave": "10",
+        "nombre": "10 · Avisos",
+        "nodo": "2:1612",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1612"
+      },
+      {
+        "clave": "10-B",
+        "nombre": "10-B · Hoja: activar notificaciones push",
+        "nodo": "2:1703",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1703"
+      },
+      {
+        "clave": "10-C",
+        "nombre": "10-C · Notificación push en el teléfono",
+        "nodo": "2:1807",
+        "url": "https://www.figma.com/design/mxiQ5ZATu4oLYhA5u5Nd54/?node-id=2-1807"
+      }
+    ],
+    "puntos": null
+  }
+]
