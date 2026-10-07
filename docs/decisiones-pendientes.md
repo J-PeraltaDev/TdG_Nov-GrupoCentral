@@ -6,7 +6,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide                 |
 | --- | ------------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
 | 1   | Lista oficial de fincas y razones sociales | **Recibida** (7 oct). Fuera del repo; faltan 4 nombres y cómo cargar | Wilmar Cuesta / el equipo |
-| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado. Faltan las variables de Pages        | El equipo                 |
+| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado; falta comprobar una vista previa     | El equipo                 |
 | 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo                 |
 | 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa                |
 | 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo                 |
@@ -22,6 +22,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo                 |
 | 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo                 |
 | 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo                 |
+| 18  | Primer administrador de producción         | Nada: «PROYECTO» tiene el esquema, pero ningún usuario               | El equipo                 |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -55,12 +56,11 @@ reportes, es un cambio al SDD que conviene decidir antes del Sprint 3.
 
 **Resuelta el 7 oct 2026.** El equipo decidió no instalar Docker y aprobó el proyecto «staging»
 (`qxjnnanjidytbyihanet`). Es la base de desarrollo, de las pruebas y de las vistas previas; el
-detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción y sigue vacío.
+detalle está en `docs/adr/0011`. «PROYECTO» queda solo para producción.
 
-**Falta una cosa, y la hace una persona:** en el proyecto de Pages, poner las variables de
-_Preview_ con la URL y la clave publicable de «staging» (pasos en
-`docs/despliegue/cloudflare-pages.md`). Sin eso, las vistas previas de los PR del Sprint 1 no
-pueden ingresar.
+El equipo puso las variables en Cloudflare Pages ese mismo día. **Producción está comprobada:**
+publica con la URL y la clave de «PROYECTO». **Falta comprobar una vista previa**, que debe
+publicar con las de «staging» y dejar ingresar con un usuario de prueba.
 
 ## 3 · Dominio de los correos de la plataforma
 
@@ -249,3 +249,19 @@ npm run test:e2e:chromium
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
 compartirla.
+
+## 18 · Primer administrador de producción
+
+«PROYECTO» tiene el esquema desde el 7 oct 2026, pero ningún usuario, así que en producción nadie
+puede ingresar. Crear usuarios es la historia RF-03 (Sprint 3), y esa pantalla la usa un
+administrador que ya debe existir: el primero hay que crearlo de otra forma.
+
+**Propuesta:** crearlo una sola vez, a mano, cuando haga falta entrar a producción:
+
+1. en el panel de Supabase de «PROYECTO», **Authentication → Users → Add user**, con el correo
+   real del administrador y una contraseña que solo él conozca;
+2. una fila en `public.usuario` con ese mismo `id`, su nombre, su correo y `rol_id = 4`, sin finca
+   ni área.
+
+El segundo paso escribe en producción, así que se hace con el OK del equipo y queda anotado en el
+reporte del sprint. Falta decidir quién será ese administrador y con qué correo (punto 3).
