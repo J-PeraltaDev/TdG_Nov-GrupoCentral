@@ -53,8 +53,11 @@ function consultar(sql) {
       '-f',
       `"${archivo}"`,
     ])
-    const texto = salida.includes('{') ? salida : error
-    const json = JSON.parse(texto.slice(texto.indexOf('{'), texto.lastIndexOf('}') + 1))
+    const texto = /[{[]/.test(salida) ? salida : error
+    const json = leerJson(texto)
+    // En una terminal el CLI imprime solo el arreglo de filas; cuando lo llama un agente,
+    // las envuelve en un objeto { rows, warning }.
+    if (Array.isArray(json)) return { filas: json }
     if (json._tag === 'Error') return { fallo: limpiarError(json.error?.message ?? texto) }
     return { filas: json.rows ?? [] }
   } catch (e) {
@@ -62,6 +65,14 @@ function consultar(sql) {
   } finally {
     rmSync(carpeta, { recursive: true, force: true })
   }
+}
+
+/** Extrae el JSON de la salida del CLI, sea un objeto o un arreglo, aunque traiga texto alrededor. */
+export function leerJson(texto) {
+  const inicio = texto.search(/[{[]/)
+  if (inicio === -1) throw new Error(texto.trim() || 'el CLI no devolvió nada')
+  const cierre = texto[inicio] === '[' ? ']' : '}'
+  return JSON.parse(texto.slice(inicio, texto.lastIndexOf(cierre) + 1))
 }
 
 function limpiarError(mensaje) {
