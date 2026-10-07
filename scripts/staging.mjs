@@ -251,7 +251,8 @@ const comandos = {
   push: () =>
     supabase(['db', 'push', '--project-ref', STAGING, ...resto], { mostrar: true }).estado,
   reset: () =>
-    supabase(['db', 'reset', '--project-ref', STAGING, ...resto], { mostrar: true }).estado,
+    supabase(['db', 'reset', '--linked', '--project-ref', STAGING, ...resto], { mostrar: true })
+      .estado,
   advisors: () =>
     supabase(['db', 'advisors', '--linked', '--project-ref', STAGING, ...resto], { mostrar: true })
       .estado,

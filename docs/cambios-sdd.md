@@ -8,6 +8,8 @@ actualicen los documentos (lo exige la Definition of Done).
 | --- | ------ | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
 | 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                      | Propuesto |
 | 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone         | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -36,7 +38,38 @@ Si prefieren usar `workbox-precaching`, es un cambio de pocas líneas en `src/sw
 > la aplicación se incluyen como archivos SVG locales, sin cargar la fuente de íconos, para
 > mantener liviana la carga inicial (RNF-05) y funcionar sin conexión.
 
----
+## 3 · Lectura de `usuario` limitada por columnas (S1)
 
-_Para el Sprint 1 ya está identificado un cambio real (la lectura de `usuario` y los privilegios
-por columna, SDD 6.1.4 y Tabla 31). Se registra aquí en el PR que lo implemente._
+**Sección:** SDD 6.1.4, Tabla 31, fila `usuario`; y Tabla 20, fila `usuario`.
+
+**El problema.** La Tabla 31 solo deja leer de `usuario` la fila propia. Como `v_novedad` y
+`usuario_publico` se ejecutan con los permisos de quien consulta, el nombre del reportante y los
+nombres de la línea de tiempo saldrían vacíos para los demás usuarios.
+
+**Texto propuesto para la fila `usuario` de la Tabla 31:**
+
+> Lectura: usuarios activos, todas las filas, solo las columnas id, nombre, rol_id, finca_id,
+> area_id y activo. Inserción y actualización: solo gestionar-usuario. Borrado: nadie.
+
+**Texto propuesto para agregar después de la Tabla 31:**
+
+> La lectura de `usuario` se limita con privilegios por columna: el correo no se expone por la
+> API de datos. El propio usuario lo tiene en su sesión, y el administrador lo consulta mediante
+> una función que verifica su rol (RF-03). Por eso el cliente pide siempre columnas explícitas de
+> `usuario`. Se incluyen las filas de usuarios desactivados para que la línea de tiempo conserve
+> sus nombres.
+
+**Texto propuesto para la fila `usuario` de la Tabla 20:** «GET de las columnas públicas
+(usuarios activos)» en lugar de «GET propio; GET de todos (administrador)».
+
+Detalle en `docs/adr/0010-control-de-acceso-y-lectura-de-usuario.md`.
+
+## 4 · Índices de claves foráneas (S1)
+
+**Sección:** SDD 6.1.1, Tabla 27.
+
+**Texto propuesto (agregar a la nota de la tabla):**
+
+> Además, cada clave foránea que no encabeza uno de estos índices tiene el suyo
+> (por ejemplo, `novedad (reportante_id)` y `notificacion (novedad_id)`), para que las uniones y
+> las verificaciones de integridad no recorran las tablas completas.
