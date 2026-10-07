@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import { existsSync } from 'node:fs'
+
+// El mismo entorno de la app: URL del proyecto de Supabase y clave de los usuarios de prueba.
+if (existsSync('.env.local')) process.loadEnvFile('.env.local')
 
 const PUERTO = 4173
 const URL_BASE = `http://localhost:${PUERTO}`
