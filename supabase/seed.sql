@@ -1,0 +1,5 @@
+-- Datos de prueba del entorno LOCAL. Se cargan con `supabase db reset`; nunca van a producción.
+--
+-- Sprint 0: todavía no hay tablas que poblar.
+-- Sprint 1: razones sociales y fincas de prueba («Razón social de prueba A», «Finca de prueba
+-- 01»…) y los usuarios de prueba por rol, con correos @novedades.test. No uses nombres reales.
