@@ -4,8 +4,8 @@ import { existsSync } from 'node:fs'
  * Usuarios de prueba del seed (supabase/seed.sql) y ayudas para ingresar.
  *
  * La contraseña no está en el repositorio: cada persona define la suya en .env.local
- * (CLAVE_USUARIOS_DE_PRUEBA) y la aplica con `npm run staging:usuarios`. En el CI se genera
- * una al azar en cada corrida. Las pruebas que necesitan ingresar se omiten si no está.
+ * (CLAVE_USUARIOS_DE_PRUEBA) y la aplica con `npm run staging:usuarios`. Las pruebas que
+ * necesitan ingresar se omiten si no está. El CI todavía no corre estas pruebas.
  */
 
 // Las variables ya definidas (por ejemplo, las del CI) no se reemplazan.
