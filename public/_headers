@@ -1,0 +1,21 @@
+# Cabeceras de Cloudflare Pages (https://developers.cloudflare.com/pages/configuration/headers/).
+# No hay 404.html a propósito: sin él, Pages trata el sitio como una SPA y responde las
+# rutas de la aplicación con index.html.
+
+# Seguridad básica en todas las respuestas
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), payment=(), usb=()
+
+# El service worker y el manifiesto no se cachean: así cada visita detecta la versión nueva
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+# Los archivos con hash en el nombre nunca cambian
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

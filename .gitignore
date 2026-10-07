@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Fuentes de verdad (contienen datos de personas y de la empresa): no se suben
+docs/fuentes/
+
+# Pruebas de extremo a extremo
+playwright-report
+test-results
+
+# Service worker en desarrollo (vite-plugin-pwa)
+dev-dist

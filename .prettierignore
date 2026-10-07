@@ -1,0 +1,17 @@
+dist
+dev-dist
+node_modules
+package-lock.json
+docs/fuentes
+supabase/.temp
+supabase/.branches
+playwright-report
+test-results
+
+# Generado por `npm run db:types`
+src/core/supabase/database.types.ts
+
+# Recursos de terceros, sin modificar
+src/core/ui/iconos/*.svg
+src/assets/fuentes
+public
