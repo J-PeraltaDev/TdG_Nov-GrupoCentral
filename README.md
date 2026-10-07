@@ -137,7 +137,8 @@ novedades de prueba en «staging».
 Playwright necesita sus navegadores una sola vez: `npx playwright install chromium webkit`. Si la
 descarga se queda colgada (pasa en redes con IPv6 defectuoso), define antes la variable de entorno
 `NODE_OPTIONS` con el valor `--dns-result-order=ipv4first`. En equipos con Control de aplicaciones
-de Windows, WebKit se instala pero no abre: usa `npm run test:e2e:chromium`; WebKit corre en el CI.
+de Windows, WebKit se instala pero no abre: usa `npm run test:e2e:chromium`. El CI todavía no
+corre las pruebas de extremo a extremo, así que WebKit está sin verificar.
 
 ## Estructura
 

@@ -19,9 +19,9 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma)         |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma)         |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma)         |
-| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit, en el CI             | El equipo                 |
+| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo                 |
 | 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo                 |
-| 17  | Pruebas que necesitan ingresar             | Escritas; **no se han corrido** contra «staging»                     | El equipo                 |
+| 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo                 |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -208,9 +208,14 @@ IPv6 de la red; la solución está en el README). Chromium funciona. WebKit se i
 Control de aplicaciones de Windows bloquea sus bibliotecas («Una directiva de Control de
 aplicaciones bloqueó este archivo»). No se intentó saltar ese control.
 
-Las pruebas locales corren con `npm run test:e2e:chromium`. WebKit corre en el CI (Linux), que
-todavía no se ha ejecutado porque el código no está en GitHub. **Riesgo:** RNF-04 pide Safari, y
-hasta que el CI corra no hay ninguna verificación en WebKit.
+Las pruebas locales corren con `npm run test:e2e:chromium`. **El CI no corre las pruebas de
+extremo a extremo:** tiene dos trabajos (lint, formato, unitarias y build; migraciones y pgTAP) y
+ninguno usa Playwright. Una versión anterior de este documento decía lo contrario.
+
+**Riesgo:** RNF-04 pide Safari y hoy no hay ninguna verificación en WebKit.
+
+**Propuesta:** agregar al CI un trabajo que levante Supabase local, genere una contraseña al azar
+para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
 ## 16 · Avisos del asesor de Supabase
 
@@ -228,21 +233,19 @@ no del código, y saldrán también en «PROYECTO».
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
-CU-06 y CU-07 ingresan con los usuarios de prueba. Están escritas, pero **no se han corrido contra
-«staging»**: el agente no maneja contraseñas de servicios en internet, y las de prueba las define
-cada persona (README, «Usuarios de prueba»).
+CU-06 y CU-07 ingresan con los usuarios de prueba, cuya contraseña define cada persona (README,
+«Usuarios de prueba»). El agente no la maneja, así que las corre el equipo.
 
-Qué sí está verificado: los pasos y localizadores de esas pruebas, contra un servidor simulado en
-el navegador; la función `registrar_novedad` y las políticas, con 157 aserciones pgTAP en
-«staging»; y la sesión sin conexión (RNF-10), que no necesita credenciales.
+**Ya se corrieron una vez** (7 oct 2026, Chromium, contra «staging»): el ingreso real funciona, y
+con él el registro, la constancia, el reintento sin duplicar y el enrutamiento. Fallaron 5 de 40,
+todas de CU-01 y por la prueba, no por la aplicación; el detalle está en `docs/sprints/S1.md`.
 
-Qué falta, y es lo primero que conviene hacer al revisar:
+**Falta repetirlas** después de ese arreglo; deben pasar las 40:
 
 ```bash
-npm run staging:usuarios      # después de definir CLAVE_USUARIOS_DE_PRUEBA en .env.local
 npm run test:e2e:chromium
 ```
 
-**Riesgo concreto:** el seed crea los usuarios escribiendo directamente en `auth.users` y
-`auth.identities`, como documenta Supabase, pero ese ingreso real nunca se ha probado. Si falla,
-el arreglo está en `supabase/seed.sql` y no toca el esquema.
+Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
+incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
+compartirla.

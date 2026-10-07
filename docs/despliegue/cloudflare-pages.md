@@ -4,9 +4,10 @@ El proyecto de Pages **ya existe**: `tdg-nov-grupocentral`, en
 <https://tdg-nov-grupocentral.pages.dev/>, conectado al repositorio
 `J-PeraltaDev/TdG_Nov-GrupoCentral`. Lo creó el equipo. Decisión y razones: `docs/adr/0004`.
 
-**Estado al 7 oct 2026:** la URL responde, pero publica la plantilla inicial de Vite (título
-«proyecto»), que es lo que hay en `main`. La aplicación aparecerá cuando el Sprint 0 llegue a
-`main`. Lo que sigue se configura en el panel y lo hace una persona.
+**Estado al 7 oct 2026:** Pages publica `main`, que ya tiene el Sprint 1, pero **la aplicación
+abre en blanco**: faltan las variables de Supabase del paso 2, en _Production_ y en _Preview_. La
+consola del navegador lo dice («Faltan VITE_SUPABASE_URL o VITE_SUPABASE_PUBLISHABLE_KEY»). Lo que
+sigue se configura en el panel y lo hace una persona.
 
 ## 1 · Revisar la configuración del build
 

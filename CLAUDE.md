@@ -36,7 +36,7 @@ npm run lint           # oxlint
 npm run format         # Prettier (format:check solo verifica)
 npm run test           # Vitest (test:watch para el modo interactivo)
 npm run test:e2e       # Playwright: Chromium y WebKit, 360 × 800 y 1280 × 800
-npm run test:e2e:chromium   # solo Chromium (WebKit no abre en estos equipos; corre en el CI)
+npm run test:e2e:chromium   # solo Chromium (WebKit no abre en estos equipos)
 npm run staging:reset  # recrea «staging»: migraciones + seed.sql (borra sus datos)
 npm run staging:push   # aplica a «staging» las migraciones que falten
 npm run staging:test   # pgTAP contra «staging» (cada archivo en una transacción con ROLLBACK)
@@ -48,7 +48,8 @@ npm run staging:usuarios    # pone CLAVE_USUARIOS_DE_PRUEBA (.env.local) a los u
 Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
 (`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
 agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y
-`test:db` (Supabase local) quedan para el CI y para quien tenga Docker.
+`test:db` (Supabase local) quedan para el CI y para quien tenga Docker. El CI corre lint, formato,
+unitarias, build y pgTAP; todavía no corre las pruebas de extremo a extremo.
 
 **Después de cada migración:** `npm run staging:reset && npm run staging:test && npm run
 staging:types && npm run staging:advisors`, y el archivo de tipos regenerado va en el mismo commit.
