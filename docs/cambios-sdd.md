@@ -10,6 +10,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto | Propuesto |
 | 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone         | Propuesto |
 | 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -73,3 +74,21 @@ Detalle en `docs/adr/0010-control-de-acceso-y-lectura-de-usuario.md`.
 > Además, cada clave foránea que no encabeza uno de estos índices tiene el suyo
 > (por ejemplo, `novedad (reportante_id)` y `notificacion (novedad_id)`), para que las uniones y
 > las verificaciones de integridad no recorran las tablas completas.
+
+## 5 · Apertura sin conexión con el perfil guardado (S1)
+
+**Sección:** SDD 3.3.3, fila «Sesión sin conexión».
+
+**Qué pasa.** El SDD dice que el cliente de Supabase persiste la sesión y que sin conexión no
+puede renovarla. La prueba obligatoria de RNF-10 lo confirmó, con un matiz que el SDD no recoge:
+con el token vencido y sin red, el cliente conserva la sesión, pero tarda cerca de medio minuto
+reintentando la renovación antes de responder. Esperarlo dejaría al reportante frente a una
+pantalla de carga. Resultado completo en `docs/pruebas/sesion-sin-conexion.md`.
+
+**Texto propuesto (agregar al final de la fila):**
+
+> Al abrir sin conexión, la aplicación entra de inmediato con el perfil guardado en el dispositivo
+> durante el último ingreso, sin esperar al cliente de Supabase, que con el token vencido reintenta
+> la renovación durante cerca de medio minuto. Con conexión, espera la sesión un máximo de cuatro
+> segundos. La sesión se renueva sola cuando vuelve la conexión, y el acceso a los datos lo decide
+> siempre el servidor (RNF-11).

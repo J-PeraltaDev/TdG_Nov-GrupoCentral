@@ -78,7 +78,7 @@ export async function llenarIngreso(page, correo, contrasena = CLAVE) {
 export async function ingresarComo(page, rol) {
   const usuario = USUARIOS[rol]
   await llenarIngreso(page, usuario.correo)
-  await page.waitForURL(`**${usuario.inicio}`)
+  await page.waitForURL(`**${usuario.inicio}`, { timeout: 20_000 })
   return usuario
 }
 

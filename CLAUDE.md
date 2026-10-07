@@ -36,14 +36,22 @@ npm run lint           # oxlint
 npm run format         # Prettier (format:check solo verifica)
 npm run test           # Vitest (test:watch para el modo interactivo)
 npm run test:e2e       # Playwright: Chromium y WebKit, 360 × 800 y 1280 × 800
-npm run db:start       # Supabase local (necesita Docker)
-npm run db:reset       # recrea la base local: migraciones + seed.sql
-npm run test:db        # pgTAP (supabase test db)
-npm run db:types       # regenera src/core/supabase/database.types.ts
+npm run test:e2e:chromium   # solo Chromium (WebKit no abre en estos equipos; corre en el CI)
+npm run staging:reset  # recrea «staging»: migraciones + seed.sql (borra sus datos)
+npm run staging:push   # aplica a «staging» las migraciones que falten
+npm run staging:test   # pgTAP contra «staging» (cada archivo en una transacción con ROLLBACK)
+npm run staging:types  # regenera src/core/supabase/database.types.ts
+npm run staging:advisors    # asesor de seguridad y rendimiento
+npm run staging:usuarios    # pone CLAVE_USUARIOS_DE_PRUEBA (.env.local) a los usuarios de prueba
 ```
 
-**Después de cada migración:** `npm run db:reset && npm run test:db && npm run db:types`, y el
-archivo de tipos regenerado va en el mismo commit.
+Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
+(`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
+agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y
+`test:db` (Supabase local) quedan para el CI y para quien tenga Docker.
+
+**Después de cada migración:** `npm run staging:reset && npm run staging:test && npm run
+staging:types && npm run staging:advisors`, y el archivo de tipos regenerado va en el mismo commit.
 
 ## Stack (no se cambia sin preguntar)
 
@@ -62,7 +70,7 @@ No agregues dependencias fuera de esta lista sin preguntar. Las razones están e
 src/
 ├── app/              # rutas, guardianes por rol, layouts
 ├── core/             # núcleo compartido (SDD, Figura 4)
-│   ├── supabase/     # cliente único, repositorios por entidad y tipos generados
+│   ├── supabase/     # cliente único, repositorios/ por entidad y tipos generados
 │   ├── offline/      # idb, cola de pendientes, sincronizador
 │   ├── conexion/     # estado de la conexión
 │   ├── sesion/       # sesión, perfil y rol
@@ -75,8 +83,9 @@ src/
 ├── dev/              # /_dev/componentes (solo en desarrollo)
 ├── styles/tokens.css # los 47 colores y 12 estilos de texto de Figma
 └── sw.js             # service worker
-supabase/             # config.toml, migrations/, tests/ (pgTAP), functions/, seed.sql (solo local)
-e2e/                  # Playwright, un archivo por caso de uso
+supabase/             # config.toml, migrations/, tests/ (pgTAP), functions/, seed.sql (solo pruebas)
+scripts/staging.mjs   # base de desarrollo sin Docker (ADR 0011)
+e2e/                  # Playwright, un archivo por caso de uso; ayudas en e2e/apoyo/
 docs/                 # adr/, scrum/, sprints/, despliegue/, pruebas/
 ```
 
@@ -92,7 +101,9 @@ docs/                 # adr/, scrum/, sprints/, despliegue/, pruebas/
 - **Código visible:** `codigo bigint` por secuencia, mostrado como `NOV-` más al menos 4 dígitos
   (`NOV-0001`).
 - **Fechas:** `Intl.DateTimeFormat` con `timeZone: 'America/Bogota'` y semana ISO propia. Formato
-  de Figma: «24 sep 2026, 7:40 a. m. · Sem 39».
+  de Figma: «24 sep 2026, 7:40 a. m. · Sem 39» (la constancia 06 la escribe «(Sem 39)»).
+- **Datos:** las pantallas no llaman a `supabase` directamente; usan los repositorios de
+  `core/supabase/repositorios/`. En las pruebas unitarias se simula el repositorio, nunca la red.
 - **Ramas:** `feat/RF-05-registrar-novedad`. Una rama y un PR por historia hacia `main`.
 - **Commits:** Conventional Commits con el RF como alcance: `feat(RF-05): registrar novedad`.
 - **Migraciones:** `supabase migration new rf05_registrar_novedad` (el archivo lo crea el CLI).
@@ -186,15 +197,17 @@ entrega como HTTP 400 con `code`, `message`, `details` y `hint`, y `core/errores
 5. **Políticas:** `TO authenticated` siempre con un predicado de alcance; `(select auth.uid())` y
    `(select private.fn_rol())` para que se evalúen una vez; todo `UPDATE` con `USING` y `WITH
 CHECK`; nunca `user_metadata` para autorizar.
-6. **Asesor:** después de cada migración corre `supabase db advisors` (o `get_advisors` del MCP)
-   y no dejes alertas nuevas.
+6. **Asesor:** después de cada migración corre `npm run staging:advisors` (o `get_advisors` del
+   MCP) y no dejes alertas nuevas.
 7. **El service worker no cachea nada de Supabase.** Los datos sin conexión viven en IndexedDB,
    no en `localStorage`; la sesión de `supabase-js` queda en su almacenamiento por defecto.
 8. **Secretos:** el repositorio es público. En el cliente solo va la clave publicable
    (`VITE_SUPABASE_PUBLISHABLE_KEY`). La clave secreta solo existe como secreto de las Edge
-   Functions.
+   Functions. Las contraseñas de los usuarios de prueba tampoco van al repositorio: cada persona
+   define la suya en `.env.local` (`CLAVE_USUARIOS_DE_PRUEBA`).
 9. **«PROYECTO» (`lyrdsmfalrchbdpmikmt`) es producción.** Solo recibe migraciones al cierre de
-   cada sprint, después de la review y con el OK del equipo. Se trabaja contra Supabase local.
+   cada sprint, después de la review y con el OK del equipo. Se trabaja contra «staging»
+   (`qxjnnanjidytbyihanet`), que es compartido: avisa antes de un `staging:reset`.
 10. **Migraciones a mano**, con `supabase migration new`. No uses `apply_migration` del MCP.
 
 ## Definition of Done
