@@ -166,3 +166,53 @@ export async function listarTransicionesDeBandeja(novedadIds) {
   if (error) throw error
   return data
 }
+
+/*
+ * Detalle y línea de tiempo de una novedad (RF-18).
+ */
+
+/** Columnas de `v_novedad` que muestra el detalle. */
+const COLUMNAS_DEL_DETALLE =
+  'id, codigo, descripcion, prioridad, estado, solucion, fecha_ejecucion, fecha_registro, ' +
+  'fecha_sincronizacion, finca_id, finca, razon_social, area_id, area, tipo_falla, reportante'
+
+/**
+ * Una novedad por su `id`, o `null` si no existe o está fuera del alcance de quien consulta:
+ * en los dos casos la base de datos responde sin filas (SDD 6.1.4) y la interfaz muestra la
+ * pantalla 22-B.
+ *
+ * @param {string} id uuid de la novedad.
+ * @returns {Promise<object | null>}
+ */
+export async function obtenerNovedad(id) {
+  const { data, error } = await supabase
+    .from('v_novedad')
+    .select(COLUMNAS_DEL_DETALLE)
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+/**
+ * Transiciones de una novedad, de la más reciente a la más antigua, con el nombre de las
+ * áreas y el nombre, el rol y el área de quien hizo cada una. Los datos de las personas salen
+ * de `usuario_publico`; nunca se pide el correo (ADR 0010).
+ *
+ * @param {string} novedadId
+ * @returns {Promise<import('../../ui/LineaDeTiempo.jsx').Transicion[]>}
+ */
+export async function listarLineaDeTiempo(novedadId) {
+  const { data, error } = await supabase
+    .from('historial_transicion')
+    .select(
+      'id, estado_anterior, estado_nuevo, observacion, fecha_hora, ' +
+        'area_anterior:area!historial_transicion_area_anterior_id_fkey(nombre), ' +
+        'area_nueva:area!historial_transicion_area_nueva_id_fkey(nombre), ' +
+        'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
+    )
+    .eq('novedad_id', novedadId)
+    .order('id', { ascending: false })
+  if (error) throw error
+  return data
+}

@@ -96,9 +96,9 @@ export default function NovedadRecibida() {
           estado.
         </p>
 
-        {/* El detalle de la novedad llega en el Sprint 2: por ahora lleva a Mis novedades. */}
         <Link
-          to="/novedades"
+          to={`/novedades/${novedad.id}`}
+          state={{ origen: '/novedades' }}
           className={`${ENLACE_BOTON} bg-primario text-sobre-primario hover:bg-primario-hover`}
         >
           Ver novedad

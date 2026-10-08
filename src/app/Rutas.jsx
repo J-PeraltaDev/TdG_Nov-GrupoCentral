@@ -13,6 +13,7 @@ import { Pendiente } from './paginas/Pendiente.jsx'
 const Marco = lazy(() => import('./Marco.jsx'))
 const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
 const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
+const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 
@@ -109,6 +110,25 @@ export function Rutas() {
 
             <Route path="/avisos" element={<Pendiente titulo="Avisos" sprint="Sprint 5" />} />
             <Route path="/cuenta" element={<Cuenta />} />
+          </Route>
+
+          {/* Detalle de una novedad: lo consultan los cuatro roles, cada uno dentro de su
+              alcance (RF-18). En el teléfono trae su propia barra superior. */}
+          <Route element={<Marco sinBarraSuperior />}>
+            <Route
+              element={
+                <GuardianDeRol
+                  roles={[
+                    ROL.REPORTANTE,
+                    ROL.APROBADOR_AREA,
+                    ROL.DIRECTOR_AGRICULTURA,
+                    ROL.ADMINISTRADOR,
+                  ]}
+                />
+              }
+            >
+              <Route path="/novedades/:id" element={<DetalleNovedad />} />
+            </Route>
           </Route>
 
           {/* Registro y constancia: en el teléfono van sin las barras de navegación. */}

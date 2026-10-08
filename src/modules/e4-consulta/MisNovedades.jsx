@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
@@ -14,8 +14,8 @@ import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 
 /*
  * Pantalla 04 · Mis novedades y 04-C · Finca sin novedades abiertas (RF-18). Figma 2:36 y
- * 2:291. La base de datos limita la lista a la finca del reportante (RNF-11). El detalle de
- * cada novedad llega en el Sprint 2 y la consulta sin conexión (04-B), en el Sprint 4.
+ * 2:291. La base de datos limita la lista a la finca del reportante (RNF-11). Cada tarjeta
+ * abre el detalle de su novedad; la consulta sin conexión (04-B) llega en el Sprint 4.
  */
 
 /** Pestañas de Figma: agrupan los estados según lo que el reportante espera de cada caso. */
@@ -55,6 +55,7 @@ function SinAbiertas() {
 export default function MisNovedades() {
   // El filtro vive en la URL: se puede volver a él con «atrás» y compartir el enlace.
   const [parametros, setParametros] = useSearchParams()
+  const { pathname, search } = useLocation()
   const pestana = PESTANAS.find((opcion) => opcion.id === parametros.get('lista')) ?? PESTANAS[0]
   const setPestana = (opcion) =>
     setParametros(opcion === PESTANAS[0] ? {} : { lista: opcion.id }, { replace: true })
@@ -199,7 +200,12 @@ export default function MisNovedades() {
         {!cargando && lista.novedades.length > 0 ? (
           <ul className="flex flex-col gap-2.5">
             {lista.novedades.map((novedad) => (
-              <TarjetaNovedad key={novedad.id} novedad={novedad} />
+              <TarjetaNovedad
+                key={novedad.id}
+                novedad={novedad}
+                a={`/novedades/${novedad.id}`}
+                origen={pathname + search}
+              />
             ))}
           </ul>
         ) : null}

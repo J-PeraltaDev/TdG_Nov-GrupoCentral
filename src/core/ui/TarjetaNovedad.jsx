@@ -23,8 +23,9 @@ const COLOR_DE_LA_BARRA = {
  * @param {'area' | 'finca'} [props.pie] Qué acompaña al tiempo: el reportante ve el área que
  *   atiende; el aprobador, la finca que reporta.
  * @param {string} [props.a] Ruta que abre la tarjeta. Sin ella, la tarjeta no es un enlace.
+ * @param {string} [props.origen] Ruta de la lista, con sus filtros: el detalle vuelve a ella.
  */
-export function TarjetaNovedad({ novedad, pie = 'area', a }) {
+export function TarjetaNovedad({ novedad, pie = 'area', a, origen }) {
   const codigo = formatearCodigo(novedad.codigo)
 
   return (
@@ -35,7 +36,11 @@ export function TarjetaNovedad({ novedad, pie = 'area', a }) {
           <h2 className="text-cuerpo-fuerte text-texto" translate="no">
             {/* El enlace cubre toda la tarjeta; su nombre es el código. */}
             {a ? (
-              <Link to={a} className="outline-none after:absolute after:inset-0">
+              <Link
+                to={a}
+                state={origen ? { origen } : undefined}
+                className="outline-none after:absolute after:inset-0"
+              >
                 {codigo}
               </Link>
             ) : (

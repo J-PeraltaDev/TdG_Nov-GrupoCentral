@@ -89,6 +89,49 @@ export function formatearFechaConSemana(fecha) {
 }
 
 /**
+ * «21 sep 2026, 6:48 a. m. (Sem 39)»: la semana entre paréntesis, como la escriben el detalle
+ * (pantalla 22) y la constancia (pantalla 06).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearFechaYSemana(fecha) {
+  return `${formatearFechaHora(fecha)} (Sem ${semanaDelAnio(fecha)})`
+}
+
+/**
+ * «23 sep 2026» a partir de una fecha sin hora (`2026-09-23`), como `fecha_ejecucion`. Se
+ * lee del texto, sin pasar por `Date`: la medianoche UTC es el día anterior en Colombia.
+ *
+ * @param {string} fecha `AAAA-MM-DD`.
+ */
+export function formatearFechaSinHora(fecha) {
+  const [anio, mes, dia] = fecha.split('-').map(Number)
+  return `${dia} ${MESES[mes - 1]} ${anio}`
+}
+
+/**
+ * «7:15 a. m.»
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearHora(fecha) {
+  const { hora, minuto } = enColombia(fecha)
+  return horaDeDoce(hora, minuto)
+}
+
+/**
+ * Indica si dos momentos caen en el mismo día de Colombia.
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [otra] Por defecto, ahora.
+ */
+export function esMismoDiaEnColombia(fecha, otra = Date.now()) {
+  const a = enColombia(fecha)
+  const b = enColombia(otra)
+  return a.anio === b.anio && a.mes === b.mes && a.dia === b.dia
+}
+
+/**
  * Tiempo transcurrido, en corto: «ahora», «hace 5 min», «hace 3 h», «hace 2 d».
  *
  * @param {Date | string | number} fecha

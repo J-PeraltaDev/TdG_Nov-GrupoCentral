@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useEnLinea } from '../core/conexion/useEnLinea.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
-import { descripcionDelPerfil, iniciales } from '../core/sesion/roles.js'
+import { descripcionDelPerfil, iniciales, rutaDeOrigen } from '../core/sesion/roles.js'
 import { Conexion } from '../core/ui/Conexion.jsx'
 import { Icono } from '../core/ui/Icono.jsx'
 import iconoMarca from '../core/ui/iconos/eco.svg'
@@ -82,7 +82,7 @@ function BarraSuperiorDelTelefono({ perfil, enLinea, ruta }) {
 function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
   return (
     <header className="sticky top-0 z-10 hidden items-center gap-3 border-b border-borde bg-superficie px-8 py-3 lg:flex">
-      {/* El buscador por código llega con la consulta de novedades (RF-18, Sprint 2). */}
+      {/* El buscador por código llega con el historial (RF-19, Sprint 5). */}
       <label className="flex w-[22.5rem] items-center gap-2 rounded-control bg-fondo px-3.5 py-2.5 text-texto-secundario inset-ring inset-ring-borde">
         <Icono src={iconoBuscar} tamano={20} />
         <span className="sr-only">Buscar por código</span>
@@ -105,7 +105,7 @@ function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
   )
 }
 
-function BarraLateral({ perfil, items, alSalir }) {
+function BarraLateral({ perfil, items, origen, alSalir }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col gap-1 border-r border-borde bg-superficie px-4 py-6 lg:flex">
       <div className="flex items-center gap-2.5 px-2 pb-5">
@@ -125,7 +125,7 @@ function BarraLateral({ perfil, items, alSalir }) {
             to={ruta}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-control px-3 py-2.5 ${
-                isActive
+                isActive || ruta === origen
                   ? 'bg-primario-contenedor text-etiqueta-fuerte text-primario'
                   : 'text-etiqueta text-texto hover:bg-gris-100'
               }`
@@ -136,7 +136,9 @@ function BarraLateral({ perfil, items, alSalir }) {
                 <Icono
                   src={icono}
                   tamano={22}
-                  className={isActive ? 'text-primario' : 'text-texto-secundario'}
+                  className={
+                    isActive || ruta === origen ? 'text-primario' : 'text-texto-secundario'
+                  }
                 />
                 <span className="min-w-0 flex-1">{etiqueta}</span>
               </>
@@ -168,7 +170,7 @@ function BarraLateral({ perfil, items, alSalir }) {
   )
 }
 
-function NavegacionInferior({ items }) {
+function NavegacionInferior({ items, origen }) {
   return (
     <nav
       aria-label="Principal"
@@ -184,14 +186,16 @@ function NavegacionInferior({ items }) {
             <>
               <span
                 className={`flex items-center rounded-2xl px-4 py-1 ${
-                  isActive ? 'bg-primario-contenedor text-primario' : 'text-texto-secundario'
+                  isActive || ruta === origen
+                    ? 'bg-primario-contenedor text-primario'
+                    : 'text-texto-secundario'
                 }`}
               >
                 <Icono src={icono} tamano={24} />
               </span>
               <span
                 className={
-                  isActive
+                  isActive || ruta === origen
                     ? 'text-auxiliar-fuerte text-primario'
                     : 'text-auxiliar text-texto-secundario'
                 }
@@ -212,13 +216,19 @@ function NavegacionInferior({ items }) {
  * @param {object} props
  * @param {boolean} [props.enfocado] Pantallas de una sola tarea (05 y 06): en el teléfono no
  *   llevan la barra superior ni la inferior; cada una pone su propia cabecera.
+ * @param {boolean} [props.sinBarraSuperior] Pantallas que en el teléfono traen su propia barra
+ *   superior, con «volver», pero conservan la navegación inferior (el detalle, 13 y 22-B).
  */
-export default function Marco({ enfocado = false }) {
+export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   const { perfil } = useSesion()
   const navegar = useNavigate()
   const enLinea = useEnLinea()
-  const { pathname: ruta } = useLocation()
+  const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
+  // En el detalle de una novedad, el menú deja marcada la pantalla desde la que se abrió.
+  const origen = ruta.startsWith('/novedades/')
+    ? rutaDeOrigen(state, perfil.rol_id).split('?')[0]
+    : null
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
@@ -232,11 +242,12 @@ export default function Marco({ enfocado = false }) {
       <BarraLateral
         perfil={perfil}
         items={items.filter((item) => !item.soloTelefono)}
+        origen={origen}
         alSalir={() => navegar('/cuenta')}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {enfocado ? null : (
+        {enfocado || sinBarraSuperior ? null : (
           <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} ruta={ruta} />
         )}
         <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
@@ -246,7 +257,10 @@ export default function Marco({ enfocado = false }) {
         </main>
 
         {enfocado ? null : (
-          <NavegacionInferior items={items.filter((item) => !item.soloEscritorio)} />
+          <NavegacionInferior
+            items={items.filter((item) => !item.soloEscritorio)}
+            origen={origen}
+          />
         )}
       </div>
     </div>

@@ -13,6 +13,25 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   listarBandeja: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
   contarBandeja: vi.fn().mockResolvedValue(0),
   listarTransicionesDeBandeja: vi.fn().mockResolvedValue([]),
+  obtenerNovedad: vi.fn().mockResolvedValue({
+    id: '00000000-0000-4000-e000-000000000153',
+    codigo: 153,
+    descripcion: 'El torniquete de la entrada no gira.',
+    prioridad: 'critico',
+    estado: 'asignada',
+    solucion: null,
+    fecha_ejecucion: null,
+    fecha_registro: '2026-09-24T12:40:00Z',
+    fecha_sincronizacion: '2026-09-24T12:41:00Z',
+    finca_id: 'finca-1',
+    finca: 'Finca de prueba 01',
+    razon_social: 'Razón social de prueba A',
+    area_id: 'area-m',
+    area: 'Mantenimiento',
+    tipo_falla: null,
+    reportante: 'Reportante de prueba',
+  }),
+  listarLineaDeTiempo: vi.fn().mockResolvedValue([]),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
@@ -23,6 +42,8 @@ vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
 }))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
+
+const DETALLE = '/novedades/00000000-0000-4000-e000-000000000153'
 
 /** Textos del menú de la barra lateral (escritorio). */
 async function menuDelEscritorio() {
@@ -147,6 +168,49 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(
       screen.queryByText('Carlos Mario Restrepo', { selector: 'header p' }),
     ).not.toBeInTheDocument()
+  })
+
+  it.each(['reportante', 'aprobador', 'director', 'administrador'])(
+    'RF-18 / CU-18: el %s entra al detalle de una novedad',
+    async (rol) => {
+      abrir(DETALLE, rol)
+
+      expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    },
+  )
+
+  it('RF-18: sin sesión no se entra al detalle', () => {
+    abrir(DETALLE, null)
+
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeVisible()
+  })
+
+  it.each([
+    ['reportante', 'Novedades'],
+    ['aprobador', 'Bandeja'],
+    ['director', 'Escaladas'],
+  ])(
+    'RF-18: en el detalle, el menú del %s deja marcada la pantalla de origen («%s»)',
+    async (rol, origen) => {
+      abrir(DETALLE, rol)
+      await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+      const [lateral] = screen.getAllByRole('navigation', { name: 'Principal' })
+      const marcados = within(lateral)
+        .getAllByRole('link')
+        .filter((enlace) => enlace.classList.contains('bg-primario-contenedor'))
+      expect(marcados.map((enlace) => enlace.textContent)).toEqual([origen])
+    },
+  )
+
+  it('RF-18: en el teléfono el detalle trae su propia barra superior y conserva la navegación', async () => {
+    abrir(DETALLE, 'aprobador')
+    await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+    // La barra del marco, con el nombre de la persona, no se pinta; la inferior sí.
+    expect(screen.queryByText('Carlos Mario Restrepo', { selector: 'header p' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'Volver a la bandeja' })).toBeVisible()
+    expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(2)
   })
 
   it('RF-23: el indicador de conexión está siempre a la vista', async () => {

@@ -1,10 +1,14 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
 import {
+  esMismoDiaEnColombia,
   formatearDuracion,
   formatearFechaConSemana,
   formatearFechaCorta,
   formatearFechaHora,
+  formatearFechaSinHora,
+  formatearFechaYSemana,
+  formatearHora,
   semanaDelAnio,
   tiempoTranscurrido,
 } from './fechas.js'
@@ -98,5 +102,33 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
 
   it('RF-09: una fecha posterior a ahora no da una duración negativa', () => {
     expect(formatearDuracion('2026-09-24T13:00:00Z', '2026-09-24T12:45:00Z')).toBe('menos de 1 min')
+  })
+
+  it('RF-18: el detalle escribe la semana entre paréntesis, como la pantalla 22', () => {
+    expect(formatearFechaYSemana('2026-09-21T11:48:00Z')).toBe('21 sep 2026, 6:48 a. m. (Sem 39)')
+  })
+
+  it.each([
+    ['2026-09-23', '23 sep 2026'],
+    ['2026-01-01', '1 ene 2026'],
+    ['2026-12-31', '31 dic 2026'],
+  ])('RF-14: una fecha sin hora (%s) se escribe «%s», sin correrse de día', (fecha, esperado) => {
+    // Si pasara por `new Date()`, la medianoche UTC sería el día anterior en Colombia.
+    expect(formatearFechaSinHora(fecha)).toBe(esperado)
+  })
+
+  it.each([
+    ['2026-09-24T12:15:00Z', '7:15 a. m.'],
+    ['2026-09-24T17:00:00Z', '12:00 p. m.'],
+    ['2026-09-25T04:30:00Z', '11:30 p. m.'],
+  ])('RF-18: la hora sola de %s → «%s»', (fecha, esperado) => {
+    expect(formatearHora(fecha)).toBe(esperado)
+  })
+
+  it('RF-18: dos momentos son del mismo día según la fecha de Colombia, no la de UTC', () => {
+    // 11:30 p. m. del 24 en Colombia ya es el 25 en UTC.
+    expect(esMismoDiaEnColombia('2026-09-25T04:30:00Z', '2026-09-24T13:00:00Z')).toBe(true)
+    expect(esMismoDiaEnColombia('2026-09-25T05:30:00Z', '2026-09-24T13:00:00Z')).toBe(false)
+    expect(esMismoDiaEnColombia('2026-09-24T13:00:00Z', '2025-09-24T13:00:00Z')).toBe(false)
   })
 })
