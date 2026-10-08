@@ -1,7 +1,9 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
+  formatearDuracion,
   formatearFechaConSemana,
+  formatearFechaCorta,
   formatearFechaHora,
   semanaDelAnio,
   tiempoTranscurrido,
@@ -58,5 +60,43 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
   ])('RF-18: tiempo transcurrido de %i ms → «%s»', (milisegundos, esperado) => {
     const ahora = new Date('2026-10-13T15:00:00Z')
     expect(tiempoTranscurrido(new Date(ahora.getTime() - milisegundos), ahora)).toBe(esperado)
+  })
+
+  it.each([
+    ['2026-09-21T11:48:00Z', '21 sep, 6:48 a. m.'],
+    ['2026-09-22T15:20:00Z', '22 sep, 10:20 a. m.'],
+    ['2026-09-24T21:45:00Z', '24 sep, 4:45 p. m.'],
+    // 03:00 UTC del 25 son las 10:00 p. m. del 24 en Colombia.
+    ['2026-09-25T03:00:00Z', '24 sep, 10:00 p. m.'],
+  ])('RF-09: fecha corta, sin año, de %s → «%s»', (fecha, esperado) => {
+    expect(formatearFechaCorta(fecha)).toBe(esperado)
+  })
+
+  it.each([
+    [20 * 1000, 'menos de 1 min'],
+    [35 * 60 * 1000, '35 min'],
+    [59 * 60 * 1000 + 59 * 1000, '59 min'],
+    [5 * 60 * 60 * 1000, '5 h'],
+    [(5 * 60 + 20) * 60 * 1000, '5 h 20 min'],
+    [24 * 60 * 60 * 1000, '1 d'],
+    [(27 * 60 + 40) * 60 * 1000, '1 d 3 h'],
+    [(45 * 60 + 59) * 60 * 1000, '1 d 21 h'],
+    [(58 * 60 + 5) * 60 * 1000, '2 d 10 h'],
+  ])('RF-09: duración de %i ms → «%s» (dos unidades, sin redondear)', (milisegundos, esperado) => {
+    const hasta = new Date('2026-09-24T12:45:00Z')
+    expect(formatearDuracion(new Date(hasta.getTime() - milisegundos), hasta)).toBe(esperado)
+  })
+
+  it('RF-09: sin segundo momento, la duración se mide hasta ahora', () => {
+    vi.useFakeTimers({ now: new Date('2026-09-24T12:45:00Z') })
+    try {
+      expect(formatearDuracion('2026-09-24T12:10:00Z')).toBe('35 min')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('RF-09: una fecha posterior a ahora no da una duración negativa', () => {
+    expect(formatearDuracion('2026-09-24T13:00:00Z', '2026-09-24T12:45:00Z')).toBe('menos de 1 min')
   })
 })

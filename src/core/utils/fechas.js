@@ -38,6 +38,12 @@ function enColombia(fecha) {
   }
 }
 
+/** «7:40 a. m.» a partir de la hora de 0 a 23. */
+function horaDeDoce(hora, minuto) {
+  const hora12 = hora % 12 === 0 ? 12 : hora % 12
+  return `${hora12}:${String(minuto).padStart(2, '0')} ${hora < 12 ? 'a. m.' : 'p. m.'}`
+}
+
 /**
  * «24 sep 2026, 7:40 a. m.»
  *
@@ -45,9 +51,17 @@ function enColombia(fecha) {
  */
 export function formatearFechaHora(fecha) {
   const { anio, mes, dia, hora, minuto } = enColombia(fecha)
-  const hora12 = hora % 12 === 0 ? 12 : hora % 12
-  const periodo = hora < 12 ? 'a. m.' : 'p. m.'
-  return `${dia} ${MESES[mes - 1]} ${anio}, ${hora12}:${String(minuto).padStart(2, '0')} ${periodo}`
+  return `${dia} ${MESES[mes - 1]} ${anio}, ${horaDeDoce(hora, minuto)}`
+}
+
+/**
+ * Fecha corta, sin año: «24 sep, 7:20 a. m.» (bandeja del escritorio y línea de tiempo).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearFechaCorta(fecha) {
+  const { mes, dia, hora, minuto } = enColombia(fecha)
+  return `${dia} ${MESES[mes - 1]}, ${horaDeDoce(hora, minuto)}`
 }
 
 /**
@@ -87,4 +101,22 @@ export function tiempoTranscurrido(fecha, ahora = Date.now()) {
   const horas = Math.floor(minutos / 60)
   if (horas < 24) return `hace ${horas} h`
   return `hace ${Math.floor(horas / 24)} d`
+}
+
+/**
+ * Duración entre dos momentos, con sus dos unidades mayores y sin redondear hacia arriba:
+ * «35 min», «5 h 20 min», «1 d 3 h». Es lo que lleva abierta una novedad (bandeja del
+ * escritorio) o lo que tardó en resolverse (detalle).
+ *
+ * @param {Date | string | number} desde
+ * @param {Date | string | number} [hasta] Por defecto, ahora.
+ */
+export function formatearDuracion(desde, hasta = Date.now()) {
+  const minutos = Math.floor((new Date(hasta).getTime() - new Date(desde).getTime()) / 60_000)
+  if (minutos < 1) return 'menos de 1 min'
+  if (minutos < 60) return `${minutos} min`
+  const horas = Math.floor(minutos / 60)
+  if (horas < 24) return minutos % 60 === 0 ? `${horas} h` : `${horas} h ${minutos % 60} min`
+  const dias = Math.floor(horas / 24)
+  return horas % 24 === 0 ? `${dias} d` : `${dias} d ${horas % 24} h`
 }
