@@ -81,3 +81,88 @@ export async function contarNovedades(estados) {
   if (error) throw error
   return count ?? 0
 }
+
+/*
+ * Bandeja del área (RF-09, SDD 6.1.11).
+ */
+
+/** Columnas de `v_novedad` que usa la bandeja: solo las necesarias (RNF-06). */
+const COLUMNAS_DE_LA_BANDEJA =
+  'id, codigo, descripcion, prioridad, estado, area_id, area, finca_id, finca, fecha_registro'
+
+/**
+ * @typedef {object} FiltroDeBandeja
+ * @property {string} areaId Área del aprobador. Las políticas ya limitan el resultado a su
+ *   área (RNF-11); filtrarla aquí hace que la consulta use el índice de la bandeja.
+ * @property {EstadoNovedad[]} estados
+ * @property {string | null} [fincaId] Solo las novedades de esa finca.
+ */
+
+/** @param {FiltroDeBandeja} filtro */
+function consultarBandeja(columnas, opciones, { areaId, estados, fincaId }) {
+  const consulta = supabase
+    .from('v_novedad')
+    .select(columnas, opciones)
+    .eq('area_id', areaId)
+    .in('estado', estados)
+  return fincaId ? consulta.eq('finca_id', fincaId) : consulta
+}
+
+/**
+ * Página de la bandeja del área: por prioridad (crítico, alto, normal, bajo: el orden del
+ * tipo `prioridad_novedad`) y, dentro de cada una, de la más antigua a la más reciente.
+ *
+ * @param {FiltroDeBandeja & { pagina?: number }} opciones `pagina` empieza en 0.
+ * @returns {Promise<{ novedades: object[], total: number }>}
+ */
+export async function listarBandeja({ pagina = 0, ...filtro }) {
+  const desde = pagina * NOVEDADES_POR_PAGINA
+  const { data, error, count } = await consultarBandeja(
+    COLUMNAS_DE_LA_BANDEJA,
+    { count: 'exact' },
+    filtro,
+  )
+    .order('prioridad', { ascending: true })
+    .order('fecha_registro', { ascending: true })
+    // Desempate estable: sin él, dos novedades con la misma fecha podrían repetirse o
+    // perderse entre una página y la siguiente.
+    .order('codigo', { ascending: true })
+    .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+  if (error) throw error
+  return { novedades: data, total: count ?? data.length }
+}
+
+/**
+ * Cantidad de novedades de la bandeja en esos estados (los conteos de las pestañas).
+ *
+ * @param {FiltroDeBandeja} filtro
+ */
+export async function contarBandeja(filtro) {
+  const { count, error } = await consultarBandeja('id', { count: 'exact', head: true }, filtro)
+  if (error) throw error
+  return count ?? 0
+}
+
+/**
+ * Transiciones que explican cómo llegó cada novedad a la bandeja: asignaciones (con el área
+ * anterior, si fue una reasignación), escalamientos y aprobaciones del director, en orden.
+ * Los nombres de las personas salen de `usuario_publico`; nunca se pide el correo (ADR 0010).
+ *
+ * @param {string[]} novedadIds Las de la página que se está viendo.
+ * @returns {Promise<object[]>}
+ */
+export async function listarTransicionesDeBandeja(novedadIds) {
+  if (novedadIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('historial_transicion')
+    .select(
+      'id, novedad_id, estado_nuevo, observacion, fecha_hora, ' +
+        'area_anterior:area!historial_transicion_area_anterior_id_fkey(nombre), ' +
+        'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre)',
+    )
+    .in('novedad_id', novedadIds)
+    .in('estado_nuevo', ['asignada', 'escalada', 'aprobada'])
+    .order('id', { ascending: true })
+  if (error) throw error
+  return data
+}

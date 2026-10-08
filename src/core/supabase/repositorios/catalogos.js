@@ -20,3 +20,18 @@ export async function listarAreas() {
   await guardarCatalogo('areas', data).catch(() => {})
   return data
 }
+
+/**
+ * Fincas activas, por nombre: las opciones del filtro de la bandeja del escritorio (RF-09).
+ *
+ * @returns {Promise<{ id: string, nombre: string }[]>}
+ */
+export async function listarFincas() {
+  const { data, error } = await supabase
+    .from('finca')
+    .select('id, nombre')
+    .eq('activo', true)
+    .order('nombre')
+  if (error) throw error
+  return data
+}
