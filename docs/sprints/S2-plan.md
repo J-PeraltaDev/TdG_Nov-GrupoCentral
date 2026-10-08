@@ -3,8 +3,8 @@
 - **Fechas:** 19–23 oct 2026 (5 días). El equipo va adelantado: se puede empezar antes si lo aprueba.
 - **Historias:** HU-09, HU-10, HU-11, HU-12, HU-14, HU-17 y HU-18 (RF-09, RF-10, RF-11, RF-12,
   RF-14, RF-17 y RF-18)
-- **Estado:** propuesta del 8 oct 2026. No se escribe código del sprint hasta tener el OK del
-  equipo y la respuesta a las decisiones del final.
+- **Estado:** aprobado el 8 oct 2026, con los puntos propuestos y con la recomendación de cada
+  decisión del final. Lo que cambie en la review se ajusta en el PR que corresponda.
 
 **Meta:** el área atiende y resuelve en primera instancia: la novedad registrada aparece en la
 bandeja del área, el aprobador la toma, la rechaza, la reasigna o la escala, o registra la solución
@@ -30,16 +30,16 @@ Las cifras coinciden con las del cierre del Sprint 1. No hay diferencias que rep
 
 ## Antes de empezar
 
-| Necesidad                                                                | Para qué                                                                 | Quién     |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------ | --------- |
-| Aprobar este plan y responder las decisiones del final                   | Sin eso no se escribe código del sprint                                  | El equipo |
-| DoR: estimar las siete historias (hay una propuesta abajo)               | Sprint Planning                                                          | El equipo |
-| Instalar el CLI de GitHub (`gh`) e iniciar sesión, o abrir los PR a mano | En el equipo no hay `gh`: el agente sube la rama y deja el enlace del PR | El equipo |
-| Repetir `npm run test:e2e:chromium` (deben pasar las 40 del Sprint 1)    | Empezar con las e2e en verde (`decisiones-pendientes.md`, punto 17)      | El equipo |
-| Decir si el agente corre las e2e que ingresan o las corre el equipo      | Usan `CLAVE_USUARIOS_DE_PRUEBA`; el agente no lee `.env.local`           | El equipo |
-| Revisar entre los dos lo que ya está en `main`                           | Los PR #2 a #6 se fusionaron sin review                                  | El equipo |
-| Avisar antes de un `staging:reset`                                       | Solo se prevé uno, en el PR 8 (tipos de falla del seed)                  | El equipo |
-| OK para empezar antes del 19 oct                                         | El calendario dice 19–23 oct                                             | El equipo |
+| Necesidad                                                             | Para qué                                                                   | Quién     |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------- |
+| Aprobar este plan y responder las decisiones del final                | Sin eso no se escribe código del sprint                                    | El equipo |
+| DoR: estimar las siete historias (hay una propuesta abajo)            | Sprint Planning                                                            | El equipo |
+| CLI de GitHub (`gh`) con sesión                                       | **Resuelto el 8 oct:** instalado; el agente abre los PR con `gh pr create` | El equipo |
+| Repetir `npm run test:e2e:chromium` (deben pasar las 40 del Sprint 1) | Empezar con las e2e en verde (`decisiones-pendientes.md`, punto 17)        | El equipo |
+| Decir si el agente corre las e2e que ingresan o las corre el equipo   | Usan `CLAVE_USUARIOS_DE_PRUEBA`; el agente no lee `.env.local`             | El equipo |
+| Revisar entre los dos lo que ya está en `main`                        | Los PR #2 a #6 se fusionaron sin review                                    | El equipo |
+| Avisar antes de un `staging:reset`                                    | Solo se prevé uno, en el PR 8 (tipos de falla del seed)                    | El equipo |
+| OK para empezar antes del 19 oct                                      | El calendario dice 19–23 oct                                               | El equipo |
 
 ## Skills del entorno
 
@@ -99,7 +99,7 @@ Reparto sugerido: una persona el servidor y la otra el cliente, al revés que en
 | HU-14     | RF-14 · Registrar solución | 8      | Normalización, `resolver_tipo`, sugerencias, autocompletado y fecha en Colombia     |
 | **Total** |                            | **38** |                                                                                     |
 
-Cuando el equipo los apruebe, se anotan en `docs/scrum/backlog.md`.
+Aprobados el 8 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
 
 ---
 
@@ -553,7 +553,7 @@ e2e en el CI y WebKit: solo si el equipo lo pide.
 
 ## Decisiones para el equipo
 
-Cada una trae una recomendación. Ninguna se resuelve en el código sin respuesta.
+Cada una trae una recomendación. **Aprobadas el 8 oct 2026 con la recomendación de cada una.**
 
 ### Las que pedía el plan de arranque
 
