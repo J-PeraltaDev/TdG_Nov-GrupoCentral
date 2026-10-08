@@ -11,6 +11,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone         | Propuesto |
 | 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
 | 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -92,3 +93,25 @@ pantalla de carga. Resultado completo en `docs/pruebas/sesion-sin-conexion.md`.
 > la renovación durante cerca de medio minuto. Con conexión, espera la sesión un máximo de cuatro
 > segundos. La sesión se renueva sola cuando vuelve la conexión, y el acceso a los datos lo decide
 > siempre el servidor (RNF-11).
+
+## 6 · Contratos de las funciones de atención (S2)
+
+**Sección:** SDD 5.3.2, Tabla 21, filas `registrar_solucion` y `sugerir_tipos_falla`.
+
+**Qué pasa.** La Tabla 21 dice que el tipo de falla llega por su identificador o por su nombre, y
+que las sugerencias traen la cantidad de novedades y la marca de coincidencia exacta, pero no fija
+cómo se declaran esos dos parámetros ni cómo se llaman las columnas del resultado. Al publicar los
+contratos del Sprint 2 hubo que decidirlo. No cambia el diseño: lo precisa, como prevé la nota de
+la misma tabla.
+
+**Texto propuesto para los parámetros de `registrar_solucion`:**
+
+> p_novedad_id uuid, p_solucion text, p_fecha_ejecucion date, p_tipo_falla_id uuid (opcional) y
+> p_tipo_falla_nombre text (opcional). Es una sola función, sin sobrecargas: el cliente envía el
+> identificador de un tipo existente o el nombre de un tipo; si llegan los dos, se usa el
+> identificador.
+
+**Texto propuesto para el resultado de `sugerir_tipos_falla`:**
+
+> Filas con id, nombre, cantidad_novedades y coincidencia_exacta de los tipos activos que coinciden
+> con el texto. RF-14

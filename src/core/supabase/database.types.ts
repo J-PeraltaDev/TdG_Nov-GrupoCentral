@@ -720,6 +720,88 @@ export type Database = {
       }
     }
     Functions: {
+      escalar_novedad: {
+        Args: { p_justificacion: string; p_novedad_id: string }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reasignar_novedad: {
+        Args: {
+          p_area_destino_id: string
+          p_motivo: string
+          p_novedad_id: string
+        }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rechazar_novedad: {
+        Args: { p_motivo: string; p_novedad_id: string }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       registrar_novedad: {
         Args: {
           p_area_id: string
@@ -728,6 +810,73 @@ export type Database = {
           p_id_local: string
           p_prioridad: Database["public"]["Enums"]["prioridad_novedad"]
         }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      registrar_solucion: {
+        Args: {
+          p_fecha_ejecucion: string
+          p_novedad_id: string
+          p_solucion: string
+          p_tipo_falla_id?: string
+          p_tipo_falla_nombre?: string
+        }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      sugerir_tipos_falla: {
+        Args: { p_texto: string }
+        Returns: {
+          cantidad_novedades: number
+          coincidencia_exacta: boolean
+          id: string
+          nombre: string
+        }[]
+      }
+      tomar_novedad: {
+        Args: { p_novedad_id: string }
         Returns: {
           actualizado_en: string
           area_id: string
