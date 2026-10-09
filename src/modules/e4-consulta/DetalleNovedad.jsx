@@ -360,6 +360,14 @@ export default function DetalleNovedad() {
     navegar(origen.split('?')[0] === '/bandeja' ? origen : '/bandeja', {
       state: { aviso: mensaje },
     })
+  // El aviso con que se vuelve de registrar la solución (pantalla 18). Vive en el estado de la
+  // navegación: al cumplir su tiempo se quita de ahí, para que no reaparezca al recargar.
+  const avisoDeLlegada =
+    typeof state?.aviso === 'string'
+      ? { tipo: state.avisoDeError ? 'error' : 'exito', mensaje: state.aviso }
+      : null
+  const quitarAvisoDeLlegada = () =>
+    navegar('.', { replace: true, state: { origen: state?.origen } })
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const acciones =
@@ -370,6 +378,8 @@ export default function DetalleNovedad() {
           acciones={accionesDisponibles(perfil, novedad)}
           alCambiar={recargar}
           alSalir={volverALaBandeja}
+          avisoDeLlegada={avisoDeLlegada}
+          alQuitarAvisoDeLlegada={quitarAvisoDeLlegada}
           esEscritorio={esEscritorio}
         />
       </Suspense>

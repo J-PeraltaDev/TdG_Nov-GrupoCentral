@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
 import { Rutas } from './Rutas.jsx'
 
@@ -36,6 +37,10 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   rechazarNovedad: vi.fn(),
   escalarNovedad: vi.fn(),
   reasignarNovedad: vi.fn(),
+  registrarSolucion: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
+  sugerirTiposFalla: vi.fn().mockResolvedValue([]),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
@@ -182,6 +187,38 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
       expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
     },
   )
+
+  it('RF-14 / CU-14: el aprobador entra a registrar la solución de una novedad en atención, sin las barras del teléfono', async () => {
+    const enAtencion = { ...(await obtenerNovedad()), estado: 'en_atencion' }
+    vi.mocked(obtenerNovedad).mockResolvedValueOnce(enAtencion)
+    abrir(`${DETALLE}/solucion`, 'aprobador')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Registrar solución' }),
+    ).toBeVisible()
+    // Solo queda el menú de la barra lateral (escritorio); la barra inferior no se pinta.
+    expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(1)
+    expect(screen.getByRole('link', { name: 'Cerrar sin registrar la solución' })).toBeVisible()
+  })
+
+  it.each([
+    ['reportante', 'Mis novedades'],
+    ['director', 'Novedades escaladas'],
+    ['administrador', 'Panel de reportes'],
+  ])(
+    'RF-14: el %s no entra a registrar una solución; el guardián lo devuelve a su inicio',
+    async (rol, titulo) => {
+      abrir(`${DETALLE}/solucion`, rol)
+
+      expect(await screen.findByRole('heading', { level: 1, name: titulo })).toBeVisible()
+    },
+  )
+
+  it('RF-14: sin sesión no se entra a registrar una solución', () => {
+    abrir(`${DETALLE}/solucion`, null)
+
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeVisible()
+  })
 
   it('RF-18: sin sesión no se entra al detalle', () => {
     abrir(DETALLE, null)

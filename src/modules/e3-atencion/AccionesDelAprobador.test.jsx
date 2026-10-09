@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter } from 'react-router'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
@@ -49,6 +50,8 @@ function pintar(props = {}) {
       esEscritorio={false}
       {...props}
     />,
+    // Las acciones enlazan a la pantalla de la solución: necesitan el enrutador.
+    { wrapper: MemoryRouter },
   )
   return { alCambiar, alSalir, ...utilidades }
 }
@@ -175,10 +178,10 @@ describe('Acciones del aprobador en el detalle (RF-10 / CU-10, Figma 13, 13-B y 
     )
   })
 
-  it('RF-18 / CU-18 5: sin acciones construidas para el estado no hay barra ni botones', () => {
+  it('RF-18 / CU-18 5: una novedad aprobada solo ofrece registrar la solución', () => {
     pintar({ novedad: APROBADA, acciones: EN_APROBADA })
 
-    expect(barra()).toBeNull()
+    expect(barra()).toContainElement(screen.getByRole('link', { name: 'Registrar solución' }))
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
@@ -667,5 +670,80 @@ describe('Reasignar desde el detalle (RF-17 / CU-17, Figma 17)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(reasignarNovedad).not.toHaveBeenCalled()
     expect(reasignar()).toHaveFocus()
+  })
+})
+
+describe('Registrar solución desde el detalle (RF-14 / CU-14, Figma 14 y 18)', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const registrarSolucion = () => screen.getByRole('link', { name: 'Registrar solución' })
+
+  it.each([
+    ['en atención', ATENDIDA, EN_ATENCION],
+    ['aprobada', APROBADA, EN_APROBADA],
+  ])(
+    'RF-14 / CU-14 1: una novedad %s ofrece «Registrar solución», la primera de la barra, que abre la pantalla 18',
+    (_, novedad, acciones) => {
+      pintar({ novedad, acciones })
+
+      expect(registrarSolucion()).toHaveAttribute('href', '/novedades/n-153/solucion')
+      expect(barra().firstElementChild).toBe(registrarSolucion())
+    },
+  )
+
+  it('RF-14: una novedad asignada no ofrece registrar la solución: primero hay que tomarla', () => {
+    pintar()
+
+    expect(screen.queryByRole('link', { name: 'Registrar solución' })).not.toBeInTheDocument()
+  })
+
+  it('RF-14: en el escritorio el enlace va con los demás botones, sin barra fija', () => {
+    pintar({ novedad: ATENDIDA, acciones: EN_ATENCION, esEscritorio: true })
+
+    expect(barra()).toBeNull()
+    expect(registrarSolucion()).toBeVisible()
+  })
+
+  it('RF-14 / CU-14: muestra el aviso con que se vuelve de la pantalla 18 y lo quita cumplido su tiempo', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const alQuitarAvisoDeLlegada = vi.fn()
+    pintar({
+      novedad: { ...ATENDIDA, estado: 'resuelta' },
+      acciones: [],
+      avisoDeLlegada: {
+        tipo: 'exito',
+        mensaje: 'Solución registrada. La finca debe confirmar el cierre.',
+      },
+      alQuitarAvisoDeLlegada,
+    })
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Solución registrada. La finca debe confirmar el cierre.',
+    )
+    expect(alQuitarAvisoDeLlegada).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(6100)
+
+    expect(alQuitarAvisoDeLlegada).toHaveBeenCalledOnce()
+  })
+
+  it('RF-14: el aviso de llegada puede ser un error, y el de una acción hecha aquí lo reemplaza', async () => {
+    vi.mocked(rechazarNovedad).mockReset()
+    vi.mocked(rechazarNovedad).mockResolvedValue({ id: 'n-153', estado: 'rechazada' })
+    pintar({
+      novedad: ATENDIDA,
+      acciones: EN_ATENCION,
+      avisoDeLlegada: { tipo: 'error', mensaje: 'La novedad cambió de estado.' },
+      alQuitarAvisoDeLlegada: () => {},
+    })
+
+    expect(screen.getByRole('alert')).toHaveTextContent('La novedad cambió de estado.')
+
+    await rechazarCon('Duplicada')
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Novedad rechazada.')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

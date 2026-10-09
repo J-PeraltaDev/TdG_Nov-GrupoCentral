@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
 import {
   escalarNovedad,
@@ -8,10 +9,12 @@ import {
 } from '../../core/supabase/repositorios/novedades.js'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
+import { Icono } from '../../core/ui/Icono.jsx'
 import iconoEscalar from '../../core/ui/iconos/arrow_circle_up.svg'
 import iconoTomar from '../../core/ui/iconos/back_hand.svg'
 import iconoRechazar from '../../core/ui/iconos/block.svg'
 import iconoReasignar from '../../core/ui/iconos/swap_horiz.svg'
+import iconoResolver from '../../core/ui/iconos/task_alt.svg'
 import { HojaEscalar } from './HojaEscalar.jsx'
 import { HojaReasignar } from './HojaReasignar.jsx'
 import { HojaRechazar } from './HojaRechazar.jsx'
@@ -21,14 +24,24 @@ import { useAccion } from './useAccion.js'
 /*
  * Acciones del aprobador de área en el detalle de una novedad (RF-10 a RF-17). Figma: barra de
  * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hojas 15 (3:1356),
- * 16 (3:1468) y 17 (3:1586).
+ * 16 (3:1468) y 17 (3:1586). «Registrar solución» no es una hoja: abre la pantalla 18.
  *
  * El mapa de acciones dice qué permite la Tabla 35; aquí se pintan las que ya tienen su
  * manejador. Se carga bajo demanda y solo para el aprobador: los demás roles no la descargan.
  */
 
 /** Acciones que este módulo ya sabe ejecutar. Las demás llegan con su historia. */
-const CONSTRUIDAS = [ACCION.TOMAR, ACCION.ESCALAR, ACCION.REASIGNAR, ACCION.RECHAZAR]
+const CONSTRUIDAS = [
+  ACCION.TOMAR,
+  ACCION.REGISTRAR_SOLUCION,
+  ACCION.ESCALAR,
+  ACCION.REASIGNAR,
+  ACCION.RECHAZAR,
+]
+
+// Un enlace con la forma del botón primario: lleva a otra pantalla, no ejecuta nada aquí.
+const ENLACE_PRINCIPAL =
+  'inline-flex h-12 w-full items-center justify-center gap-2 rounded-control bg-primario px-5 text-cuerpo-fuerte whitespace-nowrap text-sobre-primario hover:bg-primario-hover lg:h-10 lg:w-auto lg:px-4 lg:text-etiqueta-fuerte'
 
 /**
  * @param {object} props
@@ -38,6 +51,9 @@ const CONSTRUIDAS = [ACCION.TOMAR, ACCION.ESCALAR, ACCION.REASIGNAR, ACCION.RECH
  * @param {(mensaje: string) => void} props.alSalir La acción sacó la novedad del alcance del
  *   usuario (la reasignó): el detalle ya no se puede recargar y hay que volver a la bandeja,
  *   que muestra el mensaje.
+ * @param {{ tipo: 'exito' | 'error', mensaje: string } | null} [props.avisoDeLlegada] El aviso
+ *   con que se vuelve de registrar la solución; lo reemplaza el de la siguiente acción.
+ * @param {() => void} [props.alQuitarAvisoDeLlegada]
  * @param {boolean} props.esEscritorio En el escritorio son botones bajo el encabezado; en el
  *   teléfono, una barra fija abajo que reemplaza a la navegación.
  */
@@ -46,8 +62,11 @@ export default function AccionesDelAprobador({
   acciones,
   alCambiar,
   alSalir,
+  avisoDeLlegada = null,
+  alQuitarAvisoDeLlegada,
   esEscritorio,
 }) {
+  const { state } = useLocation()
   const { ejecutar, enCurso, aviso, cerrarAviso } = useAccion({
     estado: novedad.estado,
     alCambiar,
@@ -89,6 +108,16 @@ export default function AccionesDelAprobador({
     >
       {enCurso && lanzada === ACCION.TOMAR ? 'Tomando…' : 'Tomar para atención'}
     </Boton>
+  ) : puede(ACCION.REGISTRAR_SOLUCION) ? (
+    // La pantalla 18 vuelve a este detalle, que recuerda de qué lista se abrió.
+    <Link
+      to={`/novedades/${novedad.id}/solucion`}
+      state={{ origen: state?.origen }}
+      className={ENLACE_PRINCIPAL}
+    >
+      <Icono src={iconoResolver} tamano={20} />
+      Registrar solución
+    </Link>
   ) : null
 
   const escalar = puede(ACCION.ESCALAR) ? (
@@ -180,15 +209,17 @@ export default function AccionesDelAprobador({
     </>
   )
 
+  // El aviso de una acción hecha aquí va primero; si no hay, el que se trajo al llegar.
+  const visible = aviso ?? avisoDeLlegada
   const avisoTemporal = (className) =>
-    aviso ? (
+    visible ? (
       <AvisoTemporal
-        tipo={aviso.tipo}
-        accion={aviso.reintentar ? { texto: 'Reintentar', alPulsar: aviso.reintentar } : undefined}
-        alTerminar={cerrarAviso}
+        tipo={visible.tipo}
+        accion={aviso?.reintentar ? { texto: 'Reintentar', alPulsar: aviso.reintentar } : undefined}
+        alTerminar={aviso ? cerrarAviso : alQuitarAvisoDeLlegada}
         className={className}
       >
-        {aviso.mensaje}
+        {visible.mensaje}
       </AvisoTemporal>
     ) : null
 

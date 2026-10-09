@@ -469,6 +469,48 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
     },
   )
 
+  it('RF-14 / CU-14 1: una novedad en atención ofrece «Registrar solución», que abre la pantalla 18 y recuerda el origen', async () => {
+    conNovedad({ ...ASIGNADA, estado: 'en_atencion' }, [TOMADA, ...REGISTRO])
+    abrir({ rol: 'aprobador', origen: '/bandeja?pestana=en_atencion' })
+
+    expect(await screen.findByRole('link', { name: 'Registrar solución' })).toHaveAttribute(
+      'href',
+      `/novedades/${ID}/solucion`,
+    )
+  })
+
+  it('RF-14 / CU-14: al volver de registrar la solución muestra el aviso, sin acciones y con la solución a la vista', async () => {
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    pintarConSesion(
+      <Routes>
+        <Route
+          path="/novedades/:id"
+          element={
+            <main tabIndex={-1}>
+              <DetalleNovedad />
+            </main>
+          }
+        />
+      </Routes>,
+      {
+        ruta: {
+          pathname: `/novedades/${ID}`,
+          state: {
+            origen: '/bandeja',
+            aviso: 'Solución registrada. La finca debe confirmar el cierre.',
+          },
+        },
+        rol: 'aprobador',
+      },
+    )
+
+    const aviso = await screen.findByText('Solución registrada. La finca debe confirmar el cierre.')
+    expect(aviso.closest('[data-aviso-temporal]')).toHaveAttribute('role', 'status')
+    expect(await screen.findByText('Se cambió el motor del torniquete.')).toBeVisible()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Registrar solución' })).not.toBeInTheDocument()
+  })
+
   it('RF-10: en el escritorio la acción va bajo el encabezado', async () => {
     simularPantalla('escritorio')
     conNovedad()
