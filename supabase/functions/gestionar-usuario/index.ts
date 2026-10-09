@@ -2,6 +2,7 @@
 // lógica está en manejar.js, que se prueba con Vitest (docs/adr/0012).
 import { createClient } from '@supabase/supabase-js'
 import { atender, tokenDe } from '../_shared/servir.js'
+import { crearCuentas } from './cuentas.js'
 import { manejar } from './manejar.js'
 
 // La plataforma inyecta estas variables. La clave secreta salta las políticas RLS: vive solo
@@ -19,18 +20,16 @@ async function identificar(token: string): Promise<string | null> {
   return error ? null : (data?.claims?.sub ?? null)
 }
 
-async function leerPerfil(id: string) {
-  const { data, error } = await admin
-    .from('usuario')
-    .select('id, rol_id, activo')
-    .eq('id', id)
-    .maybeSingle()
-  if (error) throw error
-  return data
-}
+// Auth y la base de datos, como las necesitan las acciones.
+const cuentas = crearCuentas(admin)
 
 Deno.serve((peticion) =>
   atender(peticion, (cuerpo) =>
-    manejar(cuerpo, { token: tokenDe(peticion), identificar, leerPerfil }),
+    manejar(cuerpo, {
+      token: tokenDe(peticion),
+      identificar,
+      leerPerfil: cuentas.leerUsuario,
+      cuentas,
+    }),
   ),
 )
