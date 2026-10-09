@@ -8,7 +8,7 @@ import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { DialogoConfirmarCierre } from './DialogoConfirmarCierre.jsx'
 import { HojaFallaPersiste } from './HojaFallaPersiste.jsx'
-import { AVISO_SUELTO } from './posicionDelAviso.js'
+import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
 import { useAccion } from './useAccion.js'
 
 /*

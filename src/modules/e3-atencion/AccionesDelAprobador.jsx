@@ -18,7 +18,7 @@ import iconoResolver from '../../core/ui/iconos/task_alt.svg'
 import { HojaEscalar } from './HojaEscalar.jsx'
 import { HojaReasignar } from './HojaReasignar.jsx'
 import { HojaRechazar } from './HojaRechazar.jsx'
-import { AVISO_SUELTO } from './posicionDelAviso.js'
+import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
 import { useAccion } from './useAccion.js'
 
 /*

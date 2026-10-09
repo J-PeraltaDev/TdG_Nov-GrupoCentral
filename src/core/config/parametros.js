@@ -21,6 +21,12 @@ export const OBSERVACION_MAX_CARACTERES = 500
  */
 export const TIPO_FALLA_NOMBRE_MAX_CARACTERES = 60
 
+/**
+ * Nombre de una finca (RF-04). Solo limita el campo: la base de datos no le pone máximo. Cabe
+ * en una etiqueta y en las tablas.
+ */
+export const FINCA_NOMBRE_MAX_CARACTERES = 80
+
 /** Código temporal de recuperación de contraseña (RF-02). Se usa en el Sprint 3. */
 export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
 

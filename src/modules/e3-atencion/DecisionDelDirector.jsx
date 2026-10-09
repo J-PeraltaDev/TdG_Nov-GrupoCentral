@@ -15,7 +15,7 @@ import iconoAprobar from '../../core/ui/iconos/verified.svg'
 import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { formatearCodigo } from '../../core/utils/codigo.js'
 import { BotonesDeHoja } from './BotonesDeHoja.jsx'
-import { AVISO_SUELTO } from './posicionDelAviso.js'
+import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
 import { useAccion } from './useAccion.js'
 
 /*
