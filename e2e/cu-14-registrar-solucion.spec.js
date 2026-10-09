@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { registrarPorLaApi } from './apoyo/novedades.js'
+import { diaEnColombia, registrarPorLaApi } from './apoyo/novedades.js'
 import { descripcionUnica } from './apoyo/registro.js'
 import {
   HAY_CLAVE,
@@ -18,14 +18,6 @@ import {
  */
 
 const ESPERA_DE_SESION = { timeout: 20_000 }
-
-/** `AAAA-MM-DD` de hoy en Colombia más los días indicados. */
-function diaEnColombia(masDias = 0) {
-  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
-  const fecha = new Date(`${hoy}T12:00:00Z`)
-  fecha.setUTCDate(fecha.getUTCDate() + masDias)
-  return fecha.toISOString().slice(0, 10)
-}
 
 test.describe('CU-14 · Registrar solución aplicada', () => {
   test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
@@ -93,7 +85,10 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
       page.getByText('Solución registrada. La finca debe confirmar el cierre.'),
     ).toBeVisible()
     await expect(estadoEnElDetalle(page, 'Resuelta')).toBeVisible()
-    await expect(page.getByText(solucion)).toBeVisible()
+    // La solución sale en su bloque y, desde el Sprint 3, bajo su transición en la línea de
+    // tiempo: ahí se conserva si la finca responde que la falla persiste.
+    await expect(page.getByText(solucion)).toHaveCount(2)
+    await expect(page.getByText(solucion).first()).toBeVisible()
     await expect(page.getByText(tipo).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Registrar solución' })).toHaveCount(0)
     await expect(
@@ -139,7 +134,7 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
     await expect(reportante.page.getByText(descripcion)).toBeVisible(ESPERA_DE_SESION)
     await reportante.page.goto(`/novedades/${novedad.id}`)
     await expect(estadoEnElDetalle(reportante.page, 'Resuelta')).toBeVisible(ESPERA_DE_SESION)
-    await expect(reportante.page.getByText(solucion)).toBeVisible()
+    await expect(reportante.page.getByText(solucion).first()).toBeVisible()
     await reportante.contexto.close()
 
     // Y el administrador, el suyo, porque se creó un tipo de falla.

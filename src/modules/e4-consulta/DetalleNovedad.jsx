@@ -33,6 +33,7 @@ import { SinPermiso } from './SinPermiso.jsx'
 
 // Las acciones de cada rol van en su propio paquete: los demás roles no lo descargan.
 const AccionesDelAprobador = lazy(() => import('../e3-atencion/AccionesDelAprobador.jsx'))
+const AccionesDelReportante = lazy(() => import('../e3-atencion/AccionesDelReportante.jsx'))
 const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirector.jsx'))
 
 /*
@@ -42,7 +43,8 @@ const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirecto
  *
  * Para el director, una novedad escalada es la pantalla 20 (4:705; 20-C, 4:1054, en el
  * teléfono): el mismo detalle con la justificación del escalamiento arriba y su decisión
- * (RF-13 / CU-13).
+ * (RF-13 / CU-13). Para el reportante, una resuelta de su finca trae las acciones de la
+ * pantalla 09: confirmar el cierre o indicar que la falla persiste (RF-15 / CU-15).
  *
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
  * (Tabla 35) y cada rol trae las suyas; las evidencias y la consulta sin conexión llegan en
@@ -444,6 +446,18 @@ export default function DetalleNovedad() {
           alSalir={volverALaBandeja}
           avisoDeLlegada={avisoDeLlegada}
           alQuitarAvisoDeLlegada={quitarAvisoDeLlegada}
+          esEscritorio={esEscritorio}
+        />
+      </Suspense>
+    ) : novedad && perfil.rol_id === ROL.REPORTANTE ? (
+      // La finca responde a una novedad resuelta (RF-15). Sigue montado después, para mostrar
+      // el aviso de lo que acaba de hacer.
+      <Suspense fallback={null}>
+        <AccionesDelReportante
+          key={novedad.id}
+          novedad={novedad}
+          acciones={disponibles}
+          alCambiar={recargar}
           esEscritorio={esEscritorio}
         />
       </Suspense>

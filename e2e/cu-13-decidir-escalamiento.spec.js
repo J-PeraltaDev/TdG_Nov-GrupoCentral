@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { registrarPorLaApi } from './apoyo/novedades.js'
+import { elegirDecision, enTelefono, registrarPorLaApi } from './apoyo/novedades.js'
 import { descripcionUnica } from './apoyo/registro.js'
 import {
   HAY_CLAVE,
@@ -54,7 +54,6 @@ test.describe('CU-13 · Decidir sobre una novedad escalada', () => {
     return novedad
   }
 
-  const enTelefono = (page) => page.viewportSize().width < 1024
   const estadoEnElDetalle = (page, estado) =>
     page.getByRole('group', { name: 'Datos de la novedad' }).getByText(estado)
   const lineaDeTiempo = (page) => page.getByRole('region', { name: 'Línea de tiempo' })
@@ -86,30 +85,6 @@ test.describe('CU-13 · Decidir sobre una novedad escalada', () => {
       await expect.poll(() => tarjetas.count()).toBeGreaterThan(antes)
       await expect(page.getByRole('button', { name: 'Cargando…' })).toHaveCount(0)
     }
-  }
-
-  /**
-   * Elige la opción y deja lista la observación, sin confirmar. En el escritorio es el panel
-   * «Tu decisión»; en el teléfono, la hoja que abre el botón de la barra.
-   *
-   * @returns El contenedor donde quedaron el campo y el botón «Confirmar decisión».
-   */
-  async function elegir(page, opcion, observacion) {
-    let lugar
-    if (enTelefono(page)) {
-      await page.getByRole('button', { name: opcion, exact: true }).click()
-      lugar = page.getByRole('dialog', { name: opcion })
-      await expect(lugar).toBeVisible()
-    } else {
-      lugar = panel(page)
-      // El botón de radio está oculto a la vista: se toca su tarjeta.
-      await lugar.getByText(opcion, { exact: true }).click()
-      await expect(lugar.getByRole('radio', { name: opcion })).toBeChecked()
-    }
-    if (observacion !== undefined) {
-      await lugar.getByRole('textbox', { name: 'Observación' }).fill(observacion)
-    }
-    return lugar
   }
 
   test('RF-13 / CU-13: el director ve la escalada con su justificación, la aprueba con una observación y el área registra la solución (18-C)', async ({
@@ -151,7 +126,7 @@ test.describe('CU-13 · Decidir sobre una novedad escalada', () => {
     ).toBeVisible()
 
     // CU-13 4 y 5: aprueba con una observación.
-    const lugar = await elegir(page, 'Aprobar', observacion)
+    const lugar = await elegirDecision(page, 'Aprobar', observacion)
     await expect(lugar.getByText(/Se avisará a Mantenimiento y a la finca/)).toBeVisible()
     await lugar.getByRole('button', { name: 'Confirmar decisión' }).click()
 
@@ -274,7 +249,7 @@ test.describe('CU-13 · Decidir sobre una novedad escalada', () => {
     await expect(lineaDeTiempo(page)).toBeInViewport()
 
     // CU-13 5a: con «Rechazar» elegido y sin observación, o solo con espacios, no se confirma.
-    const lugar = await elegir(page, 'Rechazar')
+    const lugar = await elegirDecision(page, 'Rechazar')
     const campo = lugar.getByRole('textbox', { name: 'Observación' })
     const confirmar = lugar.getByRole('button', { name: 'Confirmar decisión' })
     await expect(confirmar).toBeDisabled()

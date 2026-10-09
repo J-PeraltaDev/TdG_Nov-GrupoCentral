@@ -4,12 +4,14 @@ import { Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
+  confirmarResolucion,
   decidirEscalamiento,
   escalarNovedad,
   listarLineaDeTiempo,
   obtenerNovedad,
   reasignarNovedad,
   rechazarNovedad,
+  reportarFallaPersiste,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
@@ -24,6 +26,8 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   escalarNovedad: vi.fn(),
   reasignarNovedad: vi.fn(),
   decidirEscalamiento: vi.fn(),
+  confirmarResolucion: vi.fn(),
+  reportarFallaPersiste: vi.fn(),
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
@@ -150,6 +154,8 @@ beforeEach(() => {
   vi.mocked(escalarNovedad).mockReset()
   vi.mocked(reasignarNovedad).mockReset()
   vi.mocked(decidirEscalamiento).mockReset()
+  vi.mocked(confirmarResolucion).mockReset()
+  vi.mocked(reportarFallaPersiste).mockReset()
   vi.mocked(listarAreas).mockReset()
 })
 
@@ -836,4 +842,148 @@ describe('Pantallas 20 y 20-C · El director decide sobre una escalada (RF-13 / 
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
     },
   )
+})
+
+describe('Pantallas 09, 09-B y 09-C · La finca responde a una novedad resuelta (RF-15 / CU-15)', () => {
+  const confirmarCierre = () => screen.queryByRole('button', { name: 'Confirmar cierre' })
+  const fallaPersiste = () => screen.queryByRole('button', { name: 'La falla persiste' })
+
+  it('RF-15 / CU-15 2: en el teléfono el reportante ve la solución y la barra para responder', async () => {
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    abrir({ rol: 'reportante', origen: '/novedades?lista=por_confirmar' })
+
+    const barra = await waitFor(() => {
+      const elemento = document.querySelector('[data-barra-de-acciones]')
+      expect(elemento).not.toBeNull()
+      return elemento
+    })
+    expect(barra).toContainElement(fallaPersiste())
+    expect(barra).toContainElement(confirmarCierre())
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Solución registrada por Mantenimiento' }),
+      ).getByText('Se cambió el motor del torniquete.'),
+    ).toBeVisible()
+  })
+
+  it('RF-15: en el escritorio los dos botones van bajo el encabezado', async () => {
+    simularPantalla('escritorio')
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    abrir({ rol: 'reportante' })
+
+    expect(await screen.findByRole('button', { name: 'Confirmar cierre' })).toBeEnabled()
+    expect(fallaPersiste()).toBeEnabled()
+    expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
+  })
+
+  it.each(['aprobador', 'director', 'administrador'])(
+    'Tabla 35: el %s no responde por la finca',
+    async (rol) => {
+      conNovedad(RESUELTA, HISTORIA_RESUELTA)
+      abrir({ rol })
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(confirmarCierre()).not.toBeInTheDocument()
+      expect(fallaPersiste()).not.toBeInTheDocument()
+    },
+  )
+
+  it.each(['asignada', 'en_atencion', 'escalada', 'aprobada', 'rechazada'])(
+    'Tabla 35: sobre una novedad %s el reportante no tiene nada que responder',
+    async (estado) => {
+      conNovedad({ ...ASIGNADA, estado }, [TOMADA, ...REGISTRO])
+      abrir({ rol: 'reportante' })
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
+    },
+  )
+
+  it('RF-15 / CU-15 3 a 5: al confirmar, el detalle queda Cerrada, con la observación en la línea de tiempo y sin acciones', async () => {
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    vi.mocked(confirmarResolucion).mockImplementation(async (_, observacion) => {
+      // Lo que el servidor entrega después de la transición.
+      conNovedad({ ...RESUELTA, estado: 'cerrada' }, [
+        paso(5, 'resuelta', 'cerrada', { observacion, fecha_hora: '2026-09-24T13:05:00Z' }),
+        ...HISTORIA_RESUELTA,
+      ])
+      return { id: ID, estado: 'cerrada' }
+    })
+    abrir({ rol: 'reportante' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Confirmar cierre' }))
+    const dialogo = within(
+      screen.getByRole('dialog', { name: '¿Confirmas que la novedad quedó resuelta?' }),
+    )
+    await userEvent.type(
+      dialogo.getByRole('textbox', { name: 'Observación (opcional)' }),
+      'Quedó girando bien.',
+    )
+    await userEvent.click(dialogo.getByRole('button', { name: 'Sí, cerrar' }))
+
+    expect(confirmarResolucion).toHaveBeenCalledExactlyOnceWith(ID, 'Quedó girando bien.')
+    expect(await screen.findByText('Cierre confirmado. La novedad queda Cerrada.')).toBeVisible()
+    const linea = within(screen.getByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('Quedó girando bien.')).toBeVisible()
+    const encabezado = within(screen.getByRole('group', { name: 'Datos de la novedad' }))
+    expect(encabezado.getByText('Cerrada')).toBeVisible()
+    // Cerrada conserva la solución.
+    expect(screen.getByText('Se cambió el motor del torniquete.')).toBeVisible()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
+
+  it('RF-15 / CU-15 3a: con «la falla persiste» vuelve a En atención, sin la solución, y «Tomada por» sigue siendo el aprobador', async () => {
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    vi.mocked(reportarFallaPersiste).mockImplementation(async (_, observacion) => {
+      // El servidor quita de la novedad la solución que no sirvió (decisión 21 del plan).
+      conNovedad(
+        {
+          ...RESUELTA,
+          estado: 'en_atencion',
+          solucion: null,
+          fecha_ejecucion: null,
+          tipo_falla: null,
+        },
+        [
+          paso(5, 'resuelta', 'en_atencion', { observacion, fecha_hora: '2026-09-24T13:05:00Z' }),
+          ...HISTORIA_RESUELTA,
+        ],
+      )
+      return { id: ID, estado: 'en_atencion' }
+    })
+    abrir({ rol: 'reportante' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'La falla persiste' }))
+    const hoja = within(screen.getByRole('dialog', { name: 'La falla persiste' }))
+    expect(hoja.getByRole('button', { name: 'Devolver a atención' })).toBeDisabled()
+    await userEvent.type(
+      hoja.getByRole('textbox', { name: '¿Qué sigue fallando?' }),
+      'El torniquete sigue sin girar.',
+    )
+    await userEvent.click(hoja.getByRole('button', { name: 'Devolver a atención' }))
+
+    expect(reportarFallaPersiste).toHaveBeenCalledExactlyOnceWith(
+      ID,
+      'El torniquete sigue sin girar.',
+    )
+    expect(
+      await screen.findByText('Novedad devuelta a Mantenimiento. Vuelve a estar En atención.'),
+    ).toBeVisible()
+    // SDD 6.1.3: quien la tomó es el aprobador de la última vez que pasó de asignada a en
+    // atención, no el reportante que la devolvió.
+    expect(
+      await screen.findByText(
+        'Registrada hace 3 d · Tomada por Carlos Mario Restrepo, 21 sep, 10:02 a. m.',
+      ),
+    ).toBeVisible()
+    const linea = within(screen.getByRole('region', { name: 'Línea de tiempo' }))
+    expect(linea.getByText('El torniquete sigue sin girar.')).toBeVisible()
+    expect(
+      screen.queryByRole('region', { name: 'Solución registrada por Mantenimiento' }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
 })

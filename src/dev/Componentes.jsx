@@ -3,6 +3,7 @@ import { AreaDeTexto } from '../core/ui/AreaDeTexto.jsx'
 import { AvisoTemporal } from '../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../core/ui/Boton.jsx'
 import { Conexion } from '../core/ui/Conexion.jsx'
+import { Dialogo } from '../core/ui/Dialogo.jsx'
 import { Estado } from '../core/ui/Estado.jsx'
 import { Hoja } from '../core/ui/Hoja.jsx'
 import { Pestanas } from '../core/ui/Pestanas.jsx'
@@ -11,8 +12,8 @@ import { Prioridad } from '../core/ui/Prioridad.jsx'
 /*
  * Página de desarrollo (/_dev/componentes): las 28 variantes de los componentes base, en el
  * mismo orden que la sección «00 · Sistema de diseño» de Figma (nodo 1:63), para compararlas
- * a 360 × 800 y a 1280 × 800. Debajo, los componentes que agregó el Sprint 2 a partir de las
- * pantallas. No se publica: solo existe con `npm run dev`.
+ * a 360 × 800 y a 1280 × 800. Debajo, los componentes que agregaron los Sprints 2 y 3 a partir
+ * de las pantallas. No se publica: solo existe con `npm run dev`.
  */
 
 const PESTANAS = [
@@ -60,6 +61,7 @@ function Seccion({ titulo, nodo, children }) {
 export default function Componentes() {
   const [pestana, setPestana] = useState(PESTANAS[0].id)
   const [hojaAbierta, setHojaAbierta] = useState(false)
+  const [dialogoAbierto, setDialogoAbierto] = useState(false)
   const [motivo, setMotivo] = useState('Duplicada: ya está en atención como NOV-0149.')
 
   return (
@@ -185,6 +187,33 @@ export default function Componentes() {
               Cancelar
             </Boton>
           </Hoja>
+        </div>
+      </Seccion>
+
+      <Seccion titulo="Diálogo" nodo="2:1365">
+        <div className="flex rounded-control bg-superficie p-4">
+          <Boton tipo="secundario" onClick={() => setDialogoAbierto(true)}>
+            Abrir el diálogo
+          </Boton>
+          <Dialogo
+            abierto={dialogoAbierto}
+            alCerrar={() => setDialogoAbierto(false)}
+            titulo="¿Título del diálogo?"
+            descripcion="Va centrado en el teléfono y en el escritorio. Se cierra con Escape, tocando el fondo o con su botón."
+          >
+            <div className="flex gap-2.5">
+              <Boton
+                tipo="secundario"
+                onClick={() => setDialogoAbierto(false)}
+                className="min-w-0 flex-1"
+              >
+                Cancelar
+              </Boton>
+              <Boton onClick={() => setDialogoAbierto(false)} className="min-w-0 flex-1">
+                Confirmar
+              </Boton>
+            </div>
+          </Dialogo>
         </div>
       </Seccion>
     </main>
