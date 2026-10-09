@@ -21,13 +21,21 @@ import { useTextoObligatorio } from './useTextoObligatorio.js'
 const TARJETA = 'flex min-w-0 flex-1 flex-col items-center gap-1.5 rounded-xl p-3 text-center'
 const ELEGIDA = 'bg-primario-contenedor inset-ring-2 inset-ring-primario'
 
-/** El ícono, el nombre del área y su papel en la reasignación («Área actual» o «Destino»). */
-function ContenidoDeArea({ nombre, papel, claseDelPapel = 'text-texto-secundario' }) {
+/**
+ * El ícono, el nombre del área y su papel en la reasignación («Área actual» o «Destino»).
+ * `atenuada` apaga solo el ícono, que es decorativo: el texto conserva su contraste.
+ */
+function ContenidoDeArea({
+  nombre,
+  papel,
+  claseDelPapel = 'text-texto-secundario',
+  atenuada = false,
+}) {
   const presentacion = PRESENTACION_DEL_AREA[nombre]
   return (
     <>
       <span
-        className={`flex size-9 items-center justify-center rounded-full ${presentacion?.colores ?? 'bg-gris-100 text-texto-secundario'}`}
+        className={`flex size-9 items-center justify-center rounded-full ${presentacion?.colores ?? 'bg-gris-100 text-texto-secundario'} ${atenuada ? 'opacity-60' : ''}`}
       >
         {presentacion ? <Icono src={presentacion.icono} tamano={18} /> : null}
       </span>
@@ -105,8 +113,10 @@ function Formulario({ novedad, alCerrar, alConfirmar, enCurso }) {
         </Aviso>
       ) : (
         <div className="flex items-center gap-2">
-          <p className={`${TARJETA} bg-gris-100 opacity-60 inset-ring inset-ring-borde`}>
-            <ContenidoDeArea nombre={novedad.area} papel="Área actual" />
+          {/* Figma dibuja esta tarjeta entera al 60 % de opacidad, y con eso «Área actual»
+              queda a 2,59:1. Se apagan el fondo y el ícono; el texto va con su color. */}
+          <p className={`${TARJETA} bg-gris-100 inset-ring inset-ring-borde`}>
+            <ContenidoDeArea nombre={novedad.area} papel="Área actual" atenuada />
           </p>
           <Icono src={iconoHacia} tamano={24} className="flex-none text-texto" />
           <span className="sr-only">pasa a</span>
