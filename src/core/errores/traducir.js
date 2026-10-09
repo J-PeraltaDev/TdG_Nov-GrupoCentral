@@ -29,6 +29,9 @@ const MENSAJES = {
   CORREO_EXISTENTE: 'Este correo ya está registrado.',
   NO_ENCONTRADO: 'No encontramos ese usuario.',
   SOLICITUD_INVALIDA: 'Esta solicitud ya no está disponible.',
+  // CU-04 6a: lo arma el repositorio de fincas a partir de la restricción de unicidad. Va sin
+  // punto, como lo escribe Figma (pantalla 30-B) bajo el campo.
+  FINCA_EXISTENTE: 'Ya existe una finca con ese nombre en esta razón social',
 }
 
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'

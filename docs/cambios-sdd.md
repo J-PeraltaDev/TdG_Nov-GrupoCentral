@@ -18,7 +18,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                   | Propuesto |
 | 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar | Propuesto |
 | 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad               | Propuesto |
-| 13  | S3     | SDD 6.1.1 (vistas) y 6.1.4                  | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                           | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                           | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -349,7 +349,7 @@ novedad, no solo quien la registró, aunque la finca se haya desactivado despué
 
 ## 13 · Vista `v_finca` (S3)
 
-**Sección:** SDD 6.1.1 (vistas del modelo) y 6.1.4 (control de acceso).
+**Sección:** SDD 5.3.2, Tabla 20 (recursos de la API de datos), y 6.1.1 («Vistas e índices»).
 
 **Qué pasa.** La pantalla 30 muestra, junto a cada finca, su razón social, sus novedades abiertas y
 sus reportantes asignados, y el diálogo de desactivar advierte cuántas novedades abiertas tiene
@@ -368,7 +368,13 @@ Se agregó la vista `public.v_finca` (`rf04_vista_finca`):
 - Solo lectura para `authenticated`. Las escrituras siguen yendo a `finca`, con las políticas
   del Sprint 1; no hay funciones nuevas.
 
-**Texto propuesto (6.1.1, lista de vistas):**
+**Texto propuesto (Tabla 20, fila nueva):**
 
-> v_finca · Finca con su razón social, sus novedades abiertas y sus reportantes activos · Pantalla
-> 30 (RF-04) · security_invoker, solo lectura.
+> v_finca (vista) · GET con filtros y orden · Pantalla 30: finca con su razón social, sus novedades
+> abiertas y sus reportantes activos.
+
+**Texto propuesto (6.1.1, «Vistas e índices», después de usuario_publico):**
+
+> La vista v_finca agrega a cada finca su razón social, la cantidad de novedades abiertas y la de
+> reportantes activos, para la pantalla de administración de fincas. Se define igual, con
+> security_invoker.
