@@ -33,6 +33,7 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   }),
   listarLineaDeTiempo: vi.fn().mockResolvedValue([]),
   tomarNovedad: vi.fn(),
+  rechazarNovedad: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
@@ -249,5 +250,6 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(screen.getAllByRole('button')).toHaveLength(14)
     expect(screen.getAllByRole('tablist')).toHaveLength(2)
     expect(document.querySelectorAll('[data-aviso-temporal]')).toHaveLength(2)
+    expect(screen.getAllByRole('textbox')).toHaveLength(2)
   })
 })

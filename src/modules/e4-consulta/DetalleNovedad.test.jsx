@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   listarLineaDeTiempo,
   obtenerNovedad,
+  rechazarNovedad,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
@@ -15,6 +16,7 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   obtenerNovedad: vi.fn(),
   listarLineaDeTiempo: vi.fn(),
   tomarNovedad: vi.fn(),
+  rechazarNovedad: vi.fn(),
 }))
 
 const ID = '00000000-0000-4000-e000-000000000153'
@@ -118,6 +120,7 @@ beforeEach(() => {
   vi.mocked(obtenerNovedad).mockReset()
   vi.mocked(listarLineaDeTiempo).mockReset()
   vi.mocked(tomarNovedad).mockReset()
+  vi.mocked(rechazarNovedad).mockReset()
 })
 
 afterEach(() => {
@@ -337,6 +340,36 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
     expect(obtenerNovedad).toHaveBeenCalledTimes(2)
     expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
     // El botón que tenía el foco ya no está: el foco pasa al contenido, no se pierde.
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
+
+  it('RF-11 / CU-11: al rechazarla, el detalle queda Rechazada, con el motivo en la línea de tiempo y sin acciones', async () => {
+    conNovedad()
+    vi.mocked(rechazarNovedad).mockImplementation(async (_, motivo) => {
+      // Lo que el servidor entrega después de la transición.
+      conNovedad({ ...ASIGNADA, estado: 'rechazada' }, [
+        paso(3, 'asignada', 'rechazada', {
+          usuario: APROBADOR,
+          observacion: motivo,
+          fecha_hora: '2026-09-24T13:04:00Z',
+        }),
+        ...REGISTRO,
+      ])
+      return { id: ID, estado: 'rechazada' }
+    })
+    abrir({ rol: 'aprobador' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Rechazar' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Duplicada' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Rechazar novedad' }))
+
+    expect(rechazarNovedad).toHaveBeenCalledExactlyOnceWith(ID, 'Duplicada')
+    expect(await screen.findByText('Novedad rechazada. La finca verá el motivo.')).toBeVisible()
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
+    // El motivo queda en la línea de tiempo, que es donde lo ve la finca.
+    const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('Duplicada')).toBeVisible()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveFocus()
   })
 
