@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
 import {
   escalarNovedad,
+  reasignarNovedad,
   rechazarNovedad,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
@@ -10,36 +11,43 @@ import { Boton } from '../../core/ui/Boton.jsx'
 import iconoEscalar from '../../core/ui/iconos/arrow_circle_up.svg'
 import iconoTomar from '../../core/ui/iconos/back_hand.svg'
 import iconoRechazar from '../../core/ui/iconos/block.svg'
+import iconoReasignar from '../../core/ui/iconos/swap_horiz.svg'
 import { HojaEscalar } from './HojaEscalar.jsx'
+import { HojaReasignar } from './HojaReasignar.jsx'
 import { HojaRechazar } from './HojaRechazar.jsx'
+import { AVISO_SUELTO } from './posicionDelAviso.js'
 import { useAccion } from './useAccion.js'
 
 /*
  * Acciones del aprobador de área en el detalle de una novedad (RF-10 a RF-17). Figma: barra de
- * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hojas 15 (3:1356) y
- * 16 (3:1468).
+ * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hojas 15 (3:1356),
+ * 16 (3:1468) y 17 (3:1586).
  *
  * El mapa de acciones dice qué permite la Tabla 35; aquí se pintan las que ya tienen su
  * manejador. Se carga bajo demanda y solo para el aprobador: los demás roles no la descargan.
  */
 
 /** Acciones que este módulo ya sabe ejecutar. Las demás llegan con su historia. */
-const CONSTRUIDAS = [ACCION.TOMAR, ACCION.ESCALAR, ACCION.RECHAZAR]
-
-// Sobre la navegación inferior del teléfono cuando no hay barra de acciones; en el escritorio,
-// abajo a la derecha.
-const AVISO_SUELTO =
-  'fixed inset-x-4 bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+4.75rem)] z-20 lg:inset-x-auto lg:right-8 lg:bottom-6 lg:w-96'
+const CONSTRUIDAS = [ACCION.TOMAR, ACCION.ESCALAR, ACCION.REASIGNAR, ACCION.RECHAZAR]
 
 /**
  * @param {object} props
- * @param {{ id: string, estado: string, codigo: number, finca: string, prioridad: string }} props.novedad
+ * @param {{ id: string, estado: string, codigo: number, finca: string, prioridad: string, area_id: string, area: string }} props.novedad
  * @param {readonly string[]} props.acciones Las de `accionesDisponibles` para este usuario.
  * @param {() => void} props.alCambiar Recarga el detalle después de una acción.
+ * @param {(mensaje: string) => void} props.alSalir La acción sacó la novedad del alcance del
+ *   usuario (la reasignó): el detalle ya no se puede recargar y hay que volver a la bandeja,
+ *   que muestra el mensaje.
  * @param {boolean} props.esEscritorio En el escritorio son botones bajo el encabezado; en el
  *   teléfono, una barra fija abajo que reemplaza a la navegación.
  */
-export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esEscritorio }) {
+export default function AccionesDelAprobador({
+  novedad,
+  acciones,
+  alCambiar,
+  alSalir,
+  esEscritorio,
+}) {
   const { ejecutar, enCurso, aviso, cerrarAviso } = useAccion({
     estado: novedad.estado,
     alCambiar,
@@ -56,9 +64,13 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
    * el detalle (un aviso fuera de un diálogo modal no se ve ni se anuncia), salvo que falte un
    * dato: ese se corrige en la misma hoja.
    */
-  async function confirmar(nombre, accion, exito) {
+  async function confirmar(nombre, accion, { exito, alTerminar }) {
     setLanzada(nombre)
-    const resultado = await ejecutar(accion, { exito, codigosPropios: ['DATO_OBLIGATORIO'] })
+    const resultado = await ejecutar(accion, {
+      exito,
+      alTerminar,
+      codigosPropios: ['DATO_OBLIGATORIO'],
+    })
     if (resultado.ok || resultado.fallo.codigo !== 'DATO_OBLIGATORIO') cerrarHoja()
     return resultado
   }
@@ -91,7 +103,19 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
     </Boton>
   ) : null
 
-  const enFila = puede(ACCION.RECHAZAR) ? (
+  const reasignar = puede(ACCION.REASIGNAR) ? (
+    <Boton
+      tipo="secundario"
+      icono={iconoReasignar}
+      disabled={enCurso}
+      onClick={() => setHoja(ACCION.REASIGNAR)}
+      className="min-w-0 flex-1 lg:flex-none"
+    >
+      Reasignar
+    </Boton>
+  ) : null
+
+  const rechazar = puede(ACCION.RECHAZAR) ? (
     <Boton
       tipo="secundario-peligro"
       icono={iconoRechazar}
@@ -104,11 +128,16 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
   ) : null
 
   const botones =
-    principal || escalar || enFila ? (
+    principal || escalar || reasignar || rechazar ? (
       <>
         {principal}
         {escalar}
-        {enFila ? <div className="flex gap-2.5 lg:contents">{enFila}</div> : null}
+        {reasignar || rechazar ? (
+          <div className="flex gap-2.5 lg:contents">
+            {reasignar}
+            {rechazar}
+          </div>
+        ) : null}
       </>
     ) : null
 
@@ -119,23 +148,32 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
         novedad={novedad}
         alCerrar={cerrarHoja}
         alConfirmar={(justificacion) =>
-          confirmar(
-            ACCION.ESCALAR,
-            () => escalarNovedad(novedad.id, justificacion),
-            'Novedad escalada. Queda en espera del director.',
-          )
+          confirmar(ACCION.ESCALAR, () => escalarNovedad(novedad.id, justificacion), {
+            exito: 'Novedad escalada. Queda en espera del director.',
+          })
         }
         enCurso={enCurso && lanzada === ACCION.ESCALAR}
+      />
+      <HojaReasignar
+        abierta={hoja === ACCION.REASIGNAR}
+        novedad={novedad}
+        alCerrar={cerrarHoja}
+        alConfirmar={(destino, motivo) =>
+          // La novedad sale del alcance de esta persona: no se recarga el detalle (daría «No
+          // puedes ver esta novedad»), se vuelve a la bandeja.
+          confirmar(ACCION.REASIGNAR, () => reasignarNovedad(novedad.id, destino.id, motivo), {
+            alTerminar: () => alSalir(`Novedad reasignada a ${destino.nombre}.`),
+          })
+        }
+        enCurso={enCurso && lanzada === ACCION.REASIGNAR}
       />
       <HojaRechazar
         abierta={hoja === ACCION.RECHAZAR}
         alCerrar={cerrarHoja}
         alConfirmar={(motivo) =>
-          confirmar(
-            ACCION.RECHAZAR,
-            () => rechazarNovedad(novedad.id, motivo),
-            'Novedad rechazada. La finca verá el motivo.',
-          )
+          confirmar(ACCION.RECHAZAR, () => rechazarNovedad(novedad.id, motivo), {
+            exito: 'Novedad rechazada. La finca verá el motivo.',
+          })
         }
         enCurso={enCurso && lanzada === ACCION.RECHAZAR}
       />
