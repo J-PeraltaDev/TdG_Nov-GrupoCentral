@@ -20,7 +20,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
-| 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo         |
+| 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
 | 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 
@@ -215,7 +215,7 @@ para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
 ## 16 · Avisos del asesor de Supabase
 
-El asesor sobre «staging» deja tres avisos (nivel _WARN_), los mismos desde el PR 1:
+El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
 
 | Aviso                                                | Por qué queda                                                                                                                                          |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -223,8 +223,13 @@ El asesor sobre «staging» deja tres avisos (nivel _WARN_), los mismos desde el
 | `auth_leaked_password_protection`                    | La comprobación de contraseñas filtradas es del plan de pago                                                                                           |
 | `auth_insufficient_mfa_options`                      | El SRS no pide segundo factor                                                                                                                          |
 
-El primero aparecerá una vez por cada función RPC que se agregue. Los otros dos son del proyecto,
-no del código, y saldrán también en «PROYECTO».
+El primero aparece una vez por cada función RPC. Los otros dos son del proyecto, no del código, y
+salen también en «PROYECTO».
+
+**Al 8 oct 2026 (contratos del Sprint 2):** nueve avisos en «staging». Siete son el primero, uno
+por función: `registrar_novedad` y las seis del Sprint 2 (`tomar_novedad`, `rechazar_novedad`,
+`reasignar_novedad`, `escalar_novedad`, `registrar_solucion` y `sugerir_tipos_falla`). Ninguno es
+de un tipo nuevo ni de nivel de error.
 
 ## 17 · Pruebas que necesitan ingresar
 
