@@ -1,13 +1,24 @@
+import { useState } from 'react'
+import { AvisoTemporal } from '../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../core/ui/Boton.jsx'
 import { Conexion } from '../core/ui/Conexion.jsx'
 import { Estado } from '../core/ui/Estado.jsx'
+import { Hoja } from '../core/ui/Hoja.jsx'
+import { Pestanas } from '../core/ui/Pestanas.jsx'
 import { Prioridad } from '../core/ui/Prioridad.jsx'
 
 /*
  * Página de desarrollo (/_dev/componentes): las 28 variantes de los componentes base, en el
  * mismo orden que la sección «00 · Sistema de diseño» de Figma (nodo 1:63), para compararlas
- * a 360 × 800 y a 1280 × 800. No se publica: solo existe con `npm run dev`.
+ * a 360 × 800 y a 1280 × 800. Debajo, los componentes que agregó el Sprint 2 a partir de las
+ * pantallas. No se publica: solo existe con `npm run dev`.
  */
+
+const PESTANAS = [
+  { id: 'por_atender', nombre: 'Por atender' },
+  { id: 'en_atencion', nombre: 'En atención' },
+  { id: 'en_espera', nombre: 'En espera' },
+]
 
 const ESTADOS = [
   'registrada',
@@ -46,6 +57,9 @@ function Seccion({ titulo, nodo, children }) {
 }
 
 export default function Componentes() {
+  const [pestana, setPestana] = useState(PESTANAS[0].id)
+  const [hojaAbierta, setHojaAbierta] = useState(false)
+
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 p-4 lg:p-8">
       <header className="flex flex-col gap-1">
@@ -94,6 +108,61 @@ export default function Componentes() {
               </Boton>
             </div>
           ))}
+        </div>
+      </Seccion>
+
+      <Seccion titulo="Pestañas" nodo="3:329 y 3:636">
+        <div
+          id="dev-panel"
+          role="tabpanel"
+          className="flex flex-col gap-4 rounded-control bg-superficie p-4"
+        >
+          <Pestanas
+            etiqueta="Segmentada (teléfono)"
+            pestanas={PESTANAS}
+            elegida={pestana}
+            alElegir={setPestana}
+            idDelPanel="dev-panel"
+          />
+          <Pestanas
+            etiqueta="Subrayada (escritorio)"
+            variante="subrayada"
+            pestanas={PESTANAS}
+            elegida={pestana}
+            alElegir={setPestana}
+            idDelPanel="dev-panel"
+            className="self-start"
+          />
+        </div>
+      </Seccion>
+
+      <Seccion titulo="Aviso temporal" nodo="3:1276">
+        <div className="flex flex-col gap-3 rounded-control bg-superficie p-4">
+          <AvisoTemporal>Novedad tomada. Ya está En atención.</AvisoTemporal>
+          <AvisoTemporal tipo="error" accion={{ texto: 'Reintentar', alPulsar: () => {} }}>
+            No se aplicó: se perdió la conexión. La novedad sigue En atención.
+          </AvisoTemporal>
+        </div>
+      </Seccion>
+
+      <Seccion titulo="Hoja" nodo="3:1387">
+        <div className="flex rounded-control bg-superficie p-4">
+          <Boton tipo="secundario" onClick={() => setHojaAbierta(true)}>
+            Abrir la hoja
+          </Boton>
+          <Hoja
+            abierta={hojaAbierta}
+            alCerrar={() => setHojaAbierta(false)}
+            titulo="Título de la hoja"
+          >
+            <p className="text-cuerpo-pequeno text-texto-secundario">
+              En el teléfono sale desde abajo; en el escritorio es un diálogo centrado. Se cierra
+              con Escape, tocando el fondo o con su botón.
+            </p>
+            <Boton tipo="texto" onClick={() => setHojaAbierta(false)}>
+              Cancelar
+            </Boton>
+          </Hoja>
         </div>
       </Seccion>
     </main>

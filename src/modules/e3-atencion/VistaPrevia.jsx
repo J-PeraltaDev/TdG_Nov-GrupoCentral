@@ -26,8 +26,10 @@ function Dato({ nombre, children }) {
  * @param {import('./reglasDeBandeja.js').ResumenDeTransiciones} [props.resumen]
  * @param {string} props.origen Ruta de la bandeja, con su pestaña y su filtro: el detalle
  *   vuelve a ella.
+ * @param {import('react').ReactNode} [props.accion] Acción principal de la novedad en su
+ *   estado (Figma 3:757); las demás se ejecutan desde el detalle.
  */
-export function VistaPrevia({ novedad, resumen, origen }) {
+export function VistaPrevia({ novedad, resumen, origen, accion }) {
   const codigo = formatearCodigo(novedad.codigo)
   const justificacion = ['escalada', 'aprobada'].includes(novedad.estado)
     ? resumen?.justificacion
@@ -77,6 +79,8 @@ export function VistaPrevia({ novedad, resumen, origen }) {
           </p>
         </div>
       ) : null}
+
+      {accion}
 
       <Link
         to={`/novedades/${novedad.id}`}

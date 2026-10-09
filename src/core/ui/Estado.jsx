@@ -1,3 +1,4 @@
+import { NOMBRE_DE_ESTADO } from '../utils/estados.js'
 import { Icono } from './Icono.jsx'
 import iconoAprobada from './iconos/verified.svg'
 import iconoAsignada from './iconos/assignment_ind.svg'
@@ -19,42 +20,42 @@ import iconoResuelta from './iconos/task_alt.svg'
 /** @type {Record<EstadoNovedad, { etiqueta: string, icono: string, clases: string }>} */
 const ESTADOS = {
   registrada: {
-    etiqueta: 'Registrada',
+    etiqueta: NOMBRE_DE_ESTADO.registrada,
     icono: iconoRegistrada,
     clases: 'bg-estado-registrada-fondo text-estado-registrada-texto',
   },
   asignada: {
-    etiqueta: 'Asignada',
+    etiqueta: NOMBRE_DE_ESTADO.asignada,
     icono: iconoAsignada,
     clases: 'bg-estado-asignada-fondo text-estado-asignada-texto',
   },
   en_atencion: {
-    etiqueta: 'En atención',
+    etiqueta: NOMBRE_DE_ESTADO.en_atencion,
     icono: iconoAtencion,
     clases: 'bg-estado-atencion-fondo text-estado-atencion-texto',
   },
   escalada: {
-    etiqueta: 'Escalada',
+    etiqueta: NOMBRE_DE_ESTADO.escalada,
     icono: iconoEscalada,
     clases: 'bg-estado-escalada-fondo text-estado-escalada-texto',
   },
   aprobada: {
-    etiqueta: 'Aprobada',
+    etiqueta: NOMBRE_DE_ESTADO.aprobada,
     icono: iconoAprobada,
     clases: 'bg-estado-aprobada-fondo text-estado-aprobada-texto',
   },
   rechazada: {
-    etiqueta: 'Rechazada',
+    etiqueta: NOMBRE_DE_ESTADO.rechazada,
     icono: iconoRechazada,
     clases: 'bg-estado-rechazada-fondo text-estado-rechazada-texto',
   },
   resuelta: {
-    etiqueta: 'Resuelta',
+    etiqueta: NOMBRE_DE_ESTADO.resuelta,
     icono: iconoResuelta,
     clases: 'bg-estado-resuelta-fondo text-estado-resuelta-texto',
   },
   cerrada: {
-    etiqueta: 'Cerrada',
+    etiqueta: NOMBRE_DE_ESTADO.cerrada,
     icono: iconoCerrada,
     clases: 'bg-estado-cerrada-fondo text-estado-cerrada-texto',
   },

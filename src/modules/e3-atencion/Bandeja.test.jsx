@@ -7,6 +7,7 @@ import {
   contarBandeja,
   listarBandeja,
   listarTransicionesDeBandeja,
+  tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { formatearFechaCorta } from '../../core/utils/fechas.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
@@ -18,6 +19,7 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   listarBandeja: vi.fn(),
   contarBandeja: vi.fn(),
   listarTransicionesDeBandeja: vi.fn(),
+  tomarNovedad: vi.fn(),
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarFincas: vi.fn(),
@@ -138,6 +140,7 @@ beforeEach(() => {
   vi.mocked(contarBandeja).mockReset()
   vi.mocked(listarTransicionesDeBandeja).mockReset()
   vi.mocked(listarFincas).mockReset()
+  vi.mocked(tomarNovedad).mockReset()
 })
 
 afterEach(() => {
@@ -522,6 +525,48 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
     expect(await screen.findByText('No hay novedades pendientes en Mantenimiento')).toBeVisible()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
+  })
+
+  it('RF-10 / CU-10: desde la vista previa se toma una asignada; avisa y la bandeja se recarga', async () => {
+    conBandeja()
+    vi.mocked(tomarNovedad).mockResolvedValue({ id: 'n-153', estado: 'en_atencion' })
+    abrir()
+    await filas()
+    const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0153' }))
+
+    await userEvent.click(vista.getByRole('button', { name: 'Tomar para atención' }))
+
+    expect(tomarNovedad).toHaveBeenCalledExactlyOnceWith('n-153')
+    expect(await screen.findByText('Novedad tomada. Ya está En atención.')).toBeVisible()
+    // La lista se pidió otra vez: la novedad cambió de pestaña.
+    expect(listarBandeja).toHaveBeenCalledTimes(2)
+  })
+
+  it('RF-18 / CU-18 5: la vista previa solo ofrece tomar las asignadas', async () => {
+    conBandeja()
+    abrir()
+    const [, segunda] = await filas()
+
+    // La segunda es una aprobada: su acción (registrar la solución) llega con su historia.
+    await userEvent.click(within(segunda).getByRole('button', { name: 'NOV-0147' }))
+
+    const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0147' }))
+    expect(vista.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('RF-25 (14-C): si se pierde la conexión al tomarla, lo dice y deja reintentar', async () => {
+    conBandeja()
+    vi.mocked(tomarNovedad).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    abrir()
+    await filas()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Tomar para atención' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se aplicó: se perdió la conexión. La novedad sigue Asignada.',
+    )
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeVisible()
+    expect(listarBandeja).toHaveBeenCalledOnce()
   })
 
   it('si el historial no carga, la tabla se muestra igual, sin las notas de reasignación', async () => {

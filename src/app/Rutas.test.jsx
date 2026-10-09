@@ -32,6 +32,7 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
     reportante: 'Reportante de prueba',
   }),
   listarLineaDeTiempo: vi.fn().mockResolvedValue([]),
+  tomarNovedad: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
@@ -237,13 +238,16 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ).toBeVisible()
   })
 
-  it('/_dev/componentes muestra las 28 variantes de los componentes base', async () => {
+  it('/_dev/componentes muestra las 28 variantes de los componentes base y los del Sprint 2', async () => {
     abrir('/_dev/componentes', null)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Componentes base' })).toBeVisible()
     expect(document.querySelectorAll('[data-estado]')).toHaveLength(9)
     expect(document.querySelectorAll('[data-prioridad]')).toHaveLength(4)
     expect(document.querySelectorAll('[data-conexion]')).toHaveLength(3)
-    expect(screen.getAllByRole('button')).toHaveLength(12)
+    // 12 botones del sistema de diseño, «Reintentar» del aviso y el que abre la hoja.
+    expect(screen.getAllByRole('button')).toHaveLength(14)
+    expect(screen.getAllByRole('tablist')).toHaveLength(2)
+    expect(document.querySelectorAll('[data-aviso-temporal]')).toHaveLength(2)
   })
 })
