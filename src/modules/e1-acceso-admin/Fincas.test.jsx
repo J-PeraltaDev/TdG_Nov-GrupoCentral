@@ -20,8 +20,8 @@ vi.mock('../../core/supabase/repositorios/fincas.js', () => ({
 }))
 
 const RAZONES = [
-  { id: 'rs-j', nombre: 'Agropecuaria Juanca S.A.S.' },
-  { id: 'rs-t', nombre: 'Agropecuaria Tumaradó S.A.S.' },
+  { id: 'rs-a', nombre: 'Razón social de prueba A' },
+  { id: 'rs-b', nombre: 'Razón social de prueba B' },
 ]
 
 const finca = (id, nombre, razon, cambios = {}) => ({
@@ -36,10 +36,10 @@ const finca = (id, nombre, razon, cambios = {}) => ({
 })
 
 const FINCAS = [
-  finca('f-1', 'Juanca', RAZONES[0], { novedades_abiertas: 2, reportantes_activos: 2 }),
-  finca('f-2', 'La Mónica', RAZONES[1], { novedades_abiertas: 1, reportantes_activos: 1 }),
-  finca('f-3', 'Truandó', RAZONES[0], { activo: false, novedades_abiertas: 2 }),
-  finca('f-4', 'Tumaradó', RAZONES[1], { reportantes_activos: 3 }),
+  finca('f-1', 'Altamira', RAZONES[0], { novedades_abiertas: 2, reportantes_activos: 2 }),
+  finca('f-2', 'El Jardín', RAZONES[1], { novedades_abiertas: 1, reportantes_activos: 1 }),
+  finca('f-3', 'Maracaná', RAZONES[0], { activo: false, novedades_abiertas: 2 }),
+  finca('f-4', 'Villa Rosa', RAZONES[1], { reportantes_activos: 3 }),
 ]
 
 function abrir() {
@@ -87,11 +87,11 @@ describe('Pantalla 30 · Fincas (RF-04 / CU-04)', () => {
       ],
     )
     // Por defecto, solo las activas (Figma: «Estado: Activas»).
-    expect(nombres()).toEqual(['Juanca', 'La Mónica', 'Tumaradó'])
-    const celdas = within(fila('Juanca'))
+    expect(nombres()).toEqual(['Altamira', 'El Jardín', 'Villa Rosa'])
+    const celdas = within(fila('Altamira'))
       .getAllByRole('cell')
       .map((celda) => celda.textContent)
-    expect(celdas.slice(0, 4)).toEqual(['Agropecuaria Juanca S.A.S.', '2', '2', 'Activa'])
+    expect(celdas.slice(0, 4)).toEqual(['Razón social de prueba A', '2', '2', 'Activa'])
     expect(screen.getByText('1–3 de 3 fincas')).toBeVisible()
   })
 
@@ -100,11 +100,11 @@ describe('Pantalla 30 · Fincas (RF-04 / CU-04)', () => {
     await screen.findByRole('table')
 
     await userEvent.selectOptions(estado(), 'Estado: Inactivas')
-    expect(nombres()).toEqual(['Truandó'])
-    expect(within(fila('Truandó')).getByText('Inactiva')).toBeVisible()
+    expect(nombres()).toEqual(['Maracaná'])
+    expect(within(fila('Maracaná')).getByText('Inactiva')).toBeVisible()
 
     await userEvent.selectOptions(estado(), 'Estado: Todas')
-    expect(nombres()).toEqual(['Juanca', 'La Mónica', 'Truandó', 'Tumaradó'])
+    expect(nombres()).toEqual(['Altamira', 'El Jardín', 'Maracaná', 'Villa Rosa'])
     expect(screen.getByText('1–4 de 4 fincas')).toBeVisible()
   })
 
@@ -112,18 +112,18 @@ describe('Pantalla 30 · Fincas (RF-04 / CU-04)', () => {
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.selectOptions(razonSocial(), 'Agropecuaria Tumaradó S.A.S.')
+    await userEvent.selectOptions(razonSocial(), 'Razón social de prueba B')
 
-    expect(nombres()).toEqual(['La Mónica', 'Tumaradó'])
+    expect(nombres()).toEqual(['El Jardín', 'Villa Rosa'])
   })
 
   it('RF-04: la búsqueda no distingue mayúsculas ni tildes', async () => {
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.type(buscar(), 'MONICA')
+    await userEvent.type(buscar(), 'JARDIN')
 
-    expect(nombres()).toEqual(['La Mónica'])
+    expect(nombres()).toEqual(['El Jardín'])
     expect(screen.getByText('1–1 de 1 finca')).toBeVisible()
   })
 
@@ -180,12 +180,12 @@ describe('Pantalla 30 · Fincas (RF-04 / CU-04)', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(tarjetas).toHaveLength(3)
     const primera = within(tarjetas[0])
-    expect(primera.getByRole('heading', { level: 2, name: 'Juanca' })).toBeVisible()
-    expect(primera.getByText('Agropecuaria Juanca S.A.S.')).toBeVisible()
+    expect(primera.getByRole('heading', { level: 2, name: 'Altamira' })).toBeVisible()
+    expect(primera.getByText('Razón social de prueba A')).toBeVisible()
     expect(primera.getByText('2 novedades abiertas')).toBeVisible()
     expect(primera.getByText('2 reportantes')).toBeVisible()
-    expect(primera.getByRole('button', { name: 'Editar Juanca' })).toBeVisible()
-    expect(primera.getByRole('button', { name: 'Desactivar Juanca' })).toBeVisible()
+    expect(primera.getByRole('button', { name: 'Editar Altamira' })).toBeVisible()
+    expect(primera.getByRole('button', { name: 'Desactivar Altamira' })).toBeVisible()
   })
 })
 
@@ -230,13 +230,13 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     await screen.findByRole('table')
     await userEvent.click(screen.getByRole('button', { name: 'Nueva finca' }))
 
-    await userEvent.type(nombre(), '  Pavarandó ')
-    await userEvent.selectOptions(razon(), 'Agropecuaria Tumaradó S.A.S.')
+    await userEvent.type(nombre(), '  Nueva Esperanza ')
+    await userEvent.selectOptions(razon(), 'Razón social de prueba B')
     await userEvent.click(guardar())
 
     expect(crearFinca).toHaveBeenCalledExactlyOnceWith({
-      nombre: 'Pavarandó',
-      razonSocialId: 'rs-t',
+      nombre: 'Nueva Esperanza',
+      razonSocialId: 'rs-b',
     })
     expect(await screen.findByRole('status')).toHaveTextContent('Finca creada.')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -248,9 +248,9 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     await screen.findByRole('table')
     await userEvent.click(screen.getByRole('button', { name: 'Nueva finca' }))
 
-    // «Truandó» existe en esa razón social, aunque esté inactiva.
-    await userEvent.type(nombre(), 'truando')
-    await userEvent.selectOptions(razon(), 'Agropecuaria Juanca S.A.S.')
+    // «Maracaná» existe en esa razón social, aunque esté inactiva.
+    await userEvent.type(nombre(), 'maracana')
+    await userEvent.selectOptions(razon(), 'Razón social de prueba A')
     await userEvent.click(guardar())
 
     expect(nombre()).toHaveAccessibleDescription(
@@ -260,7 +260,7 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
 
     // En otra razón social, el mismo nombre sí se puede.
     vi.mocked(crearFinca).mockResolvedValue({ id: 'f-9' })
-    await userEvent.selectOptions(razon(), 'Agropecuaria Tumaradó S.A.S.')
+    await userEvent.selectOptions(razon(), 'Razón social de prueba B')
     await userEvent.click(guardar())
     expect(crearFinca).toHaveBeenCalledOnce()
   })
@@ -272,7 +272,7 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     await userEvent.click(screen.getByRole('button', { name: 'Nueva finca' }))
 
     await userEvent.type(nombre(), 'Otra')
-    await userEvent.selectOptions(razon(), 'Agropecuaria Juanca S.A.S.')
+    await userEvent.selectOptions(razon(), 'Razón social de prueba A')
     await userEvent.click(guardar())
 
     expect(
@@ -288,12 +288,12 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     await screen.findByRole('table')
     await userEvent.click(screen.getByRole('button', { name: 'Nueva finca' }))
 
-    await userEvent.type(nombre(), 'Pavarandó')
-    await userEvent.selectOptions(razon(), 'Agropecuaria Juanca S.A.S.')
+    await userEvent.type(nombre(), 'Nueva Esperanza')
+    await userEvent.selectOptions(razon(), 'Razón social de prueba A')
     await userEvent.click(guardar())
 
     expect(await dialogo('Nueva finca').findByRole('alert')).toHaveTextContent('No hay conexión')
-    expect(nombre()).toHaveValue('Pavarandó')
+    expect(nombre()).toHaveValue('Nueva Esperanza')
   })
 
   it('RF-04 / CU-04 5: «Editar» abre la finca con sus datos y guarda los cambios', async () => {
@@ -301,19 +301,19 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Editar La Mónica' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Editar El Jardín' }))
     expect(
       dialogo('Editar finca').getByRole('textbox', { name: 'Nombre de la finca' }),
-    ).toHaveValue('La Mónica')
-    expect(razon()).toHaveValue('rs-t')
+    ).toHaveValue('El Jardín')
+    expect(razon()).toHaveValue('rs-b')
 
     await userEvent.clear(nombre())
-    await userEvent.type(nombre(), 'La Mónica Norte')
+    await userEvent.type(nombre(), 'El Jardín Norte')
     await userEvent.click(guardar())
 
     expect(actualizarFinca).toHaveBeenCalledExactlyOnceWith('f-2', {
-      nombre: 'La Mónica Norte',
-      razonSocialId: 'rs-t',
+      nombre: 'El Jardín Norte',
+      razonSocialId: 'rs-b',
     })
     expect(await screen.findByRole('status')).toHaveTextContent('Finca actualizada.')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -324,13 +324,13 @@ describe('Pantalla 30-B · Nueva finca y editar finca (RF-04 / CU-04 5, 6 y 6a)'
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Editar Juanca' }))
-    await userEvent.selectOptions(razon(), 'Agropecuaria Tumaradó S.A.S.')
+    await userEvent.click(screen.getByRole('button', { name: 'Editar Altamira' }))
+    await userEvent.selectOptions(razon(), 'Razón social de prueba B')
     await userEvent.click(guardar())
 
     expect(actualizarFinca).toHaveBeenCalledExactlyOnceWith('f-1', {
-      nombre: 'Juanca',
-      razonSocialId: 'rs-t',
+      nombre: 'Altamira',
+      razonSocialId: 'rs-b',
     })
   })
 
@@ -354,9 +354,9 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Juanca' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Altamira' }))
 
-    const dialogo = within(screen.getByRole('dialog', { name: '¿Desactivar la finca Juanca?' }))
+    const dialogo = within(screen.getByRole('dialog', { name: '¿Desactivar la finca Altamira?' }))
     expect(
       dialogo.getByText(
         'Tiene 2 novedades abiertas. Seguirán su curso, pero no se podrán registrar novedades nuevas para esta finca.',
@@ -370,7 +370,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar La Mónica' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar El Jardín' }))
 
     expect(
       screen.getByText(
@@ -384,9 +384,9 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Tumaradó' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Villa Rosa' }))
 
-    const dialogo = screen.getByRole('dialog', { name: '¿Desactivar la finca Tumaradó?' })
+    const dialogo = screen.getByRole('dialog', { name: '¿Desactivar la finca Villa Rosa?' })
     expect(dialogo).toHaveAccessibleDescription(
       'No aparecerá para nuevos registros, pero conserva su historial.',
     )
@@ -398,7 +398,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Juanca' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Altamira' }))
     await userEvent.click(desactivar())
 
     expect(actualizarFinca).toHaveBeenCalledExactlyOnceWith('f-1', { activo: false })
@@ -411,7 +411,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Juanca' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Altamira' }))
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -425,7 +425,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     abrir()
     await screen.findByRole('table')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Juanca' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Desactivar Altamira' }))
     await userEvent.click(desactivar())
 
     const dialogo = within(screen.getByRole('dialog'))
@@ -441,7 +441,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     await screen.findByRole('table')
     await userEvent.selectOptions(estado(), 'Estado: Inactivas')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Reactivar Truandó' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Reactivar Maracaná' }))
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(actualizarFinca).toHaveBeenCalledExactlyOnceWith('f-3', { activo: true })
@@ -454,7 +454,7 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     await screen.findByRole('table')
     await userEvent.selectOptions(estado(), 'Estado: Inactivas')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Reactivar Truandó' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Reactivar Maracaná' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No tienes permiso para esta acción.',

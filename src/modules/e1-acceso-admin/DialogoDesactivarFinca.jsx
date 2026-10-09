@@ -79,8 +79,10 @@ function Contenido({ finca, alCerrar, alConfirmar }) {
         </Aviso>
       ) : null}
 
-      <div className="flex gap-2.5 lg:justify-end">
-        <Boton tipo="secundario" onClick={alCerrar} className="min-w-0 flex-1 lg:flex-none">
+      {/* En el teléfono van uno sobre otro, con la acción primero: con su ícono no caben en una
+          fila a 360 px. El orden del teclado es el mismo en los dos formatos. */}
+      <div className="flex flex-col-reverse gap-1 lg:flex-row lg:justify-end lg:gap-2.5">
+        <Boton tipo="secundario" onClick={alCerrar} className="w-full lg:w-auto">
           Cancelar
         </Boton>
         <Boton
@@ -88,7 +90,7 @@ function Contenido({ finca, alCerrar, alConfirmar }) {
           icono={iconoDesactivar}
           disabled={enCurso}
           onClick={confirmar}
-          className="min-w-0 flex-1 lg:flex-none"
+          className="w-full lg:w-auto"
         >
           {enCurso ? 'Desactivando…' : 'Desactivar finca'}
         </Boton>

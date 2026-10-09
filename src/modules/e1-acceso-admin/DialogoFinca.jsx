@@ -50,7 +50,7 @@ function Formulario({ finca, razones, fincas, alCerrar, alGuardar }) {
     const faltas = {}
     if (nombre.trim() === '') faltas.nombre = 'Escribe el nombre de la finca.'
     if (razonSocialId === '') faltas.razon = 'Elige la razón social.'
-    // La restricción de la base distingue mayúsculas y tildes («Juanca» y «juanca» serían dos
+    // La restricción de la base distingue mayúsculas y tildes («Altamira» y «altamira» serían dos
     // fincas): aquí se comparan como las lee una persona. La restricción sigue siendo la
     // garantía si dos administradores guardan a la vez.
     const repetida =
@@ -139,16 +139,13 @@ function Formulario({ finca, razones, fincas, alCerrar, alGuardar }) {
         }}
       />
 
-      <div className="flex gap-2.5 lg:justify-end">
-        <Boton tipo="secundario" onClick={alCerrar} className="min-w-0 flex-1 lg:flex-none">
+      {/* En el teléfono van uno sobre otro, con la acción primero: con su ícono no caben en una
+          fila a 360 px. El orden del teclado es el mismo en los dos formatos. */}
+      <div className="flex flex-col-reverse gap-1 lg:flex-row lg:justify-end lg:gap-2.5">
+        <Boton tipo="secundario" onClick={alCerrar} className="w-full lg:w-auto">
           Cancelar
         </Boton>
-        <Boton
-          type="submit"
-          icono={iconoGuardar}
-          disabled={guardando}
-          className="min-w-0 flex-1 lg:flex-none"
-        >
+        <Boton type="submit" icono={iconoGuardar} disabled={guardando} className="w-full lg:w-auto">
           {guardando ? 'Guardando…' : 'Guardar finca'}
         </Boton>
       </div>

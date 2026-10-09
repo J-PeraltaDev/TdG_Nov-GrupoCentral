@@ -3,8 +3,8 @@ import { sinTildes } from './texto.js'
 
 describe('Comparación de textos', () => {
   it('RF-04 / CU-04 6a: no distingue mayúsculas, tildes ni espacios en los extremos', () => {
-    expect(sinTildes('  La Mónica ')).toBe('la monica')
-    expect(sinTildes('TUMARADÓ')).toBe(sinTildes('tumarado'))
+    expect(sinTildes('  El Jardín ')).toBe('el jardin')
+    expect(sinTildes('MARACANÁ')).toBe(sinTildes('maracana'))
     expect(sinTildes('Pingüino')).toBe('pinguino')
   })
 

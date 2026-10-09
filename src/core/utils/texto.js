@@ -1,6 +1,6 @@
 /**
  * El texto en minúsculas, sin tildes ni espacios en los extremos, para comparar y buscar como
- * lo haría una persona: «La Mónica» y «la monica» son lo mismo. La ñ se conserva: «año» no es
+ * lo haría una persona: «El Jardín» y «el jardin» son lo mismo. La ñ se conserva: «año» no es
  * «ano».
  *
  * @param {string | null | undefined} texto

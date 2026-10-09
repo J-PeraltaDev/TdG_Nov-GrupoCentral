@@ -4,13 +4,15 @@ import { ROL } from '../core/sesion/roles.js'
 import { Ingreso } from '../modules/e1-acceso-admin/Ingreso.jsx'
 import { Cargando } from './Cargando.jsx'
 import { GuardianDeRol, IrAlInicio, RequiereSesion } from './guardianes.jsx'
-import { Cuenta } from './paginas/Cuenta.jsx'
 import { NoEncontrada } from './paginas/NoEncontrada.jsx'
 import { Pendiente } from './paginas/Pendiente.jsx'
 
 // El ingreso va en el paquete inicial; todo lo que necesita sesión se carga bajo demanda
 // (RNF-05). Las pantallas de cada rol van en su propio paquete, con `React.lazy`.
 const Marco = lazy(() => import('./Marco.jsx'))
+const Cuenta = lazy(() =>
+  import('./paginas/Cuenta.jsx').then((modulo) => ({ default: modulo.Cuenta })),
+)
 const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
 const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
 const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
