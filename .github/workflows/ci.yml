@@ -46,6 +46,27 @@ jobs:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
 
+  funciones:
+    name: Edge Functions · revisión estática
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      # En los equipos no hay Deno ni Docker: esta es la única revisión estática de lo que
+      # solo corre en Deno. La lógica se prueba con Vitest, en el trabajo «App» (ADR 0012).
+      - uses: denoland/setup-deno@v2
+        with:
+          # La misma versión mayor que [edge_runtime] deno_version de supabase/config.toml.
+          deno-version: v2.x
+
+      - name: Revisar la entrada de cada función con su deno.json
+        run: |
+          for carpeta in supabase/functions/*/; do
+            case "$(basename "$carpeta")" in _*) continue ;; esac
+            deno check --config "${carpeta}deno.json" "${carpeta}index.ts"
+          done
+
   bd:
     name: Base de datos · migraciones y pgTAP
     runs-on: ubuntu-latest

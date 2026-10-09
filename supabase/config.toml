@@ -392,6 +392,18 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Edge Functions del proyecto (SDD 5.3.4, Tabla 23). `verify_jwt` es la comprobación de la
+# plataforma, antes de ejecutar el código: rechaza lo que no trae un token de sesión válido.
+
+# La llama un administrador con su sesión. Dentro, la función verifica además que sea un
+# administrador activo.
+[functions.gestionar-usuario]
+verify_jwt = true
+
+# No exige sesión: la validez la da el código temporal que entrega el administrador (RF-02).
+[functions.restablecer-contrasena]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

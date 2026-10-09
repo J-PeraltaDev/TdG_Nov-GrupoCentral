@@ -28,7 +28,8 @@
     "staging:test": "node scripts/staging.mjs test",
     "staging:types": "node scripts/staging.mjs types",
     "staging:advisors": "node scripts/staging.mjs advisors",
-    "staging:usuarios": "node scripts/staging.mjs usuarios"
+    "staging:usuarios": "node scripts/staging.mjs usuarios",
+    "staging:functions": "node scripts/staging.mjs functions"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.0",
