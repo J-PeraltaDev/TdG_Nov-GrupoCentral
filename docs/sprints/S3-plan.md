@@ -3,8 +3,10 @@
 - **Fechas:** 26–30 oct 2026 (5 días, sin festivos). El equipo va adelantado: se puede empezar antes
   si lo aprueba.
 - **Historias:** HU-13, HU-15, HU-04, HU-03 y HU-02 (RF-13, RF-15, RF-04, RF-03 y RF-02)
-- **Estado:** **propuesto el 9 oct 2026, sin aprobar.** No se escribe código del sprint hasta que el
-  equipo apruebe el plan, los puntos y las decisiones del final.
+- **Estado:** aprobado el 9 oct 2026, con los puntos propuestos. El equipo dejó las 47 decisiones a
+  criterio de la implementación: quedan con la recomendación de cada una, salvo la 30, que cambió
+  (el equipo pidió redactar la política de tratamiento de datos). Lo que cambie en la review se
+  ajusta en el PR que corresponda.
 
 **Meta:** el director aprueba o rechaza lo escalado; el reportante confirma el cierre o dice que la
 falla persiste; el administrador crea, edita y desactiva usuarios y fincas, y atiende las
@@ -51,17 +53,17 @@ Las cifras coinciden con las del cierre del Sprint 2. Diferencias y datos nuevos
 
 ## Antes de empezar
 
-| Necesidad                                                               | Para qué                                                                                     | Quién      |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| Aprobar este plan, los puntos y las decisiones del final                | Sin eso no se escribe código del sprint                                                      | El equipo  |
-| **Revisar y fusionar el Sprint 2 (#8 a #17), en su orden**              | El Sprint 3 edita los mismos archivos; ver «Base de las ramas»                               | El equipo  |
-| OK para empezar antes del 26 oct                                        | El calendario dice 26–30 oct                                                                 | El equipo  |
-| OK para desplegar Edge Functions en «staging»                           | Es la primera vez; se hace con `npm run staging:functions` y solo en «staging»               | El equipo  |
-| Decidir si el CI corre `deno check` (herramienta nueva, solo en el CI)  | En los equipos no hay Deno: sería la única revisión estática de las funciones (decisión 2)   | El equipo  |
-| Decir si el agente corre las pruebas que ingresan o las corre el equipo | Las e2e y la prueba de `gestionar-usuario` con la sesión del administrador de prueba         | El equipo  |
-| Texto de la política de tratamiento de datos (Ley 1581)                 | Sin el texto de la empresa, `/tratamiento-de-datos` sigue como marcador (decisión 30)        | La empresa |
-| Avisar antes de un `staging:reset`                                      | No se prevé ninguno: las migraciones entran con `staging:push`. Sigue el de antes de la demo | El equipo  |
-| Cambios en Figma que quedan anotados (decisiones 31 a 47)               | Figma no se edita desde aquí                                                                 | El equipo  |
+| Necesidad                                                               | Para qué                                                                                     | Estado al 9 oct 2026                                                                                                       |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Aprobar este plan, los puntos y las decisiones del final                | Sin eso no se escribe código del sprint                                                      | **Hecho.** Las decisiones quedaron a criterio de la implementación                                                         |
+| **Revisar y fusionar el Sprint 2 (#8 a #17), en su orden**              | El Sprint 3 edita los mismos archivos; ver «Base de las ramas»                               | **Pendiente, y es de una persona.** El equipo se lo encargó al agente, pero el entorno no le permite fusionar sin revisión |
+| Empezar antes del 26 oct                                                | El calendario dice 26–30 oct                                                                 | **Hecho:** el equipo pidió continuar                                                                                       |
+| Desplegar Edge Functions en «staging»                                   | Es la primera vez; se hace con `npm run staging:functions` y solo en «staging»               | Se hace en el PR 1                                                                                                         |
+| `deno check` en el CI (herramienta nueva, solo en el CI)                | En los equipos no hay Deno: es la única revisión estática de las funciones                   | **Sí** (decisión 2)                                                                                                        |
+| Decir si el agente corre las pruebas que ingresan o las corre el equipo | Las e2e y la prueba de `gestionar-usuario` con la sesión del administrador de prueba         | **Pendiente.** Mientras tanto quedan escritas y sin correr                                                                 |
+| Política de tratamiento de datos (Ley 1581)                             | `/tratamiento-de-datos` deja de ser un marcador (decisión 30)                                | El equipo pidió redactarla. **Faltan los datos de contacto del responsable y la validación de la empresa**                 |
+| Avisar antes de un `staging:reset`                                      | No se prevé ninguno: las migraciones entran con `staging:push`. Sigue el de antes de la demo | —                                                                                                                          |
+| Cambios en Figma que quedan anotados (decisiones 31 a 47)               | Figma no se edita desde aquí                                                                 | Pendiente del equipo                                                                                                       |
 
 Nada de este plan toca «PROYECTO». Lo que le llega al cierre está en «Cierre del sprint».
 
@@ -78,7 +80,13 @@ El Sprint 2 no está en `main`. Hay dos caminos:
 2. **Seguir sin esperar.** Las ramas salen de `docs/S2-informe` y cada PR va en borrador con
    «Depende de #17», como en el Sprint 2.
 
-Mientras se decide, hay dos cosas que no dependen del Sprint 2 y pueden salir de `main`: este plan
+**Decidido el 9 oct 2026:** el equipo eligió el primer camino y le encargó la fusión al agente. El
+entorno no se lo permite (rechaza una fusión sin revisión, que es también lo que `CLAUDE.md` reserva
+a las personas). Hasta que una persona fusione el Sprint 2, el sprint avanza por el segundo camino:
+las ramas salen de `docs/S2-informe`, en borrador y con «Depende de #17»; cuando el Sprint 2 esté
+en `main`, se les trae `main` y quedan con su diferencia propia.
+
+Hay dos cosas que no dependen del Sprint 2 y pueden salir de `main`: este plan
 (como el #8) y el **PR 1**, la base de las Edge Functions, que además es el mayor riesgo técnico y
 conviene despejarlo primero.
 
@@ -156,7 +164,7 @@ Reparto sugerido: quien hizo el servidor en el Sprint 2 hace ahora el cliente, y
 | HU-02     | RF-02 · Recuperar contraseña | 13     | Función sin sesión, código de un solo uso, intentos, segunda Edge Function y seis pantallas                |
 | **Total** |                              | **41** | El Sprint 2 fueron 38                                                                                      |
 
-Al aprobarse, se anotan en `docs/scrum/backlog.md` y `backlog.json`.
+Adoptados el 9 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
 
 ---
 
@@ -687,6 +695,25 @@ mueve el vencimiento, y con Vitest. La e2e cubre la otra mitad de 9a: el código
 
 ---
 
+## PR aparte · `feat/RNF-18-tratamiento-de-datos`
+
+Lo pidió el equipo el 9 oct 2026 (decisión 30). No depende de los demás PR del sprint.
+
+- **Pantalla:** ruta `/tratamiento-de-datos`, sin sesión, con `React.lazy` y fuera de la ruta de
+  ingreso. Reemplaza el marcador al que ya enlaza la pantalla 01. Figma no la dibuja: usa la
+  columna y los estilos de texto de las pantallas de acceso.
+- **Texto:** política de tratamiento de datos personales conforme a la Ley 1581 de 2012 y a su
+  reglamentación: responsable, datos que se tratan, finalidades, derechos del titular, cómo
+  ejercerlos y en qué plazos, seguridad, conservación y vigencia. Se redacta a partir de lo que el
+  sistema hace de verdad con los datos (RNF-18; SDD 6.1.1 y 6.1.4).
+- **Es un borrador.** No reemplaza la revisión de la empresa ni la de quien la asesore en lo
+  legal. Los datos de contacto del responsable no están en ningún documento del proyecto: no se
+  inventan; mientras lleguen, la política remite a los administradores de la plataforma.
+- **Pruebas:** Vitest (las secciones, el enlace de regreso y que no aparezca ningún dato de
+  contacto inventado) y una e2e sin sesión (del ingreso a la política y de vuelta).
+
+---
+
 ## Cobertura de los cursos de cada caso de uso
 
 | CU    | Curso normal | Alternos cubiertos                     | Lo que queda para otro sprint                              |
@@ -757,7 +784,8 @@ toque «PROYECTO»: al cierre y con el OK del equipo.
 
 ## Decisiones para el equipo
 
-Cada una trae una recomendación. **Sin aprobar.**
+Cada una trae una recomendación. **Adoptadas el 9 oct 2026 con la recomendación de cada una:** el
+equipo dejó la decisión a criterio de la implementación. La 30 cambió ese día.
 
 ### Edge Functions
 
@@ -834,7 +862,7 @@ migración nueva y hace que la línea de tiempo muestre la solución, que Figma 
 | 27  | Mensaje del 429 al ingresar               | «Demasiados intentos. Espera unos minutos e intenta de nuevo.» Va en el PR 7, en un commit `fix(RF-01)`                                                                                                                                                                                       |
 | 28  | Insignia de «Recuperación de contraseñas» | **Sí, en este sprint**, solo para el administrador: es la única señal de que llegó una solicitud (no genera aviso, porque no es de una novedad). Las demás insignias siguen para el Sprint 5                                                                                                  |
 | 29  | `corregir_tipo_falla`                     | Se queda en el Sprint 5, con HU-32, como dicen el backlog y el plan del Sprint 2. El plan de arranque la ponía en el Sprint 3: **confirmar**                                                                                                                                                  |
-| 30  | `/tratamiento-de-datos`                   | Fuera, salvo que la empresa entregue el texto durante el sprint; si llega, es una página estática y perezosa                                                                                                                                                                                  |
+| 30  | `/tratamiento-de-datos`                   | **Entra.** El equipo pidió redactar el texto (9 oct 2026). Va en un PR propio, como página estática y perezosa. Es un borrador: la empresa debe validarlo y dar los datos de contacto del responsable                                                                                         |
 
 ### Las que aparecieron al leer Figma
 
