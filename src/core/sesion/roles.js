@@ -46,6 +46,17 @@ export function nombreDeRol(rolId) {
 }
 
 /**
+ * Quién hizo algo, como lo escribe la línea de tiempo: «Carlos Mario Restrepo · Aprobador ·
+ * Mantenimiento» (SDD 5.2.5: usuario y rol).
+ *
+ * @param {{ nombre: string, rol_id: number, area: string | null } | null | undefined} usuario
+ */
+export function firmaDe(usuario) {
+  if (!usuario) return ''
+  return [usuario.nombre, nombreDeRol(usuario.rol_id), usuario.area].filter(Boolean).join(' · ')
+}
+
+/**
  * Rol con su alcance, como lo muestra Figma: «Aprobador · Mantenimiento».
  *
  * @param {import('./sesion.js').Perfil} perfil
