@@ -18,3 +18,4 @@ al anterior.
 | [0010](0010-control-de-acceso-y-lectura-de-usuario.md) | Control de acceso en la base de datos y lectura de `usuario`   | Propuesta en el Sprint 1      |
 | [0011](0011-staging-en-lugar-de-supabase-local.md)     | «staging» como base de desarrollo, sin Docker                  | Aceptada                      |
 | [0012](0012-edge-functions-sin-docker.md)              | Edge Functions: despliegue sin Docker y lógica fuera de Deno   | Aceptada                      |
+| [0013](0013-solicitar-recuperacion-sin-sesion.md)      | `solicitar_recuperacion` se puede ejecutar sin sesión          | Aceptada                      |

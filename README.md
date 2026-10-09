@@ -109,6 +109,7 @@ npm run staging:usuarios  # vuelve a poner tu contraseña de prueba
 npm run staging:test      # pruebas pgTAP
 npm run staging:types     # regenera src/core/supabase/database.types.ts
 npm run staging:advisors  # asesor de seguridad y rendimiento
+npm run staging:functions # despliega las Edge Functions en «staging» (sin Docker)
 ```
 
 `staging:reset` borra lo que haya en «staging», también lo del compañero: avisa antes. Para

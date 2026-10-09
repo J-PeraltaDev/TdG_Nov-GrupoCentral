@@ -145,6 +145,59 @@ export async function registrarSolucion(
 }
 
 /**
+ * El director aprueba o rechaza una novedad escalada (RF-13). Aprobada, vuelve al área para
+ * ejecutar la solución; rechazada, queda cerrada.
+ *
+ * @param {string} novedadId
+ * @param {boolean} aprobar
+ * @param {string | null} [observacion] Opcional al aprobar, obligatoria al rechazar.
+ * @returns {Promise<Novedad>}
+ */
+export async function decidirEscalamiento(novedadId, aprobar, observacion = null) {
+  const { data, error } = await supabase.rpc('decidir_escalamiento', {
+    p_novedad_id: novedadId,
+    p_aprobar: aprobar,
+    p_observacion: observacion,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Un reportante de la finca confirma que la novedad quedó resuelta. Queda cerrada, que es un
+ * estado final (RF-15).
+ *
+ * @param {string} novedadId
+ * @param {string | null} [observacion] Opcional.
+ * @returns {Promise<Novedad>}
+ */
+export async function confirmarResolucion(novedadId, observacion = null) {
+  const { data, error } = await supabase.rpc('confirmar_resolucion', {
+    p_novedad_id: novedadId,
+    p_observacion: observacion,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Un reportante de la finca indica que la falla persiste: la novedad vuelve a estar en
+ * atención (RF-15).
+ *
+ * @param {string} novedadId
+ * @param {string} observacion Obligatoria: qué sigue fallando.
+ * @returns {Promise<Novedad>}
+ */
+export async function reportarFallaPersiste(novedadId, observacion) {
+  const { data, error } = await supabase.rpc('reportar_falla_persiste', {
+    p_novedad_id: novedadId,
+    p_observacion: observacion,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
  * Página de novedades del alcance del usuario, de la más reciente a la más antigua. Las
  * políticas de la base de datos limitan el resultado: el reportante solo recibe las de su
  * finca (RNF-11).

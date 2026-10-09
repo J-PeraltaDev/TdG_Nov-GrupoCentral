@@ -22,8 +22,13 @@ const MENSAJES = {
   AREA_INVALIDA: 'Elige otra área.',
   FINCA_NO_ASIGNADA: 'Tu usuario no tiene una finca asignada.',
   TIPO_FALLA_INVALIDO: 'Ese tipo de falla no está disponible. Elige otro.',
-  CODIGO_INVALIDO: 'El código no es válido. Pídele uno nuevo al administrador.',
+  // CU-02 9b: un código mal escrito se puede corregir; no hay que pedir otro de una vez.
+  CODIGO_INVALIDO: 'El código no es válido. Revísalo; si sigue sin servir, pide uno nuevo.',
   CODIGO_VENCIDO: 'El código venció. Pídele uno nuevo al administrador.',
+  // Sprint 3: códigos que no están en la Tabla 22 (docs/cambios-sdd.md).
+  CORREO_EXISTENTE: 'Este correo ya está registrado.',
+  NO_ENCONTRADO: 'No encontramos ese usuario.',
+  SOLICITUD_INVALIDA: 'Esta solicitud ya no está disponible.',
 }
 
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'
@@ -42,6 +47,8 @@ export function esErrorDeRed(error) {
   const { name, message, status } = /** @type {any} */ (error)
   return (
     name === 'AuthRetryableFetchError' ||
+    // La petición no llegó a la Edge Function.
+    name === 'FunctionsFetchError' ||
     (name === 'TypeError' && FALLO_DE_RED.test(String(message))) ||
     FALLO_DE_RED.test(String(message)) ||
     status === 0

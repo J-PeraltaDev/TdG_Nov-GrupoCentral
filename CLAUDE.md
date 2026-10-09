@@ -196,6 +196,9 @@ entrega como HTTP 400 con `code`, `message`, `details` y `hint`, y `core/errores
 2. **Toda función `SECURITY DEFINER`** lleva `set search_path = ''` y nombres calificados, tiene
    `revoke execute … from public, anon`, concede `execute` solo a `authenticated` y verifica por
    sí misma la identidad, el rol y el alcance. Las auxiliares viven en `private`, que no se expone.
+   Dos excepciones, cada una con su prueba: `solicitar_recuperacion` también la ejecuta `anon`,
+   porque no exige sesión (ADR 0013), y `consumir_codigo_recuperacion` solo la ejecuta
+   `service_role`, desde una Edge Function.
 3. **Las vistas** se declaran `with (security_invoker = true)`.
 4. **Privilegios explícitos.** Cada migración escribe sus `GRANT`: en «PROYECTO» las tablas nuevas
    no quedan expuestas a la API por defecto (y `auto_expose_new_tables = false` hace lo mismo en

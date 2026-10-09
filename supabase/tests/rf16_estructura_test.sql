@@ -131,16 +131,21 @@ select ok(
   ),
   'RNF-11: anon no puede ejecutar registrar_novedad'
 );
+-- La excepción es solicitar_recuperacion (Sprint 3): quien olvidó su contraseña no tiene
+-- sesión (SDD, Tabla 21: «Sin sesión»; docs/adr/0013). Cualquier otra función que anon pueda
+-- ejecutar hace fallar esta prueba.
 select is(
   (
-    select count(*)::int
+    select coalesce(array_agg(p.oid::regprocedure::text order by p.oid::regprocedure::text), '{}')
     from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname in ('public', 'private')
       and has_function_privilege('anon', p.oid, 'execute')
+      -- Antes del Sprint 3 la lista es vacía: esta prueba vale igual en `main`.
+      and to_regprocedure('public.solicitar_recuperacion(text)') is distinct from p.oid
   ),
-  0,
-  'RNF-11: anon no puede ejecutar ninguna función de public ni de private'
+  '{}'::text[],
+  'RNF-11: anon no puede ejecutar ninguna función de public ni de private, salvo solicitar_recuperacion'
 );
 
 -- anon no tiene ningún privilegio sobre las tablas ni las vistas

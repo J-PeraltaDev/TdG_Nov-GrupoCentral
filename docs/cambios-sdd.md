@@ -4,17 +4,19 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                             | Estado    |
-| --- | ------ | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                      | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone         | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA` | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                   | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                        | Propuesto |
+| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                                                 | Estado    |
+| --- | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                          | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                     | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                             | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                       | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                           | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                     | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                     | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                       | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                            | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                   | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -212,3 +214,86 @@ cosas que el SDD no fija. Ninguna cambia el diseño.
 
 > Solución no vacía; fecha de ejecución no posterior a la fecha actual en Colombia
 > (America/Bogota); tipo existente activo o nombre nuevo normalizado sin duplicado (sección 6.1.8)
+
+## 10 · Contrato de las Edge Functions (S3)
+
+**Sección:** SDD 5.3.4, Tabla 23, y 4.2.10 (ficha de C-10).
+
+**Qué pasa.** La Tabla 23 da la solicitud y los estados de respuesta, pero no el cuerpo de un error
+ni cómo se despliegan y se prueban las funciones en equipos sin Docker. Al publicar el contrato hubo
+que precisarlo (plan del Sprint 3, decisiones 1 a 6 y 14). No cambia el diseño. Detalle en
+`docs/adr/0012-edge-functions-sin-docker.md`.
+
+**Texto propuesto (agregar después de la Tabla 23):**
+
+> Las dos funciones reciben `POST` con un objeto JSON. Un error lleva el cuerpo `{ codigo, campos }`:
+> `codigo` es un código estable (los de la Tabla 22 y, además, `CORREO_EXISTENTE` y
+> `NO_ENCONTRADO`) y `campos` dice qué datos de la solicitud están mal. `gestionar-usuario`
+> responde 403 con `SIN_PERMISO` si quien llama no es un administrador activo, o si intenta
+> desactivarse o cambiarse el rol a sí mismo; 404 si el usuario no existe. En `crear` y en
+> `actualizar` admite además `activo` (opcional).
+>
+> `gestionar-usuario` conserva la verificación del token que hace la plataforma y, dentro,
+> comprueba en la tabla `usuario` que quien llama es un administrador activo.
+> `restablecer-contrasena` no exige sesión. Las dos responden solo a los orígenes de la aplicación
+> (CORS con lista cerrada).
+
+**Texto propuesto (ficha de C-10, fila «Recursos»):**
+
+> Invocaciones del plan gratuito. La clave de servicio la entrega la plataforma a cada función; no
+> se copia a ningún archivo. Las funciones se despliegan con el CLI sin Docker, y su lógica se
+> prueba fuera de Deno.
+
+## 11 · Funciones del Sprint 3 (S3)
+
+**Sección:** SDD 5.3.2, Tablas 21 y 22; 6.1.3 (reglas de las funciones); 6.1.4, Tabla 31; y la
+regla 2 de `CLAUDE.md`.
+
+**Qué pasa.** Al publicar los contratos del sprint (plan del Sprint 3, decisiones 7, 8, 10 y 13)
+hubo que precisar tres firmas y agregar dos funciones que la Tabla 21 no tiene.
+
+1. **Firmas.** `decidir_escalamiento` y `confirmar_resolucion` declaran la observación como
+   opcional; que sea obligatoria al rechazar lo valida la función. `generar_codigo_recuperacion`
+   devuelve, además del código, cuándo vence, para que la pantalla 32 pueda decir «Vence hoy a
+   las…».
+2. **`listar_usuarios()`, nueva.** La API de datos no expone el correo (cambio 3 y ADR 0010). El
+   administrador lo lee con esta función, que verifica que sea un administrador activo y devuelve
+   también el último ingreso, que solo existe en Auth (pantalla 28).
+3. **`consumir_codigo_recuperacion(p_correo, p_codigo)`, nueva.** La llama
+   `restablecer-contrasena` con la clave de servicio. Compara el código con su resumen dentro de la
+   base de datos, así `codigo_hash` no sale de ella, y marca la solicitud como usada. Solo la
+   ejecuta `service_role`.
+4. **`solicitar_recuperacion` la ejecuta `anon`.** Es lo que dice la Tabla 21 («Sin sesión»), pero
+   contradice la regla general de la sección 6.1.3 («su ejecución se revoca al rol anónimo»). Es
+   la única excepción; razones y resguardos en `docs/adr/0013`.
+5. **Códigos de error nuevos:** `SOLICITUD_INVALIDA` (la solicitud no existe, ya se usó, ya venció
+   o su usuario está inactivo) y, en las Edge Functions, `CORREO_EXISTENTE` y `NO_ENCONTRADO`.
+   `CODIGO_INVALIDO` deja reintentar, como pide CU-02 9b.
+
+**Texto propuesto (Tabla 21, filas nuevas y cambiadas):**
+
+> decidir_escalamiento · p_novedad_id, p_aprobar boolean, p_observacion (opcional; obligatoria si
+> rechaza) · Director de agricultura · Novedad aprobada o rechazada. RF-13
+>
+> generar_codigo_recuperacion · p_solicitud_id · Administrador · Código de seis dígitos, visible una
+> sola vez, y su vencimiento. RF-02
+>
+> listar_usuarios · — · Administrador · Usuarios con su correo y su último ingreso. RF-03
+>
+> consumir_codigo_recuperacion · p_correo, p_codigo · Solo restablecer-contrasena · OK con el
+> usuario, CODIGO_INVALIDO o CODIGO_VENCIDO; marca la solicitud como usada. RF-02
+
+**Texto propuesto (6.1.3, después de «se concede solo a los usuarios autenticados»):**
+
+> La excepción es solicitar_recuperacion, que no exige sesión: no devuelve nada, no revela si el
+> correo existe y solo registra una solicitud por usuario.
+
+**Texto propuesto (Tabla 22, filas nuevas):**
+
+> SOLICITUD_INVALIDA · La solicitud de recuperación no existe, ya se usó, ya venció o su usuario
+> está inactivo · «Esta solicitud ya no está disponible»; se recarga la lista.
+>
+> CORREO_EXISTENTE · El correo ya está registrado (gestionar-usuario) · Pantalla 29, en el campo.
+
+**Texto propuesto (Tabla 31, fila `usuario`, columna de lectura):** agregar «El administrador lee
+el correo y el último ingreso con listar_usuarios».
