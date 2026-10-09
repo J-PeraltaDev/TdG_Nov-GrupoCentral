@@ -76,7 +76,9 @@ describe('Línea de tiempo (RF-18 / CU-18 4, Figma 3:817 y 4:2212)', () => {
 
     const enrutamiento = within(pasos()[3])
     expect(enrutamiento.getByText('Sistema')).toBeVisible()
-    expect(enrutamiento.getByText('21 sep, 9:15 a. m. · Área: Mantenimiento')).toBeVisible()
+    expect(enrutamiento.getByText('21 sep, 9:15 a. m.').parentElement).toHaveTextContent(
+      '21 sep, 9:15 a. m. · Área: Mantenimiento',
+    )
     expect(enrutamiento.queryByText(/Luz Marina/)).not.toBeInTheDocument()
   })
 
@@ -120,9 +122,9 @@ describe('Línea de tiempo (RF-18 / CU-18 4, Figma 3:817 y 4:2212)', () => {
 
     const reasignacion = within(pasos()[0])
     expect(reasignacion.getByText('Jhon Fredy Mosquera · Aprobador · Sistemas')).toBeVisible()
-    expect(
-      reasignacion.getByText('24 sep, 7:40 a. m. · Área: de Sistemas a Mantenimiento'),
-    ).toBeVisible()
+    expect(reasignacion.getByText('24 sep, 7:40 a. m.').parentElement).toHaveTextContent(
+      '24 sep, 7:40 a. m. · Área: de Sistemas a Mantenimiento',
+    )
     expect(
       reasignacion.getByText('Es un daño del aire acondicionado; lo atiende Mantenimiento.'),
     ).toBeVisible()

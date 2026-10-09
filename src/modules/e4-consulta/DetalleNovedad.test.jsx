@@ -120,10 +120,19 @@ describe('Pantallas 13 y 14 · Detalle de la novedad en el teléfono (RF-18 / CU
     const encabezado = within(screen.getByRole('group', { name: 'Datos de la novedad' }))
     expect(encabezado.getByText('Asignada')).toBeVisible()
     expect(encabezado.getByText('Crítico')).toBeVisible()
-    expect(encabezado.getByText('Finca Finca de prueba 01')).toBeVisible()
+    expect(encabezado.getByText('Finca de prueba 01')).toBeVisible()
     expect(encabezado.getByText('Mantenimiento')).toBeVisible()
     expect(screen.getByText(ASIGNADA.descripcion)).toBeVisible()
     expect(screen.getByText('Registrada hace 25 min')).toBeVisible()
+  })
+
+  it('RF-18: la etiqueta de la finca antepone «Finca» al nombre, como Figma, sin repetirlo', async () => {
+    conNovedad({ ...ASIGNADA, finca: 'El Ejemplo' })
+    abrir()
+    await screen.findByRole('heading', { level: 1 })
+
+    const encabezado = within(screen.getByRole('group', { name: 'Datos de la novedad' }))
+    expect(encabezado.getByText('Finca El Ejemplo')).toBeVisible()
   })
 
   it('RNF-09: distingue quién la reportó, cuándo se registró en la finca y cuándo se sincronizó', async () => {
@@ -146,7 +155,9 @@ describe('Pantallas 13 y 14 · Detalle de la novedad en el teléfono (RF-18 / CU
     const pasos = linea.getAllByRole('listitem')
     expect(pasos).toHaveLength(2)
     expect(within(pasos[0]).getByText('Sistema')).toBeVisible()
-    expect(within(pasos[0]).getByText('24 sep, 7:41 a. m. · Área: Mantenimiento')).toBeVisible()
+    expect(within(pasos[0]).getByText('24 sep, 7:41 a. m.').parentElement).toHaveTextContent(
+      '24 sep, 7:41 a. m. · Área: Mantenimiento',
+    )
     expect(within(pasos[1]).getByText('Luz Marina Córdoba · Reportante')).toBeVisible()
   })
 
@@ -336,7 +347,7 @@ describe('Pantalla 22 · Detalle completo en el escritorio (RF-18 / CU-18)', () 
     expect(encabezado.getByText('Asignada')).toBeVisible()
     expect(encabezado.getByText('Crítico')).toBeVisible()
     expect(encabezado.getByText('Mantenimiento')).toBeVisible()
-    expect(encabezado.getByText('Finca Finca de prueba 01')).toBeVisible()
+    expect(encabezado.getByText('Finca de prueba 01')).toBeVisible()
     expect(screen.getByText('Razón social de prueba A')).toBeVisible()
     expect(screen.getByRole('link', { name: 'Volver a la bandeja' })).toHaveAttribute(
       'href',

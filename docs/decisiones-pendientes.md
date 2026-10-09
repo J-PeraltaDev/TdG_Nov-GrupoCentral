@@ -24,6 +24,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -143,6 +144,13 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   1 min» como duración mínima; «Cargando…», «Ver más» y «Reintentar», como en Mis novedades. Para
   los lectores de pantalla: «Novedades de la bandeja» (pestañas), «Filtrar por finca», «Novedades:
   Por atender» (título de la tabla) y «Vista previa de NOV-0147».
+- **Detalle de la novedad (Sprint 2):** el enlace de regreso según la pantalla de origen
+  («Volver a la bandeja», «Volver a mis novedades», «Volver a las escaladas», «Volver al panel»;
+  Figma solo escribe «Volver al historial»); en 22-B, «Solo puedes consultar las novedades de tu
+  área.» para el aprobador y «Esta novedad no existe o ya no está disponible.» con «Volver al
+  inicio» para el director y el administrador (Figma solo dibuja el del reportante); en la línea de
+  tiempo, «Área: de Sistemas a Mantenimiento» para una reasignación, y «pasa a» entre los dos
+  estados para los lectores de pantalla; «Registró» en la solución, como la pantalla 09.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -185,8 +193,8 @@ Puntos en los que Figma no alcanza a decidir, o en los que se contradice:
   suaves que existen: Alto con advertencia suave, Normal con información suave y Bajo con gris.
 - **Alto de las tarjetas de prioridad.** En Figma cada tarjeta mide lo que ocupa su texto
   (86 y 102 px en la misma fila). En la aplicación las dos de una fila miden lo mismo.
-- **«Ver novedad» en la constancia.** El detalle llega en el Sprint 2; por ahora lleva a Mis
-  novedades. Por lo mismo, las tarjetas de la lista todavía no se pueden abrir.
+- **«Ver novedad» en la constancia.** **Resuelto en el Sprint 2:** abre el detalle de la novedad
+  (`/novedades/:id`), igual que las tarjetas de Mis novedades y las de la bandeja.
 - **«Revisar» en el aviso de novedades por confirmar.** Cambia al filtro «Por confirmar». La
   confirmación como tal (CU-15) es del Sprint 2.
 - **Cerrar el formulario con datos escritos.** La «X» sale sin preguntar y lo escrito se pierde.
@@ -313,3 +321,39 @@ decisiones 1, 4, 5, 14 y 15):
 - **Fila bajo el cursor.** Se sombrea con `gris-100`; Figma no dibuja ese estado (punto 9).
 - **Duraciones.** Las dos unidades mayores, sin redondear hacia arriba: «35 min», «5 h 20 min»,
   «1 d 3 h».
+
+## 20 · Detalles del detalle de la novedad (13, 14, 22 y 22-B)
+
+Lo que Figma no alcanza a decidir, o en lo que sus pantallas no coinciden entre sí, y cómo quedó
+(plan del Sprint 2, decisiones 1, 3, 10, 12, 13, 17 y 19):
+
+- **Lo que llega en otro sprint no se pinta todavía:** el bloque «Evidencias» (Sprint 4), la
+  etiqueta «Registrada sin conexión» (Sprint 4), «Corregir tipo» (Sprint 5) y el menú «⋮» del
+  encabezado, cuyo contenido Figma no dibuja.
+- **Usuario en la línea de tiempo.** «Nombre · Rol · Área» en el teléfono y en el escritorio, como
+  la pantalla 22 y como pide SDD 5.2.5. Las pantallas 13, 14 y 09 escriben «Nombre · Área» para el
+  aprobador.
+- **«Sincronizada» y la semana.** El teléfono muestra siempre «Sincronizada» (13 la dibuja y 14
+  no) y escribe la fecha de registro con su semana, «(Sem 39)», como 09 y 22 (13 y 14 no la traen).
+- **Orden de las etiquetas.** Estado, prioridad, área y finca, como 09 y 22; en 13 y 14 la finca va
+  antes que el área. La etiqueta antepone «Finca» al nombre, como Figma («Finca Juanca»), salvo que
+  el nombre ya empiece así.
+- **«Tomada por».** Sale de la última vez que la novedad pasó de asignada a en atención, para que
+  en el Sprint 3 «la falla persiste» no muestre al reportante. Lleva solo la hora si fue hoy; si
+  no, también la fecha («22 sep, 10:20 a. m.»). Se muestra mientras la novedad está en atención.
+- **«Registrada hace…» en el escritorio.** Figma solo dibuja en el escritorio una novedad cerrada.
+  Para las que están en manos del área, la línea «Registrada hace 3 h · Tomada por…» va bajo la
+  razón social.
+- **Novedad resuelta en el teléfono.** Para todos los roles se usa el bloque de la pantalla 09:
+  «Solución registrada por {área}», con el tipo de falla, la fecha de ejecución y quién la registró.
+- **22-B sin el código.** Figma pone el código en el encabezado, pero cuando la consulta no
+  devuelve filas la aplicación no lo conoce (la dirección lleva el identificador): el encabezado
+  dice «Novedad». La pantalla no distingue una novedad fuera del alcance de una que no existe,
+  porque la base de datos responde igual en los dos casos.
+- **Barras del teléfono.** El detalle trae su propia barra superior, con «volver», y conserva la
+  navegación inferior, como 22-B. Cuando haya acciones (PR 4), su barra la reemplaza, como en 13
+  y 14.
+- **Menú en el detalle.** Queda marcada la pantalla desde la que se abrió (Bandeja, Novedades…);
+  si se llegó por la dirección, la de inicio del rol.
+- **Anchos entre 1024 y 1279 px.** La línea de tiempo va debajo de los datos; desde 1280 px, a la
+  derecha, con los 400 px de Figma.

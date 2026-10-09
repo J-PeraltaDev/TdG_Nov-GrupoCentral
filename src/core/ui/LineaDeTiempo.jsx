@@ -34,13 +34,12 @@ function autor(transicion) {
   return [usuario.nombre, nombreDeRol(usuario.rol_id), usuario.area].filter(Boolean).join(' · ')
 }
 
-/** «24 sep, 7:40 a. m. · Área: Sistemas»: la fecha y, si cambió, el área. */
-function detalle(transicion) {
-  const fecha = formatearFechaCorta(transicion.fecha_hora)
+/** « · Área: Sistemas» después de la fecha, si la transición cambió el área. */
+function cambioDeArea(transicion) {
   const nueva = transicion.area_nueva?.nombre
-  if (!nueva) return fecha
+  if (!nueva) return ''
   const anterior = transicion.area_anterior?.nombre
-  return anterior ? `${fecha} · Área: de ${anterior} a ${nueva}` : `${fecha} · Área: ${nueva}`
+  return anterior ? ` · Área: de ${anterior} a ${nueva}` : ` · Área: ${nueva}`
 }
 
 /**
@@ -84,7 +83,10 @@ export function LineaDeTiempo({ transiciones, conPie = false }) {
                 </p>
                 <p className="text-etiqueta-fuerte break-words text-texto">{autor(transicion)}</p>
                 <p className="text-auxiliar text-texto-secundario">
-                  <time dateTime={transicion.fecha_hora}>{detalle(transicion)}</time>
+                  <time dateTime={transicion.fecha_hora}>
+                    {formatearFechaCorta(transicion.fecha_hora)}
+                  </time>
+                  {cambioDeArea(transicion)}
                 </p>
                 {transicion.observacion ? (
                   <p className="rounded-lg bg-gris-100 px-2.5 py-2 text-cuerpo-pequeno break-words text-texto">

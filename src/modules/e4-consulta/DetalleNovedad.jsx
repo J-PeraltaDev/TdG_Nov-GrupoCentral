@@ -79,7 +79,10 @@ function Etiquetas({ novedad }) {
       <Etiqueta className={COLOR_DEL_AREA[novedad.area] ?? 'text-texto-secundario'}>
         {novedad.area}
       </Etiqueta>
-      <Etiqueta>Finca {novedad.finca}</Etiqueta>
+      {/* Figma escribe «Finca Juanca»; si el nombre ya empieza por «Finca», no se repite. */}
+      <Etiqueta>
+        {/^finca\b/i.test(novedad.finca) ? novedad.finca : `Finca ${novedad.finca}`}
+      </Etiqueta>
     </>
   )
 }
