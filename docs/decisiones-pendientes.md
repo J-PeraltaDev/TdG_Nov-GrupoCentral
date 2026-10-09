@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | 44 pasaron el 8 oct; **faltan por correr** las 26 nuevas del S2      | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -286,6 +286,10 @@ por función: `registrar_novedad` y las seis del Sprint 2 (`tomar_novedad`, `rec
 `reasignar_novedad`, `escalar_novedad`, `registrar_solucion` y `sugerir_tipos_falla`). Ninguno es
 de un tipo nuevo ni de nivel de error.
 
+**Al 9 oct 2026 (cierre del Sprint 2, con las seis funciones implementadas):** los mismos nueve.
+Las auxiliares de `private` no generan avisos: no son `security definer` ni están en un esquema
+expuesto.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
@@ -296,11 +300,20 @@ CU-06 y CU-07 ingresan con los usuarios de prueba, cuya contraseña define cada 
 con él el registro, la constancia, el reintento sin duplicar y el enrutamiento. Fallaron 5 de 40,
 todas de CU-01 y por la prueba, no por la aplicación; el detalle está en `docs/sprints/S1.md`.
 
-**Falta repetirlas** después de ese arreglo; deben pasar las 40:
+**Se repitieron el 8 oct 2026**, ya con las de la bandeja (CU-09): pasaron las 44. En una corrida
+anterior de ese día fallaron seis con la pantalla en «Cargando…»; el servidor había respondido bien
+y el equipo tenía poca memoria, así que se bajó a cuatro navegadores en paralelo y se subió la
+espera por defecto a 10 s.
+
+**Faltan por correr las 26 nuevas del Sprint 2** (CU-18, CU-10, CU-11, CU-12, CU-17 y CU-14; el
+detalle está en `docs/sprints/S2.md`). Deben pasar las 70:
 
 ```bash
 npm run test:e2e:chromium
 ```
+
+Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas dejan novedades con
+descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`.
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que

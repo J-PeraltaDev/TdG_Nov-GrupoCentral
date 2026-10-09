@@ -11,8 +11,11 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** Sprint 1 (ingreso por rol, registro de la novedad con su código `NOV-####` y lista
-de novedades de la finca). El avance por sprint está en [`docs/sprints/`](docs/sprints/).
+**Estado:** Sprint 2 (atención en primera instancia: bandeja del área, detalle con línea de
+tiempo, y tomar, rechazar, escalar, reasignar y registrar la solución con su tipo de falla), en
+revisión. En `main` está el Sprint 1 (ingreso por rol, registro de la novedad con su código
+`NOV-####` y lista de novedades de la finca). El avance por sprint está en
+[`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
 
