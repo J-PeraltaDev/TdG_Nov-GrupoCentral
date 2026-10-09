@@ -23,6 +23,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
 | 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
+| 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -137,6 +138,11 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
 - **Lista:** «Cargando…» · «Ver más» · «No hay novedades en esta lista.» (para Por confirmar,
   Cerradas y Rechazadas; Figma solo dibuja el vacío de Abiertas) · «N novedades resueltas
   esperan tu confirmación» (Figma solo muestra el singular).
+- **Bandeja del área (Sprint 2):** «No hay novedades en esta lista.» cuando la pestaña está
+  vacía pero hay novedades en otra (Figma solo dibuja la bandeja sin nada pendiente); «menos de
+  1 min» como duración mínima; «Cargando…», «Ver más» y «Reintentar», como en Mis novedades. Para
+  los lectores de pantalla: «Novedades de la bandeja» (pestañas), «Filtrar por finca», «Novedades:
+  Por atender» (título de la tabla) y «Vista previa de NOV-0147».
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -282,3 +288,33 @@ y con la gestión de usuarios del Sprint 3 cada uno puede tener la suya.
 Después, en <https://tdg-nov-grupocentral.pages.dev/>, la cuenta debe entrar y ver el menú del
 administrador. Queda anotarlo en el reporte del sprint, porque es un cambio hecho a mano en
 producción. El correo de la cuenta depende del punto 3.
+
+## 19 · Detalles de la bandeja del área (11 y 12)
+
+Lo que Figma no alcanza a decidir en las pantallas 11, 11-C y 12, y cómo quedó (plan del Sprint 2,
+decisiones 1, 4, 5, 14 y 15):
+
+- **Lo que llega en otro sprint no se pinta todavía:** el ícono de cámara de las tarjetas y de la
+  tabla (evidencias, Sprint 4), la insignia con la cantidad en «Bandeja» y en la campana (Sprint 5)
+  y el buscador por código (Sprint 5).
+- **Fila y vista previa en el escritorio.** Tocar una fila la muestra en la vista previa; el
+  detalle se abre con «Ver detalle completo». La primera fila queda elegida al cargar. La acción
+  principal del panel («Tomar para atención», «Registrar solución») llega con su historia.
+- **Notas del estado.** «Aprobada por el director» sale del estado; «Reasignada desde {área}», de la
+  última asignación de la novedad en su historial, que el escritorio consulta para las novedades de
+  la página. El teléfono no pide el historial.
+- **Anchos entre 1024 y 1439 px.** Figma dibuja la bandeja a 1440 px. Entre 1024 y 1279 px la vista
+  previa va debajo de la tabla; entre 1280 y 1439 px el panel mide 300 px (340 en Figma) y la
+  primera y la última columna se angostan, para que la descripción siga siendo legible.
+- **A 360 px.** Figma dibuja el teléfono a 390 px. Por debajo de ese ancho, el título de la barra
+  superior baja de 18 a 16 px («Bandeja · Mantenimiento» no cabe junto a la conexión y la campana)
+  y las tarjetas de los contadores usan menos espacio interior.
+- **Bandeja vacía (11-C).** «No hay novedades pendientes en {área}» solo sale cuando las tres
+  pestañas están en cero. Si la vacía es solo la pestaña abierta, o hay un filtro de finca, dice
+  «No hay novedades en esta lista.».
+- **Filtro por finca.** Solo en el escritorio, como en Figma. Ofrece las fincas activas del
+  catálogo, no solo las que tienen novedades en la bandeja. La pestaña y la finca quedan en la
+  dirección, igual que el filtro de Mis novedades.
+- **Fila bajo el cursor.** Se sombrea con `gris-100`; Figma no dibuja ese estado (punto 9).
+- **Duraciones.** Las dos unidades mayores, sin redondear hacia arriba: «35 min», «5 h 20 min»,
+  «1 d 3 h».

@@ -108,3 +108,41 @@ export function leerDeLaApi(page, consulta) {
     },
   )
 }
+
+/**
+ * Llama a una función de la base de datos con la sesión que tiene la página, igual que lo
+ * haría la aplicación. Sirve para preparar los datos de una prueba (registrar una novedad,
+ * tomarla…) sin recorrer otra vez las pantallas y sin ninguna clave privilegiada: la función
+ * verifica el rol y el alcance de quien la llama.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} funcion Nombre de la función (SDD, Tabla 21).
+ * @param {object} parametros
+ * @returns {Promise<any>} El resultado; si la función falla, lanza un error con su código.
+ */
+export async function llamarALaApi(page, funcion, parametros) {
+  const { estado, cuerpo } = await page.evaluate(
+    async ({ url, clave, nombre, argumentos }) => {
+      const guardada = Object.keys(localStorage).find((k) => /^sb-.+-auth-token$/.test(k))
+      const { access_token: token } = JSON.parse(localStorage.getItem(guardada))
+      const respuesta = await fetch(`${url}/rest/v1/rpc/${nombre}`, {
+        method: 'POST',
+        headers: {
+          apikey: clave,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(argumentos),
+      })
+      return { estado: respuesta.status, cuerpo: await respuesta.json() }
+    },
+    {
+      url: process.env.VITE_SUPABASE_URL,
+      clave: process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      nombre: funcion,
+      argumentos: parametros,
+    },
+  )
+  if (estado >= 400) throw new Error(`${funcion} respondió ${estado}: ${cuerpo?.message}`)
+  return cuerpo
+}

@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useEnLinea } from '../core/conexion/useEnLinea.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil, iniciales } from '../core/sesion/roles.js'
@@ -41,16 +41,37 @@ function Campana() {
   )
 }
 
-function BarraSuperiorDelTelefono({ perfil, enLinea }) {
+/** Lo que dice la barra superior del teléfono en cada pantalla. */
+function titulosDelTelefono(perfil, ruta) {
+  // La bandeja se presenta con el nombre del área (Figma 3:302).
+  if (ruta === '/bandeja' && perfil.area) {
+    return { titulo: `Bandeja · ${perfil.area.nombre}`, subtitulo: null }
+  }
   // El reportante ve su finca y su razón social; los demás roles, su nombre y su rol.
-  const titulo = perfil.finca?.nombre ?? perfil.nombre
-  const subtitulo = perfil.finca?.razon_social?.nombre ?? descripcionDelPerfil(perfil)
+  return {
+    titulo: perfil.finca?.nombre ?? perfil.nombre,
+    subtitulo: perfil.finca?.razon_social?.nombre ?? descripcionDelPerfil(perfil),
+  }
+}
+
+function BarraSuperiorDelTelefono({ perfil, enLinea, ruta }) {
+  const { titulo, subtitulo } = titulosDelTelefono(perfil, ruta)
 
   return (
     <header className="sticky top-0 z-10 flex h-15 items-center gap-1 border-b border-borde bg-superficie pr-1 pl-4 lg:hidden">
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="truncate text-subtitulo text-texto">{titulo}</p>
-        <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
+        {/* Un título de una sola línea baja a 16 px en los teléfonos de menos de 390 px:
+            a 360 px «Bandeja · Mantenimiento» no cabe junto a la conexión y la campana. */}
+        <p
+          className={`truncate text-texto ${
+            subtitulo ? 'text-subtitulo' : 'text-cuerpo-fuerte min-[390px]:text-subtitulo'
+          }`}
+        >
+          {titulo}
+        </p>
+        {subtitulo ? (
+          <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
+        ) : null}
       </div>
       <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
       <Campana />
@@ -196,6 +217,7 @@ export default function Marco({ enfocado = false }) {
   const { perfil } = useSesion()
   const navegar = useNavigate()
   const enLinea = useEnLinea()
+  const { pathname: ruta } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
 
   return (
@@ -214,7 +236,9 @@ export default function Marco({ enfocado = false }) {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {enfocado ? null : <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} />}
+        {enfocado ? null : (
+          <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} ruta={ruta} />
+        )}
         <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">

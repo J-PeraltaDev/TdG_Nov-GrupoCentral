@@ -10,12 +10,16 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   listarNovedades: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
   contarNovedades: vi.fn().mockResolvedValue(0),
   registrarNovedad: vi.fn(),
+  listarBandeja: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  contarBandeja: vi.fn().mockResolvedValue(0),
+  listarTransicionesDeBandeja: vi.fn().mockResolvedValue([]),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
     { id: 'area-m', nombre: 'Mantenimiento' },
     { id: 'area-s', nombre: 'Sistemas' },
   ]),
+  listarFincas: vi.fn().mockResolvedValue([]),
 }))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
@@ -51,7 +55,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
 
   it.each([
     ['reportante', 'Mis novedades'],
-    ['aprobador', 'Bandeja del área'],
+    ['aprobador', 'Bandeja · Mantenimiento'],
     ['director', 'Novedades escaladas'],
     ['administrador', 'Panel de reportes'],
   ])('RF-01 / CU-01 4: el %s entra a su pantalla de inicio («%s»)', async (rol, titulo) => {
@@ -96,8 +100,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it.each([
     ['reportante', '/bandeja', 'Mis novedades'],
     ['reportante', '/usuarios', 'Mis novedades'],
-    ['aprobador', '/registrar', 'Bandeja del área'],
-    ['aprobador', '/panel', 'Bandeja del área'],
+    ['aprobador', '/registrar', 'Bandeja · Mantenimiento'],
+    ['aprobador', '/panel', 'Bandeja · Mantenimiento'],
     ['director', '/usuarios', 'Novedades escaladas'],
     ['administrador', '/registrar', 'Panel de reportes'],
   ])(
@@ -133,6 +137,18 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(screen.getByText('Razón social de prueba A')).toBeInTheDocument()
   })
 
+  it('RF-09: en el teléfono, la barra superior del aprobador presenta la bandeja de su área', async () => {
+    abrir('/bandeja', 'aprobador')
+
+    expect(
+      await screen.findByText('Bandeja · Mantenimiento', { selector: 'p' }),
+    ).toBeInTheDocument()
+    // El título reemplaza al nombre y al rol, que en el teléfono quedan en Cuenta.
+    expect(
+      screen.queryByText('Carlos Mario Restrepo', { selector: 'header p' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('RF-23: el indicador de conexión está siempre a la vista', async () => {
     abrir('/novedades', 'reportante')
 
@@ -144,7 +160,9 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it('con sesión, el ingreso redirige al inicio del rol', async () => {
     abrir('/ingresar', 'aprobador')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Bandeja del área' })).toBeVisible()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bandeja · Mantenimiento' }),
+    ).toBeVisible()
   })
 
   it('una ruta que no existe muestra la página de no encontrada', () => {
