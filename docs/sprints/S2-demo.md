@@ -10,6 +10,10 @@ escalar y reasignar.
   `npm run build && npm run preview` en el equipo). Usa «staging», nunca producción.
 - **Usuarios de prueba** (`@novedades.test`), con la contraseña que definió el equipo:
   `reportante.01`, `aprobador.mantenimiento`, `aprobador.sistemas` y `director`.
+- **«staging» limpio:** avisarle al compañero y correr `npm run staging:reset` y después
+  `npm run staging:usuarios`. Quita las novedades que dejaron las pruebas y carga los cuatro tipos
+  de falla de prueba («Biométrico», «Puentes y pasos», «Torniquetes» y «Red e internet»), para que
+  el autocompletado tenga qué sugerir.
 - **Dos ventanas:** una angosta, como un teléfono (360 px), para el reportante, y una ancha para
   el aprobador. Conviene tenerlas con la sesión ya iniciada.
 - **Cuatro novedades registradas de antemano** con el reportante, todas para Mantenimiento, para
@@ -51,8 +55,9 @@ En la ventana del aprobador de Mantenimiento.
    - «¿Qué se hizo?»: «Se actualizó el firmware del biométrico y se reinició el equipo.»
    - La fecha de ejecución ya trae la de hoy. Cambiarla a mañana y pulsar «Marcar como resuelta»:
      el sistema no la deja pasar. Devolverla a hoy.
-   - Tipo de falla: escribir «biometrico», sin tilde. Si el tipo existe, lo sugiere, lo marca con
-     «Coincide» y no deja crear otro; si no existe, se crea ahí mismo.
+   - Tipo de falla: escribir «biometrico», sin tilde. El sistema sugiere «Biométrico», lo marca
+     con «Coincide» y no deja crear otro. (Sin el `staging:reset` no existe todavía: se crea ahí
+     mismo, y se puede mostrar lo mismo con la segunda novedad que se resuelva.)
    - «Marcar como resuelta».
 4. De vuelta en el detalle: «Resuelta», con la solución, el tipo de falla y la fecha.
 5. En la ventana del reportante: la novedad está en «Por confirmar». Abrirla: ve la solución y toda

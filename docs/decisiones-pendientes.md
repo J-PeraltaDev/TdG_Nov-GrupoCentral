@@ -21,15 +21,15 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | 9 oct: 57 de 70; las 13 fallas, corregidas. **Falta repetirlas**     | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 70 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 | 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 23  | Contraste del «Área actual» de la hoja 17  | Se dejó la opacidad de Figma; medido y con propuesta                 | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17  | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
 | 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 25  | Tipos de falla de prueba en «staging»      | Agregados al seed; **falta** un `staging:reset` para cargarlos       | El equipo         |
+| 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -322,8 +322,8 @@ CU-17 y CU-14): **pasaron 57 y fallaron 13**, ninguna por la aplicación.
 De las 26 nuevas pasaron 18; cada una pasó al menos en un tamaño, salvo la primera de CU-10. Además
 el tiempo máximo por prueba subió de 30 a 60 s.
 
-**Falta repetirlas con esos arreglos**, que se verificaron sin credenciales (sesión fabricada y
-servidor simulado) pero no contra «staging». Deben pasar las 70, más las seis de preparación:
+**Se repitieron ese mismo día con los dos arreglos: pasaron las 70, más las seis de preparación
+(76).** Para volver a correrlas:
 
 ```bash
 npm run test:e2e:chromium
@@ -331,6 +331,11 @@ npm run test:e2e:chromium
 
 Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas dejan novedades con
 descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`.
+
+**Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
+pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
+momento.». Le puede pasar a una persona que se equivoque varias veces seguidas con la contraseña;
+un mensaje propio, que diga que espere unos minutos, le serviría más.
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
@@ -507,12 +512,14 @@ página real, el nombre del área da **4,25:1** y la etiqueta «Área actual», 
 pide 4,5:1. No es un control deshabilitado (ahí la norma no aplica): es texto que la persona
 necesita leer.
 
-No se cambió, porque se corrige primero en Figma, como el punto 6. La información no se pierde: el
-orden, la flecha y el texto «pasa a» para los lectores de pantalla dicen lo mismo.
+**Resuelto el 9 oct 2026.** El equipo dejó la decisión a criterio de la implementación y se aplicó
+la propuesta que estaba anotada aquí: la tarjeta ya no va entera al 60 %. Se apagan
+el fondo y el ícono, que son decorativos, y el texto va con sus colores normales. Medido otra vez
+sobre la página real: el nombre del área da **14,38:1** y «Área actual», **5,73:1**. La tarjeta se
+sigue leyendo como el punto de partida: es gris, y la del destino va en verde y con borde.
 
-**Propuesta:** dejar la opacidad solo en el ícono y en el fondo de la tarjeta, y el texto con sus
-colores normales (`texto` y `texto-secundario` sobre `gris-100` pasan de 4,5:1). Es un cambio de
-una línea en `HojaReasignar.jsx`.
+**Falta reflejarlo en Figma** (nodo 3:1591): quitarle la opacidad al marco y dejarla solo en el
+ícono.
 
 ## 24 · Detalles de la pantalla 18 (registrar solución, 18-B y 18-C)
 
@@ -547,15 +554,29 @@ Lo que Figma no dibuja o deja abierto:
   persona cambió el estado antes, se vuelve al detalle con «La novedad cambió de estado.».
 - **Vista previa de la bandeja (12).** «Registrar solución» para una novedad en atención o aprobada;
   «Tomar para atención» para una asignada.
+- **Área táctil de los campos de una línea.** En la fecha y en el tipo de falla solo el texto
+  recibe el toque, no todo el recuadro de 50 px. Es el mismo `CampoTexto` del ingreso (Sprint 1):
+  conviene resolverlo ahí, para todos los campos, en un cambio aparte.
 
 ## 25 · Tipos de falla de prueba en «staging»
 
 `supabase/seed.sql` trae ahora cuatro tipos de falla de prueba («Biométrico», «Puentes y pasos»,
 «Torniquetes» y «Red e internet»), creados por el administrador de prueba, para que el
 autocompletado de la pantalla 18 tenga qué sugerir. El seed solo se carga con `npm run
-staging:reset`, que borra los datos de «staging»: **no se corrió**, a la espera de que el equipo lo
-autorice. Mientras tanto «staging» no tiene esos cuatro tipos, pero la pantalla funciona igual:
-quien registra una solución crea el tipo que necesite.
+staging:reset`, que borra los datos de «staging».
+
+**Decidido el 9 oct 2026: no se corre ahora, sino justo antes de la demo.** El equipo dejó la
+decisión a criterio de la implementación, y se optó por esperar. Nada depende de él hoy
+(las 76 pruebas pasan sin esos tipos, y quien registra una solución crea el tipo que necesite); es
+una operación que borra lo que el compañero tenga en «staging», que es compartido; deja a los
+usuarios de prueba con una contraseña al azar hasta que alguien corra `staging:usuarios`; y cada
+corrida de las pruebas vuelve a llenar la base. Hecho antes de la demo, deja la bandeja limpia y el
+autocompletado con sugerencias, que es cuando se va a notar:
+
+```bash
+npm run staging:reset
+npm run staging:usuarios
+```
 
 Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
 …») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
