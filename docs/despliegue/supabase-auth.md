@@ -45,8 +45,35 @@ Panel de Supabase → **Project Settings** → **API Keys**.
 
 - **Publishable key** (`sb_publishable_…`): es la única que va en el cliente
   (`VITE_SUPABASE_PUBLISHABLE_KEY`) y en Cloudflare Pages.
-- **Secret key** (`sb_secret_…`): nunca en el repositorio, en `.env.local` ni en Pages. Solo
-  como secreto de las Edge Functions, desde el Sprint 3.
+- **Secret key** (`sb_secret_…`): nunca en el repositorio, en `.env.local` ni en Pages. Solo la
+  usan las Edge Functions, y **nadie tiene que copiarla**: la plataforma se la entrega a cada
+  función en la variable `SUPABASE_SECRET_KEYS` (un JSON por nombre de clave; se usa `default`).
+
+## Edge Functions
+
+Son dos (SDD 5.3.4, Tabla 23): `gestionar-usuario` y `restablecer-contrasena`. Cómo están hechas y
+por qué: `docs/adr/0012`.
+
+En «staging» se despliegan con el script del repositorio, sin Docker:
+
+```bash
+npm run staging:functions
+```
+
+Sin argumentos despliega todas; con un nombre, solo esa (`npm run staging:functions --
+gestionar-usuario`). Qué función exige sesión (`verify_jwt`) se define en `supabase/config.toml`.
+No hay secretos que crear a mano: `SUPABASE_URL` y `SUPABASE_SECRET_KEYS` los pone la plataforma.
+Para confirmarlo, **Edge Functions → Secrets** en el panel debe listar las dos.
+
+**En «PROYECTO» las despliega una persona, al cierre del sprint y con el OK del equipo**, después
+de aplicar las migraciones:
+
+```bash
+npx supabase functions deploy --use-api --project-ref lyrdsmfalrchbdpmikmt
+```
+
+Después conviene comprobar, sin sesión, que `restablecer-contrasena` responde (400 con un cuerpo
+vacío) y que `gestionar-usuario` rechaza (401).
 
 ## Vincular el repositorio (`supabase link`)
 

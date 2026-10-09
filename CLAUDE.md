@@ -43,13 +43,18 @@ npm run staging:test   # pgTAP contra «staging» (cada archivo en una transacci
 npm run staging:types  # regenera src/core/supabase/database.types.ts
 npm run staging:advisors    # asesor de seguridad y rendimiento
 npm run staging:usuarios    # pone CLAVE_USUARIOS_DE_PRUEBA (.env.local) a los usuarios de prueba
+npm run staging:functions   # despliega en «staging» las Edge Functions (sin Docker, ADR 0012)
 ```
 
 Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
 (`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
 agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y
 `test:db` (Supabase local) quedan para el CI y para quien tenga Docker. El CI corre lint, formato,
-unitarias, build y pgTAP; todavía no corre las pruebas de extremo a extremo.
+unitarias, build, pgTAP y `deno check` de las Edge Functions; todavía no corre las pruebas de
+extremo a extremo.
+
+**Después de cada cambio en una Edge Function:** `npm run staging:functions` y una prueba contra
+«staging». Su lógica va en módulos `.js` puros, probados con Vitest (ADR 0012).
 
 **Después de cada migración:** `npm run staging:reset && npm run staging:test && npm run
 staging:types && npm run staging:advisors`, y el archivo de tipos regenerado va en el mismo commit.

@@ -51,6 +51,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/pruebas/preparacion.js'],
-    include: ['src/**/*.test.{js,jsx}'],
+    // Las Edge Functions tienen su lógica en módulos puros que se prueban aquí, sin Deno
+    // (docs/adr/0012); cada una de esas pruebas pide el entorno `node`.
+    include: ['src/**/*.test.{js,jsx}', 'supabase/functions/**/*.test.js'],
   },
 })
