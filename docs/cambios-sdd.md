@@ -13,6 +13,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
 | 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
 | 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA` | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -142,3 +143,29 @@ ejecución para los roles de la API (migración `rf10_transiciones_base`).
 > n ← la novedad, con bloqueo de la fila. SI n no existe O NO alcance(u, n) → ERROR SIN_PERMISO
 >
 > SI n.estado no admite la acción → ERROR TRANSICION_INVALIDA
+
+## 8 · Máximo de 500 caracteres en los textos de las transiciones (S2)
+
+**Sección:** SDD 6.1.3, Tabla 30 (columna de validaciones), y 7.3 (parámetros por validar).
+
+**Qué pasa.** La Tabla 30 pide que el motivo, la justificación y la solución no estén vacíos, pero
+no les pone un máximo, y la columna `observacion` del historial es un texto sin límite. Figma sí lo
+muestra: las hojas 15, 16 y 17 traen un contador «/500». Se adoptó ese límite (decisión 7 del plan
+del Sprint 2), igual al de la descripción de la novedad:
+
+- En el cliente, el parámetro `OBSERVACION_MAX_CARACTERES` de `src/core/config/parametros.js`; el
+  campo no deja escribir más y muestra el contador.
+- En el servidor, la auxiliar `private.texto_obligatorio`, que usan las funciones de transición:
+  quita los espacios y los saltos de línea de los extremos y responde `DATO_OBLIGATORIO` si el
+  texto queda vacío o pasa de 500 caracteres. No se agregó un `CHECK` a la tabla: el historial
+  solo se escribe desde esas funciones.
+
+**Texto propuesto (Tabla 30, validaciones de `rechazar_novedad`, `reasignar_novedad`,
+`escalar_novedad` y `registrar_solucion`):**
+
+> Motivo (o justificación, o solución) no vacío y de máximo 500 caracteres, sin contar los espacios
+> de los extremos.
+
+**Texto propuesto (parámetros configurables):**
+
+> Longitud máxima del motivo, la justificación, la observación y la solución: 500 caracteres.

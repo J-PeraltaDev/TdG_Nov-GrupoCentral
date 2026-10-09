@@ -15,7 +15,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 185,6 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 185,7 KB de 200 KB                                           | El equipo         |
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
@@ -26,6 +26,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -155,6 +156,9 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
 - **Acciones del aprobador (Sprint 2):** mientras la acción se ejecuta, el botón dice «Tomando…»;
   el aviso de 14-C nombra el estado en que quedó la novedad («La novedad sigue Asignada.»; Figma
   lo escribe para una en atención).
+- **Rechazar novedad (Sprint 2):** el aviso «Novedad rechazada. La finca verá el motivo.»; el botón
+  dice «Rechazando…» mientras se ejecuta; para los lectores de pantalla, «Motivos frecuentes»
+  (grupo de accesos rápidos) y «Caracteres:» antes del contador.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -178,6 +182,9 @@ Quedan unos 16 KB. Todo lo que tiene sesión se carga bajo demanda y no cuenta a
 CSS 7,6 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 14 KB. Lo nuevo se
 carga bajo demanda: la bandeja (5,4 KB), el detalle (4,9 KB) y las acciones del aprobador
 (0,8 KB), que solo descarga ese rol. Lo que sube es el CSS, 1,4 KB desde el Sprint 1.
+
+Con «Rechazar novedad» (RF-11): ≈ 185,7 KB. La hoja y su campo van en el paquete de las acciones
+del aprobador, que pasa a 2,8 KB.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -396,3 +403,27 @@ del Sprint 2:
   y el detalle se recarga solo (Tabla 22).
 - **Mientras se ejecuta.** El botón queda deshabilitado y dice «Tomando…», para que no se envíe dos
   veces.
+
+## 22 · Hojas de las acciones (15, 16 y 17)
+
+Lo que Figma no dibuja o deja abierto de las hojas que piden un texto antes de confirmar:
+
+- **En el escritorio** (decisión 4 del plan): la hoja es un diálogo centrado de 448 px con el mismo
+  contenido; «Cancelar» y el botón que confirma van en una fila, a la derecha.
+- **Qué pasa al confirmar.** La hoja se cierra siempre y el resultado se muestra en el detalle, con
+  el aviso temporal: un aviso fuera de un diálogo modal no se ve ni lo anuncia el lector de
+  pantalla. Si se pierde la conexión, «Reintentar» envía el mismo texto sin volver a abrir la hoja.
+  La única excepción es `DATO_OBLIGATORIO`, que se corrige en la misma hoja.
+- **Después de rechazar** (decisión 9): la persona se queda en el detalle, ya rechazado y sin
+  acciones, con el motivo en la línea de tiempo.
+- **Motivos frecuentes de la hoja 16.** Son accesos rápidos, no un catálogo. Al tocar uno se
+  escribe al comienzo del motivo y se conserva lo que la persona ya había escrito («Duplicada: ya
+  está en atención como NOV-0149.», como el ejemplo de Figma); tocar otro lo reemplaza y tocar el
+  mismo lo quita. El que queda marcado es el que encabeza el texto. El foco no se mueve al campo.
+- **Tamaño de los motivos frecuentes.** La pastilla mide 32 px, como en Figma, dentro de un botón
+  de 48 px en el teléfono (área táctil); por eso las filas quedan a 16 px y no a 8. A 360 px el
+  tercero no cabe en una línea y pasa a dos.
+- **«Rechazar novedad» deshabilitado.** Mientras el motivo esté vacío o tenga solo espacios (CU-11
+  3a). El campo no deja pasar de 500 caracteres y muestra el contador.
+- **Al abrir**, el foco queda en el primer control de la hoja; al cerrarla vuelve al botón que la
+  abrió y, si ese botón ya no existe, al contenido de la página.
