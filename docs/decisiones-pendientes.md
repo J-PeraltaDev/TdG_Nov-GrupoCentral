@@ -27,6 +27,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 | 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17  | Se dejó la opacidad de Figma; medido y con propuesta                 | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -161,6 +162,10 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   (grupo de accesos rápidos) y «Caracteres:» antes del contador.
 - **Escalar novedad (Sprint 2):** el aviso «Novedad escalada. Queda en espera del director.»; el
   botón dice «Escalando…» mientras se ejecuta.
+- **Reasignar novedad (Sprint 2):** el aviso «Novedad reasignada a {área}.»; el botón dice
+  «Reasignando…» mientras se ejecuta; «No hay otra área activa.» si el catálogo no ofrece destino;
+  «No pudimos cargar las áreas. Revisa tu conexión.», como en el registro; para los lectores de
+  pantalla, «pasa a» entre el área actual y el destino.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -187,7 +192,9 @@ carga bajo demanda: la bandeja (5,4 KB), el detalle (4,9 KB) y las acciones del 
 
 Con «Rechazar novedad» (RF-11): ≈ 185,7 KB. La hoja y su campo van en el paquete de las acciones
 del aprobador, que pasa a 2,8 KB. Con «Escalar novedad» (RF-12) el total no cambia (185,7 KB) y
-ese paquete pasa a 3,5 KB.
+ese paquete pasa a 3,5 KB. Con «Reasignar novedad» (RF-17) tampoco (185,7 KB); el paquete de las
+acciones queda en 5,0 KB, y la presentación de las áreas (1,2 KB), que comparte con el registro,
+tampoco entra en la ruta de ingreso.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -426,6 +433,15 @@ Lo que Figma no dibuja o deja abierto de las hojas que piden un texto antes de c
   como está en el catálogo y la prioridad (Figma escribe «NOV-0150 · Pavarandó»).
 - **«Escalar novedad» deshabilitado** mientras la justificación esté vacía o tenga solo espacios
   (CU-12 3a), igual que en la hoja 16.
+- **Después de reasignar** (decisión 9): la novedad sale del alcance de quien la reasigna, así que
+  el detalle no se recarga (daría «No puedes ver esta novedad»). La persona vuelve a su bandeja, a
+  la misma pestaña y filtro si venía de ahí, con el aviso «Novedad reasignada a Sistemas.». El
+  aviso viaja en el estado de la navegación y se quita solo, para que no reaparezca al recargar.
+- **Hoja 17, el destino.** Sale de las áreas activas del catálogo, sin la actual. Hoy son dos
+  áreas, así que el destino queda elegido, como lo dibuja Figma. Si llega a haber más, la tarjeta
+  del destino pasa a ser una lista de opciones y hay que elegir una; si no queda ninguna, la hoja
+  lo dice y no deja confirmar. Si las áreas no cargan, ofrece «Reintentar» sin perder el motivo.
+- **«Reasignar» deshabilitado** mientras el motivo esté vacío (CU-17 3a) o no haya destino.
 - **Motivos frecuentes de la hoja 16.** Son accesos rápidos, no un catálogo. Al tocar uno se
   escribe al comienzo del motivo y se conserva lo que la persona ya había escrito («Duplicada: ya
   está en atención como NOV-0149.», como el ejemplo de Figma); tocar otro lo reemplaza y tocar el
@@ -437,3 +453,18 @@ Lo que Figma no dibuja o deja abierto de las hojas que piden un texto antes de c
   3a). El campo no deja pasar de 500 caracteres y muestra el contador.
 - **Al abrir**, el foco queda en el primer control de la hoja; al cerrarla vuelve al botón que la
   abrió y, si ese botón ya no existe, al contenido de la página.
+
+## 23 · Contraste del «Área actual» de la hoja 17
+
+En la hoja «Reasignar a otra área», Figma dibuja la tarjeta del área actual al 60 % de opacidad,
+para que se lea como el punto de partida y no como una opción. Con esa opacidad, medido sobre la
+página real, el nombre del área da **4,25:1** y la etiqueta «Área actual», **2,59:1**; WCAG 1.4.3
+pide 4,5:1. No es un control deshabilitado (ahí la norma no aplica): es texto que la persona
+necesita leer.
+
+No se cambió, porque se corrige primero en Figma, como el punto 6. La información no se pierde: el
+orden, la flecha y el texto «pasa a» para los lectores de pantalla dicen lo mismo.
+
+**Propuesta:** dejar la opacidad solo en el ícono y en el fondo de la tarjeta, y el texto con sus
+colores normales (`texto` y `texto-secundario` sobre `gris-100` pasan de 4,5:1). Es un cambio de
+una línea en `HojaReasignar.jsx`.
