@@ -385,6 +385,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "novedad_finca_id_fkey"
+            columns: ["finca_id"]
+            isOneToOne: false
+            referencedRelation: "v_finca"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "novedad_reportante_id_fkey"
             columns: ["reportante_id"]
             isOneToOne: false
@@ -613,6 +620,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "usuario_finca_id_fkey"
+            columns: ["finca_id"]
+            isOneToOne: false
+            referencedRelation: "v_finca"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "usuario_rol_id_fkey"
             columns: ["rol_id"]
             isOneToOne: false
@@ -645,6 +659,27 @@ export type Database = {
             columns: ["rol_id"]
             isOneToOne: false
             referencedRelation: "rol"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_finca: {
+        Row: {
+          activo: boolean | null
+          creado_en: string | null
+          id: string | null
+          nombre: string | null
+          novedades_abiertas: number | null
+          razon_social: string | null
+          razon_social_id: string | null
+          reportantes_activos: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finca_razon_social_id_fkey"
+            columns: ["razon_social_id"]
+            isOneToOne: false
+            referencedRelation: "razon_social"
             referencedColumns: ["id"]
           },
         ]
@@ -693,6 +728,13 @@ export type Database = {
             columns: ["finca_id"]
             isOneToOne: false
             referencedRelation: "finca"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "novedad_finca_id_fkey"
+            columns: ["finca_id"]
+            isOneToOne: false
+            referencedRelation: "v_finca"
             referencedColumns: ["id"]
           },
           {
