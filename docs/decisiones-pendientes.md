@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | 44 pasaron el 8 oct; **faltan por correr** las 26 nuevas del S2      | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | 9 oct: 57 de 70; las 13 fallas, corregidas. **Falta repetirlas**     | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -305,8 +305,25 @@ anterior de ese día fallaron seis con la pantalla en «Cargando…»; el servid
 y el equipo tenía poca memoria, así que se bajó a cuatro navegadores en paralelo y se subió la
 espera por defecto a 10 s.
 
-**Faltan por correr las 26 nuevas del Sprint 2** (CU-18, CU-10, CU-11, CU-12, CU-17 y CU-14; el
-detalle está en `docs/sprints/S2.md`). Deben pasar las 70:
+**El 9 oct 2026 se corrieron las 70**, con las 26 nuevas del Sprint 2 (CU-18, CU-10, CU-11, CU-12,
+CU-17 y CU-14): **pasaron 57 y fallaron 13**, ninguna por la aplicación.
+
+- **Once, por el límite de ingresos de Auth.** Cada prueba ingresaba por el formulario, y las
+  nuevas lo hacen con tres o cuatro usuarios: la corrida hizo unas 170 peticiones a
+  `/auth/v1/token` en dos minutos (las anteriores, unas 65) y «staging» respondió 429 a once. La
+  pantalla mostró «No pudimos iniciar tu sesión» y esas pruebas no pasaron del ingreso. Ahora cada
+  usuario ingresa una sola vez por corrida (`e2e/sesiones.setup.js`) y las pruebas reutilizan su
+  sesión; solo CU-01, que prueba el ingreso, usa el formulario. Quedan unos 20 ingresos por
+  corrida.
+- **Dos, por una ayuda de las pruebas.** `cargarTodaLaLista` daba la bandeja por cargada antes de
+  que la pantalla la pidiera, y la prueba de CU-10 buscaba su novedad entre las primeras 20 de 50.
+  Ahora espera a que el panel exista.
+
+De las 26 nuevas pasaron 18; cada una pasó al menos en un tamaño, salvo la primera de CU-10. Además
+el tiempo máximo por prueba subió de 30 a 60 s.
+
+**Falta repetirlas con esos arreglos**, que se verificaron sin credenciales (sesión fabricada y
+servidor simulado) pero no contra «staging». Deben pasar las 70, más las seis de preparación:
 
 ```bash
 npm run test:e2e:chromium

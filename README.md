@@ -137,6 +137,12 @@ prueba y nunca llegan a producción.
 necesitan ingresar usan `CLAVE_USUARIOS_DE_PRUEBA` y se omiten si falta. Cada corrida deja
 novedades de prueba en «staging».
 
+Auth limita los ingresos por minuto, así que cada usuario de prueba ingresa una sola vez al
+comienzo de la corrida (`e2e/sesiones.setup.js`) y las pruebas reutilizan su sesión con
+`ingresarComo`. Solo las de CU-01, que prueban el ingreso mismo, pasan por el formulario. Las
+sesiones quedan en `test-results/sesiones/`, que Playwright limpia en cada corrida y que no se sube
+al repositorio: son tokens de los usuarios de prueba, no hay que compartir esa carpeta.
+
 Playwright necesita sus navegadores una sola vez: `npx playwright install chromium webkit`. Si la
 descarga se queda colgada (pasa en redes con IPv6 defectuoso), define antes la variable de entorno
 `NODE_OPTIONS` con el valor `--dns-result-order=ipv4first`. En equipos con Control de aplicaciones
