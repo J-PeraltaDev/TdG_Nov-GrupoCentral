@@ -1,17 +1,28 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
-import { rechazarNovedad, tomarNovedad } from '../../core/supabase/repositorios/novedades.js'
+import {
+  escalarNovedad,
+  rechazarNovedad,
+  tomarNovedad,
+} from '../../core/supabase/repositorios/novedades.js'
 import AccionesDelAprobador from './AccionesDelAprobador.jsx'
 
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   tomarNovedad: vi.fn(),
   rechazarNovedad: vi.fn(),
+  escalarNovedad: vi.fn(),
 }))
 
 const ASIGNADA = { id: 'n-153', estado: 'asignada' }
-const ATENDIDA = { id: 'n-153', estado: 'en_atencion' }
+const ATENDIDA = {
+  id: 'n-153',
+  estado: 'en_atencion',
+  codigo: 150,
+  finca: 'Pavarandó',
+  prioridad: 'critico',
+}
 const APROBADA = { id: 'n-153', estado: 'aprobada' }
 // Lo que la Tabla 35 le permite al aprobador en cada estado.
 const EN_ASIGNADA = [ACCION.TOMAR, ACCION.REASIGNAR, ACCION.RECHAZAR]
@@ -37,6 +48,16 @@ const rechazar = () => screen.getByRole('button', { name: 'Rechazar' })
 const barra = () => document.querySelector('[data-barra-de-acciones]')
 const motivo = () => screen.getByRole('textbox', { name: 'Motivo del rechazo' })
 const confirmarRechazo = () => screen.getByRole('button', { name: 'Rechazar novedad' })
+
+const escalar = () => screen.getByRole('button', { name: 'Escalar al director' })
+const justificacion = () => screen.getByRole('textbox', { name: 'Justificación' })
+
+/** Abre la hoja de escalar, escribe la justificación y confirma. */
+async function escalarCon(texto) {
+  await userEvent.click(escalar())
+  await userEvent.type(justificacion(), texto)
+  await userEvent.click(screen.getByRole('button', { name: 'Escalar novedad' }))
+}
 
 /** Abre la hoja, escribe el motivo y confirma. */
 async function rechazarCon(texto) {
@@ -175,6 +196,7 @@ describe('Acciones del aprobador en el detalle (RF-10 / CU-10, Figma 13, 13-B y 
 
     expect(screen.getByRole('status')).toHaveTextContent('Novedad tomada. Ya está En atención.')
     expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+    expect(barra()).toContainElement(escalar())
     expect(barra()).toContainElement(rechazar())
   })
 
@@ -342,5 +364,156 @@ describe('Rechazar desde el detalle (RF-11 / CU-11, Figma 16)', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Novedad rechazada.')
     expect(barra()).toBeNull()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+})
+
+describe('Escalar desde el detalle (RF-12 / CU-12, Figma 15)', () => {
+  beforeEach(() => {
+    vi.mocked(tomarNovedad).mockReset()
+    vi.mocked(rechazarNovedad).mockReset()
+    vi.mocked(escalarNovedad).mockReset()
+  })
+
+  const pintarEnAtencion = (props = {}) =>
+    pintar({ novedad: ATENDIDA, acciones: EN_ATENCION, ...props })
+
+  it('RF-12 / CU-12 1: una novedad en atención se puede escalar; va a todo el ancho, antes de «Rechazar»', () => {
+    pintarEnAtencion()
+
+    expect(barra()).toContainElement(escalar())
+    const botones = within(barra()).getAllByRole('button')
+    expect(botones.map((boton) => boton.textContent)).toEqual(['Escalar al director', 'Rechazar'])
+  })
+
+  it('RF-12: una novedad asignada no ofrece escalar: primero hay que tomarla', () => {
+    pintar()
+
+    expect(screen.queryByRole('button', { name: 'Escalar al director' })).not.toBeInTheDocument()
+  })
+
+  it('RF-12 / CU-12 1 y 2: «Escalar al director» abre la hoja de la justificación, con la novedad a la vista', async () => {
+    pintarEnAtencion()
+
+    await userEvent.click(escalar())
+
+    const hoja = screen.getByRole('dialog', { name: 'Escalar al director de agricultura' })
+    expect(hoja).toBeVisible()
+    expect(within(hoja).getByText('NOV-0150')).toBeVisible()
+    expect(within(hoja).getByText('Crítico')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Escalar novedad' })).toBeDisabled()
+    expect(escalarNovedad).not.toHaveBeenCalled()
+  })
+
+  it('RF-12 / CU-12 3 a 6: al confirmar llama a la función con la justificación, cierra la hoja, avisa y recarga', async () => {
+    vi.mocked(escalarNovedad).mockResolvedValue({ id: 'n-153', estado: 'escalada' })
+    const { alCambiar } = pintarEnAtencion()
+
+    await escalarCon('El router se quemó; hay que comprar uno nuevo.')
+
+    expect(escalarNovedad).toHaveBeenCalledExactlyOnceWith(
+      'n-153',
+      'El router se quemó; hay que comprar uno nuevo.',
+    )
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Novedad escalada. Queda en espera del director.',
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(alCambiar).toHaveBeenCalledOnce()
+    expect(rechazarNovedad).not.toHaveBeenCalled()
+  })
+
+  it('RF-12: mientras escala, la hoja dice «Escalando…»', async () => {
+    let terminar
+    vi.mocked(escalarNovedad).mockReturnValue(new Promise((resolver) => (terminar = resolver)))
+    pintarEnAtencion()
+
+    await escalarCon('Hay que comprar un router')
+
+    expect(screen.getByRole('button', { name: 'Escalando…' })).toBeDisabled()
+
+    terminar({ id: 'n-153', estado: 'escalada' })
+    expect(await screen.findByRole('status')).toBeVisible()
+  })
+
+  it('RF-25 / CU-12 1a (14-C): si se pierde la conexión cierra la hoja, dice que no se aplicó y «Reintentar» envía la misma justificación', async () => {
+    vi.mocked(escalarNovedad).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    const { alCambiar } = pintarEnAtencion()
+
+    await escalarCon('Hay que comprar un router')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se aplicó: se perdió la conexión. La novedad sigue En atención.',
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(alCambiar).not.toHaveBeenCalled()
+
+    vi.mocked(escalarNovedad).mockResolvedValue({ id: 'n-153', estado: 'escalada' })
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Novedad escalada.')
+    expect(escalarNovedad).toHaveBeenLastCalledWith('n-153', 'Hay que comprar un router')
+    expect(alCambiar).toHaveBeenCalledOnce()
+  })
+
+  it('RF-12: si alguien cambió el estado antes, cierra la hoja, avisa y recarga', async () => {
+    vi.mocked(escalarNovedad).mockRejectedValue({ code: 'P0001', message: 'TRANSICION_INVALIDA' })
+    const { alCambiar } = pintarEnAtencion()
+
+    await escalarCon('Hay que comprar un router')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('La novedad cambió de estado.')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(alCambiar).toHaveBeenCalledOnce()
+  })
+
+  it('RF-12: si el servidor responde DATO_OBLIGATORIO, la hoja sigue abierta y señala el campo', async () => {
+    vi.mocked(escalarNovedad).mockRejectedValue({ code: 'P0001', message: 'DATO_OBLIGATORIO' })
+    pintarEnAtencion()
+
+    await escalarCon('Hay que comprar un router')
+
+    await vi.waitFor(() => expect(justificacion()).toBeInvalid())
+    expect(justificacion()).toHaveValue('Hay que comprar un router')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('RF-12: «Cancelar» cierra la hoja sin escalar y devuelve el foco al botón', async () => {
+    pintarEnAtencion()
+    await userEvent.click(escalar())
+    await userEvent.type(justificacion(), 'Hay que comprar un router')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(escalarNovedad).not.toHaveBeenCalled()
+    expect(escalar()).toHaveFocus()
+  })
+
+  it('RF-12: una novedad escalada ya no tiene acciones para el aprobador; el aviso se conserva', async () => {
+    vi.mocked(escalarNovedad).mockResolvedValue({ id: 'n-153', estado: 'escalada' })
+    const { rerender } = pintarEnAtencion()
+    await escalarCon('Hay que comprar un router')
+    await screen.findByRole('status')
+
+    rerender(
+      <AccionesDelAprobador
+        novedad={{ ...ATENDIDA, estado: 'escalada' }}
+        acciones={[]}
+        alCambiar={() => {}}
+        esEscritorio={false}
+      />,
+    )
+
+    expect(screen.getByRole('status')).toHaveTextContent('Novedad escalada.')
+    expect(barra()).toBeNull()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('en el escritorio «Escalar al director» es un botón más bajo el encabezado', () => {
+    pintarEnAtencion({ esEscritorio: true })
+
+    expect(barra()).toBeNull()
+    expect(escalar()).toBeEnabled()
+    expect(rechazar()).toBeEnabled()
   })
 })
