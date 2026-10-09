@@ -16,6 +16,12 @@ const ESCRITORIO = { width: 1280, height: 800 }
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // Cada prueba abre uno o varios navegadores y habla con «staging». Con el valor por defecto
+  // (la mitad de los núcleos: ocho en estos equipos) el equipo se queda sin memoria y las
+  // páginas tardan segundos en pintar una respuesta que el servidor entregó en milisegundos.
+  workers: process.env.CI ? 2 : 4,
+  // Mismo motivo: 5 s es poco para una pantalla que depende de un servidor remoto.
+  expect: { timeout: 10_000 },
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
