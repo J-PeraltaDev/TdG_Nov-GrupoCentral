@@ -100,7 +100,8 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
       page.getByRole('region', { name: 'Línea de tiempo' }).getByRole('listitem'),
     ).toHaveCount(4)
 
-    // En la base quedó resuelta con sus tres datos y una transición sin observación.
+    // En la base quedó resuelta con sus tres datos, y la solución también en el historial:
+    // así no se pierde si la finca responde que la falla persiste (RF-15).
     const [vista] = await leerDeLaApi(
       page,
       `v_novedad?select=estado,solucion,fecha_ejecucion,tipo_falla&id=eq.${novedad.id}`,
@@ -115,7 +116,7 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
       page,
       `historial_transicion?select=estado_anterior,observacion&novedad_id=eq.${novedad.id}&estado_nuevo=eq.resuelta`,
     )
-    expect(historial).toEqual([{ estado_anterior: 'en_atencion', observacion: null }])
+    expect(historial).toEqual([{ estado_anterior: 'en_atencion', observacion: solucion }])
 
     // CU-14 5a: el tipo recién creado ya se sugiere, aunque se escriba en mayúsculas y con
     // espacios de más, y es coincidencia exacta.

@@ -17,6 +17,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                            | Propuesto |
 | 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                   | Propuesto |
 | 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad               | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -297,3 +298,50 @@ hubo que precisar tres firmas y agregar dos funciones que la Tabla 21 no tiene.
 
 **Texto propuesto (Tabla 31, fila `usuario`, columna de lectura):** agregar «El administrador lee
 el correo y el último ingreso con listar_usuarios».
+
+## 12 · La solución cuando la falla persiste (S3)
+
+**Sección:** SDD 6.1.3, Tabla 30 (filas de `registrar_solucion`, `confirmar_resolucion` y
+`reportar_falla_persiste`).
+
+**Qué pasa.** La Tabla 30 dice de `registrar_solucion`: «Sin observación; la solución queda en la
+novedad». Y de «la falla persiste» solo dice que la novedad vuelve a estar en atención. Con eso,
+una novedad en atención seguiría mostrando una solución, una fecha de ejecución y un tipo de
+falla; y al registrar la solución siguiente, el texto de la primera se perdería, porque no está en
+ningún otro lado. Se adoptó la opción C de la decisión 21 del plan del Sprint 3:
+
+1. **`registrar_solucion` guarda además la solución como observación de su transición.** El
+   historial es inmutable (RNF-12): conserva el texto de cada intento, y la línea de tiempo lo
+   muestra bajo «→ Resuelta».
+2. **`reportar_falla_persiste` limpia de la novedad** `solucion`, `fecha_ejecucion` y
+   `tipo_falla_id`. Una novedad en atención nunca trae una solución, y la restricción
+   `novedad_resuelta_completa` sigue valiendo para las resueltas y las cerradas.
+3. **`confirmar_resolucion` conserva los tres datos:** son lo que queda de la novedad cerrada.
+
+**Lo que se pierde:** el tipo de falla y la fecha de ejecución del intento que no sirvió; el texto
+de la solución, no. Los reportes del Sprint 5 no cambian: RF-27 y RF-29 miran el estado y la
+última resolución.
+
+**Lo que no cambia:** las soluciones registradas antes de este cambio siguen sin observación en
+el historial, que no se puede corregir; su texto está en la novedad.
+
+También queda precisado quién puede responder: cualquier reportante activo de la finca de la
+novedad, no solo quien la registró, aunque la finca se haya desactivado después (CU-04 3b).
+
+**Texto propuesto (Tabla 30, fila de `registrar_solucion`, columna del historial):**
+
+> en atención o aprobada → resuelta, con la solución como observación. La solución, la fecha de
+> ejecución y el tipo de falla quedan además en la novedad.
+
+**Texto propuesto (Tabla 30, fila de `reportar_falla_persiste`):**
+
+> Reportante activo de la finca de la novedad · Estado resuelta · Observación no vacía y de máximo
+> 500 caracteres · resuelta → en atención, con la observación; la novedad pierde la solución, la
+> fecha de ejecución y el tipo de falla, que se registran de nuevo al resolverla · Avisa a los
+> aprobadores activos del área.
+
+**Texto propuesto (Tabla 30, fila de `confirmar_resolucion`):**
+
+> Reportante activo de la finca de la novedad · Estado resuelta · Observación opcional, de máximo
+> 500 caracteres · resuelta → cerrada, con la observación si la hay; la novedad conserva la
+> solución · Avisa a los aprobadores activos del área.
