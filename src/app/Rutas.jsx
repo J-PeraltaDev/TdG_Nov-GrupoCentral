@@ -17,6 +17,8 @@ const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.
 const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
+// Sin sesión, pero fuera de la ruta de ingreso: solo se descarga si alguien la abre.
+const TratamientoDeDatos = lazy(() => import('../modules/e1-acceso-admin/TratamientoDeDatos.jsx'))
 
 // Página de componentes: solo existe en desarrollo. En el build de producción esta
 // condición es falsa y el módulo ni siquiera se empaqueta.
@@ -45,17 +47,7 @@ export function Rutas() {
             />
           }
         />
-        <Route
-          path="/tratamiento-de-datos"
-          element={
-            <Pendiente
-              titulo="Política de tratamiento de datos"
-              sprint="Sprint 3"
-              detalle="El texto de la política lo define la empresa, conforme a la Ley 1581 de 2012."
-              salida={VOLVER_AL_INGRESO}
-            />
-          }
-        />
+        <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
 
         <Route element={<RequiereSesion />}>
           <Route element={<Marco />}>

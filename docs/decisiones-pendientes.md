@@ -30,6 +30,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 23  | Contraste del «Área actual» de la hoja 17  | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
 | 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
+| 26  | Política de tratamiento de datos           | Redactada como borrador; faltan datos de contacto y validación       | La empresa        |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -581,3 +582,47 @@ npm run staging:usuarios
 Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
 …») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
 `staging:reset`.
+
+## 26 · Política de tratamiento de datos personales (RNF-18)
+
+La pantalla de ingreso enlaza desde el Sprint 1 a `/tratamiento-de-datos`, que era un marcador. El
+9 oct 2026 el equipo pidió redactar el texto. Quedó en
+`src/modules/e1-acceso-admin/TratamientoDeDatos.jsx`, como una pantalla sin sesión que se descarga
+solo si alguien la abre.
+
+**Es un borrador y no reemplaza una revisión legal.** Se redactó con el contenido mínimo que pide
+el artículo 13 del Decreto 1377 de 2013 (responsable, tratamiento y finalidad, derechos, área que
+atiende, procedimiento y vigencia), los derechos del artículo 8 de la Ley 1581 de 2012 y los plazos
+de sus artículos 14 y 15, y describe lo que el sistema hace de verdad con los datos. Mientras la
+empresa no lo apruebe, la pantalla dice «Versión preliminar, en revisión por la empresa.»
+
+**Lo que falta, y solo la empresa puede dar** (va en `politicaDeDatos.js`; lo que está vacío no se
+muestra y nunca se inventa):
+
+- **Quién es el responsable.** Se puso Agropecuaria Tumaradó S.A.S., que es la empresa que nombra
+  el proyecto. Los usuarios trabajan para varias razones sociales del grupo: hay que confirmar cuál
+  responde por el tratamiento, o si responden varias.
+- **NIT, dirección, correo y teléfono** para las consultas y los reclamos. Sin ellos la política no
+  cumple el artículo 13; por ahora remite a los administradores de la plataforma.
+- **La fecha desde la que rige** (`VIGENTE_DESDE`). Al ponerla, la pantalla deja de decir que es
+  preliminar.
+
+**Lo que la empresa debe revisar, porque la política lo afirma:**
+
+- **La autorización.** El texto dice que la empresa le pide la autorización a cada persona antes de
+  crearle la cuenta. La aplicación no la recoge ni la guarda: tiene que existir por fuera (en el
+  contrato o en un formato firmado), o hay que diseñar cómo se recoge.
+- **La supresión.** Los usuarios se desactivan, no se borran, y su nombre queda en el historial, que
+  es inmutable (RNF-12). El texto lo dice así; conviene que lo confirme quien asesore en lo legal.
+- **Los encargados.** Nombra a Supabase y a Cloudflare y dice que sus servidores pueden estar fuera
+  de Colombia. La empresa debe revisar los términos de esos servicios para la transmisión de datos.
+- **El aviso de los cambios.** Dice que un cambio importante se informa «por la plataforma» antes de
+  aplicarlo. Hoy eso sería a mano; no hay una función que lo haga.
+
+Dos renglones describen funciones que todavía no existen y están escritos en condicional: las
+fotografías de evidencia (Sprint 4) y las notificaciones en el dispositivo (Sprint 5). Si alguna se
+recorta, hay que quitar su renglón.
+
+No se registró la política en la Superintendencia de Industria y Comercio ni se evaluó si la empresa
+debe inscribir sus bases de datos en el Registro Nacional de Bases de Datos: eso lo define la
+empresa.
