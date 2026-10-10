@@ -207,8 +207,9 @@ select results_eq(
   $$ select estado_anterior::text, estado_nuevo::text, usuario_id, observacion, area_anterior_id, area_nueva_id
      from public.historial_transicion
      where novedad_id = 'a5000000-0000-4000-8000-0000000000d1' $$,
-  $$ values ('en_atencion', 'resuelta', 'a5000000-0000-4000-8000-000000000002'::uuid, null::text, null::uuid, null::uuid) $$,
-  'RF-16 / CU-14 7: el historial registra en atención → resuelta, sin observación (la solución queda en la novedad)'
+  $$ values ('en_atencion', 'resuelta', 'a5000000-0000-4000-8000-000000000002'::uuid,
+             'Se actualizó el firmware del biométrico.', null::uuid, null::uuid) $$,
+  'RF-16 / CU-14 7: el historial registra en atención → resuelta, con la solución como observación (así no se pierde si la falla persiste; Sprint 3)'
 );
 
 -- CU-14 5a · el mismo tipo, aunque cambien mayúsculas, tildes o espacios ----------------------

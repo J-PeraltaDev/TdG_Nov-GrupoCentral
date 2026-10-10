@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { registrarPorLaApi } from './apoyo/novedades.js'
+import { diaEnColombia, registrarPorLaApi } from './apoyo/novedades.js'
 import { descripcionUnica } from './apoyo/registro.js'
 import {
   HAY_CLAVE,
@@ -18,14 +18,6 @@ import {
  */
 
 const ESPERA_DE_SESION = { timeout: 20_000 }
-
-/** `AAAA-MM-DD` de hoy en Colombia más los días indicados. */
-function diaEnColombia(masDias = 0) {
-  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
-  const fecha = new Date(`${hoy}T12:00:00Z`)
-  fecha.setUTCDate(fecha.getUTCDate() + masDias)
-  return fecha.toISOString().slice(0, 10)
-}
 
 test.describe('CU-14 · Registrar solución aplicada', () => {
   test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
@@ -93,14 +85,18 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
       page.getByText('Solución registrada. La finca debe confirmar el cierre.'),
     ).toBeVisible()
     await expect(estadoEnElDetalle(page, 'Resuelta')).toBeVisible()
-    await expect(page.getByText(solucion)).toBeVisible()
+    // La solución sale en su bloque y, desde el Sprint 3, bajo su transición en la línea de
+    // tiempo: ahí se conserva si la finca responde que la falla persiste.
+    await expect(page.getByText(solucion)).toHaveCount(2)
+    await expect(page.getByText(solucion).first()).toBeVisible()
     await expect(page.getByText(tipo).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Registrar solución' })).toHaveCount(0)
     await expect(
       page.getByRole('region', { name: 'Línea de tiempo' }).getByRole('listitem'),
     ).toHaveCount(4)
 
-    // En la base quedó resuelta con sus tres datos y una transición sin observación.
+    // En la base quedó resuelta con sus tres datos, y la solución también en el historial:
+    // así no se pierde si la finca responde que la falla persiste (RF-15).
     const [vista] = await leerDeLaApi(
       page,
       `v_novedad?select=estado,solucion,fecha_ejecucion,tipo_falla&id=eq.${novedad.id}`,
@@ -115,7 +111,7 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
       page,
       `historial_transicion?select=estado_anterior,observacion&novedad_id=eq.${novedad.id}&estado_nuevo=eq.resuelta`,
     )
-    expect(historial).toEqual([{ estado_anterior: 'en_atencion', observacion: null }])
+    expect(historial).toEqual([{ estado_anterior: 'en_atencion', observacion: solucion }])
 
     // CU-14 5a: el tipo recién creado ya se sugiere, aunque se escriba en mayúsculas y con
     // espacios de más, y es coincidencia exacta.
@@ -138,7 +134,7 @@ test.describe('CU-14 · Registrar solución aplicada', () => {
     await expect(reportante.page.getByText(descripcion)).toBeVisible(ESPERA_DE_SESION)
     await reportante.page.goto(`/novedades/${novedad.id}`)
     await expect(estadoEnElDetalle(reportante.page, 'Resuelta')).toBeVisible(ESPERA_DE_SESION)
-    await expect(reportante.page.getByText(solucion)).toBeVisible()
+    await expect(reportante.page.getByText(solucion).first()).toBeVisible()
     await reportante.contexto.close()
 
     // Y el administrador, el suyo, porque se creó un tipo de falla.

@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 74 (más las 6 de preparación)       | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 80 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -31,6 +31,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
 | 27  | Detalles de las pantallas 19, 20 y 20-C    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 28  | Detalles de las pantallas 09, 09-B y 09-C  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -190,6 +191,10 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   título es la opción («Aprobar», «Rechazar»), debajo va su consecuencia con los textos del panel,
   y la ayuda del campo se parte en dos, «Opcional al aprobar» y «Obligatoria al rechazar» (en el
   panel va entera: «Opcional al aprobar, obligatoria al rechazar»).
+- **Confirmar el cierre o «la falla persiste» (Sprint 3):** los avisos «Cierre confirmado. La
+  novedad queda Cerrada.» y «Novedad devuelta a {área}. Vuelve a estar En atención.»; los botones
+  dicen «Cerrando…» y «Devolviendo…» mientras se ejecutan; «Observación (opcional)» en el diálogo
+  09-C, que Figma no trae.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 - **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
@@ -357,12 +362,20 @@ npm run test:e2e:chromium
 **En el Sprint 3 las corre también el agente,** con el permiso del equipo (9 oct 2026): las
 pruebas cargan `.env.local` por su cuenta y la contraseña no pasa por la conversación. Ese día,
 con las cuatro de CU-13 (la decisión del director y la pantalla 18-C, que estaba pendiente),
-**pasaron las 74, más las seis de preparación (80).**
+pasaron las 74, más las seis de preparación. Con las seis de CU-15 (confirmar el cierre, «la falla
+persiste» y el recorrido completo del incremento, de registrar a cerrar con cada rol en su
+pantalla), **pasaron las 80, más las seis de preparación (86).**
+
+Una aserción de CU-14 cambió con la decisión 21 C: la transición a «resuelta» lleva ahora la
+solución como observación, y el texto de la solución sale dos veces en el detalle (en su bloque y
+en la línea de tiempo). La migración ya está en «staging»: en una rama anterior a
+`feat/RF-15-confirmar-resolucion`, esa prueba falla.
 
 Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas dejan novedades con
-descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`. Las de CU-13
-reutilizan uno de esos tipos y dejan sus novedades decididas (resueltas o rechazadas); las de
-CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias páginas.
+descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`. Las de CU-13 y
+CU-15 reutilizan uno de esos tipos y dejan sus novedades decididas, cerradas o de nuevo en
+atención; las de CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias
+páginas.
 
 **Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
 pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
@@ -655,3 +668,32 @@ plan del Sprint 3:
 - **El foco después de una acción ya no desplaza la página.** Al quedarse sin el botón que tenía
   el foco, este pasa al contenido (Sprint 2); ahora lo hace sin mover lo que la persona está
   viendo. Vale para todas las acciones del detalle.
+
+## 28 · Detalles de las pantallas 09, 09-B y 09-C (la finca responde)
+
+Lo que Figma no dibuja o deja abierto, resuelto con las decisiones 20, 21, 22, 31 y 47 del plan del
+Sprint 3:
+
+- **09-C trae un campo que Figma no dibuja: «Observación (opcional)»** (decisión 31). CU-15 3 dice
+  que el reportante, «si lo desea, escribe una observación», y la función la recibe. Es apartarse de
+  Figma para cumplir el caso de uso: **falta reflejarlo en Figma.**
+- **En el escritorio.** Figma solo dibuja 09 en el teléfono. Los dos botones van bajo el encabezado
+  del detalle, en el mismo orden («La falla persiste» y «Confirmar cierre»); la hoja 09-B es un
+  diálogo centrado, como las del aprobador, y el aviso temporal va abajo a la derecha.
+- **Diálogo.** 09-C es el primer diálogo de confirmación: `core/ui/Dialogo.jsx`, centrado en los dos
+  formatos, que también usarán 28-B, 30 y 32. Se cierra con Escape, con «Cancelar» o tocando el
+  fondo, y devuelve el foco al botón que lo abrió.
+- **La solución también sale en la línea de tiempo,** bajo «→ Resuelta» (decisión 21 C y
+  `docs/cambios-sdd.md`, entrada 12). En una novedad resuelta o cerrada se lee dos veces: en su
+  bloque y en el historial. Figma no la dibuja en la línea de tiempo.
+- **Después de «la falla persiste».** La novedad vuelve a En atención sin el bloque de la solución;
+  el texto de la que no sirvió queda en la línea de tiempo. «Tomada por» sigue mostrando al
+  aprobador de la última vez que pasó de asignada a en atención, no al reportante (decisión 22).
+- **Después de responder.** La persona se queda en el detalle, que se recarga sin pasar por
+  «Cargando…», ya sin la barra y con su aviso temporal. Si otra persona de la finca respondió antes,
+  «La novedad cambió de estado.» y se recarga.
+- **Quién puede responder.** Cualquier reportante activo de la finca de la novedad, no solo quien la
+  registró (Tabla 30), aunque la finca se haya desactivado después (CU-04 3b).
+- **Lo que llega después:** «Adjuntar foto» y el bloque «Evidencias» de 09, y 09-D (el cierre
+  bloqueado sin conexión), en el Sprint 4. Aquí, si la conexión se cae durante la acción, no se
+  aplica, el aviso dice que la novedad sigue Resuelta y ofrece «Reintentar».
