@@ -2,8 +2,10 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
+import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
   escalarNovedad,
+  reasignarNovedad,
   rechazarNovedad,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
@@ -13,15 +15,21 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   tomarNovedad: vi.fn(),
   rechazarNovedad: vi.fn(),
   escalarNovedad: vi.fn(),
+  reasignarNovedad: vi.fn(),
+}))
+vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
+  listarAreas: vi.fn(),
 }))
 
-const ASIGNADA = { id: 'n-153', estado: 'asignada' }
+const ASIGNADA = { id: 'n-153', estado: 'asignada', area_id: 'area-m', area: 'Mantenimiento' }
 const ATENDIDA = {
   id: 'n-153',
   estado: 'en_atencion',
   codigo: 150,
   finca: 'Pavarandó',
   prioridad: 'critico',
+  area_id: 'area-m',
+  area: 'Mantenimiento',
 }
 const APROBADA = { id: 'n-153', estado: 'aprobada' }
 // Lo que la Tabla 35 le permite al aprobador en cada estado.
@@ -31,16 +39,18 @@ const EN_APROBADA = [ACCION.REGISTRAR_SOLUCION]
 
 function pintar(props = {}) {
   const alCambiar = vi.fn()
+  const alSalir = vi.fn()
   const utilidades = render(
     <AccionesDelAprobador
       novedad={ASIGNADA}
       acciones={EN_ASIGNADA}
       alCambiar={alCambiar}
+      alSalir={alSalir}
       esEscritorio={false}
       {...props}
     />,
   )
-  return { alCambiar, ...utilidades }
+  return { alCambiar, alSalir, ...utilidades }
 }
 
 const tomar = () => screen.getByRole('button', { name: 'Tomar para atención' })
@@ -382,7 +392,11 @@ describe('Escalar desde el detalle (RF-12 / CU-12, Figma 15)', () => {
 
     expect(barra()).toContainElement(escalar())
     const botones = within(barra()).getAllByRole('button')
-    expect(botones.map((boton) => boton.textContent)).toEqual(['Escalar al director', 'Rechazar'])
+    expect(botones.map((boton) => boton.textContent)).toEqual([
+      'Escalar al director',
+      'Reasignar',
+      'Rechazar',
+    ])
   })
 
   it('RF-12: una novedad asignada no ofrece escalar: primero hay que tomarla', () => {
@@ -515,5 +529,143 @@ describe('Escalar desde el detalle (RF-12 / CU-12, Figma 15)', () => {
     expect(barra()).toBeNull()
     expect(escalar()).toBeEnabled()
     expect(rechazar()).toBeEnabled()
+  })
+})
+
+describe('Reasignar desde el detalle (RF-17 / CU-17, Figma 17)', () => {
+  beforeEach(() => {
+    vi.mocked(tomarNovedad).mockReset()
+    vi.mocked(rechazarNovedad).mockReset()
+    vi.mocked(escalarNovedad).mockReset()
+    vi.mocked(reasignarNovedad).mockReset()
+    vi.mocked(listarAreas).mockReset()
+    vi.mocked(listarAreas).mockResolvedValue([
+      { id: 'area-m', nombre: 'Mantenimiento' },
+      { id: 'area-s', nombre: 'Sistemas' },
+    ])
+  })
+
+  const reasignar = () => screen.getByRole('button', { name: 'Reasignar' })
+  const motivoDeReasignacion = () =>
+    screen.getByRole('textbox', { name: 'Motivo de la reasignación' })
+
+  /** Abre la hoja, espera el destino, escribe el motivo y confirma. */
+  async function reasignarCon(texto) {
+    await userEvent.click(reasignar())
+    const hoja = within(screen.getByRole('dialog', { name: 'Reasignar a otra área' }))
+    await hoja.findByText('Destino')
+    await userEvent.type(motivoDeReasignacion(), texto)
+    await userEvent.click(hoja.getByRole('button', { name: 'Reasignar' }))
+  }
+
+  it.each([
+    ['asignada', ASIGNADA, EN_ASIGNADA, ['Tomar para atención', 'Reasignar', 'Rechazar']],
+    ['en atención', ATENDIDA, EN_ATENCION, ['Escalar al director', 'Reasignar', 'Rechazar']],
+  ])(
+    'RF-17 / CU-17 1: una novedad %s se puede reasignar; comparte fila con «Rechazar»',
+    (_, novedad, acciones, esperados) => {
+      pintar({ novedad, acciones })
+
+      const botones = within(barra()).getAllByRole('button')
+      expect(botones.map((boton) => boton.textContent)).toEqual(esperados)
+      expect(reasignar().parentElement).toBe(rechazar().parentElement)
+    },
+  )
+
+  it('RF-17 / CU-17 1 y 2: «Reasignar» abre la hoja con el área actual y la de destino', async () => {
+    pintar()
+
+    await userEvent.click(reasignar())
+
+    const hoja = within(screen.getByRole('dialog', { name: 'Reasignar a otra área' }))
+    expect(
+      within(hoja.getByText('Área actual').closest('p')).getByText('Mantenimiento'),
+    ).toBeVisible()
+    expect(
+      within((await hoja.findByText('Destino')).closest('p')).getByText('Sistemas'),
+    ).toBeVisible()
+    expect(reasignarNovedad).not.toHaveBeenCalled()
+  })
+
+  it('RF-17 / CU-17 3 a 6: al confirmar llama a la función con el área de destino y el motivo, y sale del detalle con el aviso', async () => {
+    vi.mocked(reasignarNovedad).mockResolvedValue({ id: 'n-153', estado: 'asignada' })
+    const { alCambiar, alSalir } = pintar()
+
+    await reasignarCon('Es un daño de la red; lo atiende Sistemas.')
+
+    expect(reasignarNovedad).toHaveBeenCalledExactlyOnceWith(
+      'n-153',
+      'area-s',
+      'Es un daño de la red; lo atiende Sistemas.',
+    )
+    await vi.waitFor(() =>
+      expect(alSalir).toHaveBeenCalledExactlyOnceWith('Novedad reasignada a Sistemas.'),
+    )
+    // La novedad ya no está en su alcance: recargar el detalle daría «No puedes ver esta
+    // novedad».
+    expect(alCambiar).not.toHaveBeenCalled()
+  })
+
+  it('RF-25 / CU-17 1a (14-C): si se pierde la conexión cierra la hoja, dice que no se aplicó y «Reintentar» envía lo mismo', async () => {
+    vi.mocked(reasignarNovedad).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    const { alCambiar, alSalir } = pintar()
+
+    await reasignarCon('No es de Mantenimiento')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se aplicó: se perdió la conexión. La novedad sigue Asignada.',
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(alSalir).not.toHaveBeenCalled()
+
+    vi.mocked(reasignarNovedad).mockResolvedValue({ id: 'n-153', estado: 'asignada' })
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+
+    await vi.waitFor(() => expect(alSalir).toHaveBeenCalledOnce())
+    expect(reasignarNovedad).toHaveBeenLastCalledWith('n-153', 'area-s', 'No es de Mantenimiento')
+    expect(alCambiar).not.toHaveBeenCalled()
+  })
+
+  it('RF-17: si alguien cambió el estado antes, cierra la hoja, avisa y recarga el detalle', async () => {
+    vi.mocked(reasignarNovedad).mockRejectedValue({ code: 'P0001', message: 'TRANSICION_INVALIDA' })
+    const { alCambiar, alSalir } = pintar()
+
+    await reasignarCon('No es de Mantenimiento')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('La novedad cambió de estado.')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(alCambiar).toHaveBeenCalledOnce()
+    expect(alSalir).not.toHaveBeenCalled()
+  })
+
+  it('RF-17: si el servidor responde AREA_INVALIDA, cierra la hoja y muestra «Elige otra área.»', async () => {
+    vi.mocked(reasignarNovedad).mockRejectedValue({ code: 'P0001', message: 'AREA_INVALIDA' })
+    const { alSalir } = pintar()
+
+    await reasignarCon('No es de Mantenimiento')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Elige otra área.')
+    expect(alSalir).not.toHaveBeenCalled()
+  })
+
+  it('RF-17: si el servidor responde DATO_OBLIGATORIO, la hoja sigue abierta y señala el campo', async () => {
+    vi.mocked(reasignarNovedad).mockRejectedValue({ code: 'P0001', message: 'DATO_OBLIGATORIO' })
+    const { alSalir } = pintar()
+
+    await reasignarCon('No es de Mantenimiento')
+
+    await vi.waitFor(() => expect(motivoDeReasignacion()).toBeInvalid())
+    expect(alSalir).not.toHaveBeenCalled()
+  })
+
+  it('RF-17: «Cancelar» cierra la hoja sin reasignar y devuelve el foco al botón', async () => {
+    pintar()
+    await userEvent.click(reasignar())
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(reasignarNovedad).not.toHaveBeenCalled()
+    expect(reasignar()).toHaveFocus()
   })
 })

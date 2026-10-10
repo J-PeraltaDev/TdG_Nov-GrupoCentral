@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
@@ -295,6 +295,7 @@ function Escritorio({ novedad, transiciones, acciones }) {
 export default function DetalleNovedad() {
   const { id } = useParams()
   const { state } = useLocation()
+  const navegar = useNavigate()
   const { perfil } = useSesion()
   const enLinea = useEnLinea()
   const esEscritorio = useEsEscritorio()
@@ -353,6 +354,12 @@ export default function DetalleNovedad() {
 
   const origen = rutaDeOrigen(state, perfil.rol_id)
   const textoDeVolver = VOLVER[origen.split('?')[0]] ?? 'Volver'
+  // Cuando el aprobador reasigna la novedad, deja de estar en su alcance: vuelve a su bandeja
+  // (la misma pestaña y filtro, si venía de ahí), que muestra el aviso.
+  const volverALaBandeja = (/** @type {string} */ mensaje) =>
+    navegar(origen.split('?')[0] === '/bandeja' ? origen : '/bandeja', {
+      state: { aviso: mensaje },
+    })
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const acciones =
@@ -362,6 +369,7 @@ export default function DetalleNovedad() {
           novedad={novedad}
           acciones={accionesDisponibles(perfil, novedad)}
           alCambiar={recargar}
+          alSalir={volverALaBandeja}
           esEscritorio={esEscritorio}
         />
       </Suspense>

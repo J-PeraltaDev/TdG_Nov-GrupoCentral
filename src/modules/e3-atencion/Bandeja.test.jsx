@@ -569,6 +569,41 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
     expect(listarBandeja).toHaveBeenCalledOnce()
   })
 
+  it('RF-17 / CU-17: al llegar del detalle después de reasignar, muestra el aviso y lo quita de la navegación', async () => {
+    conBandeja()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      abrir({
+        pathname: '/bandeja',
+        search: '?pestana=en_atencion',
+        state: { aviso: 'Novedad reasignada a Sistemas.' },
+      })
+
+      const aviso = await screen.findByText('Novedad reasignada a Sistemas.')
+      expect(aviso.closest('[data-aviso-temporal]')).toHaveAttribute('role', 'status')
+      // Sigue en la pestaña en la que estaba.
+      const pestana = () => screen.getByRole('tab', { name: /En atención/ })
+      expect(pestana()).toHaveAttribute('aria-selected', 'true')
+
+      // Cumplido su tiempo se quita, y con él el estado de la navegación.
+      await vi.advanceTimersByTimeAsync(6100)
+      await vi.waitFor(() =>
+        expect(screen.queryByText('Novedad reasignada a Sistemas.')).not.toBeInTheDocument(),
+      )
+      expect(pestana()).toHaveAttribute('aria-selected', 'true')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('RNF-11: un aviso que no es un texto no se pinta', async () => {
+    conBandeja()
+    abrir({ pathname: '/bandeja', state: { aviso: { mensaje: 'x' } } })
+    await filas()
+
+    expect(document.querySelector('[data-aviso-temporal]')).toBeNull()
+  })
+
   it('si el historial no carga, la tabla se muestra igual, sin las notas de reasignación', async () => {
     conBandeja()
     vi.mocked(listarTransicionesDeBandeja).mockRejectedValue(new TypeError('Failed to fetch'))

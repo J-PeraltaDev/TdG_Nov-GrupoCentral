@@ -12,13 +12,12 @@ import iconoFinca from '../../core/ui/iconos/agriculture.svg'
 import iconoElegida from '../../core/ui/iconos/check_circle.svg'
 import iconoCerrar from '../../core/ui/iconos/close.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
-import iconoMantenimiento from '../../core/ui/iconos/construction.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoBloqueado from '../../core/ui/iconos/lock.svg'
 import iconoMarcado from '../../core/ui/iconos/radio_button_checked.svg'
 import iconoSinMarcar from '../../core/ui/iconos/radio_button_unchecked.svg'
-import iconoSistemas from '../../core/ui/iconos/router.svg'
 import iconoEnviar from '../../core/ui/iconos/send.svg'
+import { PRESENTACION_DEL_AREA } from '../../core/ui/presentacionDelArea.js'
 import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { crearBorrador, enviarNovedad } from './enviarNovedad.js'
 import { resumenDeFaltantes, validarNovedad } from './validarNovedad.js'
@@ -56,20 +55,6 @@ const PRIORIDADES = [
     marca: 'text-prioridad-bajo',
   },
 ]
-
-/** Qué atiende cada área. Las áreas vienen del catálogo; esto es solo su presentación. */
-const PRESENTACION_DEL_AREA = {
-  Mantenimiento: {
-    icono: iconoMantenimiento,
-    colores: 'bg-advertencia-suave text-area-mantenimiento',
-    atiende: 'Infraestructura, puentes, bombas, equipos y herramientas',
-  },
-  Sistemas: {
-    icono: iconoSistemas,
-    colores: 'bg-info-suave text-area-sistemas',
-    atiende: 'Internet, biométricos, torniquetes y equipos de cómputo',
-  },
-}
 
 // El botón de opción real queda oculto a la vista; el foco se dibuja en la tarjeta.
 const TARJETA =

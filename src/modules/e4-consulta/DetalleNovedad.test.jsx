@@ -1,11 +1,13 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
   escalarNovedad,
   listarLineaDeTiempo,
   obtenerNovedad,
+  reasignarNovedad,
   rechazarNovedad,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
@@ -19,7 +21,23 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   tomarNovedad: vi.fn(),
   rechazarNovedad: vi.fn(),
   escalarNovedad: vi.fn(),
+  reasignarNovedad: vi.fn(),
 }))
+vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
+  listarAreas: vi.fn(),
+}))
+
+/** La bandeja, reducida a lo que el detalle le entrega al volver: la dirección y el aviso. */
+function BandejaDePrueba() {
+  const { search, state } = useLocation()
+  return (
+    <>
+      <h1>Bandeja del área</h1>
+      <p data-testid="consulta">{search}</p>
+      <p role="status">{state?.aviso}</p>
+    </>
+  )
+}
 
 const ID = '00000000-0000-4000-e000-000000000153'
 // 8:05 a. m. del 24 de septiembre en Colombia.
@@ -104,7 +122,7 @@ function abrir({ rol = 'aprobador', id = ID, origen } = {}) {
         }
       />
       <Route path="/novedades" element={<h1>Mis novedades</h1>} />
-      <Route path="/bandeja" element={<h1>Bandeja del área</h1>} />
+      <Route path="/bandeja" element={<BandejaDePrueba />} />
       <Route path="/escaladas" element={<h1>Novedades escaladas</h1>} />
     </Routes>,
     {
@@ -124,6 +142,8 @@ beforeEach(() => {
   vi.mocked(tomarNovedad).mockReset()
   vi.mocked(rechazarNovedad).mockReset()
   vi.mocked(escalarNovedad).mockReset()
+  vi.mocked(reasignarNovedad).mockReset()
+  vi.mocked(listarAreas).mockReset()
 })
 
 afterEach(() => {
@@ -412,6 +432,42 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveFocus()
   })
+
+  it.each([
+    [
+      'desde la bandeja, vuelve a la misma pestaña',
+      '/bandeja?pestana=en_atencion',
+      '?pestana=en_atencion',
+    ],
+    ['por la dirección, va a la bandeja', undefined, ''],
+  ])(
+    'RF-17 / CU-17: al reasignarla no recarga el detalle (%s) y la bandeja recibe el aviso',
+    async (_, origen, consulta) => {
+      conNovedad()
+      vi.mocked(listarAreas).mockResolvedValue([
+        { id: 'area-m', nombre: 'Mantenimiento' },
+        { id: 'area-s', nombre: 'Sistemas' },
+      ])
+      vi.mocked(reasignarNovedad).mockResolvedValue({ id: ID, estado: 'asignada' })
+      abrir({ rol: 'aprobador', origen })
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Reasignar' }))
+      const hoja = within(screen.getByRole('dialog', { name: 'Reasignar a otra área' }))
+      await hoja.findByText('Destino')
+      await userEvent.type(
+        hoja.getByRole('textbox', { name: 'Motivo de la reasignación' }),
+        'Es de Sistemas',
+      )
+      await userEvent.click(hoja.getByRole('button', { name: 'Reasignar' }))
+
+      expect(await screen.findByRole('heading', { name: 'Bandeja del área' })).toBeVisible()
+      expect(reasignarNovedad).toHaveBeenCalledExactlyOnceWith(ID, 'area-s', 'Es de Sistemas')
+      expect(screen.getByRole('status')).toHaveTextContent('Novedad reasignada a Sistemas.')
+      expect(screen.getByTestId('consulta')).toHaveTextContent(consulta)
+      // El detalle no se volvió a pedir: ya no está en el alcance de esta persona.
+      expect(obtenerNovedad).toHaveBeenCalledOnce()
+    },
+  )
 
   it('RF-10: en el escritorio la acción va bajo el encabezado', async () => {
     simularPantalla('escritorio')

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useSearchParams } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarFincas } from '../../core/supabase/repositorios/catalogos.js'
@@ -24,6 +24,7 @@ import iconoBandeja from '../../core/ui/iconos/inbox.svg'
 import { Pestanas } from '../../core/ui/Pestanas.jsx'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
+import { AVISO_SUELTO } from './posicionDelAviso.js'
 import { PESTANAS, resumirTransiciones } from './reglasDeBandeja.js'
 import { TablaDeBandeja } from './TablaDeBandeja.jsx'
 import { useAccion } from './useAccion.js'
@@ -117,8 +118,17 @@ export default function Bandeja() {
 
   // La pestaña y la finca viven en la URL: se vuelve a ellas con «atrás» y se pueden compartir.
   const [parametros, setParametros] = useSearchParams()
-  const { pathname, search } = useLocation()
+  const { pathname, search, state } = useLocation()
+  const navegar = useNavigate()
   const origen = pathname + search
+  // El aviso con que se llega desde el detalle cuando la novedad salió del alcance (se
+  // reasignó). Vive en el estado de la navegación: al cumplir su tiempo se quita de ahí, para
+  // que no reaparezca al recargar ni al volver atrás.
+  const avisoDeLlegada = typeof state?.aviso === 'string' ? state.aviso : null
+  const quitarAvisoDeLlegada = useCallback(
+    () => navegar(origen, { replace: true, state: null }),
+    [navegar, origen],
+  )
   const pestana = PESTANAS.find(({ id }) => id === parametros.get('pestana')) ?? PESTANAS[0]
   // El filtro por finca solo existe en el escritorio (Figma 12).
   const fincaId = esEscritorio ? parametros.get('finca') : null
@@ -391,6 +401,10 @@ export default function Bandeja() {
             className="fixed right-8 bottom-6 z-20 w-96"
           >
             {aviso.mensaje}
+          </AvisoTemporal>
+        ) : avisoDeLlegada ? (
+          <AvisoTemporal alTerminar={quitarAvisoDeLlegada} className={AVISO_SUELTO}>
+            {avisoDeLlegada}
           </AvisoTemporal>
         ) : null}
 
