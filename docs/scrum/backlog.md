@@ -451,7 +451,7 @@ Pantallas de Figma (SDD, Tabla 36: 04, 09, 13, 14, 20–22)
 - **CU-02** · Actores: Usuario (primario); Administrador (secundario).
 - **Precondición:** El usuario está registrado con un correo asignado por el administrador y hay conexión.
 - **Postcondición:** La contraseña del usuario queda actualizada.
-- **Puntos:** por estimar
+- **Puntos:** 13
 
 Criterios de aceptación · curso normal
 
@@ -486,7 +486,7 @@ Pantallas de Figma (SDD, Tabla 36: 02, 03, 32)
 - **CU-03** · Actores: Administrador (primario).
 - **Precondición:** El administrador inició sesión y hay conexión.
 - **Postcondición:** El usuario queda creado, actualizado o desactivado con su rol asignado.
-- **Puntos:** por estimar
+- **Puntos:** 13
 
 Criterios de aceptación · curso normal
 
@@ -517,7 +517,7 @@ Pantallas de Figma (SDD, Tabla 36: 28, 29)
 - **CU-04** · Actores: Administrador (primario).
 - **Precondición:** El administrador inició sesión y hay conexión.
 - **Postcondición:** La finca queda disponible para el registro de novedades, o inactiva si se desactivó.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -546,7 +546,7 @@ Pantallas de Figma (SDD, Tabla 36: 30)
 - **CU-13** · Actores: Director de agricultura (primario).
 - **Precondición:** La novedad está “escalada”, el director inició sesión y hay conexión.
 - **Postcondición:** La novedad queda “aprobada”, y regresa al área para ejecutar la solución (CU-14), o “rechazada”, con lo que el caso termina.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -579,7 +579,7 @@ Pantallas de Figma (SDD, Tabla 36: 12, 19, 20)
 - **CU-15** · Actores: Reportante (primario).
 - **Precondición:** La novedad está “resuelta”, pertenece a la finca del reportante y hay conexión.
 - **Postcondición:** La novedad queda “cerrada” y no admite más cambios, salvo la corrección del tipo de falla por el administrador (CU-32), que no cambia su estado y queda anotada en su historial.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
