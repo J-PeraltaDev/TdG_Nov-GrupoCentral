@@ -1,14 +1,33 @@
-import { Navigate, Outlet } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { Navigate, Outlet, useNavigate } from 'react-router'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
 import { rutaDeInicio } from '../core/sesion/roles.js'
 import { Cargando } from './Cargando.jsx'
 
-/** Deja pasar solo con sesión; sin ella, lleva al ingreso (RNF-10). */
+/**
+ * Deja pasar solo con sesión; sin ella, lleva al ingreso (RNF-10).
+ *
+ * Si con la sesión abierta le cambian el rol, la finca o el área (RF-03), lo lleva a su
+ * pantalla de inicio y vuelve a montar las pantallas: lo que tenían cargado era del alcance
+ * anterior.
+ */
 export function RequiereSesion() {
-  const { fase } = useSesion()
+  const { fase, perfil } = useSesion()
+  const navegar = useNavigate()
+  const alcance = perfil ? `${perfil.rol_id}:${perfil.finca_id}:${perfil.area_id}` : null
+  const anterior = useRef(alcance)
+
+  useEffect(() => {
+    const cambio = anterior.current !== null && alcance !== null && anterior.current !== alcance
+    anterior.current = alcance
+    if (cambio) navegar(rutaDeInicio(perfil.rol_id), { replace: true })
+    // Solo importa el cambio del alcance: `navegar` y `perfil` no lo disparan.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [alcance])
+
   if (fase === 'cargando') return <Cargando />
   if (fase === 'sin_sesion') return <Navigate to="/ingresar" replace />
-  return <Outlet />
+  return <Outlet key={alcance} />
 }
 
 /**

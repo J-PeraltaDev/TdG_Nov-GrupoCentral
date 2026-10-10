@@ -133,32 +133,48 @@ function conLimite(promesa, milisegundos) {
  * (docs/pruebas/sesion-sin-conexion.md). La sesión se renueva sola cuando vuelve la red, y los
  * datos siempre los protege el servidor (RNF-11).
  *
- * @returns {Promise<Perfil | null>}
+ * La misma revisión se repite con la sesión viva (al volver a la pestaña, o cuando una acción
+ * responde `SIN_PERMISO`): si un administrador desactivó al usuario mientras tanto, aquí se
+ * cierra la sesión local, y se dice por qué, para que el ingreso muestre el aviso 01-C
+ * (RF-03 / CU-01 4b). Las novedades pendientes de sincronizar se conservan.
+ *
+ * @returns {Promise<{ perfil: Perfil | null, desactivado: boolean }>} `desactivado`: había
+ *   sesión, pero el usuario ya no está activo (o no tiene perfil) y se cerró.
  */
-export async function restaurarSesion() {
+export async function revisarSesion() {
   const guardado = (await leerMeta('perfil')) ?? null
+  const con = (perfil) => ({ perfil, desactivado: false })
 
-  if (!navigator.onLine) return guardado
+  if (!navigator.onLine) return con(guardado)
 
   const respuesta = await conLimite(supabase.auth.getSession(), ESPERA_DE_SESION_MS)
   // El navegador dice que hay red, pero no responde: se sigue con lo guardado.
-  if (!respuesta) return guardado
+  if (!respuesta) return con(guardado)
 
   const { data, error } = respuesta
-  if (!data.session) return error && esErrorDeRed(error) ? guardado : null
+  if (!data.session) return con(error && esErrorDeRed(error) ? guardado : null)
 
   try {
     const descargado = await descargarPerfil(data.session.user.id)
     if (!descargado) {
       await cerrarSesion()
-      return null
+      return { perfil: null, desactivado: true }
     }
     await guardarEnElDispositivo(descargado)
-    return descargado.perfil
+    return con(descargado.perfil)
   } catch (fallo) {
     // Se cayó la red justo ahora: se sigue con lo guardado, si es del mismo usuario.
-    return esErrorDeRed(fallo) && guardado?.id === data.session.user.id ? guardado : null
+    return con(esErrorDeRed(fallo) && guardado?.id === data.session.user.id ? guardado : null)
   }
+}
+
+/**
+ * El perfil de la sesión guardada, o `null` si no hay sesión. Es `revisarSesion` sin el motivo.
+ *
+ * @returns {Promise<Perfil | null>}
+ */
+export async function restaurarSesion() {
+  return (await revisarSesion()).perfil
 }
 
 /**

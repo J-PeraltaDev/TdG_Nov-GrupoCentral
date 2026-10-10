@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
-import { pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
+import { PERFILES, pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
 import { Rutas } from './Rutas.jsx'
 
 // Las pantallas del reportante consultan el servidor: aquí solo interesan las rutas.
@@ -301,6 +301,57 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'No encontramos esta página' }),
     ).toBeVisible()
+  })
+
+  it('RF-03: si le cambian el rol con la sesión abierta, pasa al inicio y al menú del rol nuevo', async () => {
+    const { cambiarSesion } = abrir('/novedades', 'reportante')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mis novedades' })).toBeVisible()
+
+    cambiarSesion({ perfil: PERFILES.aprobador })
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bandeja · Mantenimiento' }),
+    ).toBeVisible()
+    expect(await menuDelEscritorio()).toEqual(['Bandeja', 'Historial', 'Avisos'])
+  })
+
+  it('RF-03: si le cambian la finca, vuelve a su inicio y las listas se piden de nuevo', async () => {
+    const { listarNovedades } = await import('../core/supabase/repositorios/novedades.js')
+    const { cambiarSesion } = abrir(DETALLE, 'reportante')
+    expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    vi.mocked(listarNovedades).mockClear()
+
+    cambiarSesion({
+      perfil: {
+        ...PERFILES.reportante,
+        finca_id: 'finca-2',
+        finca: { ...PERFILES.reportante.finca, id: 'finca-2', nombre: 'Finca de prueba 02' },
+      },
+    })
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mis novedades' })).toBeVisible()
+    expect(listarNovedades).toHaveBeenCalled()
+  })
+
+  it('RF-03: si el perfil se relee sin cambios, la persona sigue donde estaba', async () => {
+    const { cambiarSesion } = abrir(DETALLE, 'reportante')
+    expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    vi.mocked(obtenerNovedad).mockClear()
+
+    cambiarSesion({ perfil: { ...PERFILES.reportante, nombre: 'Con otro nombre' } })
+
+    expect(screen.getByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    expect(obtenerNovedad).not.toHaveBeenCalled()
+  })
+
+  it('RF-03 / CU-01 4b: si lo desactivan con la sesión abierta, queda en el ingreso con el aviso 01-C', async () => {
+    const { cambiarSesion } = abrir('/novedades', 'reportante')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mis novedades' })).toBeVisible()
+
+    cambiarSesion({ fase: 'sin_sesion', perfil: null, motivoDeSalida: 'desactivado' })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Tu usuario está desactivado.')
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeVisible()
   })
 
   it('RF-04: el administrador abre la pantalla de fincas', async () => {

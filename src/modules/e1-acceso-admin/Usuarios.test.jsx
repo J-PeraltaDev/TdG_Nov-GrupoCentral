@@ -11,6 +11,7 @@ import {
   listarUsuarios,
 } from '../../core/supabase/repositorios/usuarios.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
+import { alPedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import Usuarios from './Usuarios.jsx'
 
@@ -365,8 +366,10 @@ describe('Pantalla 28-B · Desactivar y reactivar un usuario (RF-03 / CU-03 3a)'
     expect(await screen.findByRole('status')).toHaveTextContent('Usuario reactivado.')
   })
 
-  it('RNF-11: si la función responde que no tiene permiso, lo dice', async () => {
+  it('RNF-11: si la función responde que no tiene permiso, lo dice y pide releer el perfil', async () => {
     vi.mocked(activarUsuario).mockRejectedValue(new Error('SIN_PERMISO'))
+    const alPedirRevision = vi.fn()
+    const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
     abrir()
     await screen.findByRole('table')
 
@@ -375,6 +378,21 @@ describe('Pantalla 28-B · Desactivar y reactivar un usuario (RF-03 / CU-03 3a)'
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No tienes permiso para esta acción.',
     )
+    expect(alPedirRevision).toHaveBeenCalledOnce()
+    dejarDeEscuchar()
+  })
+
+  it('RNF-11: si ya no es administrador, la lista lo dice y pide releer el perfil', async () => {
+    vi.mocked(listarUsuarios).mockRejectedValue({ message: 'SIN_PERMISO' })
+    const alPedirRevision = vi.fn()
+    const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
+    abrir()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No tienes permiso para esta acción.',
+    )
+    expect(alPedirRevision).toHaveBeenCalledOnce()
+    dejarDeEscuchar()
   })
 })
 

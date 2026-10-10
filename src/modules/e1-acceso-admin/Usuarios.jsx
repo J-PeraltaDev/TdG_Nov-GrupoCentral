@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { traducirError } from '../../core/errores/traducir.js'
+import { vigilarPermiso } from '../../core/sesion/perfilVigente.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { iniciales, nombreCompletoDeRol, ROL } from '../../core/sesion/roles.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
@@ -186,7 +187,8 @@ export default function Usuarios() {
   // recargar después de un cambio se conserva lo que ya se ve hasta que llegue lo nuevo.
   useEffect(() => {
     let vigente = true
-    Promise.all([listarUsuarios(), listarFincasConConteos(), listarAreas()])
+    // Si ya no es administrador, la lista responde SIN_PERMISO: el perfil se relee.
+    Promise.all([vigilarPermiso(listarUsuarios), listarFincasConConteos(), listarAreas()])
       .then(([usuarios, fincas, areas]) => {
         if (vigente) setDatos({ cargados: true, usuarios, fincas, areas, fallo: null })
       })
@@ -216,17 +218,17 @@ export default function Usuarios() {
   /** @type {import('./PanelUsuario.jsx').AlGuardarUsuario} */
   async function guardar(cambios) {
     if (abierto?.usuario) {
-      await actualizarUsuario(abierto.usuario.id, cambios)
+      await vigilarPermiso(() => actualizarUsuario(abierto.usuario.id, cambios))
       hecho('Usuario actualizado.')
     } else {
-      await crearUsuario(cambios)
+      await vigilarPermiso(() => crearUsuario(cambios))
       // La contraseña inicial solo se vio en el formulario, que ya se cerró.
       hecho('Usuario creado. Entrégale su contraseña inicial.')
     }
   }
 
   async function desactivar() {
-    await desactivarUsuario(abierto.usuario.id)
+    await vigilarPermiso(() => desactivarUsuario(abierto.usuario.id))
     hecho('Usuario desactivado.')
   }
 
@@ -235,7 +237,7 @@ export default function Usuarios() {
     setReactivando(usuario.id)
     setAviso(null)
     try {
-      await activarUsuario(usuario.id)
+      await vigilarPermiso(() => activarUsuario(usuario.id))
       hecho('Usuario reactivado.')
     } catch (error) {
       setAviso({ tipo: 'error', mensaje: traducirError(error).mensaje })

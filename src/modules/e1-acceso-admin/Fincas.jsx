@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { traducirError } from '../../core/errores/traducir.js'
+import { vigilarPermiso } from '../../core/sesion/perfilVigente.js'
 import {
   actualizarFinca,
   crearFinca,
@@ -174,16 +175,16 @@ export default function Fincas() {
   /** @type {import('./DialogoFinca.jsx').AlGuardarFinca} */
   async function guardar({ nombre, razonSocialId }) {
     if (dialogo?.finca) {
-      await actualizarFinca(dialogo.finca.id, { nombre, razonSocialId })
+      await vigilarPermiso(() => actualizarFinca(dialogo.finca.id, { nombre, razonSocialId }))
       hecho('Finca actualizada.')
     } else {
-      await crearFinca({ nombre, razonSocialId })
+      await vigilarPermiso(() => crearFinca({ nombre, razonSocialId }))
       hecho('Finca creada.')
     }
   }
 
   async function desactivar() {
-    await actualizarFinca(dialogo.finca.id, { activo: false })
+    await vigilarPermiso(() => actualizarFinca(dialogo.finca.id, { activo: false }))
     hecho('Finca desactivada.')
   }
 
@@ -192,7 +193,7 @@ export default function Fincas() {
     setReactivando(finca.id)
     setAviso(null)
     try {
-      await actualizarFinca(finca.id, { activo: true })
+      await vigilarPermiso(() => actualizarFinca(finca.id, { activo: true }))
       hecho('Finca reactivada.')
     } catch (error) {
       setAviso({ tipo: 'error', mensaje: traducirError(error).mensaje })

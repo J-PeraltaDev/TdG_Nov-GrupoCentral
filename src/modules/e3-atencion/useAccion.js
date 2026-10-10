@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { traducirError } from '../../core/errores/traducir.js'
+import { pedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { NOMBRE_DE_ESTADO } from '../../core/utils/estados.js'
 
 /**
@@ -53,6 +54,9 @@ export function useAccion({ estado, alCambiar }) {
         return { ok: true, resultado }
       } catch (error) {
         const fallo = traducirError(error)
+        // Puede que ya no tenga ese rol o esa área, o que lo hayan desactivado: el perfil se
+        // relee, y el menú y las pantallas quedan al día (RF-03).
+        if (fallo.codigo === 'SIN_PERMISO') pedirRevisionDelPerfil()
         if (fallo.tipo === 'red') {
           setAviso({
             tipo: 'error',

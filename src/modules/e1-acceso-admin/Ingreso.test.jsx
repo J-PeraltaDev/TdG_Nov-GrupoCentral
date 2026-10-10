@@ -5,14 +5,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import { Ingreso } from './Ingreso.jsx'
 
-function abrir(ingresar = vi.fn()) {
+function abrir(ingresar = vi.fn(), sesion = {}) {
   return pintarConSesion(
     <Routes>
       <Route path="/ingresar" element={<Ingreso />} />
       <Route path="/novedades" element={<h1>Mis novedades</h1>} />
       <Route path="/bandeja" element={<h1>Bandeja del área</h1>} />
     </Routes>,
-    { ruta: '/ingresar', sesion: { ingresar } },
+    { ruta: '/ingresar', sesion: { ingresar, ...sesion } },
   )
 }
 
@@ -163,5 +163,35 @@ describe('Pantalla 01 · Iniciar sesión (RF-01 / CU-01)', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Ocultar la contraseña' }))
     expect(screen.getByLabelText('Contraseña')).toHaveAttribute('type', 'password')
+  })
+})
+
+describe('Pantalla 01-C · La sesión se cerró porque desactivaron al usuario (RF-03 / CU-01 4b)', () => {
+  const AVISO =
+    'Tu usuario está desactivado. Si crees que es un error, comunícate con un administrador.'
+
+  it('RF-03 / CU-01 4b: al llegar al ingreso dice por qué ya no tiene sesión', () => {
+    abrir(vi.fn(), { motivoDeSalida: 'desactivado' })
+
+    expect(screen.getByRole('alert')).toHaveTextContent(AVISO)
+    // El formulario sigue ahí: otra persona puede ingresar en el mismo dispositivo.
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeEnabled()
+  })
+
+  it('RF-01: lo que resulte del siguiente intento reemplaza ese aviso', async () => {
+    abrir(vi.fn().mockResolvedValue({ ok: false, motivo: 'credenciales' }), {
+      motivoDeSalida: 'desactivado',
+    })
+
+    await llenarYEnviar()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Correo o contraseña incorrectos')
+    expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+  })
+
+  it('RF-01: sin ese motivo, el ingreso no muestra ningún aviso', () => {
+    abrir()
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
