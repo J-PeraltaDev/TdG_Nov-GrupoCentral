@@ -5,6 +5,7 @@ import { supabase } from '../cliente.js'
 import { invocarFuncion } from './funciones.js'
 import { confirmarResolucion, decidirEscalamiento, reportarFallaPersiste } from './novedades.js'
 import {
+  contarSolicitudesPendientes,
   generarCodigoRecuperacion,
   listarSolicitudes,
   restablecerContrasena,
@@ -231,15 +232,50 @@ describe('Recuperación de contraseña (RF-02; SDD, Tablas 20, 21 y 23)', () => 
   })
 
   it('RF-02 / CU-02 5: listarSolicitudes pide columnas explícitas, sin el resumen del código', async () => {
-    const filas = [{ id: 's-1', usuario_id: 'u-9', expira_en: null, usado: false, creada_en: 'x' }]
+    const filas = [
+      {
+        id: 's-1',
+        usuario_id: 'u-9',
+        expira_en: null,
+        usado: false,
+        intentos_fallidos: 0,
+        creada_en: 'x',
+      },
+    ]
     const order = vi.fn().mockResolvedValue({ data: filas, error: null })
     const select = vi.fn().mockReturnValue({ order })
     vi.mocked(supabase.from).mockReturnValue({ select })
 
     await expect(listarSolicitudes()).resolves.toBe(filas)
     expect(supabase.from).toHaveBeenCalledExactlyOnceWith('solicitud_recuperacion')
-    expect(select).toHaveBeenCalledExactlyOnceWith('id, usuario_id, expira_en, usado, creada_en')
+    expect(select).toHaveBeenCalledExactlyOnceWith(
+      'id, usuario_id, expira_en, usado, intentos_fallidos, creada_en',
+    )
     expect(order).toHaveBeenCalledExactlyOnceWith('creada_en', { ascending: false })
+  })
+
+  it('RF-02 / CU-02 5: contarSolicitudesPendientes cuenta las que esperan un código, sin traer filas', async () => {
+    const is = vi.fn().mockResolvedValue({ count: 3, error: null })
+    const eq = vi.fn().mockReturnValue({ is })
+    const select = vi.fn().mockReturnValue({ eq })
+    vi.mocked(supabase.from).mockReturnValue({ select })
+
+    await expect(contarSolicitudesPendientes()).resolves.toBe(3)
+    expect(supabase.from).toHaveBeenCalledExactlyOnceWith('solicitud_recuperacion')
+    expect(select).toHaveBeenCalledExactlyOnceWith('id', { count: 'exact', head: true })
+    expect(eq).toHaveBeenCalledExactlyOnceWith('usado', false)
+    expect(is).toHaveBeenCalledExactlyOnceWith('expira_en', null)
+  })
+
+  it('contarSolicitudesPendientes lanza el error de la consulta, y sin cuenta responde cero', async () => {
+    const error = { code: '42501', message: 'permission denied' }
+    const is = vi.fn().mockResolvedValueOnce({ count: null, error })
+    vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq: () => ({ is }) }) })
+
+    await expect(contarSolicitudesPendientes()).rejects.toBe(error)
+
+    is.mockResolvedValueOnce({ count: null, error: null })
+    await expect(contarSolicitudesPendientes()).resolves.toBe(0)
   })
 
   it('RF-02 / CU-02 6: generarCodigoRecuperacion devuelve el código y su vencimiento', async () => {
@@ -264,7 +300,7 @@ describe('Recuperación de contraseña (RF-02; SDD, Tablas 20, 21 y 23)', () => 
 
   it.each([
     ['CODIGO_INVALIDO', 'El código no es válido. Revísalo; si sigue sin servir, pide uno nuevo.'],
-    ['CODIGO_VENCIDO', 'El código venció. Pídele uno nuevo al administrador.'],
+    ['CODIGO_VENCIDO', 'El código venció. Pide uno nuevo al administrador.'],
   ])('RF-02 / CU-02 9a y 9b: %s llega con su mensaje', async (codigo, mensaje) => {
     vi.mocked(supabase.functions.invoke).mockResolvedValue({
       data: null,

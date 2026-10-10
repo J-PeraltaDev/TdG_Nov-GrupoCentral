@@ -16,9 +16,19 @@ import { useEffect, useId, useRef } from 'react'
  * @param {import('react').ReactNode} props.titulo La pregunta.
  * @param {import('react').ReactNode} [props.descripcion] Qué pasa si se confirma.
  * @param {import('react').ReactNode} [props.icono] Va sobre el título (un `IconoDeHoja`).
+ * @param {boolean} [props.cierraConElFondo] `false` cuando cerrarlo sin querer cuesta algo que
+ *   no se recupera (el código temporal de 32): queda Escape y el botón del contenido.
  * @param {import('react').ReactNode} props.children Los campos, si los hay, y los botones.
  */
-export function Dialogo({ abierto, alCerrar, titulo, descripcion, icono, children }) {
+export function Dialogo({
+  abierto,
+  alCerrar,
+  titulo,
+  descripcion,
+  icono,
+  cierraConElFondo = true,
+  children,
+}) {
   const dialogo = useRef(null)
   const idDelTitulo = useId()
   const idDeLaDescripcion = useId()
@@ -40,7 +50,7 @@ export function Dialogo({ abierto, alCerrar, titulo, descripcion, icono, childre
       onClose={alCerrar}
       onClick={(evento) => {
         // El fondo (::backdrop) es el propio diálogo; el contenido va en un hijo.
-        if (evento.target === evento.currentTarget) alCerrar()
+        if (cierraConElFondo && evento.target === evento.currentTarget) alCerrar()
       }}
       className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-superficie p-0 text-texto backdrop:bg-overlay/50 lg:max-w-md"
     >

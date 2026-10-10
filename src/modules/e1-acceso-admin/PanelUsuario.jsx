@@ -20,6 +20,7 @@ import iconoAdvertencia from '../../core/ui/iconos/warning.svg'
 import { Panel } from '../../core/ui/Panel.jsx'
 import { PRESENTACION_DEL_AREA } from '../../core/ui/presentacionDelArea.js'
 import { esContrasenaValida } from '../../core/utils/contrasena.js'
+import { esCorreoValido } from '../../core/utils/correo.js'
 import { advertenciaDeAlcance } from './advertenciaDeAlcance.js'
 import { generarContrasena } from './generarContrasena.js'
 
@@ -65,9 +66,6 @@ const ORDEN = ['nombre', 'correo', 'contrasena_inicial', 'rol_id', 'finca_id', '
 /** El texto de Figma (29) bajo el correo; el mismo caso que traduce `CORREO_EXISTENTE`. */
 const CORREO_REGISTRADO = 'Este correo ya está registrado'
 const PROPIO = 'No puedes cambiar tu propio rol ni desactivar tu cuenta.'
-
-/** La misma forma mínima que revisa la función: algo, una arroba y un dominio con punto. */
-const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const TARJETA_DE_ROL =
   'flex flex-col gap-0.5 rounded-control px-3.5 py-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primario'
@@ -164,7 +162,7 @@ function Formulario({ usuario, yoId, usuarios, fincas, areas, alCerrar, alGuarda
     /** @type {Record<string, string>} */
     const faltas = {}
     if (nombre.trim() === '') faltas.nombre = FALTA.nombre
-    if (esNuevo && !CORREO.test(correo.trim())) faltas.correo = FALTA.correo
+    if (esNuevo && !esCorreoValido(correo)) faltas.correo = FALTA.correo
     if (esNuevo && !esContrasenaValida(contrasena)) {
       faltas.contrasena_inicial = FALTA.contrasena_inicial
     }

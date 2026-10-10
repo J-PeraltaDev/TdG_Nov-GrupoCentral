@@ -24,7 +24,8 @@ const MENSAJES = {
   TIPO_FALLA_INVALIDO: 'Ese tipo de falla no está disponible. Elige otro.',
   // CU-02 9b: un código mal escrito se puede corregir; no hay que pedir otro de una vez.
   CODIGO_INVALIDO: 'El código no es válido. Revísalo; si sigue sin servir, pide uno nuevo.',
-  CODIGO_VENCIDO: 'El código venció. Pídele uno nuevo al administrador.',
+  // El texto de Figma (03-B).
+  CODIGO_VENCIDO: 'El código venció. Pide uno nuevo al administrador.',
   // Sprint 3: códigos que no están en la Tabla 22 (docs/cambios-sdd.md).
   CORREO_EXISTENTE: 'Este correo ya está registrado.',
   NO_ENCONTRADO: 'No encontramos ese usuario.',

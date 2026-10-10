@@ -29,6 +29,9 @@ export const FINCA_NOMBRE_MAX_CARACTERES = 80
 
 /** Código temporal de recuperación de contraseña (RF-02). Se usa en el Sprint 3. */
 export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
+/** Códigos incorrectos que admite una solicitud antes de que su código deje de servir. El
+ * límite lo aplica el servidor (`private.solicitud_abierta`); aquí es para decir «Vencida». */
+export const CODIGO_RECUPERACION_MAX_INTENTOS = 5
 
 /** Evidencias fotográficas (RF-08). Se usan en el Sprint 4. */
 export const FOTO_LADO_MAYOR_PX = 1600

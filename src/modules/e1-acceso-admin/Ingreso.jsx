@@ -1,20 +1,20 @@
 import { useRef, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Cargando } from '../../app/Cargando.jsx'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { rutaDeInicio } from '../../core/sesion/roles.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
+import { BotonVerContrasena } from '../../core/ui/BotonVerContrasena.jsx'
 import { CampoTexto } from '../../core/ui/CampoTexto.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
+import iconoListo from '../../core/ui/iconos/check_circle.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoMarca from '../../core/ui/iconos/eco.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoCandado from '../../core/ui/iconos/lock.svg'
 import iconoCorreo from '../../core/ui/iconos/mail.svg'
-import iconoVer from '../../core/ui/iconos/visibility.svg'
-import iconoOcultar from '../../core/ui/iconos/visibility_off.svg'
 import { InvitacionAInstalar } from './InvitacionAInstalar.jsx'
 
 const ID_DEL_AVISO = 'aviso-de-ingreso'
@@ -22,11 +22,12 @@ const ID_DEL_AVISO = 'aviso-de-ingreso'
 /**
  * Pantalla 01 · Iniciar sesión (RF-01, CU-01), con sus variantes:
  *   01-B credenciales incorrectas · 01-C usuario desactivado · 01-D sin conexión en el
- *   primer ingreso. La 01-E (contraseña actualizada) llega con RF-02 en el Sprint 3.
+ *   primer ingreso · 01-E contraseña actualizada, al volver de la recuperación (RF-02).
  */
 export function Ingreso() {
   const { fase, perfil, ingresar, motivoDeSalida } = useSesion()
   const navegar = useNavigate()
+  const { state } = useLocation()
   const enLinea = useEnLinea()
   /** @type {[import('../../core/sesion/sesion.js').MotivoDeRechazo | null, Function]} */
   const [rechazo, setRechazo] = useState(null)
@@ -42,6 +43,9 @@ export function Ingreso() {
   // Lo último que pasó: el resultado del intento de ingreso o, antes de intentar, el motivo
   // con que se cerró la sesión (un administrador desactivó al usuario mientras la tenía abierta).
   const motivo = rechazo ?? motivoDeSalida ?? null
+  // 01-E: viene de crear su contraseña nueva (CU-02, paso 10). El resultado del siguiente
+  // intento reemplaza el aviso.
+  const contrasenaActualizada = state?.contrasenaActualizada === true && !motivo
 
   // 01-D: el primer ingreso en un dispositivo necesita conexión (CU-01 2a).
   const sinConexion = !enLinea || motivo === 'sin_conexion'
@@ -84,6 +88,11 @@ export function Ingreso() {
         onSubmit={alEnviar}
         className="flex flex-col gap-4 rounded-2xl bg-superficie p-5 inset-ring inset-ring-borde"
       >
+        {contrasenaActualizada ? (
+          <Aviso tipo="exito" icono={iconoListo} role="status">
+            Contraseña actualizada. Ya puedes ingresar.
+          </Aviso>
+        ) : null}
         {motivo === 'credenciales' ? (
           <Aviso tipo="error" icono={iconoError} role="alert" id={ID_DEL_AVISO}>
             Correo o contraseña incorrectos. Revisa los datos e intenta de nuevo.
@@ -127,15 +136,7 @@ export function Ingreso() {
           conError={rechazo === 'credenciales'}
           descritoPor={rechazo === 'credenciales' ? ID_DEL_AVISO : undefined}
           accion={
-            <button
-              type="button"
-              onClick={() => setContrasenaVisible((visible) => !visible)}
-              aria-label={contrasenaVisible ? 'Ocultar la contraseña' : 'Mostrar la contraseña'}
-              aria-pressed={contrasenaVisible}
-              className="-my-3.5 -mr-3.5 flex size-12 flex-none cursor-pointer items-center justify-center rounded-control text-texto-secundario"
-            >
-              <Icono src={contrasenaVisible ? iconoOcultar : iconoVer} tamano={20} />
-            </button>
+            <BotonVerContrasena visible={contrasenaVisible} alCambiar={setContrasenaVisible} />
           }
         />
 

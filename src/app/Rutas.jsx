@@ -18,6 +18,11 @@ const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
 const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
 const Fincas = lazy(() => import('../modules/e1-acceso-admin/Fincas.jsx'))
 const Usuarios = lazy(() => import('../modules/e1-acceso-admin/Usuarios.jsx'))
+const Recuperaciones = lazy(() => import('../modules/e1-acceso-admin/Recuperaciones.jsx'))
+// La recuperación no tiene sesión, pero tampoco va en el paquete del ingreso: la abre quien
+// olvidó su contraseña, no todo el que entra.
+const RecuperarContrasena = lazy(() => import('../modules/e1-acceso-admin/RecuperarContrasena.jsx'))
+const CrearContrasena = lazy(() => import('../modules/e1-acceso-admin/CrearContrasena.jsx'))
 const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
 const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
@@ -39,17 +44,8 @@ export function Rutas() {
       <Routes>
         <Route path="/" element={<IrAlInicio />} />
         <Route path="/ingresar" element={<Ingreso />} />
-        <Route
-          path="/recuperar"
-          element={
-            <Pendiente
-              titulo="Recuperar contraseña"
-              sprint="Sprint 3"
-              detalle="Mientras tanto, pídele ayuda a un administrador."
-              salida={VOLVER_AL_INGRESO}
-            />
-          }
-        />
+        <Route path="/recuperar" element={<RecuperarContrasena />} />
+        <Route path="/recuperar/codigo" element={<CrearContrasena />} />
         <Route
           path="/tratamiento-de-datos"
           element={
@@ -105,10 +101,7 @@ export function Rutas() {
                 path="/tipos-de-falla"
                 element={<Pendiente titulo="Tipos de falla" sprint="Sprint 5" />}
               />
-              <Route
-                path="/recuperacion"
-                element={<Pendiente titulo="Recuperación de contraseñas" sprint="Sprint 3" />}
-              />
+              <Route path="/recuperacion" element={<Recuperaciones />} />
             </Route>
 
             <Route path="/avisos" element={<Pendiente titulo="Avisos" sprint="Sprint 5" />} />

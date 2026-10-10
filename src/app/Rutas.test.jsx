@@ -1,8 +1,10 @@
 import 'fake-indexeddb/auto'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
+import { contarSolicitudesPendientes } from '../core/supabase/repositorios/recuperacion.js'
+import { simularPantalla } from '../pruebas/pantalla.js'
 import { PERFILES, pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
 import { Rutas } from './Rutas.jsx'
 
@@ -58,6 +60,13 @@ vi.mock('../core/supabase/repositorios/usuarios.js', () => ({
   actualizarUsuario: vi.fn(),
   desactivarUsuario: vi.fn(),
   activarUsuario: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/recuperacion.js', () => ({
+  solicitarRecuperacion: vi.fn(),
+  restablecerContrasena: vi.fn(),
+  listarSolicitudes: vi.fn().mockResolvedValue([]),
+  generarCodigoRecuperacion: vi.fn(),
+  contarSolicitudesPendientes: vi.fn().mockResolvedValue(0),
 }))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
@@ -158,6 +167,9 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['aprobador', '/fincas', 'Bandeja · Mantenimiento'],
     ['director', '/fincas', 'Novedades escaladas'],
     ['aprobador', '/usuarios', 'Bandeja · Mantenimiento'],
+    ['reportante', '/recuperacion', 'Mis novedades'],
+    ['aprobador', '/recuperacion', 'Bandeja · Mantenimiento'],
+    ['director', '/recuperacion', 'Novedades escaladas'],
     ['administrador', '/registrar', 'Usuarios'],
   ])(
     'RF-18: el %s no entra a %s; el guardián lo devuelve a su inicio',
@@ -385,6 +397,106 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
       expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument()
     },
   )
+
+  it('RF-02 / CU-02 1: sin sesión, «¿Olvidaste tu contraseña?» abre la pantalla 02', async () => {
+    abrir('/ingresar', null)
+
+    await userEvent.click(screen.getByRole('link', { name: '¿Olvidaste tu contraseña?' }))
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Recuperar contraseña' }),
+    ).toBeVisible()
+    expect(screen.getByLabelText('Correo registrado')).toBeVisible()
+  })
+
+  it('RF-02 / CU-02 8: sin sesión, /recuperar/codigo abre la pantalla 03', async () => {
+    abrir('/recuperar/codigo', null)
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Crear contraseña nueva' }),
+    ).toBeVisible()
+    expect(screen.getByLabelText('Código temporal')).toBeVisible()
+  })
+
+  it('RF-02 / CU-02 5: el administrador abre la pantalla de recuperación de contraseñas', async () => {
+    abrir('/recuperacion', 'administrador')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Recuperación de contraseñas' }),
+    ).toBeVisible()
+    expect(await screen.findByText('No hay solicitudes pendientes.')).toBeVisible()
+  })
+
+  describe('Insignia de «Recuperación de contraseñas» (RF-02, decisión 28 del plan)', () => {
+    afterEach(() => {
+      vi.mocked(contarSolicitudesPendientes).mockClear()
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(0)
+      vi.unstubAllGlobals()
+    })
+
+    it('el menú del administrador dice cuántas solicitudes esperan un código', async () => {
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(2)
+      abrir('/usuarios', 'administrador')
+
+      const [lateral] = await screen.findAllByRole('navigation', { name: 'Principal' })
+      expect(
+        await within(lateral).findByRole('link', {
+          name: 'Recuperación de contraseñas, 2 solicitudes pendientes',
+        }),
+      ).toHaveAttribute('href', '/recuperacion')
+    })
+
+    it('con una sola, lo dice en singular', async () => {
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(1)
+      abrir('/usuarios', 'administrador')
+
+      expect(
+        await screen.findByRole('link', {
+          name: 'Recuperación de contraseñas, 1 solicitud pendiente',
+        }),
+      ).toBeVisible()
+    })
+
+    it('sin solicitudes, el menú no lleva insignia', async () => {
+      abrir('/usuarios', 'administrador')
+
+      expect(await menuDelEscritorio()).toContain('Recuperación de contraseñas')
+      expect(screen.queryByText(/solicitudes? pendientes?/)).not.toBeInTheDocument()
+    })
+
+    it('en el teléfono, la insignia va en «Cuenta», junto a la pantalla', async () => {
+      simularPantalla('telefono')
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(3)
+      abrir('/cuenta', 'administrador')
+
+      const administracion = within(
+        await screen.findByRole('navigation', { name: 'Administración' }),
+      )
+      expect(
+        await administracion.findByRole('link', {
+          name: 'Recuperación de contraseñas, 3 solicitudes pendientes',
+        }),
+      ).toBeVisible()
+    })
+
+    it.each(['reportante', 'aprobador', 'director'])(
+      'RNF-11: con la sesión del %s no se cuentan las solicitudes',
+      async (rol) => {
+        abrir('/cuenta', rol)
+
+        expect(await screen.findByRole('heading', { level: 1, name: 'Cuenta' })).toBeVisible()
+        expect(contarSolicitudesPendientes).not.toHaveBeenCalled()
+      },
+    )
+
+    it('si la cuenta falla, el menú sigue sin insignia y sin error', async () => {
+      vi.mocked(contarSolicitudesPendientes).mockRejectedValue(new TypeError('Failed to fetch'))
+      abrir('/usuarios', 'administrador')
+
+      expect(await menuDelEscritorio()).toContain('Recuperación de contraseñas')
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    })
+  })
 
   it('/_dev/componentes muestra las 28 variantes de los componentes base y los de los Sprints 2 y 3', async () => {
     abrir('/_dev/componentes', null)

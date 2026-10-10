@@ -8,7 +8,9 @@ import iconoMarca from '../core/ui/iconos/eco.svg'
 import iconoSalir from '../core/ui/iconos/logout.svg'
 import iconoAvisos from '../core/ui/iconos/notifications.svg'
 import iconoBuscar from '../core/ui/iconos/search.svg'
+import { Insignia } from './Insignia.jsx'
 import { MENU } from './menu.js'
+import { useInsignias } from './useInsignias.js'
 
 /*
  * Marco de las pantallas con sesión (SDD 5.2, «Navegación por rol»):
@@ -105,7 +107,7 @@ function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
   )
 }
 
-function BarraLateral({ perfil, items, origen, alSalir }) {
+function BarraLateral({ perfil, items, insignias, origen, alSalir }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col gap-1 border-r border-borde bg-superficie px-4 py-6 lg:flex">
       <div className="flex items-center gap-2.5 px-2 pb-5">
@@ -141,6 +143,7 @@ function BarraLateral({ perfil, items, origen, alSalir }) {
                   }
                 />
                 <span className="min-w-0 flex-1">{etiqueta}</span>
+                <Insignia cantidad={insignias[ruta]} />
               </>
             )}
           </NavLink>
@@ -225,6 +228,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   const enLinea = useEnLinea()
   const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
+  const insignias = useInsignias(perfil.rol_id)
   // En el detalle de una novedad, el menú deja marcada la pantalla desde la que se abrió.
   const origen = ruta.startsWith('/novedades/')
     ? rutaDeOrigen(state, perfil.rol_id).split('?')[0]
@@ -244,6 +248,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
       <BarraLateral
         perfil={perfil}
         items={items.filter((item) => !item.soloTelefono)}
+        insignias={insignias}
         origen={origen}
         alSalir={() => navegar('/cuenta')}
       />
@@ -255,7 +260,9 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
         <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
-          <Outlet />
+          {/* «Cuenta» pinta en el teléfono las pantallas que aquí solo caben en el
+              escritorio, con su insignia. */}
+          <Outlet context={{ insignias }} />
         </main>
 
         {enfocado ? null : (
