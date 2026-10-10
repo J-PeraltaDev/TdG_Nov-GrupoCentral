@@ -179,6 +179,10 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   tipo coincide. Puedes crear uno nuevo.»).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
+- **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
+  «No encontramos ese usuario.» y «Esta solicitud ya no está disponible.». El del código
+  incorrecto cambió a «El código no es válido. Revísalo; si sigue sin servir, pide uno nuevo.»:
+  el anterior mandaba a pedir otro de una vez, y CU-02 9b deja corregirlo.
 
 ## 11 · Peso de la ruta de ingreso (RNF-05)
 
@@ -289,6 +293,14 @@ de un tipo nuevo ni de nivel de error.
 **Al 9 oct 2026 (cierre del Sprint 2, con las seis funciones implementadas):** los mismos nueve.
 Las auxiliares de `private` no generan avisos: no son `security definer` ni están en un esquema
 expuesto.
+
+**Al 9 oct 2026 (contratos del Sprint 3):** dieciséis avisos en «staging», todos de nivel _WARN_.
+Trece son el primero, uno por función: las siete de antes y `decidir_escalamiento`,
+`confirmar_resolucion`, `reportar_falla_persiste`, `generar_codigo_recuperacion`, `listar_usuarios`
+y `solicitar_recuperacion`. Los dos de Auth siguen igual. Y hay **uno de un tipo nuevo**,
+`anon_security_definer_function_executable`, por `solicitar_recuperacion`: es la única función que
+se puede ejecutar sin sesión, a propósito (`docs/adr/0013`). `consumir_codigo_recuperacion` no
+genera aviso: solo la ejecuta `service_role`.
 
 ## 17 · Pruebas que necesitan ingresar
 

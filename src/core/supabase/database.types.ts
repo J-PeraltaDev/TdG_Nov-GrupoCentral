@@ -720,6 +720,69 @@ export type Database = {
       }
     }
     Functions: {
+      confirmar_resolucion: {
+        Args: { p_novedad_id: string; p_observacion?: string }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      consumir_codigo_recuperacion: {
+        Args: { p_codigo: string; p_correo: string }
+        Returns: {
+          resultado: string
+          usuario_id: string
+        }[]
+      }
+      decidir_escalamiento: {
+        Args: {
+          p_aprobar: boolean
+          p_novedad_id: string
+          p_observacion?: string
+        }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       escalar_novedad: {
         Args: { p_justificacion: string; p_novedad_id: string }
         Returns: {
@@ -745,6 +808,27 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      generar_codigo_recuperacion: {
+        Args: { p_solicitud_id: string }
+        Returns: {
+          codigo: string
+          expira_en: string
+        }[]
+      }
+      listar_usuarios: {
+        Args: never
+        Returns: {
+          activo: boolean
+          area_id: string
+          correo: string
+          creado_en: string
+          finca_id: string
+          id: string
+          nombre: string
+          rol_id: number
+          ultimo_ingreso: string
+        }[]
       }
       reasignar_novedad: {
         Args: {
@@ -866,6 +950,33 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reportar_falla_persiste: {
+        Args: { p_novedad_id: string; p_observacion: string }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      solicitar_recuperacion: { Args: { p_correo: string }; Returns: undefined }
       sugerir_tipos_falla: {
         Args: { p_texto: string }
         Returns: {
