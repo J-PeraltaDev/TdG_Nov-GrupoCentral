@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { borrarDatosDeSesion } from '../offline/bd.js'
 import { supabase } from '../supabase/cliente.js'
 import { ContextoSesion } from './ContextoSesion.js'
@@ -32,7 +32,9 @@ export function ProveedorSesion({ children }) {
   const fase = useRef(estado.fase)
   const ultimaRevision = useRef(0)
 
-  useEffect(() => {
+  // Con el mismo pintado, no después: si una acción responde SIN_PERMISO apenas aparece la
+  // pantalla, el oyente ya tiene que saber que hay sesión.
+  useLayoutEffect(() => {
     fase.current = estado.fase
   }, [estado.fase])
 
