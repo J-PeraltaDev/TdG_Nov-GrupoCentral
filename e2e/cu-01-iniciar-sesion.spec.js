@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
+import { enTelefono } from './apoyo/novedades.js'
 import {
+  abrirCuentaDesdeElAvatar,
   HAY_CLAVE,
   ingresarComo,
   ingresarPorElFormulario,
@@ -107,6 +109,24 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
 
       await expect(page).toHaveURL(/\/ingresar$/)
       await page.goto('/novedades')
+      await expect(page).toHaveURL(/\/ingresar$/)
+    })
+
+    test('RF-01 / CU-01 5 y 6: en el teléfono, el director cierra la sesión desde su avatar, porque «Cuenta» no está en su barra inferior', async ({
+      page,
+    }) => {
+      test.skip(!enTelefono(page), 'En el escritorio la cuenta ya va en la barra superior.')
+      // Con una sesión propia: al cerrarla no se le quita a las demás pruebas.
+      await ingresarPorElFormulario(page, 'director')
+      await expect(menuVisible(page).getByRole('link', { name: 'Cuenta' })).toHaveCount(0)
+
+      await abrirCuentaDesdeElAvatar(page)
+      const cuenta = page.getByRole('main')
+      await expect(cuenta.getByText(USUARIOS.director.nombre)).toBeVisible(ESPERA_DE_AUTH)
+      await cuenta.getByRole('button', { name: 'Cerrar sesión' }).click()
+
+      await expect(page).toHaveURL(/\/ingresar$/)
+      await page.goto('/escaladas')
       await expect(page).toHaveURL(/\/ingresar$/)
     })
   })

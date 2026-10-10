@@ -300,3 +300,18 @@ export async function crearUsuarioDePrueba(page, marca) {
 export async function desactivarUsuarioDePrueba(page, usuarioId) {
   await llamarAFuncion(page, 'gestionar-usuario', { accion: 'desactivar', usuario_id: usuarioId })
 }
+
+/**
+ * En el teléfono, abre «Cuenta» desde el avatar de la barra superior. Es por donde entran el
+ * director y el administrador: su barra inferior no la trae.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export async function abrirCuentaDesdeElAvatar(page) {
+  await page
+    .getByRole('banner')
+    .filter({ visible: true })
+    .getByRole('link', { name: /^Cuenta de / })
+    .click({ timeout: 20_000 })
+  await page.waitForURL('**/cuenta')
+}

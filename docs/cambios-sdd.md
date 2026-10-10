@@ -21,6 +21,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                              | Propuesto |
 | 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»           | Propuesto |
 | 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3          | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud | Propuesto |
+| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10   | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                               | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -495,3 +496,27 @@ minutos.
 **Texto propuesto (7.3, fila nueva):**
 
 > Intentos fallidos por código temporal · 5 · Al alcanzarlo, el código deja de servir.
+
+## 16 · «Cuenta» en el teléfono del director y del administrador (S3)
+
+**Sección:** SDD 5.2, «Navegación por rol», y Tabla 10 (menú de cada rol).
+
+**Qué pasa.** En el teléfono la navegación es una barra inferior de cuatro opciones. La del
+reportante y la del aprobador traen «Cuenta». La del director (Escaladas, Historial, Panel y
+Avisos) y la del administrador (Panel, Historial, Usuarios y Avisos) no, ni en la Tabla 10 ni en
+Figma (pantalla 20-C). «Cuenta» es donde se cierra la sesión (CU-01, pasos 5 y 6) y, para el
+administrador, por donde se llega en el teléfono a Fincas, Tipos de falla y Recuperación de
+contraseñas, que no caben en la barra. Sin una entrada, esos dos roles solo llegaban escribiendo
+la dirección.
+
+**Qué se hizo (complemento).** En el teléfono, la barra superior de esos dos roles lleva el avatar
+con las iniciales que ya tiene la del escritorio, y abre «Cuenta». La barra inferior no cambia:
+siguen siendo las cuatro opciones de la Tabla 10. Para el administrador, el avatar carga la
+insignia de las solicitudes de recuperación que esperan un código, que en el teléfono solo se veía
+dentro de «Cuenta». El equipo dejó esta decisión a la implementación (10 oct 2026).
+
+**Texto propuesto (5.2, «Navegación por rol», después de la barra inferior):**
+
+> Cuando «Cuenta» no es una de las cuatro opciones de la barra inferior (director de agricultura y
+> administrador), la barra superior del teléfono incluye el avatar del usuario, que la abre, igual
+> que en el escritorio.
