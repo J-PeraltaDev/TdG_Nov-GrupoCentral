@@ -56,7 +56,8 @@ export const USUARIOS = {
   administrador: {
     correo: 'administrador@novedades.test',
     nombre: 'Administrador de prueba',
-    inicio: '/panel',
+    // Hasta que llegue el panel de reportes (Sprint 5).
+    inicio: '/usuarios',
     menu: ['Panel', 'Historial', 'Usuarios', 'Avisos'],
   },
   desactivado: { correo: 'desactivado@novedades.test' },

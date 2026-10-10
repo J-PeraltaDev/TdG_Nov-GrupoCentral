@@ -9,21 +9,21 @@ import {
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
+import { BotonDeIcono } from '../../core/ui/BotonDeIcono.jsx'
+import { CampoDeBusqueda } from '../../core/ui/CampoDeBusqueda.jsx'
 import { Filtro } from '../../core/ui/Filtro.jsx'
-import { Icono } from '../../core/ui/Icono.jsx'
 import iconoNueva from '../../core/ui/iconos/add.svg'
 import iconoDesactivar from '../../core/ui/iconos/block.svg'
 import iconoReactivar from '../../core/ui/iconos/check_circle.svg'
-import iconoAnterior from '../../core/ui/iconos/chevron_left.svg'
-import iconoSiguiente from '../../core/ui/iconos/chevron_right.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoRazonSocial from '../../core/ui/iconos/domain.svg'
 import iconoEditar from '../../core/ui/iconos/edit.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
-import iconoBuscar from '../../core/ui/iconos/search.svg'
 import iconoEstado from '../../core/ui/iconos/toggle_on.svg'
+import { Paginacion } from '../../core/ui/Paginacion.jsx'
 import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
+import { paginar } from '../../core/utils/paginar.js'
 import { sinTildes } from '../../core/utils/texto.js'
 import { DialogoDesactivarFinca } from './DialogoDesactivarFinca.jsx'
 import { DialogoFinca } from './DialogoFinca.jsx'
@@ -64,35 +64,20 @@ function EstadoDeLaFinca({ activo }) {
   )
 }
 
-/** Un botón de solo ícono: su nombre dice sobre qué finca actúa. */
-function Accion({ icono, nombre, color = 'text-texto', ...resto }) {
-  return (
-    <button
-      type="button"
-      aria-label={nombre}
-      title={nombre}
-      {...resto}
-      className={`flex size-12 flex-none cursor-pointer items-center justify-center rounded-control hover:bg-gris-100 disabled:cursor-not-allowed disabled:text-deshabilitado lg:size-10 ${color}`}
-    >
-      <Icono src={icono} tamano={20} />
-    </button>
-  )
-}
-
 /** Editar y desactivar (o reactivar) una finca. */
 function Acciones({ finca, alEditar, alDesactivar, alReactivar, ocupada }) {
   return (
     <div className="flex items-center">
-      <Accion icono={iconoEditar} nombre={`Editar ${finca.nombre}`} onClick={alEditar} />
+      <BotonDeIcono icono={iconoEditar} nombre={`Editar ${finca.nombre}`} onClick={alEditar} />
       {finca.activo ? (
-        <Accion
+        <BotonDeIcono
           icono={iconoDesactivar}
           nombre={`Desactivar ${finca.nombre}`}
           color="text-error"
           onClick={alDesactivar}
         />
       ) : (
-        <Accion
+        <BotonDeIcono
           icono={iconoReactivar}
           nombre={`Reactivar ${finca.nombre}`}
           color="text-exito"
@@ -225,11 +210,8 @@ export default function Fincas() {
       (razonId === '' || finca.razon_social_id === razonId) &&
       sinTildes(finca.nombre).includes(buscada),
   )
-  // Si la lista se acortó (un filtro, una finca desactivada), la página no queda en el aire.
-  const ultimaPagina = Math.max(0, Math.ceil(coinciden.length / FINCAS_POR_PAGINA) - 1)
-  const paginaVigente = Math.min(pagina, ultimaPagina)
-  const desde = paginaVigente * FINCAS_POR_PAGINA
-  const visibles = coinciden.slice(desde, desde + FINCAS_POR_PAGINA)
+  const paginas = paginar(coinciden, pagina, FINCAS_POR_PAGINA)
+  const { visibles } = paginas
 
   const acciones = (finca) => (
     <Acciones
@@ -261,19 +243,7 @@ export default function Fincas() {
       </header>
 
       <div role="search" className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
-        <div className="flex h-12 items-center gap-2 rounded-control bg-superficie px-3.5 inset-ring inset-ring-borde focus-within:inset-ring-2 focus-within:inset-ring-primario lg:h-10 lg:w-80">
-          <Icono src={iconoBuscar} tamano={20} className="flex-none text-texto-secundario" />
-          <input
-            type="search"
-            name="buscar"
-            aria-label="Buscar finca"
-            placeholder="Buscar finca"
-            autoComplete="off"
-            value={busqueda}
-            onChange={(evento) => filtrar(setBusqueda)(evento.target.value)}
-            className="min-w-0 flex-1 bg-transparent text-cuerpo-pequeno text-texto outline-none placeholder:text-texto-secundario"
-          />
-        </div>
+        <CampoDeBusqueda nombre="Buscar finca" value={busqueda} alCambiar={filtrar(setBusqueda)} />
         <Filtro
           nombre="Razón social"
           icono={iconoRazonSocial}
@@ -385,25 +355,16 @@ export default function Fincas() {
       ) : null}
 
       {coinciden.length > 0 ? (
-        <nav aria-label="Páginas" className="flex items-center justify-between gap-3">
-          <p className="text-cuerpo-pequeno text-texto-secundario">
-            {desde + 1}–{desde + visibles.length} de {plural(coinciden.length, 'finca', 'fincas')}
-          </p>
-          <div className="flex items-center">
-            <Accion
-              icono={iconoAnterior}
-              nombre="Página anterior"
-              disabled={paginaVigente === 0}
-              onClick={() => setPagina(paginaVigente - 1)}
-            />
-            <Accion
-              icono={iconoSiguiente}
-              nombre="Página siguiente"
-              disabled={paginaVigente === ultimaPagina}
-              onClick={() => setPagina(paginaVigente + 1)}
-            />
-          </div>
-        </nav>
+        <Paginacion
+          pagina={paginas.pagina}
+          ultima={paginas.ultima}
+          desde={paginas.desde}
+          visibles={visibles.length}
+          total={coinciden.length}
+          singular="finca"
+          plural="fincas"
+          alCambiar={setPagina}
+        />
       ) : null}
 
       {aviso ? (

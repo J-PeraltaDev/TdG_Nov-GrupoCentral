@@ -132,6 +132,23 @@ export function esMismoDiaEnColombia(fecha, otra = Date.now()) {
 }
 
 /**
+ * Cuándo ingresó alguien por última vez, como lo escribe Figma en la pantalla 28: «hoy 7:18
+ * a. m.», «ayer», «22 sep» o, si fue otro año, «12 ago 2025». Sin fecha, «Nunca».
+ *
+ * @param {Date | string | number | null | undefined} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearUltimoIngreso(fecha, ahora = Date.now()) {
+  if (fecha === null || fecha === undefined) return 'Nunca'
+  if (esMismoDiaEnColombia(fecha, ahora)) return `hoy ${formatearHora(fecha)}`
+  // Colombia no cambia de hora: ayer es siempre 24 horas antes.
+  if (esMismoDiaEnColombia(fecha, new Date(ahora).getTime() - 24 * 3_600_000)) return 'ayer'
+  const { anio, mes, dia } = enColombia(fecha)
+  const corta = `${dia} ${MESES[mes - 1]}`
+  return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
+}
+
+/**
  * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
  * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
  * mañana en UTC.

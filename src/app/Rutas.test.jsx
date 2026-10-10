@@ -52,6 +52,13 @@ vi.mock('../core/supabase/repositorios/fincas.js', () => ({
   crearFinca: vi.fn(),
   actualizarFinca: vi.fn(),
 }))
+vi.mock('../core/supabase/repositorios/usuarios.js', () => ({
+  listarUsuarios: vi.fn().mockResolvedValue([]),
+  crearUsuario: vi.fn(),
+  actualizarUsuario: vi.fn(),
+  desactivarUsuario: vi.fn(),
+  activarUsuario: vi.fn(),
+}))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
 }))
@@ -100,7 +107,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', 'Mis novedades'],
     ['aprobador', 'Bandeja · Mantenimiento'],
     ['director', 'Novedades escaladas'],
-    ['administrador', 'Panel de reportes'],
+    // Hasta que llegue el panel de reportes (Sprint 5), el administrador entra a Usuarios.
+    ['administrador', 'Usuarios'],
   ])('RF-01 / CU-01 4: el %s entra a su pantalla de inicio («%s»)', async (rol, titulo) => {
     abrir('/', rol)
 
@@ -149,7 +157,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', '/fincas', 'Mis novedades'],
     ['aprobador', '/fincas', 'Bandeja · Mantenimiento'],
     ['director', '/fincas', 'Novedades escaladas'],
-    ['administrador', '/registrar', 'Panel de reportes'],
+    ['aprobador', '/usuarios', 'Bandeja · Mantenimiento'],
+    ['administrador', '/registrar', 'Usuarios'],
   ])(
     'RF-18: el %s no entra a %s; el guardián lo devuelve a su inicio',
     async (rol, ruta, titulo) => {
@@ -220,7 +229,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it.each([
     ['reportante', 'Mis novedades'],
     ['director', 'Novedades escaladas'],
-    ['administrador', 'Panel de reportes'],
+    ['administrador', 'Usuarios'],
   ])(
     'RF-14: el %s no entra a registrar una solución; el guardián lo devuelve a su inicio',
     async (rol, titulo) => {
