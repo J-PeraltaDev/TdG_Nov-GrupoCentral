@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
@@ -7,11 +7,14 @@ import {
   contarBandeja,
   listarBandeja,
   listarTransicionesDeBandeja,
+  tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
+import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
 import iconoFinca from '../../core/ui/iconos/agriculture.svg'
+import iconoTomar from '../../core/ui/iconos/back_hand.svg'
 import iconoEnAtencion from '../../core/ui/iconos/build.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
@@ -23,6 +26,7 @@ import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { PESTANAS, resumirTransiciones } from './reglasDeBandeja.js'
 import { TablaDeBandeja } from './TablaDeBandeja.jsx'
+import { useAccion } from './useAccion.js'
 import { VistaPrevia } from './VistaPrevia.jsx'
 
 /*
@@ -244,6 +248,14 @@ export default function Bandeja() {
   // Con la lista a la vista, el reintento es volver a pedir la página que faltó.
   const reintentar = lista.novedades.length > 0 ? verMas : () => setIntento((n) => n + 1)
 
+  // Acción principal de la vista previa (Figma 12): después de ejecutarla se recarga la
+  // bandeja, porque la novedad cambia de pestaña.
+  const recargar = useCallback(() => setIntento((n) => n + 1), [])
+  const { ejecutar, enCurso, aviso, cerrarAviso } = useAccion({
+    estado: elegida?.estado,
+    alCambiar: recargar,
+  })
+
   const nombreDeLaPestana = ({ id, nombre }) =>
     esEscritorio && conteos ? `${nombre} (${conteos[id]})` : nombre
   const pestanas = PESTANAS.map((opcion) => ({ id: opcion.id, nombre: nombreDeLaPestana(opcion) }))
@@ -317,7 +329,27 @@ export default function Bandeja() {
                 elegidaId={elegida.id}
                 alElegir={setElegidaId}
               />
-              <VistaPrevia novedad={elegida} resumen={resumenes[elegida.id]} origen={origen} />
+              <VistaPrevia
+                novedad={elegida}
+                resumen={resumenes[elegida.id]}
+                origen={origen}
+                accion={
+                  elegida.estado === 'asignada' ? (
+                    <Boton
+                      tamano="escritorio"
+                      icono={iconoTomar}
+                      disabled={enCurso}
+                      onClick={() =>
+                        ejecutar(() => tomarNovedad(elegida.id), {
+                          exito: 'Novedad tomada. Ya está En atención.',
+                        })
+                      }
+                    >
+                      {enCurso ? 'Tomando…' : 'Tomar para atención'}
+                    </Boton>
+                  ) : null
+                }
+              />
             </div>
           ) : (
             <ul className="flex flex-col gap-2.5">
@@ -347,6 +379,19 @@ export default function Bandeja() {
           >
             {fallo.mensaje}
           </Aviso>
+        ) : null}
+
+        {aviso ? (
+          <AvisoTemporal
+            tipo={aviso.tipo}
+            accion={
+              aviso.reintentar ? { texto: 'Reintentar', alPulsar: aviso.reintentar } : undefined
+            }
+            alTerminar={cerrarAviso}
+            className="fixed right-8 bottom-6 z-20 w-96"
+          >
+            {aviso.mensaje}
+          </AvisoTemporal>
         ) : null}
 
         {!cargando && !fallo && hayMas ? (

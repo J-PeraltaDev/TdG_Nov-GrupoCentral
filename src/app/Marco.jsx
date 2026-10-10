@@ -174,7 +174,7 @@ function NavegacionInferior({ items, origen }) {
   return (
     <nav
       aria-label="Principal"
-      className="sticky bottom-0 z-10 flex items-start border-t border-borde bg-superficie px-2 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:hidden"
+      className="sticky bottom-0 z-10 flex items-start border-t border-borde bg-superficie px-2 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] group-has-[[data-barra-de-acciones]]/marco:hidden lg:hidden"
     >
       {items.map(({ ruta, etiqueta, corta, icono }) => (
         <NavLink
@@ -231,7 +231,9 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
     : null
 
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
+    // Cuando una pantalla pinta su barra de acciones ([data-barra-de-acciones]), esta ocupa
+    // el lugar de la navegación inferior del teléfono.
+    <div className="group/marco flex min-h-dvh flex-col lg:flex-row">
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-superficie focus:px-4 focus:py-3 focus:text-etiqueta-fuerte focus:text-primario"

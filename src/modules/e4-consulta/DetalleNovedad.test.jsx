@@ -2,7 +2,11 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { listarLineaDeTiempo, obtenerNovedad } from '../../core/supabase/repositorios/novedades.js'
+import {
+  listarLineaDeTiempo,
+  obtenerNovedad,
+  tomarNovedad,
+} from '../../core/supabase/repositorios/novedades.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import DetalleNovedad from './DetalleNovedad.jsx'
@@ -10,6 +14,7 @@ import DetalleNovedad from './DetalleNovedad.jsx'
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   obtenerNovedad: vi.fn(),
   listarLineaDeTiempo: vi.fn(),
+  tomarNovedad: vi.fn(),
 }))
 
 const ID = '00000000-0000-4000-e000-000000000153'
@@ -85,7 +90,15 @@ function conNovedad(novedad = ASIGNADA, transiciones = REGISTRO) {
 function abrir({ rol = 'aprobador', id = ID, origen } = {}) {
   return pintarConSesion(
     <Routes>
-      <Route path="/novedades/:id" element={<DetalleNovedad />} />
+      <Route
+        path="/novedades/:id"
+        element={
+          // El contenido de la página, como lo pone el marco.
+          <main tabIndex={-1}>
+            <DetalleNovedad />
+          </main>
+        }
+      />
       <Route path="/novedades" element={<h1>Mis novedades</h1>} />
       <Route path="/bandeja" element={<h1>Bandeja del área</h1>} />
       <Route path="/escaladas" element={<h1>Novedades escaladas</h1>} />
@@ -104,6 +117,7 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'], now: AHORA })
   vi.mocked(obtenerNovedad).mockReset()
   vi.mocked(listarLineaDeTiempo).mockReset()
+  vi.mocked(tomarNovedad).mockReset()
 })
 
 afterEach(() => {
@@ -269,6 +283,70 @@ describe('Pantallas 13 y 14 · Detalle de la novedad en el teléfono (RF-18 / CU
 
     expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
+  it('RF-18 / CU-18 5: el aprobador del área ve «Tomar para atención» en una asignada', async () => {
+    conNovedad()
+    abrir({ rol: 'aprobador' })
+
+    expect(await screen.findByRole('button', { name: 'Tomar para atención' })).toBeEnabled()
+  })
+
+  it.each(['reportante', 'director', 'administrador'])(
+    'RF-18 / CU-18 5: el %s consulta una asignada sin acciones de atención',
+    async (rol) => {
+      conNovedad()
+      abrir({ rol })
+      await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    },
+  )
+
+  it('RNF-11: el aprobador no ve acciones sobre una novedad que no es de su área', async () => {
+    // No debería llegarle (la base no se la entrega), pero el mapa tampoco le daría acciones.
+    conNovedad({ ...ASIGNADA, area_id: 'area-s', area: 'Sistemas' })
+    abrir({ rol: 'aprobador' })
+    await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('RF-10 / CU-10: al tomarla, el detalle se recarga sin dejar de mostrarse y queda en atención', async () => {
+    conNovedad()
+    vi.mocked(tomarNovedad).mockImplementation(async () => {
+      // Lo que el servidor entrega después de la transición.
+      conNovedad({ ...ASIGNADA, estado: 'en_atencion' }, [TOMADA, ...REGISTRO])
+      return { id: ID, estado: 'en_atencion' }
+    })
+    abrir({ rol: 'aprobador' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Tomar para atención' }))
+
+    expect(tomarNovedad).toHaveBeenCalledExactlyOnceWith(ID)
+    expect(await screen.findByText('Novedad tomada. Ya está En atención.')).toBeVisible()
+    // Mientras llega lo nuevo no se vuelve a «Cargando…»: el aviso y el contenido siguen ahí.
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        'Registrada hace 25 min · Tomada por Carlos Mario Restrepo, 7:55 a. m.',
+      ),
+    ).toBeVisible()
+    expect(obtenerNovedad).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+    // El botón que tenía el foco ya no está: el foco pasa al contenido, no se pierde.
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
+
+  it('RF-10: en el escritorio la acción va bajo el encabezado', async () => {
+    simularPantalla('escritorio')
+    conNovedad()
+    abrir({ rol: 'aprobador' })
+
+    expect(await screen.findByRole('button', { name: 'Tomar para atención' })).toBeEnabled()
+    expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
   })
 })
 

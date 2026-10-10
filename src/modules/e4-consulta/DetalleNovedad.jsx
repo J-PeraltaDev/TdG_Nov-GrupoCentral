@@ -1,9 +1,10 @@
-import { useEffect, useId, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
+import { accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
-import { rutaDeOrigen } from '../../core/sesion/roles.js'
+import { ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
 import { listarLineaDeTiempo, obtenerNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -30,13 +31,17 @@ import {
 } from '../../core/utils/fechas.js'
 import { SinPermiso } from './SinPermiso.jsx'
 
+// Las acciones del aprobador van en su propio paquete: los demás roles no lo descargan.
+const AccionesDelAprobador = lazy(() => import('../e3-atencion/AccionesDelAprobador.jsx'))
+
 /*
  * Detalle y línea de tiempo de una novedad (RF-18 / CU-18), para los cuatro roles. Figma:
  * 13 (3:764) y 14 (3:965) en el teléfono, 22 (4:2093) en el escritorio y 09 (2:1118) para la
  * novedad resuelta. Fuera del alcance del usuario, o si no existe, la pantalla 22-B.
  *
- * Lo que se ve lo decide la base de datos (RNF-11). Las acciones de cada rol se agregan con
- * su historia; las evidencias y la consulta sin conexión llegan en el Sprint 4.
+ * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
+ * (Tabla 35) y cada rol trae las suyas; las evidencias y la consulta sin conexión llegan en
+ * el Sprint 4.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -210,7 +215,7 @@ function Telefono({ novedad, transiciones }) {
   )
 }
 
-function Escritorio({ novedad, transiciones }) {
+function Escritorio({ novedad, transiciones, acciones }) {
   const resuelta = novedad.solucion ? resolucion(transiciones) : null
   const linea = seguimiento(novedad, transiciones)
 
@@ -230,6 +235,7 @@ function Escritorio({ novedad, transiciones }) {
           </div>
           <p className="text-cuerpo-pequeno text-texto-secundario">{novedad.razon_social}</p>
           {linea ? <p className="text-auxiliar text-texto-secundario">{linea}</p> : null}
+          {acciones}
         </div>
 
         <dl className={`grid grid-cols-2 gap-x-5 gap-y-4 p-5 ${TARJETA}`}>
@@ -295,10 +301,11 @@ export default function DetalleNovedad() {
 
   const idValido = UUID.test(id ?? '')
   const [intento, setIntento] = useState(0)
-  // El resultado lleva la consulta que lo produjo: mientras no coincida con la vigente,
-  // el detalle está cargando.
+  // El resultado lleva la novedad que lo produjo: mientras no sea la de la dirección, el
+  // detalle está cargando. Al recargar la misma novedad (después de una acción) se conserva lo
+  // que ya se ve hasta que llegue lo nuevo.
   const [resultado, setResultado] = useState({
-    consulta: '',
+    id: '',
     novedad: null,
     transiciones: [],
     fallo: null,
@@ -312,11 +319,11 @@ export default function DetalleNovedad() {
     let vigente = true
     Promise.all([obtenerNovedad(id), listarLineaDeTiempo(id)])
       .then(([novedad, transiciones]) => {
-        if (vigente) setResultado({ consulta, novedad, transiciones, fallo: null })
+        if (vigente) setResultado({ id, novedad, transiciones, fallo: null })
       })
       .catch((error) => {
         if (vigente) {
-          setResultado({ consulta, novedad: null, transiciones: [], fallo: traducirError(error) })
+          setResultado({ id, novedad: null, transiciones: [], fallo: traducirError(error) })
         }
       })
     return () => {
@@ -324,21 +331,47 @@ export default function DetalleNovedad() {
     }
   }, [id, idValido, consulta])
 
-  const cargando = idValido && resultado.consulta !== consulta
+  const recargar = useCallback(() => setIntento((n) => n + 1), [])
+
+  const cargando = idValido && resultado.id !== id
   const { novedad, transiciones, fallo } = cargando
     ? { novedad: null, transiciones: [], fallo: null }
     : resultado
   const sinPermiso = !cargando && !fallo && !novedad
 
+  // Cuando una acción cambia el estado, el botón que tenía el foco puede desaparecer (ya no hay
+  // nada que tomar). El foco no se queda en la nada: pasa al contenido de la página, y quien
+  // navega con el teclado o con lector de pantalla retoma desde ahí.
+  const raiz = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const estado = novedad?.estado
+  const estadoAnterior = useRef(estado)
+  useEffect(() => {
+    const cambio = Boolean(estadoAnterior.current && estado && estadoAnterior.current !== estado)
+    estadoAnterior.current = estado
+    if (cambio && document.activeElement === document.body) raiz.current?.closest('main')?.focus()
+  }, [estado])
+
   const origen = rutaDeOrigen(state, perfil.rol_id)
   const textoDeVolver = VOLVER[origen.split('?')[0]] ?? 'Volver'
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
+
+  const acciones =
+    novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
+      <Suspense fallback={null}>
+        <AccionesDelAprobador
+          novedad={novedad}
+          acciones={accionesDisponibles(perfil, novedad)}
+          alCambiar={recargar}
+          esEscritorio={esEscritorio}
+        />
+      </Suspense>
+    ) : null
   // En el teléfono el título de la página va en la barra superior. Sin novedad que mostrar,
   // el título lo pone el contenido (22-B) y la barra solo dice «Novedad».
   const TituloDeLaBarra = codigo ? 'h1' : 'p'
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div ref={raiz} className="flex flex-1 flex-col">
       {/* En el teléfono el detalle trae su propia barra superior (Figma 3:771); en el
           escritorio, la conexión ya está en la barra del marco. */}
       {esEscritorio ? null : (
@@ -374,7 +407,7 @@ export default function DetalleNovedad() {
             icono={fallo.tipo === 'red' ? iconoSinConexion : iconoError}
             role="alert"
             accion={
-              <Boton tipo="texto" tamano="escritorio" onClick={() => setIntento((n) => n + 1)}>
+              <Boton tipo="texto" tamano="escritorio" onClick={recargar}>
                 Reintentar
               </Boton>
             }
@@ -396,10 +429,13 @@ export default function DetalleNovedad() {
               <Icono src={iconoVolver} tamano={18} />
               {textoDeVolver}
             </Link>
-            <Escritorio novedad={novedad} transiciones={transiciones} />
+            <Escritorio novedad={novedad} transiciones={transiciones} acciones={acciones} />
           </div>
         ) : (
-          <Telefono novedad={novedad} transiciones={transiciones} />
+          <>
+            <Telefono novedad={novedad} transiciones={transiciones} />
+            {acciones}
+          </>
         )
       ) : null}
     </div>

@@ -12,6 +12,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
 | 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
 | 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA` | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -115,3 +116,29 @@ la misma tabla.
 
 > Filas con id, nombre, cantidad_novedades y coincidencia_exacta de los tipos activos que coinciden
 > con el texto. RF-14
+
+## 7 · Rol que no corresponde a la acción: `SIN_PERMISO` (S2)
+
+**Sección:** SDD 6.1.3, algoritmo general de las funciones de transición, y Tabla 22.
+
+**Qué pasa.** El algoritmo general comprueba en un solo paso el estado, la acción y el rol, y
+responde `TRANSICION_INVALIDA` si la combinación no está permitida. La Tabla 22, en cambio, deja
+`SIN_PERMISO` para el rol o el alcance que no permiten la acción y `TRANSICION_INVALIDA` para el
+estado. Con el algoritmo al pie de la letra, un reportante que llamara a `tomar_novedad` recibiría
+el aviso de que la novedad cambió de estado y el cliente recargaría el detalle, que no es lo que
+pasó. Se implementó como la Tabla 22, en este orden: el perfil y el rol (`SIN_PERMISO`), el bloqueo
+de la fila y el alcance (`SIN_PERMISO`) y, por último, el estado (`TRANSICION_INVALIDA`). Así,
+además, un usuario de otro rol no llega a bloquear la fila.
+
+Estas comprobaciones, los destinatarios y la escritura de los avisos son comunes a todas las
+transiciones del sprint: viven en funciones auxiliares del esquema `private`, sin permiso de
+ejecución para los roles de la API (migración `rf10_transiciones_base`).
+
+**Texto propuesto (reemplaza las tres comprobaciones del algoritmo):**
+
+> u ← perfil del usuario autenticado. SI u no existe, NO u.activo O u.rol no es el de la acción →
+> ERROR SIN_PERMISO
+>
+> n ← la novedad, con bloqueo de la fila. SI n no existe O NO alcance(u, n) → ERROR SIN_PERMISO
+>
+> SI n.estado no admite la acción → ERROR TRANSICION_INVALIDA

@@ -15,7 +15,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 183,8 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 185,6 KB de 200 KB                                           | El equipo         |
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
@@ -25,6 +25,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -151,6 +152,9 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   inicio» para el director y el administrador (Figma solo dibuja el del reportante); en la línea de
   tiempo, «Área: de Sistemas a Mantenimiento» para una reasignación, y «pasa a» entre los dos
   estados para los lectores de pantalla; «Registró» en la solución, como la pantalla 09.
+- **Acciones del aprobador (Sprint 2):** mientras la acción se ejecuta, el botón dice «Tomando…»;
+  el aviso de 14-C nombra el estado en que quedó la novedad («La novedad sigue Asignada.»; Figma
+  lo escribe para una en atención).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -169,6 +173,11 @@ Sprint 1:
 
 Quedan unos 16 KB. Todo lo que tiene sesión se carga bajo demanda y no cuenta aquí: el marco
 (5,8 KB), Mis novedades (3,1 KB), Registrar (5,1 KB) y la constancia (1,7 KB).
+
+**Sprint 2, medido el 8 oct 2026 con «Tomar novedad» (RF-10):** ≈ 185,6 KB (JavaScript 149,0 KB,
+CSS 7,6 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 14 KB. Lo nuevo se
+carga bajo demanda: la bandeja (5,4 KB), el detalle (4,9 KB) y las acciones del aprobador
+(0,8 KB), que solo descarga ese rol. Lo que sube es el CSS, 1,4 KB desde el Sprint 1.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -362,3 +371,28 @@ Lo que Figma no alcanza a decidir, o en lo que sus pantallas no coinciden entre 
   si se llegó por la dirección, la de inicio del rol.
 - **Anchos entre 1024 y 1279 px.** La línea de tiempo va debajo de los datos; desde 1280 px, a la
   derecha, con los 400 px de Figma.
+
+## 21 · Acciones del aprobador en el detalle (13, 13-B, 14 y 14-C)
+
+Lo que Figma no dibuja o deja abierto de las acciones, resuelto con las decisiones 4 y 9 del plan
+del Sprint 2:
+
+- **En el escritorio.** Figma solo dibuja las acciones en el teléfono. En el escritorio los botones
+  van bajo el encabezado del detalle, y el aviso temporal, abajo a la derecha. En la vista previa
+  de la bandeja (12) va la acción principal de la novedad («Tomar para atención» en una asignada);
+  las demás se ejecutan desde el detalle.
+- **Barra de acciones del teléfono.** Reemplaza a la navegación inferior, como en 13 y 14. Si la
+  novedad queda sin acciones, vuelve la navegación y el aviso se muestra encima de ella. Hasta que
+  lleguen rechazar, escalar, reasignar y registrar la solución (RF-11, 12, 17 y 14), una novedad en
+  atención no tiene barra.
+- **Después de tomarla.** La persona se queda en el detalle, que se actualiza sin pasar por
+  «Cargando…»: cambian el estado, la línea de tiempo y «Tomada por». El foco del teclado pasa al
+  contenido de la página, porque el botón que lo tenía desaparece.
+- **Cuánto dura el aviso.** El de confirmación (13-B) se quita solo a los 6 segundos. El de error
+  (14-C) se queda hasta que la persona actúe, porque trae «Reintentar». Figma no fija la duración.
+- **Sin conexión (14-C).** Si la acción no llega al servidor, no se encola ni se reintenta sola: el
+  aviso dice que no se aplicó y en qué estado sigue la novedad, y ofrece «Reintentar» (RF-25).
+- **Si otra persona ya actuó.** Con `TRANSICION_INVALIDA` se muestra «La novedad cambió de estado.»
+  y el detalle se recarga solo (Tabla 22).
+- **Mientras se ejecuta.** El botón queda deshabilitado y dice «Tomando…», para que no se envíe dos
+  veces.
