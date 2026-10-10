@@ -110,6 +110,20 @@ describe('Pantalla 01 · Iniciar sesión (RF-01 / CU-01)', () => {
     expect(screen.getByLabelText('Contraseña')).not.toHaveAttribute('aria-invalid')
   })
 
+  it('RF-01 / CU-01 4a: si Auth frena los intentos, dice que hay que esperar y deja el formulario como está', async () => {
+    abrir(vi.fn().mockResolvedValue({ ok: false, motivo: 'demasiados_intentos' }))
+
+    await llenarYEnviar()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Demasiados intentos. Espera unos minutos e intenta de nuevo.',
+    )
+    // No es la contraseña lo que está mal: no se señala el campo.
+    expect(screen.getByLabelText('Contraseña')).not.toHaveAttribute('aria-invalid')
+    expect(screen.getByLabelText('Correo')).toHaveValue('reportante.01@novedades.test')
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeEnabled()
+  })
+
   it('RF-01 / CU-01 2a (01-D): sin conexión explica que el primer ingreso necesita internet y bloquea el botón', () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
     const ingresar = vi.fn()

@@ -21,7 +21,7 @@ import { supabase } from '../supabase/cliente.js'
  * @property {{ id: string, nombre: string } | null} area
  */
 
-/** @typedef {'credenciales' | 'desactivado' | 'sin_conexion' | 'error'} MotivoDeRechazo */
+/** @typedef {'credenciales' | 'desactivado' | 'demasiados_intentos' | 'sin_conexion' | 'error'} MotivoDeRechazo */
 
 // La API no expone el correo: nunca `select *` sobre usuario (ADR 0010).
 const COLUMNAS_DEL_PERFIL = 'id, nombre, rol_id, finca_id, area_id, activo'
@@ -89,6 +89,8 @@ export async function iniciarSesion(correo, contrasena) {
   if (error) {
     if (esErrorDeRed(error)) return { ok: false, motivo: 'sin_conexion' }
     if (error.code === 'user_banned') return { ok: false, motivo: 'desactivado' }
+    // Auth limita los ingresos por dirección: no es que los datos estén mal, hay que esperar.
+    if (error.status === 429) return { ok: false, motivo: 'demasiados_intentos' }
     if (error.code === 'invalid_credentials' || error.status === 400) {
       return { ok: false, motivo: 'credenciales' }
     }

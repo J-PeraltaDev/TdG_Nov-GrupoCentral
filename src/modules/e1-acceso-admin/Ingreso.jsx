@@ -94,6 +94,11 @@ export function Ingreso() {
             Tu usuario está desactivado. Si crees que es un error, comunícate con un administrador.
           </Aviso>
         ) : null}
+        {motivo === 'demasiados_intentos' ? (
+          <Aviso tipo="error" icono={iconoError} role="alert" id={ID_DEL_AVISO}>
+            Demasiados intentos. Espera unos minutos e intenta de nuevo.
+          </Aviso>
+        ) : null}
         {motivo === 'error' ? (
           <Aviso tipo="error" icono={iconoError} role="alert" id={ID_DEL_AVISO}>
             No pudimos iniciar tu sesión. Intenta de nuevo en un momento.
