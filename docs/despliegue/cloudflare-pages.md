@@ -60,8 +60,15 @@ La guía `docs/despliegue/supabase-auth.md` pide poner en «PROYECTO» la URL de
 como _Site URL_ (**Authentication** → **URL Configuration**). Con el nombre real del proyecto es
 `https://tdg-nov-grupocentral.pages.dev`.
 
-En el Sprint 1 el ingreso es con correo y contraseña y no usa redirecciones, así que esto no
-bloquea; hará falta en el Sprint 3, con la recuperación de contraseña.
+**No bloquea nada, tampoco en el Sprint 3.** El ingreso es con correo y contraseña, y la
+recuperación de contraseña (RF-02) es con un código que entrega el administrador: ninguno de los
+dos usa enlaces por correo ni redirecciones, que es para lo que Auth usa la _Site URL_. Una versión
+anterior de este documento decía que haría falta en el Sprint 3. Conviene ponerla igual, para que
+no quede el valor por defecto.
+
+Las Edge Functions sí necesitan conocer esta dirección, pero no la leen de Auth: su lista de
+orígenes permitidos está en `supabase/functions/_shared/cors.js`. Si el proyecto de Pages cambia de
+nombre o se le pone un dominio propio, hay que agregarlo ahí y volver a desplegarlas.
 
 ## 4 · Verificar
 
