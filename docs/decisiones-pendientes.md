@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 80 (más las 6 de preparación)       | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 86 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -32,6 +32,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
 | 27  | Detalles de las pantallas 19, 20 y 20-C    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 28  | Detalles de las pantallas 09, 09-B y 09-C  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 29  | Detalles de las pantallas 30 y 30-B        | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -195,6 +196,17 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   novedad queda Cerrada.» y «Novedad devuelta a {área}. Vuelve a estar En atención.»; los botones
   dicen «Cerrando…» y «Devolviendo…» mientras se ejecutan; «Observación (opcional)» en el diálogo
   09-C, que Figma no trae.
+- **Fincas (Sprint 3):** los avisos «Finca creada.», «Finca actualizada.», «Finca desactivada.» y
+  «Finca reactivada.»; los errores «Escribe el nombre de la finca.» y «Elige la razón social.»
+  (Figma solo escribe el del nombre repetido); «Elige la razón social» como opción vacía; los
+  botones dicen «Guardando…» y «Desactivando…» mientras se ejecutan; «No hay fincas que
+  coincidan.»; las opciones «Estado: Inactivas» y «Estado: Todas» (Figma solo muestra «Activas»);
+  el singular de la advertencia («Tiene 1 novedad abierta. Seguirá su curso…») y de la página
+  («1–1 de 1 finca»); en el diálogo de desactivar, «N reportantes activos dejarán de poder
+  registrar.» y, sin novedades abiertas, «No aparecerá para nuevos registros, pero conserva su
+  historial.»; en las tarjetas del teléfono, «2 novedades abiertas» y «2 reportantes». Para los
+  lectores de pantalla: «Editar {finca}», «Desactivar {finca}», «Reactivar {finca}», «Página
+  anterior», «Página siguiente» y «Administración» (la sección de «Cuenta»).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 - **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
@@ -364,7 +376,10 @@ pruebas cargan `.env.local` por su cuenta y la contraseña no pasa por la conver
 con las cuatro de CU-13 (la decisión del director y la pantalla 18-C, que estaba pendiente),
 pasaron las 74, más las seis de preparación. Con las seis de CU-15 (confirmar el cierre, «la falla
 persiste» y el recorrido completo del incremento, de registrar a cerrar con cada rol en su
-pantalla), **pasaron las 80, más las seis de preparación (86).**
+pantalla), pasaron las 80, más las seis de preparación. Con las seis de CU-04 (crear, repetir
+el nombre, editar y desactivar una finca propia; el diálogo de una finca del seed, que se cancela;
+y el intento de un rol que no es el administrador), **pasaron las 86, más las seis de preparación
+(92).**
 
 Una aserción de CU-14 cambió con la decisión 21 C: la transición a «resuelta» lleva ahora la
 solución como observación, y el texto de la solución sale dos veces en el detalle (en su bloque y
@@ -375,7 +390,8 @@ Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas deja
 descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`. Las de CU-13 y
 CU-15 reutilizan uno de esos tipos y dejan sus novedades decididas, cerradas o de nuevo en
 atención; las de CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias
-páginas.
+páginas. Las de CU-04 crean una finca por corrida («Finca e2e …») y la dejan desactivada, para
+que no aparezca en los filtros de las demás pantallas.
 
 **Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
 pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
@@ -697,3 +713,47 @@ Sprint 3:
 - **Lo que llega después:** «Adjuntar foto» y el bloque «Evidencias» de 09, y 09-D (el cierre
   bloqueado sin conexión), en el Sprint 4. Aquí, si la conexión se cae durante la acción, no se
   aplica, el aviso dice que la novedad sigue Resuelta y ofrece «Reintentar».
+
+## 29 · Detalles de las pantallas 30 y 30-B (fincas)
+
+Lo que Figma no dibuja o deja abierto, resuelto con las decisiones 17, 18, 24, 35, 37 y 41 del plan
+del Sprint 3:
+
+- **De dónde salen los conteos** (decisión 17). De la vista `v_finca`, que es nueva
+  (`docs/cambios-sdd.md`, entrada 13): la API no pudo contarlos como recursos embebidos. «Abierta»
+  es toda novedad que no está cerrada ni rechazada; «Reportantes asignados» cuenta los activos.
+- **En el teléfono** (decisión 24). Figma solo dibuja 30 en el escritorio. La tabla pasa a
+  tarjetas, con los mismos datos y acciones, y los filtros ocupan el ancho. Como «Fincas» no cabe
+  en la barra inferior del administrador, se llega desde «Cuenta», que en el teléfono trae una
+  sección «Administración» con lo que el menú solo muestra en el escritorio (Fincas, Tipos de
+  falla y Recuperación de contraseñas).
+- **Filtros y búsqueda** (decisión 35). Se traen todas las fincas y se filtran en el navegador:
+  son decenas. La búsqueda no distingue mayúsculas ni tildes. Los filtros son la lista
+  desplegable del navegador con la forma de la pastilla de Figma. Páginas de 20, con el rango y
+  las flechas de Figma; al filtrar se vuelve a la primera.
+- **Nombre repetido** (decisión 41). Antes de guardar, el formulario compara el nombre sin
+  mayúsculas ni tildes contra las fincas de esa razón social, activas e inactivas: «Altamira» y
+  «altamira» son la misma. La restricción de la base de datos, que sí distingue, sigue siendo la
+  garantía si dos personas guardan a la vez, y su error se muestra en el mismo campo.
+- **Largo del nombre.** El campo admite hasta 80 caracteres (`FINCA_NOMBRE_MAX_CARACTERES`); la
+  base de datos no le pone máximo.
+- **Editar.** El mismo diálogo de 30-B, con el título «Editar finca». Figma solo dibuja «Nueva
+  finca».
+- **Desactivar siempre pide confirmación** (decisión 37). Con novedades abiertas, la advertencia de
+  Figma; sin ellas, una frase sobre lo que pasa. En los dos casos dice cuántos reportantes
+  activos dejan de poder registrar.
+- **Reactivar** es un toque, sin diálogo, con su aviso temporal. El ícono es el círculo con visto,
+  en verde: Figma no dibuja ninguna finca inactiva.
+- **Si algo falla al guardar o al desactivar,** el diálogo no se cierra: el error sale dentro, y
+  lo escrito se conserva. Es distinto de las hojas del detalle, que se cierran: aquí la persona
+  está llenando un formulario.
+- **Botones de los diálogos en el teléfono.** «Guardar finca» y «Desactivar finca», con su ícono,
+  no caben junto a «Cancelar» a 360 px: van uno sobre otro, con la acción primero. En el
+  escritorio, en una fila, como Figma.
+- **Razones sociales.** Son un catálogo precargado: la aplicación no las crea ni las edita. Las
+  listas ofrecen las activas.
+- **Nombres de las pruebas y de las capturas.** Las pruebas y las capturas de esta pantalla usan
+  fincas y razones sociales inventadas («Altamira», «Razón social de prueba A»): la lista
+  oficial se mantiene fuera del repositorio (punto 1).
+- **La carga de las fincas reales** no es parte de esta historia: es un paso del cierre del sprint
+  (decisión 18).

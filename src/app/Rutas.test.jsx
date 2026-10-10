@@ -1,5 +1,6 @@
 import 'fake-indexeddb/auto'
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
@@ -44,6 +45,12 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   decidirEscalamiento: vi.fn(),
   confirmarResolucion: vi.fn(),
   reportarFallaPersiste: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/fincas.js', () => ({
+  listarFincasConConteos: vi.fn().mockResolvedValue([]),
+  listarRazonesSociales: vi.fn().mockResolvedValue([]),
+  crearFinca: vi.fn(),
+  actualizarFinca: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
@@ -139,6 +146,9 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['aprobador', '/registrar', 'Bandeja · Mantenimiento'],
     ['aprobador', '/panel', 'Bandeja · Mantenimiento'],
     ['director', '/usuarios', 'Novedades escaladas'],
+    ['reportante', '/fincas', 'Mis novedades'],
+    ['aprobador', '/fincas', 'Bandeja · Mantenimiento'],
+    ['director', '/fincas', 'Novedades escaladas'],
     ['administrador', '/registrar', 'Panel de reportes'],
   ])(
     'RF-18: el %s no entra a %s; el guardián lo devuelve a su inicio',
@@ -283,6 +293,38 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
       screen.getByRole('heading', { level: 1, name: 'No encontramos esta página' }),
     ).toBeVisible()
   })
+
+  it('RF-04: el administrador abre la pantalla de fincas', async () => {
+    abrir('/fincas', 'administrador')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Fincas' })).toBeVisible()
+    expect(await screen.findByRole('button', { name: 'Nueva finca' })).toBeVisible()
+  })
+
+  it('RF-04: desde «Cuenta», el administrador abre las pantallas que no caben en la barra del teléfono', async () => {
+    abrir('/cuenta', 'administrador')
+
+    const administracion = within(await screen.findByRole('navigation', { name: 'Administración' }))
+    expect(administracion.getAllByRole('link').map((enlace) => enlace.textContent)).toEqual([
+      'Fincas',
+      'Tipos de falla',
+      'Recuperación de contraseñas',
+    ])
+
+    await userEvent.click(administracion.getByRole('link', { name: 'Fincas' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Fincas' })).toBeVisible()
+  })
+
+  it.each(['reportante', 'aprobador', 'director'])(
+    'en «Cuenta», el %s no tiene la sección de administración',
+    async (rol) => {
+      abrir('/cuenta', rol)
+
+      expect(await screen.findByRole('heading', { level: 1, name: 'Cuenta' })).toBeVisible()
+      expect(screen.queryByRole('navigation', { name: 'Administración' })).not.toBeInTheDocument()
+    },
+  )
 
   it('/_dev/componentes muestra las 28 variantes de los componentes base y los de los Sprints 2 y 3', async () => {
     abrir('/_dev/componentes', null)
