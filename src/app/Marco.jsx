@@ -1,7 +1,7 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useEnLinea } from '../core/conexion/useEnLinea.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
-import { descripcionDelPerfil, iniciales } from '../core/sesion/roles.js'
+import { descripcionDelPerfil, iniciales, rutaDeOrigen } from '../core/sesion/roles.js'
 import { Conexion } from '../core/ui/Conexion.jsx'
 import { Icono } from '../core/ui/Icono.jsx'
 import iconoMarca from '../core/ui/iconos/eco.svg'
@@ -41,16 +41,37 @@ function Campana() {
   )
 }
 
-function BarraSuperiorDelTelefono({ perfil, enLinea }) {
+/** Lo que dice la barra superior del teléfono en cada pantalla. */
+function titulosDelTelefono(perfil, ruta) {
+  // La bandeja se presenta con el nombre del área (Figma 3:302).
+  if (ruta === '/bandeja' && perfil.area) {
+    return { titulo: `Bandeja · ${perfil.area.nombre}`, subtitulo: null }
+  }
   // El reportante ve su finca y su razón social; los demás roles, su nombre y su rol.
-  const titulo = perfil.finca?.nombre ?? perfil.nombre
-  const subtitulo = perfil.finca?.razon_social?.nombre ?? descripcionDelPerfil(perfil)
+  return {
+    titulo: perfil.finca?.nombre ?? perfil.nombre,
+    subtitulo: perfil.finca?.razon_social?.nombre ?? descripcionDelPerfil(perfil),
+  }
+}
+
+function BarraSuperiorDelTelefono({ perfil, enLinea, ruta }) {
+  const { titulo, subtitulo } = titulosDelTelefono(perfil, ruta)
 
   return (
     <header className="sticky top-0 z-10 flex h-15 items-center gap-1 border-b border-borde bg-superficie pr-1 pl-4 lg:hidden">
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="truncate text-subtitulo text-texto">{titulo}</p>
-        <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
+        {/* Un título de una sola línea baja a 16 px en los teléfonos de menos de 390 px:
+            a 360 px «Bandeja · Mantenimiento» no cabe junto a la conexión y la campana. */}
+        <p
+          className={`truncate text-texto ${
+            subtitulo ? 'text-subtitulo' : 'text-cuerpo-fuerte min-[390px]:text-subtitulo'
+          }`}
+        >
+          {titulo}
+        </p>
+        {subtitulo ? (
+          <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
+        ) : null}
       </div>
       <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
       <Campana />
@@ -61,7 +82,7 @@ function BarraSuperiorDelTelefono({ perfil, enLinea }) {
 function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
   return (
     <header className="sticky top-0 z-10 hidden items-center gap-3 border-b border-borde bg-superficie px-8 py-3 lg:flex">
-      {/* El buscador por código llega con la consulta de novedades (RF-18, Sprint 2). */}
+      {/* El buscador por código llega con el historial (RF-19, Sprint 5). */}
       <label className="flex w-[22.5rem] items-center gap-2 rounded-control bg-fondo px-3.5 py-2.5 text-texto-secundario inset-ring inset-ring-borde">
         <Icono src={iconoBuscar} tamano={20} />
         <span className="sr-only">Buscar por código</span>
@@ -84,7 +105,7 @@ function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
   )
 }
 
-function BarraLateral({ perfil, items, alSalir }) {
+function BarraLateral({ perfil, items, origen, alSalir }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col gap-1 border-r border-borde bg-superficie px-4 py-6 lg:flex">
       <div className="flex items-center gap-2.5 px-2 pb-5">
@@ -104,7 +125,7 @@ function BarraLateral({ perfil, items, alSalir }) {
             to={ruta}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-control px-3 py-2.5 ${
-                isActive
+                isActive || ruta === origen
                   ? 'bg-primario-contenedor text-etiqueta-fuerte text-primario'
                   : 'text-etiqueta text-texto hover:bg-gris-100'
               }`
@@ -115,7 +136,9 @@ function BarraLateral({ perfil, items, alSalir }) {
                 <Icono
                   src={icono}
                   tamano={22}
-                  className={isActive ? 'text-primario' : 'text-texto-secundario'}
+                  className={
+                    isActive || ruta === origen ? 'text-primario' : 'text-texto-secundario'
+                  }
                 />
                 <span className="min-w-0 flex-1">{etiqueta}</span>
               </>
@@ -147,11 +170,11 @@ function BarraLateral({ perfil, items, alSalir }) {
   )
 }
 
-function NavegacionInferior({ items }) {
+function NavegacionInferior({ items, origen }) {
   return (
     <nav
       aria-label="Principal"
-      className="sticky bottom-0 z-10 flex items-start border-t border-borde bg-superficie px-2 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:hidden"
+      className="sticky bottom-0 z-10 flex items-start border-t border-borde bg-superficie px-2 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] group-has-[[data-barra-de-acciones]]/marco:hidden lg:hidden"
     >
       {items.map(({ ruta, etiqueta, corta, icono }) => (
         <NavLink
@@ -163,14 +186,16 @@ function NavegacionInferior({ items }) {
             <>
               <span
                 className={`flex items-center rounded-2xl px-4 py-1 ${
-                  isActive ? 'bg-primario-contenedor text-primario' : 'text-texto-secundario'
+                  isActive || ruta === origen
+                    ? 'bg-primario-contenedor text-primario'
+                    : 'text-texto-secundario'
                 }`}
               >
                 <Icono src={icono} tamano={24} />
               </span>
               <span
                 className={
-                  isActive
+                  isActive || ruta === origen
                     ? 'text-auxiliar-fuerte text-primario'
                     : 'text-auxiliar text-texto-secundario'
                 }
@@ -191,15 +216,24 @@ function NavegacionInferior({ items }) {
  * @param {object} props
  * @param {boolean} [props.enfocado] Pantallas de una sola tarea (05 y 06): en el teléfono no
  *   llevan la barra superior ni la inferior; cada una pone su propia cabecera.
+ * @param {boolean} [props.sinBarraSuperior] Pantallas que en el teléfono traen su propia barra
+ *   superior, con «volver», pero conservan la navegación inferior (el detalle, 13 y 22-B).
  */
-export default function Marco({ enfocado = false }) {
+export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   const { perfil } = useSesion()
   const navegar = useNavigate()
   const enLinea = useEnLinea()
+  const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
+  // En el detalle de una novedad, el menú deja marcada la pantalla desde la que se abrió.
+  const origen = ruta.startsWith('/novedades/')
+    ? rutaDeOrigen(state, perfil.rol_id).split('?')[0]
+    : null
 
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
+    // Cuando una pantalla pinta su barra de acciones ([data-barra-de-acciones]), esta ocupa
+    // el lugar de la navegación inferior del teléfono.
+    <div className="group/marco flex min-h-dvh flex-col lg:flex-row">
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-superficie focus:px-4 focus:py-3 focus:text-etiqueta-fuerte focus:text-primario"
@@ -210,11 +244,14 @@ export default function Marco({ enfocado = false }) {
       <BarraLateral
         perfil={perfil}
         items={items.filter((item) => !item.soloTelefono)}
+        origen={origen}
         alSalir={() => navegar('/cuenta')}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {enfocado ? null : <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} />}
+        {enfocado || sinBarraSuperior ? null : (
+          <BarraSuperiorDelTelefono perfil={perfil} enLinea={enLinea} ruta={ruta} />
+        )}
         <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
@@ -222,7 +259,10 @@ export default function Marco({ enfocado = false }) {
         </main>
 
         {enfocado ? null : (
-          <NavegacionInferior items={items.filter((item) => !item.soloEscritorio)} />
+          <NavegacionInferior
+            items={items.filter((item) => !item.soloEscritorio)}
+            origen={origen}
+          />
         )}
       </div>
     </div>

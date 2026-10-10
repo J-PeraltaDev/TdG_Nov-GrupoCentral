@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../pruebas/sesionDePrueba.jsx'
 import { Rutas } from './Rutas.jsx'
 
@@ -10,15 +11,48 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   listarNovedades: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
   contarNovedades: vi.fn().mockResolvedValue(0),
   registrarNovedad: vi.fn(),
+  listarBandeja: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  contarBandeja: vi.fn().mockResolvedValue(0),
+  listarTransicionesDeBandeja: vi.fn().mockResolvedValue([]),
+  obtenerNovedad: vi.fn().mockResolvedValue({
+    id: '00000000-0000-4000-e000-000000000153',
+    codigo: 153,
+    descripcion: 'El torniquete de la entrada no gira.',
+    prioridad: 'critico',
+    estado: 'asignada',
+    solucion: null,
+    fecha_ejecucion: null,
+    fecha_registro: '2026-09-24T12:40:00Z',
+    fecha_sincronizacion: '2026-09-24T12:41:00Z',
+    finca_id: 'finca-1',
+    finca: 'Finca de prueba 01',
+    razon_social: 'Razón social de prueba A',
+    area_id: 'area-m',
+    area: 'Mantenimiento',
+    tipo_falla: null,
+    reportante: 'Reportante de prueba',
+  }),
+  listarLineaDeTiempo: vi.fn().mockResolvedValue([]),
+  tomarNovedad: vi.fn(),
+  rechazarNovedad: vi.fn(),
+  escalarNovedad: vi.fn(),
+  reasignarNovedad: vi.fn(),
+  registrarSolucion: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
+  sugerirTiposFalla: vi.fn().mockResolvedValue([]),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
     { id: 'area-m', nombre: 'Mantenimiento' },
     { id: 'area-s', nombre: 'Sistemas' },
   ]),
+  listarFincas: vi.fn().mockResolvedValue([]),
 }))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
+
+const DETALLE = '/novedades/00000000-0000-4000-e000-000000000153'
 
 /** Textos del menú de la barra lateral (escritorio). */
 async function menuDelEscritorio() {
@@ -51,7 +85,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
 
   it.each([
     ['reportante', 'Mis novedades'],
-    ['aprobador', 'Bandeja del área'],
+    ['aprobador', 'Bandeja · Mantenimiento'],
     ['director', 'Novedades escaladas'],
     ['administrador', 'Panel de reportes'],
   ])('RF-01 / CU-01 4: el %s entra a su pantalla de inicio («%s»)', async (rol, titulo) => {
@@ -96,8 +130,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it.each([
     ['reportante', '/bandeja', 'Mis novedades'],
     ['reportante', '/usuarios', 'Mis novedades'],
-    ['aprobador', '/registrar', 'Bandeja del área'],
-    ['aprobador', '/panel', 'Bandeja del área'],
+    ['aprobador', '/registrar', 'Bandeja · Mantenimiento'],
+    ['aprobador', '/panel', 'Bandeja · Mantenimiento'],
     ['director', '/usuarios', 'Novedades escaladas'],
     ['administrador', '/registrar', 'Panel de reportes'],
   ])(
@@ -133,6 +167,93 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(screen.getByText('Razón social de prueba A')).toBeInTheDocument()
   })
 
+  it('RF-09: en el teléfono, la barra superior del aprobador presenta la bandeja de su área', async () => {
+    abrir('/bandeja', 'aprobador')
+
+    expect(
+      await screen.findByText('Bandeja · Mantenimiento', { selector: 'p' }),
+    ).toBeInTheDocument()
+    // El título reemplaza al nombre y al rol, que en el teléfono quedan en Cuenta.
+    expect(
+      screen.queryByText('Carlos Mario Restrepo', { selector: 'header p' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it.each(['reportante', 'aprobador', 'director', 'administrador'])(
+    'RF-18 / CU-18: el %s entra al detalle de una novedad',
+    async (rol) => {
+      abrir(DETALLE, rol)
+
+      expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    },
+  )
+
+  it('RF-14 / CU-14: el aprobador entra a registrar la solución de una novedad en atención, sin las barras del teléfono', async () => {
+    const enAtencion = { ...(await obtenerNovedad()), estado: 'en_atencion' }
+    vi.mocked(obtenerNovedad).mockResolvedValueOnce(enAtencion)
+    abrir(`${DETALLE}/solucion`, 'aprobador')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Registrar solución' }),
+    ).toBeVisible()
+    // Solo queda el menú de la barra lateral (escritorio); la barra inferior no se pinta.
+    expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(1)
+    expect(screen.getByRole('link', { name: 'Cerrar sin registrar la solución' })).toBeVisible()
+  })
+
+  it.each([
+    ['reportante', 'Mis novedades'],
+    ['director', 'Novedades escaladas'],
+    ['administrador', 'Panel de reportes'],
+  ])(
+    'RF-14: el %s no entra a registrar una solución; el guardián lo devuelve a su inicio',
+    async (rol, titulo) => {
+      abrir(`${DETALLE}/solucion`, rol)
+
+      expect(await screen.findByRole('heading', { level: 1, name: titulo })).toBeVisible()
+    },
+  )
+
+  it('RF-14: sin sesión no se entra a registrar una solución', () => {
+    abrir(`${DETALLE}/solucion`, null)
+
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeVisible()
+  })
+
+  it('RF-18: sin sesión no se entra al detalle', () => {
+    abrir(DETALLE, null)
+
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeVisible()
+  })
+
+  it.each([
+    ['reportante', 'Novedades'],
+    ['aprobador', 'Bandeja'],
+    ['director', 'Escaladas'],
+  ])(
+    'RF-18: en el detalle, el menú del %s deja marcada la pantalla de origen («%s»)',
+    async (rol, origen) => {
+      abrir(DETALLE, rol)
+      await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+      const [lateral] = screen.getAllByRole('navigation', { name: 'Principal' })
+      const marcados = within(lateral)
+        .getAllByRole('link')
+        .filter((enlace) => enlace.classList.contains('bg-primario-contenedor'))
+      expect(marcados.map((enlace) => enlace.textContent)).toEqual([origen])
+    },
+  )
+
+  it('RF-18: en el teléfono el detalle trae su propia barra superior y conserva la navegación', async () => {
+    abrir(DETALLE, 'aprobador')
+    await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
+
+    // La barra del marco, con el nombre de la persona, no se pinta; la inferior sí.
+    expect(screen.queryByText('Carlos Mario Restrepo', { selector: 'header p' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'Volver a la bandeja' })).toBeVisible()
+    expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(2)
+  })
+
   it('RF-23: el indicador de conexión está siempre a la vista', async () => {
     abrir('/novedades', 'reportante')
 
@@ -144,7 +265,9 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it('con sesión, el ingreso redirige al inicio del rol', async () => {
     abrir('/ingresar', 'aprobador')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Bandeja del área' })).toBeVisible()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bandeja · Mantenimiento' }),
+    ).toBeVisible()
   })
 
   it('una ruta que no existe muestra la página de no encontrada', () => {
@@ -155,13 +278,17 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ).toBeVisible()
   })
 
-  it('/_dev/componentes muestra las 28 variantes de los componentes base', async () => {
+  it('/_dev/componentes muestra las 28 variantes de los componentes base y los del Sprint 2', async () => {
     abrir('/_dev/componentes', null)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Componentes base' })).toBeVisible()
     expect(document.querySelectorAll('[data-estado]')).toHaveLength(9)
     expect(document.querySelectorAll('[data-prioridad]')).toHaveLength(4)
     expect(document.querySelectorAll('[data-conexion]')).toHaveLength(3)
-    expect(screen.getAllByRole('button')).toHaveLength(12)
+    // 12 botones del sistema de diseño, «Reintentar» del aviso y el que abre la hoja.
+    expect(screen.getAllByRole('button')).toHaveLength(14)
+    expect(screen.getAllByRole('tablist')).toHaveLength(2)
+    expect(document.querySelectorAll('[data-aviso-temporal]')).toHaveLength(2)
+    expect(screen.getAllByRole('textbox')).toHaveLength(2)
   })
 })

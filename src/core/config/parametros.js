@@ -9,6 +9,18 @@
 /** Descripción de la novedad (RF-05). En la BD: CHECK de `novedad.descripcion` (Sprint 1). */
 export const DESCRIPCION_MAX_CARACTERES = 500
 
+/**
+ * Motivo, justificación, observación y solución (RF-11 a RF-17): los textos que quedan en el
+ * historial. En la BD: `private.texto_obligatorio` (Sprint 2).
+ */
+export const OBSERVACION_MAX_CARACTERES = 500
+
+/**
+ * Nombre de un tipo de falla nuevo (RF-14). Solo limita el campo: la base de datos no le pone
+ * máximo. Cabe en una etiqueta y en las tablas de los reportes.
+ */
+export const TIPO_FALLA_NOMBRE_MAX_CARACTERES = 60
+
 /** Código temporal de recuperación de contraseña (RF-02). Se usa en el Sprint 3. */
 export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
 

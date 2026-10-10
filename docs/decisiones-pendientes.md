@@ -15,14 +15,21 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 183,8 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 186,1 KB de 200 KB                                           | El equipo         |
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
-| 16  | Avisos del asesor de Supabase              | Tres avisos conocidos, ninguno nuevo; explicados abajo               | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | Corridas una vez contra «staging»; falta repetirlas tras un arreglo  | El equipo         |
+| 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 70 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
+| 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17  | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
+| 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -137,6 +144,39 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
 - **Lista:** «Cargando…» · «Ver más» · «No hay novedades en esta lista.» (para Por confirmar,
   Cerradas y Rechazadas; Figma solo dibuja el vacío de Abiertas) · «N novedades resueltas
   esperan tu confirmación» (Figma solo muestra el singular).
+- **Bandeja del área (Sprint 2):** «No hay novedades en esta lista.» cuando la pestaña está
+  vacía pero hay novedades en otra (Figma solo dibuja la bandeja sin nada pendiente); «menos de
+  1 min» como duración mínima; «Cargando…», «Ver más» y «Reintentar», como en Mis novedades. Para
+  los lectores de pantalla: «Novedades de la bandeja» (pestañas), «Filtrar por finca», «Novedades:
+  Por atender» (título de la tabla) y «Vista previa de NOV-0147».
+- **Detalle de la novedad (Sprint 2):** el enlace de regreso según la pantalla de origen
+  («Volver a la bandeja», «Volver a mis novedades», «Volver a las escaladas», «Volver al panel»;
+  Figma solo escribe «Volver al historial»); en 22-B, «Solo puedes consultar las novedades de tu
+  área.» para el aprobador y «Esta novedad no existe o ya no está disponible.» con «Volver al
+  inicio» para el director y el administrador (Figma solo dibuja el del reportante); en la línea de
+  tiempo, «Área: de Sistemas a Mantenimiento» para una reasignación, y «pasa a» entre los dos
+  estados para los lectores de pantalla; «Registró» en la solución, como la pantalla 09.
+- **Acciones del aprobador (Sprint 2):** mientras la acción se ejecuta, el botón dice «Tomando…»;
+  el aviso de 14-C nombra el estado en que quedó la novedad («La novedad sigue Asignada.»; Figma
+  lo escribe para una en atención).
+- **Rechazar novedad (Sprint 2):** el aviso «Novedad rechazada. La finca verá el motivo.»; el botón
+  dice «Rechazando…» mientras se ejecuta; para los lectores de pantalla, «Motivos frecuentes»
+  (grupo de accesos rápidos) y «Caracteres:» antes del contador.
+- **Escalar novedad (Sprint 2):** el aviso «Novedad escalada. Queda en espera del director.»; el
+  botón dice «Escalando…» mientras se ejecuta.
+- **Reasignar novedad (Sprint 2):** el aviso «Novedad reasignada a {área}.»; el botón dice
+  «Reasignando…» mientras se ejecuta; «No hay otra área activa.» si el catálogo no ofrece destino;
+  «No pudimos cargar las áreas. Revisa tu conexión.», como en el registro; para los lectores de
+  pantalla, «pasa a» entre el área actual y el destino.
+- **Registrar solución (Sprint 2):** los errores de cada campo («Describe qué se hizo.», «Indica la
+  fecha de ejecución.», «Elige un tipo de falla o crea uno nuevo.»; Figma solo escribe el de la
+  fecha posterior a hoy); el aviso «Solución registrada. La finca debe confirmar el cierre.»; el
+  botón dice «Guardando…» mientras se ejecuta; en el tipo de falla, «Escribe para buscar», «Elige
+  uno de la lista o crea uno nuevo.», «Tipo nuevo», «1 novedad» (Figma solo muestra el plural) y
+  «No pudimos buscar los tipos. Revisa tu conexión.»; para los lectores de pantalla, «Cerrar sin
+  registrar la solución», «Descripción de la novedad:», «Borrar lo escrito», «Cambiar el tipo de
+  falla», «Tipos de falla» (la lista) y el resultado de la búsqueda («2 tipos coinciden.», «Ningún
+  tipo coincide. Puedes crear uno nuevo.»).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -155,6 +195,21 @@ Sprint 1:
 
 Quedan unos 16 KB. Todo lo que tiene sesión se carga bajo demanda y no cuenta aquí: el marco
 (5,8 KB), Mis novedades (3,1 KB), Registrar (5,1 KB) y la constancia (1,7 KB).
+
+**Sprint 2, medido el 8 oct 2026 con «Tomar novedad» (RF-10):** ≈ 185,6 KB (JavaScript 149,0 KB,
+CSS 7,6 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 14 KB. Lo nuevo se
+carga bajo demanda: la bandeja (5,4 KB), el detalle (4,9 KB) y las acciones del aprobador
+(0,8 KB), que solo descarga ese rol. Lo que sube es el CSS, 1,4 KB desde el Sprint 1.
+
+Con «Rechazar novedad» (RF-11): ≈ 185,7 KB. La hoja y su campo van en el paquete de las acciones
+del aprobador, que pasa a 2,8 KB. Con «Escalar novedad» (RF-12) el total no cambia (185,7 KB) y
+ese paquete pasa a 3,5 KB. Con «Reasignar novedad» (RF-17) tampoco (185,7 KB); el paquete de las
+acciones queda en 5,0 KB, y la presentación de las áreas (1,2 KB), que comparte con el registro,
+tampoco entra en la ruta de ingreso.
+
+Con «Registrar solución» (RF-14), medido el 9 oct 2026: ≈ 186,1 KB (JavaScript 149,3 KB, CSS
+7,8 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 13,9 KB. La pantalla 18
+va en su propio paquete (6,0 KB), que solo descarga el aprobador cuando la abre.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -179,8 +234,8 @@ Puntos en los que Figma no alcanza a decidir, o en los que se contradice:
   suaves que existen: Alto con advertencia suave, Normal con información suave y Bajo con gris.
 - **Alto de las tarjetas de prioridad.** En Figma cada tarjeta mide lo que ocupa su texto
   (86 y 102 px en la misma fila). En la aplicación las dos de una fila miden lo mismo.
-- **«Ver novedad» en la constancia.** El detalle llega en el Sprint 2; por ahora lleva a Mis
-  novedades. Por lo mismo, las tarjetas de la lista todavía no se pueden abrir.
+- **«Ver novedad» en la constancia.** **Resuelto en el Sprint 2:** abre el detalle de la novedad
+  (`/novedades/:id`), igual que las tarjetas de Mis novedades y las de la bandeja.
 - **«Revisar» en el aviso de novedades por confirmar.** Cambia al filtro «Por confirmar». La
   confirmación como tal (CU-15) es del Sprint 2.
 - **Cerrar el formulario con datos escritos.** La «X» sale sin preguntar y lo escrito se pierde.
@@ -215,7 +270,7 @@ para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
 ## 16 · Avisos del asesor de Supabase
 
-El asesor sobre «staging» deja tres avisos (nivel _WARN_), los mismos desde el PR 1:
+El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
 
 | Aviso                                                | Por qué queda                                                                                                                                          |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -223,8 +278,17 @@ El asesor sobre «staging» deja tres avisos (nivel _WARN_), los mismos desde el
 | `auth_leaked_password_protection`                    | La comprobación de contraseñas filtradas es del plan de pago                                                                                           |
 | `auth_insufficient_mfa_options`                      | El SRS no pide segundo factor                                                                                                                          |
 
-El primero aparecerá una vez por cada función RPC que se agregue. Los otros dos son del proyecto,
-no del código, y saldrán también en «PROYECTO».
+El primero aparece una vez por cada función RPC. Los otros dos son del proyecto, no del código, y
+salen también en «PROYECTO».
+
+**Al 8 oct 2026 (contratos del Sprint 2):** nueve avisos en «staging». Siete son el primero, uno
+por función: `registrar_novedad` y las seis del Sprint 2 (`tomar_novedad`, `rechazar_novedad`,
+`reasignar_novedad`, `escalar_novedad`, `registrar_solucion` y `sugerir_tipos_falla`). Ninguno es
+de un tipo nuevo ni de nivel de error.
+
+**Al 9 oct 2026 (cierre del Sprint 2, con las seis funciones implementadas):** los mismos nueve.
+Las auxiliares de `private` no generan avisos: no son `security definer` ni están en un esquema
+expuesto.
 
 ## 17 · Pruebas que necesitan ingresar
 
@@ -236,11 +300,42 @@ CU-06 y CU-07 ingresan con los usuarios de prueba, cuya contraseña define cada 
 con él el registro, la constancia, el reintento sin duplicar y el enrutamiento. Fallaron 5 de 40,
 todas de CU-01 y por la prueba, no por la aplicación; el detalle está en `docs/sprints/S1.md`.
 
-**Falta repetirlas** después de ese arreglo; deben pasar las 40:
+**Se repitieron el 8 oct 2026**, ya con las de la bandeja (CU-09): pasaron las 44. En una corrida
+anterior de ese día fallaron seis con la pantalla en «Cargando…»; el servidor había respondido bien
+y el equipo tenía poca memoria, así que se bajó a cuatro navegadores en paralelo y se subió la
+espera por defecto a 10 s.
+
+**El 9 oct 2026 se corrieron las 70**, con las 26 nuevas del Sprint 2 (CU-18, CU-10, CU-11, CU-12,
+CU-17 y CU-14): **pasaron 57 y fallaron 13**, ninguna por la aplicación.
+
+- **Once, por el límite de ingresos de Auth.** Cada prueba ingresaba por el formulario, y las
+  nuevas lo hacen con tres o cuatro usuarios: la corrida hizo unas 170 peticiones a
+  `/auth/v1/token` en dos minutos (las anteriores, unas 65) y «staging» respondió 429 a once. La
+  pantalla mostró «No pudimos iniciar tu sesión» y esas pruebas no pasaron del ingreso. Ahora cada
+  usuario ingresa una sola vez por corrida (`e2e/sesiones.setup.js`) y las pruebas reutilizan su
+  sesión; solo CU-01, que prueba el ingreso, usa el formulario. Quedan unos 20 ingresos por
+  corrida.
+- **Dos, por una ayuda de las pruebas.** `cargarTodaLaLista` daba la bandeja por cargada antes de
+  que la pantalla la pidiera, y la prueba de CU-10 buscaba su novedad entre las primeras 20 de 50.
+  Ahora espera a que el panel exista.
+
+De las 26 nuevas pasaron 18; cada una pasó al menos en un tamaño, salvo la primera de CU-10. Además
+el tiempo máximo por prueba subió de 30 a 60 s.
+
+**Se repitieron ese mismo día con los dos arreglos: pasaron las 70, más las seis de preparación
+(76).** Para volver a correrlas:
 
 ```bash
 npm run test:e2e:chromium
 ```
+
+Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas dejan novedades con
+descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`.
+
+**Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
+pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
+momento.». Le puede pasar a una persona que se equivoque varias veces seguidas con la contraseña;
+un mensaje propio, que diga que espere unos minutos, le serviría más.
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
@@ -277,3 +372,212 @@ y con la gestión de usuarios del Sprint 3 cada uno puede tener la suya.
 Después, en <https://tdg-nov-grupocentral.pages.dev/>, la cuenta debe entrar y ver el menú del
 administrador. Queda anotarlo en el reporte del sprint, porque es un cambio hecho a mano en
 producción. El correo de la cuenta depende del punto 3.
+
+## 19 · Detalles de la bandeja del área (11 y 12)
+
+Lo que Figma no alcanza a decidir en las pantallas 11, 11-C y 12, y cómo quedó (plan del Sprint 2,
+decisiones 1, 4, 5, 14 y 15):
+
+- **Lo que llega en otro sprint no se pinta todavía:** el ícono de cámara de las tarjetas y de la
+  tabla (evidencias, Sprint 4), la insignia con la cantidad en «Bandeja» y en la campana (Sprint 5)
+  y el buscador por código (Sprint 5).
+- **Fila y vista previa en el escritorio.** Tocar una fila la muestra en la vista previa; el
+  detalle se abre con «Ver detalle completo». La primera fila queda elegida al cargar. La acción
+  principal del panel («Tomar para atención», «Registrar solución») llega con su historia.
+- **Notas del estado.** «Aprobada por el director» sale del estado; «Reasignada desde {área}», de la
+  última asignación de la novedad en su historial, que el escritorio consulta para las novedades de
+  la página. El teléfono no pide el historial.
+- **Anchos entre 1024 y 1439 px.** Figma dibuja la bandeja a 1440 px. Entre 1024 y 1279 px la vista
+  previa va debajo de la tabla; entre 1280 y 1439 px el panel mide 300 px (340 en Figma) y la
+  primera y la última columna se angostan, para que la descripción siga siendo legible.
+- **A 360 px.** Figma dibuja el teléfono a 390 px. Por debajo de ese ancho, el título de la barra
+  superior baja de 18 a 16 px («Bandeja · Mantenimiento» no cabe junto a la conexión y la campana)
+  y las tarjetas de los contadores usan menos espacio interior.
+- **Bandeja vacía (11-C).** «No hay novedades pendientes en {área}» solo sale cuando las tres
+  pestañas están en cero. Si la vacía es solo la pestaña abierta, o hay un filtro de finca, dice
+  «No hay novedades en esta lista.».
+- **Filtro por finca.** Solo en el escritorio, como en Figma. Ofrece las fincas activas del
+  catálogo, no solo las que tienen novedades en la bandeja. La pestaña y la finca quedan en la
+  dirección, igual que el filtro de Mis novedades.
+- **Fila bajo el cursor.** Se sombrea con `gris-100`; Figma no dibuja ese estado (punto 9).
+- **Duraciones.** Las dos unidades mayores, sin redondear hacia arriba: «35 min», «5 h 20 min»,
+  «1 d 3 h».
+
+## 20 · Detalles del detalle de la novedad (13, 14, 22 y 22-B)
+
+Lo que Figma no alcanza a decidir, o en lo que sus pantallas no coinciden entre sí, y cómo quedó
+(plan del Sprint 2, decisiones 1, 3, 10, 12, 13, 17 y 19):
+
+- **Lo que llega en otro sprint no se pinta todavía:** el bloque «Evidencias» (Sprint 4), la
+  etiqueta «Registrada sin conexión» (Sprint 4), «Corregir tipo» (Sprint 5) y el menú «⋮» del
+  encabezado, cuyo contenido Figma no dibuja.
+- **Usuario en la línea de tiempo.** «Nombre · Rol · Área» en el teléfono y en el escritorio, como
+  la pantalla 22 y como pide SDD 5.2.5. Las pantallas 13, 14 y 09 escriben «Nombre · Área» para el
+  aprobador.
+- **«Sincronizada» y la semana.** El teléfono muestra siempre «Sincronizada» (13 la dibuja y 14
+  no) y escribe la fecha de registro con su semana, «(Sem 39)», como 09 y 22 (13 y 14 no la traen).
+- **Orden de las etiquetas.** Estado, prioridad, área y finca, como 09 y 22; en 13 y 14 la finca va
+  antes que el área. La etiqueta antepone «Finca» al nombre, como Figma («Finca Juanca»), salvo que
+  el nombre ya empiece así.
+- **«Tomada por».** Sale de la última vez que la novedad pasó de asignada a en atención, para que
+  en el Sprint 3 «la falla persiste» no muestre al reportante. Lleva solo la hora si fue hoy; si
+  no, también la fecha («22 sep, 10:20 a. m.»). Se muestra mientras la novedad está en atención.
+- **«Registrada hace…» en el escritorio.** Figma solo dibuja en el escritorio una novedad cerrada.
+  Para las que están en manos del área, la línea «Registrada hace 3 h · Tomada por…» va bajo la
+  razón social.
+- **Novedad resuelta en el teléfono.** Para todos los roles se usa el bloque de la pantalla 09:
+  «Solución registrada por {área}», con el tipo de falla, la fecha de ejecución y quién la registró.
+- **22-B sin el código.** Figma pone el código en el encabezado, pero cuando la consulta no
+  devuelve filas la aplicación no lo conoce (la dirección lleva el identificador): el encabezado
+  dice «Novedad». La pantalla no distingue una novedad fuera del alcance de una que no existe,
+  porque la base de datos responde igual en los dos casos.
+- **Barras del teléfono.** El detalle trae su propia barra superior, con «volver», y conserva la
+  navegación inferior, como 22-B. Cuando haya acciones (PR 4), su barra la reemplaza, como en 13
+  y 14.
+- **Menú en el detalle.** Queda marcada la pantalla desde la que se abrió (Bandeja, Novedades…);
+  si se llegó por la dirección, la de inicio del rol.
+- **Anchos entre 1024 y 1279 px.** La línea de tiempo va debajo de los datos; desde 1280 px, a la
+  derecha, con los 400 px de Figma.
+
+## 21 · Acciones del aprobador en el detalle (13, 13-B, 14 y 14-C)
+
+Lo que Figma no dibuja o deja abierto de las acciones, resuelto con las decisiones 4 y 9 del plan
+del Sprint 2:
+
+- **En el escritorio.** Figma solo dibuja las acciones en el teléfono. En el escritorio los botones
+  van bajo el encabezado del detalle, y el aviso temporal, abajo a la derecha. En la vista previa
+  de la bandeja (12) va la acción principal de la novedad («Tomar para atención» en una asignada);
+  las demás se ejecutan desde el detalle.
+- **Barra de acciones del teléfono.** Reemplaza a la navegación inferior, como en 13 y 14. Si la
+  novedad queda sin acciones, vuelve la navegación y el aviso se muestra encima de ella. Hasta que
+  lleguen rechazar, escalar, reasignar y registrar la solución (RF-11, 12, 17 y 14), una novedad en
+  atención no tiene barra.
+- **Después de tomarla.** La persona se queda en el detalle, que se actualiza sin pasar por
+  «Cargando…»: cambian el estado, la línea de tiempo y «Tomada por». El foco del teclado pasa al
+  contenido de la página, porque el botón que lo tenía desaparece.
+- **Cuánto dura el aviso.** El de confirmación (13-B) se quita solo a los 6 segundos. El de error
+  (14-C) se queda hasta que la persona actúe, porque trae «Reintentar». Figma no fija la duración.
+- **Sin conexión (14-C).** Si la acción no llega al servidor, no se encola ni se reintenta sola: el
+  aviso dice que no se aplicó y en qué estado sigue la novedad, y ofrece «Reintentar» (RF-25).
+- **Si otra persona ya actuó.** Con `TRANSICION_INVALIDA` se muestra «La novedad cambió de estado.»
+  y el detalle se recarga solo (Tabla 22).
+- **Mientras se ejecuta.** El botón queda deshabilitado y dice «Tomando…», para que no se envíe dos
+  veces.
+
+## 22 · Hojas de las acciones (15, 16 y 17)
+
+Lo que Figma no dibuja o deja abierto de las hojas que piden un texto antes de confirmar:
+
+- **En el escritorio** (decisión 4 del plan): la hoja es un diálogo centrado de 448 px con el mismo
+  contenido; «Cancelar» y el botón que confirma van en una fila, a la derecha.
+- **Qué pasa al confirmar.** La hoja se cierra siempre y el resultado se muestra en el detalle, con
+  el aviso temporal: un aviso fuera de un diálogo modal no se ve ni lo anuncia el lector de
+  pantalla. Si se pierde la conexión, «Reintentar» envía el mismo texto sin volver a abrir la hoja.
+  La única excepción es `DATO_OBLIGATORIO`, que se corrige en la misma hoja.
+- **Después de rechazar** (decisión 9): la persona se queda en el detalle, ya rechazado y sin
+  acciones, con el motivo en la línea de tiempo.
+- **Después de escalar** (decisión 9): también se queda en el detalle, ya escalado y sin acciones
+  para el aprobador, con la justificación en la línea de tiempo. En la bandeja la novedad pasa a
+  «En espera».
+- **Hoja 15, la novedad que se escala.** El recuadro lleva el código, el nombre de la finca tal
+  como está en el catálogo y la prioridad (Figma escribe «NOV-0150 · Pavarandó»).
+- **«Escalar novedad» deshabilitado** mientras la justificación esté vacía o tenga solo espacios
+  (CU-12 3a), igual que en la hoja 16.
+- **Después de reasignar** (decisión 9): la novedad sale del alcance de quien la reasigna, así que
+  el detalle no se recarga (daría «No puedes ver esta novedad»). La persona vuelve a su bandeja, a
+  la misma pestaña y filtro si venía de ahí, con el aviso «Novedad reasignada a Sistemas.». El
+  aviso viaja en el estado de la navegación y se quita solo, para que no reaparezca al recargar.
+- **Hoja 17, el destino.** Sale de las áreas activas del catálogo, sin la actual. Hoy son dos
+  áreas, así que el destino queda elegido, como lo dibuja Figma. Si llega a haber más, la tarjeta
+  del destino pasa a ser una lista de opciones y hay que elegir una; si no queda ninguna, la hoja
+  lo dice y no deja confirmar. Si las áreas no cargan, ofrece «Reintentar» sin perder el motivo.
+- **«Reasignar» deshabilitado** mientras el motivo esté vacío (CU-17 3a) o no haya destino.
+- **Motivos frecuentes de la hoja 16.** Son accesos rápidos, no un catálogo. Al tocar uno se
+  escribe al comienzo del motivo y se conserva lo que la persona ya había escrito («Duplicada: ya
+  está en atención como NOV-0149.», como el ejemplo de Figma); tocar otro lo reemplaza y tocar el
+  mismo lo quita. El que queda marcado es el que encabeza el texto. El foco no se mueve al campo.
+- **Tamaño de los motivos frecuentes.** La pastilla mide 32 px, como en Figma, dentro de un botón
+  de 48 px en el teléfono (área táctil); por eso las filas quedan a 16 px y no a 8. A 360 px el
+  tercero no cabe en una línea y pasa a dos.
+- **«Rechazar novedad» deshabilitado.** Mientras el motivo esté vacío o tenga solo espacios (CU-11
+  3a). El campo no deja pasar de 500 caracteres y muestra el contador.
+- **Al abrir**, el foco queda en el primer control de la hoja; al cerrarla vuelve al botón que la
+  abrió y, si ese botón ya no existe, al contenido de la página.
+
+## 23 · Contraste del «Área actual» de la hoja 17
+
+En la hoja «Reasignar a otra área», Figma dibuja la tarjeta del área actual al 60 % de opacidad,
+para que se lea como el punto de partida y no como una opción. Con esa opacidad, medido sobre la
+página real, el nombre del área da **4,25:1** y la etiqueta «Área actual», **2,59:1**; WCAG 1.4.3
+pide 4,5:1. No es un control deshabilitado (ahí la norma no aplica): es texto que la persona
+necesita leer.
+
+**Resuelto el 9 oct 2026.** El equipo dejó la decisión a criterio de la implementación y se aplicó
+la propuesta que estaba anotada aquí: la tarjeta ya no va entera al 60 %. Se apagan
+el fondo y el ícono, que son decorativos, y el texto va con sus colores normales. Medido otra vez
+sobre la página real: el nombre del área da **14,38:1** y «Área actual», **5,73:1**. La tarjeta se
+sigue leyendo como el punto de partida: es gris, y la del destino va en verde y con borde.
+
+**Falta reflejarlo en Figma** (nodo 3:1591): quitarle la opacidad al marco y dejarla solo en el
+ícono.
+
+## 24 · Detalles de la pantalla 18 (registrar solución, 18-B y 18-C)
+
+Lo que Figma no dibuja o deja abierto:
+
+- **Ruta propia.** La pantalla vive en `/novedades/:id/solucion`, sin las barras de navegación del
+  teléfono, como el registro. «Cerrar» vuelve al detalle. Si la novedad no admite la solución (no
+  está en atención ni aprobada, o es de otra área), la dirección lleva al detalle.
+- **En el escritorio** (decisión 4 del plan): una columna centrada dentro del marco, como el
+  registro, con el título en el contenido y «Cancelar» junto al botón.
+- **Fecha de ejecución** (decisión 16): es el campo de fecha del navegador, con hoy en Colombia por
+  defecto y como máximo. Por eso muestra la fecha como la escribe el dispositivo («09/10/2026») y
+  no «24 sep 2026», que es como la dibuja Figma. El mensaje de 18-B sí usa el formato de Figma.
+- **Contador en «¿Qué se hizo?»** (decisión 7): «0/500», aunque Figma no lo dibuja en este campo.
+- **Cuándo se valida.** «Marcar como resuelta» está siempre disponible; al pulsarlo se señala lo
+  que falta o la fecha que no puede ser, y el foco va al primer campo con error (CU-14 6a). La
+  misma pantalla resulta si el que rechaza la fecha es el servidor (`FECHA_INVALIDA`).
+- **Tipo de falla: hay que elegir.** No basta con escribir: se elige una sugerencia o «Crear tipo
+  nuevo». La lista va debajo del campo, como en Figma, y aparece desde la primera letra, después de
+  una espera de un cuarto de segundo. Enter elige la opción activa y nunca envía el formulario.
+- **«Crear tipo nuevo» deshabilitado** cuando hay una coincidencia exacta (CU-14 5a). El aviso «Ya
+  existe…» solo sale si lo escrito no es idéntico al nombre del tipo; si es idéntico, sobra.
+- **Tipo elegido.** Se muestra como en 18-C, con su cantidad de novedades (o «Tipo nuevo»), y con
+  un botón para cambiarlo, que Figma no dibuja.
+- **Nombre de un tipo nuevo.** El campo admite hasta 60 caracteres
+  (`TIPO_FALLA_NOMBRE_MAX_CARACTERES`); la base de datos no le pone máximo.
+- **18-C.** El recuadro muestra la última aprobación del director; si no dejó observación, va sin
+  las comillas. Hasta el Sprint 3 la aplicación no tiene cómo aprobar un escalamiento: está
+  cubierto con pruebas unitarias y con pgTAP, y su prueba de extremo a extremo queda para entonces.
+- **Después de registrar** (decisión 9): se vuelve al detalle, ya resuelto y sin acciones para el
+  aprobador, con el aviso «Solución registrada. La finca debe confirmar el cierre.». Si otra
+  persona cambió el estado antes, se vuelve al detalle con «La novedad cambió de estado.».
+- **Vista previa de la bandeja (12).** «Registrar solución» para una novedad en atención o aprobada;
+  «Tomar para atención» para una asignada.
+- **Área táctil de los campos de una línea.** En la fecha y en el tipo de falla solo el texto
+  recibe el toque, no todo el recuadro de 50 px. Es el mismo `CampoTexto` del ingreso (Sprint 1):
+  conviene resolverlo ahí, para todos los campos, en un cambio aparte.
+
+## 25 · Tipos de falla de prueba en «staging»
+
+`supabase/seed.sql` trae ahora cuatro tipos de falla de prueba («Biométrico», «Puentes y pasos»,
+«Torniquetes» y «Red e internet»), creados por el administrador de prueba, para que el
+autocompletado de la pantalla 18 tenga qué sugerir. El seed solo se carga con `npm run
+staging:reset`, que borra los datos de «staging».
+
+**Decidido el 9 oct 2026: no se corre ahora, sino justo antes de la demo.** El equipo dejó la
+decisión a criterio de la implementación, y se optó por esperar. Nada depende de él hoy
+(las 76 pruebas pasan sin esos tipos, y quien registra una solución crea el tipo que necesite); es
+una operación que borra lo que el compañero tenga en «staging», que es compartido; deja a los
+usuarios de prueba con una contraseña al azar hasta que alguien corra `staging:usuarios`; y cada
+corrida de las pruebas vuelve a llenar la base. Hecho antes de la demo, deja la bandeja limpia y el
+autocompletado con sugerencias, que es cuando se va a notar:
+
+```bash
+npm run staging:reset
+npm run staging:usuarios
+```
+
+Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
+…») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
+`staging:reset`.

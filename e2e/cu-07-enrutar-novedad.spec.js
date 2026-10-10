@@ -11,9 +11,9 @@ import { HAY_CLAVE, ingresarComo, leerDeLaApi, MOTIVO_SIN_CLAVE } from './apoyo/
 /*
  * CU-07 · Enrutar la novedad al área (RF-07). El enrutamiento ocurre dentro del registro.
  *
- * La bandeja del área (pantalla 11) llega en el Sprint 2. Mientras tanto, lo que recibe cada
- * aprobador se comprueba leyendo la API con su propia sesión, que es lo mismo que hará la
- * bandeja: sin claves privilegiadas, las políticas de la base deciden qué ve cada quien.
+ * Lo que recibe cada aprobador se comprueba leyendo la API con su propia sesión, que es lo
+ * mismo que hace la bandeja: sin claves privilegiadas, las políticas de la base deciden qué ve
+ * cada quien. La bandeja en pantalla (11 y 12) se prueba en cu-09-consultar-bandeja.spec.js.
  */
 test.describe('CU-07 · Enrutar la novedad al área', () => {
   test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)

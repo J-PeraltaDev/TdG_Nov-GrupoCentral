@@ -75,3 +75,19 @@ values
   ('00000000-0000-4000-a000-000000000007', 'Usuario desactivado de prueba', 'desactivado@novedades.test', 1,
    '00000000-0000-4000-c000-000000000001', null, false)
 on conflict (id) do nothing;
+
+-- Tipos de falla de prueba (RF-14) --------------------------------------------------------
+-- Para que el autocompletado de «Registrar solución» (pantalla 18) tenga qué sugerir. Los
+-- crea el administrador de prueba. El nombre normalizado sale de la misma función que usa
+-- registrar_solucion, para que el seed no se aparte de la regla (SDD 6.1.8).
+
+insert into public.tipo_falla (id, nombre, nombre_normalizado, creado_por)
+select t.id, t.nombre, private.normalizar_tipo_falla(t.nombre), '00000000-0000-4000-a000-000000000006'
+from (
+  values
+    ('00000000-0000-4000-f000-000000000001'::uuid, 'Biométrico'),
+    ('00000000-0000-4000-f000-000000000002'::uuid, 'Puentes y pasos'),
+    ('00000000-0000-4000-f000-000000000003'::uuid, 'Torniquetes'),
+    ('00000000-0000-4000-f000-000000000004'::uuid, 'Red e internet')
+) as t (id, nombre)
+on conflict (id) do nothing;
