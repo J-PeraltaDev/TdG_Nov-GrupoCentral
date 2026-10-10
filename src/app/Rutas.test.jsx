@@ -14,6 +14,9 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   listarBandeja: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
   contarBandeja: vi.fn().mockResolvedValue(0),
   listarTransicionesDeBandeja: vi.fn().mockResolvedValue([]),
+  listarEscaladas: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  listarEscalamientos: vi.fn().mockResolvedValue([]),
+  contarDecisionesDelMes: vi.fn().mockResolvedValue({ aprobadas: 0, rechazadas: 0 }),
   obtenerNovedad: vi.fn().mockResolvedValue({
     id: '00000000-0000-4000-e000-000000000153',
     codigo: 153,
@@ -38,6 +41,7 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   escalarNovedad: vi.fn(),
   reasignarNovedad: vi.fn(),
   registrarSolucion: vi.fn(),
+  decidirEscalamiento: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),

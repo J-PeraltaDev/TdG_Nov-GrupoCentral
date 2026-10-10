@@ -319,6 +319,82 @@ export async function listarTransicionesDeBandeja(novedadIds) {
 }
 
 /*
+ * Novedades escaladas, para el director de agricultura (RF-13, pantalla 19).
+ */
+
+/** Columnas de `v_novedad` que usa la lista de escaladas: solo las necesarias (RNF-06). */
+const COLUMNAS_DE_LAS_ESCALADAS =
+  'id, codigo, descripcion, prioridad, estado, area_id, area, finca_id, finca, fecha_registro'
+
+/**
+ * Página de las novedades que esperan la decisión del director: por prioridad y, dentro de
+ * cada una, de la más antigua a la más reciente, como la bandeja del área.
+ *
+ * @param {{ pagina?: number }} [opciones] `pagina` empieza en 0.
+ * @returns {Promise<{ novedades: object[], total: number }>}
+ */
+export async function listarEscaladas({ pagina = 0 } = {}) {
+  const desde = pagina * NOVEDADES_POR_PAGINA
+  const { data, error, count } = await supabase
+    .from('v_novedad')
+    .select(COLUMNAS_DE_LAS_ESCALADAS, { count: 'exact' })
+    .eq('estado', 'escalada')
+    .order('prioridad', { ascending: true })
+    .order('fecha_registro', { ascending: true })
+    .order('codigo', { ascending: true })
+    .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+  if (error) throw error
+  return { novedades: data, total: count ?? data.length }
+}
+
+/**
+ * Los escalamientos de esas novedades, en orden: la justificación, cuándo y quién escaló
+ * (nombre, rol y área, de `usuario_publico`; nunca el correo, ADR 0010).
+ *
+ * @param {string[]} novedadIds Las de la página que se está viendo.
+ * @returns {Promise<object[]>}
+ */
+export async function listarEscalamientos(novedadIds) {
+  if (novedadIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('historial_transicion')
+    .select(
+      'id, novedad_id, observacion, fecha_hora, ' +
+        'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
+    )
+    .in('novedad_id', novedadIds)
+    .eq('estado_nuevo', 'escalada')
+    .order('id', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Cuántas novedades escaladas aprobó y cuántas rechazó un director desde una fecha (los dos
+ * contadores «este mes» de la pantalla 19). Se cuentan en el historial, que es donde queda
+ * quién decidió.
+ *
+ * @param {string} usuarioId El director.
+ * @param {string} desde Instante ISO 8601 desde el que se cuenta.
+ * @returns {Promise<{ aprobadas: number, rechazadas: number }>}
+ */
+export async function contarDecisionesDelMes(usuarioId, desde) {
+  const contar = async (estado) => {
+    const { count, error } = await supabase
+      .from('historial_transicion')
+      .select('id', { count: 'exact', head: true })
+      .eq('usuario_id', usuarioId)
+      .eq('estado_anterior', 'escalada')
+      .eq('estado_nuevo', estado)
+      .gte('fecha_hora', desde)
+    if (error) throw error
+    return count ?? 0
+  }
+  const [aprobadas, rechazadas] = await Promise.all([contar('aprobada'), contar('rechazada')])
+  return { aprobadas, rechazadas }
+}
+
+/*
  * Detalle y línea de tiempo de una novedad (RF-18).
  */
 

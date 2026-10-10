@@ -144,6 +144,16 @@ export function hoyEnColombia(ahora = Date.now()) {
 }
 
 /**
+ * El comienzo del mes en curso en Colombia, como instante (`2026-10-01T00:00:00-05:00`), para
+ * filtrar «este mes» en el servidor. Colombia no cambia de hora: siempre es UTC−5.
+ *
+ * @param {Date | string | number} [ahora]
+ */
+export function inicioDelMesEnColombia(ahora = Date.now()) {
+  return `${hoyEnColombia(ahora).slice(0, 7)}-01T00:00:00-05:00`
+}
+
+/**
  * Tiempo transcurrido, en corto: «ahora», «hace 5 min», «hace 3 h», «hace 2 d».
  *
  * @param {Date | string | number} fecha

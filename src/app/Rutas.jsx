@@ -13,6 +13,7 @@ import { Pendiente } from './paginas/Pendiente.jsx'
 const Marco = lazy(() => import('./Marco.jsx'))
 const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
 const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
+const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
 const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
 const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
@@ -68,10 +69,7 @@ export function Rutas() {
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.DIRECTOR_AGRICULTURA]} />}>
-              <Route
-                path="/escaladas"
-                element={<Pendiente titulo="Novedades escaladas" sprint="Sprint 3" />}
-              />
+              <Route path="/escaladas" element={<Escaladas />} />
             </Route>
 
             <Route

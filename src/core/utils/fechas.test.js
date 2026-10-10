@@ -10,6 +10,7 @@ import {
   formatearFechaYSemana,
   formatearHora,
   hoyEnColombia,
+  inicioDelMesEnColombia,
   semanaDelAnio,
   tiempoTranscurrido,
 } from './fechas.js'
@@ -145,6 +146,16 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     expect(hoyEnColombia('2026-01-05T15:00:00Z')).toBe('2026-01-05')
     // El último día del año en Colombia, cuando en UTC ya empezó el siguiente.
     expect(hoyEnColombia('2027-01-01T03:00:00Z')).toBe('2026-12-31')
+  })
+
+  it('RF-13: el mes empieza a la medianoche del día 1 en Colombia, no en UTC', () => {
+    expect(inicioDelMesEnColombia('2026-10-09T15:00:00Z')).toBe('2026-10-01T00:00:00-05:00')
+    // 10:00 p. m. del 30 de septiembre en Colombia: en UTC ya es octubre.
+    expect(inicioDelMesEnColombia('2026-10-01T03:00:00Z')).toBe('2026-09-01T00:00:00-05:00')
+    // El instante exacto en que empieza el mes.
+    expect(new Date(inicioDelMesEnColombia('2026-10-09T15:00:00Z')).toISOString()).toBe(
+      '2026-10-01T05:00:00.000Z',
+    )
   })
 
   it('RF-14: sin argumento, «hoy» es el momento actual', () => {

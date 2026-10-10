@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 70 (más las 6 de preparación)       | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 74 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -30,6 +30,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 23  | Contraste del «Área actual» de la hoja 17  | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
 | 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
+| 27  | Detalles de las pantallas 19, 20 y 20-C    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -177,6 +178,18 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   registrar la solución», «Descripción de la novedad:», «Borrar lo escrito», «Cambiar el tipo de
   falla», «Tipos de falla» (la lista) y el resultado de la búsqueda («2 tipos coinciden.», «Ningún
   tipo coincide. Puedes crear uno nuevo.»).
+- **Novedades escaladas (Sprint 3):** «No hay novedades esperando tu decisión.» cuando la lista
+  está vacía; «Esperando decisión hace menos de 1 min» para una recién escalada (el «ahora» de las
+  demás pantallas no se lee bien ahí); «–» en un contador mientras carga; «Cargando…», «Ver más»
+  y «Reintentar», como en la bandeja. Para los lectores de pantalla: «Resumen de tus decisiones»
+  (los contadores), «Novedades escaladas» (la lista) y el código en cada enlace («Revisar y decidir
+  NOV-0147», «Ver historial de NOV-0147»), para distinguirlos entre tarjetas.
+- **Decisión del director (Sprint 3):** los avisos «Novedad aprobada. Vuelve a {área} para ejecutar
+  la solución.» y «Novedad rechazada. El área y la finca verán tu observación.»; el botón dice
+  «Confirmando…» mientras se ejecuta. En las hojas del teléfono (20-C), que Figma no dibuja: el
+  título es la opción («Aprobar», «Rechazar»), debajo va su consecuencia con los textos del panel,
+  y la ayuda del campo se parte en dos, «Opcional al aprobar» y «Obligatoria al rechazar» (en el
+  panel va entera: «Opcional al aprobar, obligatoria al rechazar»).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 - **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
@@ -341,8 +354,15 @@ el tiempo máximo por prueba subió de 30 a 60 s.
 npm run test:e2e:chromium
 ```
 
+**En el Sprint 3 las corre también el agente,** con el permiso del equipo (9 oct 2026): las
+pruebas cargan `.env.local` por su cuenta y la contraseña no pasa por la conversación. Ese día,
+con las cuatro de CU-13 (la decisión del director y la pantalla 18-C, que estaba pendiente),
+**pasaron las 74, más las seis de preparación (80).**
+
 Las de CU-14 crean un tipo de falla por corrida («Tipo e2e …»), y todas dejan novedades con
-descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`.
+descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:reset`. Las de CU-13
+reutilizan uno de esos tipos y dejan sus novedades decididas (resueltas o rechazadas); las de
+CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias páginas.
 
 **Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
 pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
@@ -559,8 +579,9 @@ Lo que Figma no dibuja o deja abierto:
 - **Nombre de un tipo nuevo.** El campo admite hasta 60 caracteres
   (`TIPO_FALLA_NOMBRE_MAX_CARACTERES`); la base de datos no le pone máximo.
 - **18-C.** El recuadro muestra la última aprobación del director; si no dejó observación, va sin
-  las comillas. Hasta el Sprint 3 la aplicación no tiene cómo aprobar un escalamiento: está
-  cubierto con pruebas unitarias y con pgTAP, y su prueba de extremo a extremo queda para entonces.
+  las comillas. Su prueba de extremo a extremo llegó con la decisión del director, en el Sprint 3
+  (`e2e/cu-13-decidir-escalamiento.spec.js`): antes la aplicación no tenía cómo aprobar un
+  escalamiento.
 - **Después de registrar** (decisión 9): se vuelve al detalle, ya resuelto y sin acciones para el
   aprobador, con el aviso «Solución registrada. La finca debe confirmar el cierre.». Si otra
   persona cambió el estado antes, se vuelve al detalle con «La novedad cambió de estado.».
@@ -593,3 +614,44 @@ npm run staging:usuarios
 Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
 …») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
 `staging:reset`.
+
+## 27 · Detalles de las pantallas 19, 20, 20-B y 20-C (el director decide)
+
+Lo que Figma no dibuja o deja abierto, resuelto con las decisiones 19, 24, 32 a 36, 38 y 47 del
+plan del Sprint 3:
+
+- **19 en el teléfono.** Figma solo la dibuja en el escritorio. En el teléfono son las mismas
+  tarjetas en una columna; los contadores van sin ícono (a 360 px no cabe junto al nombre) y los
+  dos enlaces ocupan el ancho, con «Revisar y decidir» primero.
+- **«Esperan tu decisión»** es el total de escaladas, no las de la página. «Aprobadas» y
+  «Rechazadas este mes» son las decisiones de quien consulta, en el mes calendario de Colombia.
+- **«Esperando decisión hace…»** se cuenta desde la última vez que la novedad se escaló. La
+  justificación y quién escaló salen del historial, que se pide aparte: mientras llega (o si
+  falla), la tarjeta va sin el recuadro y cuenta desde el registro.
+- **20 es el detalle de la novedad** (`/novedades/:id`) cuando lo abre el director y está
+  escalada. Conserva las tarjetas de la pantalla 22 («Reportada por», «Registrada en finca» y
+  «Sincronizada» en su recuadro, y la razón social bajo el código): Figma pone esos datos en una
+  línea bajo el código y bajo la descripción. Cambian el recuadro de la justificación, el título
+  «Descripción del reporte», el panel a la derecha y la línea de tiempo, que pasa bajo el
+  contenido. «Evidencias» y «registrada sin conexión» llegan en el Sprint 4.
+- **Pie de la justificación.** «Nombre · Rol · Área · fecha», con los mismos puntos de la línea de
+  tiempo; Figma lo escribe con coma en 20 y sin el rol en 20-C.
+- **Solo la ve el director, y solo mientras decide.** Para los demás roles, y después de la
+  decisión, la justificación es una observación más de la línea de tiempo.
+- **Entre 1024 y 1279 px** todo va en una columna: el contenido, la decisión y la línea de tiempo.
+- **Sin opción elegida al entrar** (decisión 36): hasta elegir, «Confirmar decisión» está
+  deshabilitado, con el candado de 20-B. El mensaje «Escribe la observación para rechazar» aparece
+  al elegir «Rechazar» con el campo vacío, como lo dibuja 20-B, y se quita al escribir.
+- **20-C: hojas** (decisión 34). Cada botón de la barra abre la suya, con la consecuencia, la
+  novedad sobre la que se decide (como la hoja 15), la observación y «Confirmar decisión», que en
+  la de rechazar va en rojo, como en la hoja 16. La nota de Figma «Cada opción abre una hoja…» es
+  una indicación del diseño y no se pinta. La barra reemplaza a la navegación (decisión 38).
+- **Después de decidir.** La persona se queda en el detalle, que se recarga sin pasar por
+  «Cargando…»: ya sin panel ni barra, con el aviso temporal y la observación en la línea de
+  tiempo. Si otro director decidió antes, «La novedad cambió de estado.» y se recarga. Si se cae
+  la conexión, lo escrito en el panel no se pierde y el aviso ofrece «Reintentar».
+- **«Ver historial»** abre el detalle en la línea de tiempo (`#linea-de-tiempo`): la lleva a la
+  vista y le da el foco.
+- **El foco después de una acción ya no desplaza la página.** Al quedarse sin el botón que tenía
+  el foco, este pasa al contenido (Sprint 2); ahora lo hace sin mover lo que la persona está
+  viendo. Vale para todas las acciones del detalle.

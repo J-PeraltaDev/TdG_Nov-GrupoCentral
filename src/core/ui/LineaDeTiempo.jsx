@@ -1,4 +1,4 @@
-import { nombreDeRol } from '../sesion/roles.js'
+import { firmaDe } from '../sesion/roles.js'
 import { formatearFechaCorta } from '../utils/fechas.js'
 import { Estado } from './Estado.jsx'
 import { Icono } from './Icono.jsx'
@@ -28,10 +28,7 @@ const esDelSistema = (transicion) =>
 
 /** «Carlos Mario Restrepo · Aprobador · Mantenimiento» (SDD 5.2.5: usuario y rol). */
 function autor(transicion) {
-  if (esDelSistema(transicion)) return 'Sistema'
-  const { usuario } = transicion
-  if (!usuario) return ''
-  return [usuario.nombre, nombreDeRol(usuario.rol_id), usuario.area].filter(Boolean).join(' · ')
+  return esDelSistema(transicion) ? 'Sistema' : firmaDe(transicion.usuario)
 }
 
 /** « · Área: Sistemas» después de la fecha, si la transición cambió el área. */
