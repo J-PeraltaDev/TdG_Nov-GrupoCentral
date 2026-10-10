@@ -13,9 +13,8 @@ Colombiano Jaime Isaza Cadavid.
 
 **Estado:** Sprint 3 (el director aprueba o rechaza lo escalado, la finca confirma el cierre o
 dice que la falla persiste, y el administrador gestiona usuarios, fincas y la recuperación de
-contraseñas), en revisión, igual que buena parte del Sprint 2 (atención en primera instancia). En
-`main` están el Sprint 1 (ingreso por rol, registro de la novedad con su código `NOV-####` y lista
-de novedades de la finca) y la bandeja del área. El avance por sprint está en
+contraseñas), ya en `main` junto con los Sprints 1 y 2. En producción la base de datos sigue en
+el Sprint 1: las migraciones y las Edge Functions se aplican al cierre. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
