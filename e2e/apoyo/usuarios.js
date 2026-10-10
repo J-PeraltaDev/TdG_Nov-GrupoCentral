@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 /*
  * Usuarios de prueba del seed (supabase/seed.sql) y ayudas para ingresar.
@@ -6,6 +7,10 @@ import { existsSync } from 'node:fs'
  * La contraseña no está en el repositorio: cada persona define la suya en .env.local
  * (CLAVE_USUARIOS_DE_PRUEBA) y la aplica con `npm run staging:usuarios`. Las pruebas que
  * necesitan ingresar se omiten si no está. El CI todavía no corre estas pruebas.
+ *
+ * Cada usuario ingresa por el formulario una sola vez por corrida (e2e/sesiones.setup.js) y
+ * las pruebas reutilizan esa sesión: Auth limita los ingresos por minuto y, con cada prueba
+ * ingresando varias veces, «staging» empezó a responder 429.
  */
 
 // Las variables ya definidas (por ejemplo, las del CI) no se reemplazan.
@@ -20,6 +25,13 @@ export const USUARIOS = {
   reportante: {
     correo: 'reportante.01@novedades.test',
     nombre: 'Reportante de prueba 01',
+    inicio: '/novedades',
+    menu: ['Novedades', 'Registrar', 'Avisos', 'Cuenta'],
+  },
+  // De otra finca y otra razón social: no ve las novedades del primero.
+  reportanteOtraFinca: {
+    correo: 'reportante.03@novedades.test',
+    nombre: 'Reportante de prueba 03',
     inicio: '/novedades',
     menu: ['Novedades', 'Registrar', 'Avisos', 'Cuenta'],
   },
@@ -70,14 +82,80 @@ export async function llenarIngreso(page, correo, contrasena = CLAVE) {
 }
 
 /**
- * Ingresa con un usuario de prueba y espera su pantalla de inicio.
+ * Ingresa por el formulario con un usuario de prueba y espera su pantalla de inicio. Es un
+ * ingreso real contra Auth: úsalo solo donde lo que se prueba es el ingreso mismo, o donde la
+ * prueba necesita una sesión propia (porque la cierra).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {keyof typeof USUARIOS} rol
+ */
+export async function ingresarPorElFormulario(page, rol) {
+  const usuario = USUARIOS[rol]
+  await llenarIngreso(page, usuario.correo)
+  await page.waitForURL(`**${usuario.inicio}`, { timeout: 20_000 })
+  return usuario
+}
+
+/** Usuarios de prueba que pueden ingresar: todos menos el desactivado. */
+export const ROLES_CON_SESION = Object.keys(USUARIOS).filter((rol) => USUARIOS[rol].inicio)
+
+// Dentro de test-results: Playwright la limpia al empezar cada corrida y no se sube al
+// repositorio. Guarda tokens de los usuarios de prueba: no hay que compartirla.
+const CARPETA_DE_SESIONES = join('test-results', 'sesiones')
+const archivoDeSesion = (rol) => join(CARPETA_DE_SESIONES, `${rol}.json`)
+
+/** A una sesión con menos de este tiempo de vida no se le confía una prueba. */
+const VIDA_MINIMA_MS = 10 * 60_000
+
+/**
+ * Toma la sesión de supabase-js de una página que ya ingresó (la guarda en localStorage) y la
+ * deja en un archivo para las demás pruebas de la corrida.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {keyof typeof USUARIOS} rol
+ */
+export async function guardarSesion(page, rol) {
+  const sesion = await page.evaluate(() => {
+    const clave = Object.keys(localStorage).find((k) => /^sb-.+-auth-token$/.test(k))
+    return clave ? { clave, valor: localStorage.getItem(clave) } : null
+  })
+  if (!sesion) throw new Error(`No hay sesión de ${rol} que guardar.`)
+  mkdirSync(CARPETA_DE_SESIONES, { recursive: true })
+  writeFileSync(archivoDeSesion(rol), JSON.stringify(sesion))
+}
+
+/**
+ * La sesión guardada de un usuario, si existe y le queda vida suficiente.
+ *
+ * @param {keyof typeof USUARIOS} rol
+ * @returns {{ clave: string, valor: string } | null}
+ */
+function sesionGuardada(rol) {
+  if (!existsSync(archivoDeSesion(rol))) return null
+  const sesion = JSON.parse(readFileSync(archivoDeSesion(rol), 'utf8'))
+  const venceEn = (JSON.parse(sesion.valor).expires_at ?? 0) * 1000 - Date.now()
+  return venceEn > VIDA_MINIMA_MS ? sesion : null
+}
+
+/**
+ * Deja la página con la sesión de un usuario de prueba, en su pantalla de inicio.
+ *
+ * No pasa por el formulario: pone en el navegador la sesión que ese usuario abrió al comienzo
+ * de la corrida, y la aplicación la recupera como al recargar la página (descarga el perfil y
+ * decide adónde ir). Si no hay una sesión guardada, ingresa por el formulario.
  *
  * @param {import('@playwright/test').Page} page
  * @param {keyof typeof USUARIOS} rol
  */
 export async function ingresarComo(page, rol) {
   const usuario = USUARIOS[rol]
-  await llenarIngreso(page, usuario.correo)
+  const sesion = sesionGuardada(rol)
+  if (!sesion) return ingresarPorElFormulario(page, rol)
+
+  // localStorage es del origen: hay que estar en la aplicación para escribirlo.
+  await page.goto('/ingresar')
+  await page.evaluate(({ clave, valor }) => localStorage.setItem(clave, valor), sesion)
+  await page.goto(usuario.inicio)
   await page.waitForURL(`**${usuario.inicio}`, { timeout: 20_000 })
   return usuario
 }
@@ -107,4 +185,42 @@ export function leerDeLaApi(page, consulta) {
       ruta: consulta,
     },
   )
+}
+
+/**
+ * Llama a una función de la base de datos con la sesión que tiene la página, igual que lo
+ * haría la aplicación. Sirve para preparar los datos de una prueba (registrar una novedad,
+ * tomarla…) sin recorrer otra vez las pantallas y sin ninguna clave privilegiada: la función
+ * verifica el rol y el alcance de quien la llama.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} funcion Nombre de la función (SDD, Tabla 21).
+ * @param {object} parametros
+ * @returns {Promise<any>} El resultado; si la función falla, lanza un error con su código.
+ */
+export async function llamarALaApi(page, funcion, parametros) {
+  const { estado, cuerpo } = await page.evaluate(
+    async ({ url, clave, nombre, argumentos }) => {
+      const guardada = Object.keys(localStorage).find((k) => /^sb-.+-auth-token$/.test(k))
+      const { access_token: token } = JSON.parse(localStorage.getItem(guardada))
+      const respuesta = await fetch(`${url}/rest/v1/rpc/${nombre}`, {
+        method: 'POST',
+        headers: {
+          apikey: clave,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(argumentos),
+      })
+      return { estado: respuesta.status, cuerpo: await respuesta.json() }
+    },
+    {
+      url: process.env.VITE_SUPABASE_URL,
+      clave: process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      nombre: funcion,
+      argumentos: parametros,
+    },
+  )
+  if (estado >= 400) throw new Error(`${funcion} respondió ${estado}: ${cuerpo?.message}`)
+  return cuerpo
 }

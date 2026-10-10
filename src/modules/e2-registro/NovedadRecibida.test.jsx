@@ -86,10 +86,13 @@ describe('Pantalla 06 · Novedad recibida (RF-06 / CU-06)', () => {
     expect(await screen.findByText('Código NOV-0153 copiado')).toBeInTheDocument()
   })
 
-  it('ofrece ver la novedad y registrar otra', () => {
+  it('RF-18: ofrece ver el detalle de la novedad y registrar otra', () => {
     abrir()
 
-    expect(screen.getByRole('link', { name: 'Ver novedad' })).toHaveAttribute('href', '/novedades')
+    expect(screen.getByRole('link', { name: 'Ver novedad' })).toHaveAttribute(
+      'href',
+      '/novedades/n-153',
+    )
     expect(screen.getByRole('link', { name: 'Registrar otra novedad' })).toHaveAttribute(
       'href',
       '/registrar',

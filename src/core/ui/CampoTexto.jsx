@@ -7,6 +7,7 @@ import { Icono } from './Icono.jsx'
  *
  * @param {object} props
  * @param {string} props.etiqueta
+ * @param {boolean} [props.obligatorio] Agrega el asterisco y marca el campo como requerido.
  * @param {string} [props.icono] URL de un SVG de `iconos/`, a la izquierda.
  * @param {boolean} [props.conError] Marca el campo como inválido.
  * @param {string} [props.descritoPor] `id` del mensaje que explica el error.
@@ -17,6 +18,7 @@ import { Icono } from './Icono.jsx'
  */
 export function CampoTexto({
   etiqueta,
+  obligatorio = false,
   icono,
   conError = false,
   descritoPor,
@@ -31,6 +33,11 @@ export function CampoTexto({
     <div className={`flex w-full flex-col gap-1.5 ${className}`}>
       <label htmlFor={id} className="text-etiqueta text-texto">
         {etiqueta}
+        {obligatorio ? (
+          <span aria-hidden="true" className="ml-1 text-error">
+            *
+          </span>
+        ) : null}
       </label>
       <div
         className={`flex items-center gap-2 rounded-control bg-superficie px-3.5 py-[13px] ${
@@ -45,6 +52,7 @@ export function CampoTexto({
           {...resto}
           ref={ref}
           id={id}
+          required={obligatorio || undefined}
           aria-invalid={conError || undefined}
           aria-describedby={descritoPor}
           className="min-w-0 flex-1 bg-transparent text-cuerpo text-texto outline-none placeholder:text-texto-secundario"

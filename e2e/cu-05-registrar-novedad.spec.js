@@ -40,6 +40,10 @@ test.describe('CU-05 · Registrar novedad', () => {
 
     // La novedad queda en la lista de la finca, con el mismo código.
     await page.getByRole('link', { name: 'Ver novedad' }).click()
+    // «Ver novedad» abre su detalle (RF-18), con el mismo código; de ahí se vuelve a la lista.
+    await expect(page).toHaveURL(/\/novedades\/[0-9a-f-]{36}$/)
+    await expect(page.getByRole('heading', { level: 1, name: codigo })).toBeVisible()
+    await page.getByRole('link', { name: 'Volver a mis novedades' }).click()
     await expect(page).toHaveURL(/\/novedades$/)
     const tarjeta = page.getByRole('listitem').filter({ hasText: descripcion })
     await expect(tarjeta.getByRole('heading', { name: codigo })).toBeVisible()
@@ -95,6 +99,8 @@ test.describe('CU-05 · Registrar novedad', () => {
 
     // En la finca hay una sola novedad con esa descripción.
     await page.getByRole('link', { name: 'Ver novedad' }).click()
+    await expect(page.getByRole('heading', { level: 1, name: codigo })).toBeVisible()
+    await page.getByRole('link', { name: 'Volver a mis novedades' }).click()
     const tarjetas = page.getByRole('listitem').filter({ hasText: descripcion })
     await expect(tarjetas).toHaveCount(1)
     await expect(tarjetas.getByRole('heading', { name: codigo })).toBeVisible()

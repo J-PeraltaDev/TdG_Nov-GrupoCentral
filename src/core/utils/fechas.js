@@ -38,6 +38,12 @@ function enColombia(fecha) {
   }
 }
 
+/** «7:40 a. m.» a partir de la hora de 0 a 23. */
+function horaDeDoce(hora, minuto) {
+  const hora12 = hora % 12 === 0 ? 12 : hora % 12
+  return `${hora12}:${String(minuto).padStart(2, '0')} ${hora < 12 ? 'a. m.' : 'p. m.'}`
+}
+
 /**
  * «24 sep 2026, 7:40 a. m.»
  *
@@ -45,9 +51,17 @@ function enColombia(fecha) {
  */
 export function formatearFechaHora(fecha) {
   const { anio, mes, dia, hora, minuto } = enColombia(fecha)
-  const hora12 = hora % 12 === 0 ? 12 : hora % 12
-  const periodo = hora < 12 ? 'a. m.' : 'p. m.'
-  return `${dia} ${MESES[mes - 1]} ${anio}, ${hora12}:${String(minuto).padStart(2, '0')} ${periodo}`
+  return `${dia} ${MESES[mes - 1]} ${anio}, ${horaDeDoce(hora, minuto)}`
+}
+
+/**
+ * Fecha corta, sin año: «24 sep, 7:20 a. m.» (bandeja del escritorio y línea de tiempo).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearFechaCorta(fecha) {
+  const { mes, dia, hora, minuto } = enColombia(fecha)
+  return `${dia} ${MESES[mes - 1]}, ${horaDeDoce(hora, minuto)}`
 }
 
 /**
@@ -75,6 +89,61 @@ export function formatearFechaConSemana(fecha) {
 }
 
 /**
+ * «21 sep 2026, 6:48 a. m. (Sem 39)»: la semana entre paréntesis, como la escriben el detalle
+ * (pantalla 22) y la constancia (pantalla 06).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearFechaYSemana(fecha) {
+  return `${formatearFechaHora(fecha)} (Sem ${semanaDelAnio(fecha)})`
+}
+
+/**
+ * «23 sep 2026» a partir de una fecha sin hora (`2026-09-23`), como `fecha_ejecucion`. Se
+ * lee del texto, sin pasar por `Date`: la medianoche UTC es el día anterior en Colombia.
+ *
+ * @param {string} fecha `AAAA-MM-DD`.
+ */
+export function formatearFechaSinHora(fecha) {
+  const [anio, mes, dia] = fecha.split('-').map(Number)
+  return `${dia} ${MESES[mes - 1]} ${anio}`
+}
+
+/**
+ * «7:15 a. m.»
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearHora(fecha) {
+  const { hora, minuto } = enColombia(fecha)
+  return horaDeDoce(hora, minuto)
+}
+
+/**
+ * Indica si dos momentos caen en el mismo día de Colombia.
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [otra] Por defecto, ahora.
+ */
+export function esMismoDiaEnColombia(fecha, otra = Date.now()) {
+  const a = enColombia(fecha)
+  const b = enColombia(otra)
+  return a.anio === b.anio && a.mes === b.mes && a.dia === b.dia
+}
+
+/**
+ * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
+ * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
+ * mañana en UTC.
+ *
+ * @param {Date | string | number} [ahora]
+ */
+export function hoyEnColombia(ahora = Date.now()) {
+  const { anio, mes, dia } = enColombia(ahora)
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+}
+
+/**
  * Tiempo transcurrido, en corto: «ahora», «hace 5 min», «hace 3 h», «hace 2 d».
  *
  * @param {Date | string | number} fecha
@@ -87,4 +156,22 @@ export function tiempoTranscurrido(fecha, ahora = Date.now()) {
   const horas = Math.floor(minutos / 60)
   if (horas < 24) return `hace ${horas} h`
   return `hace ${Math.floor(horas / 24)} d`
+}
+
+/**
+ * Duración entre dos momentos, con sus dos unidades mayores y sin redondear hacia arriba:
+ * «35 min», «5 h 20 min», «1 d 3 h». Es lo que lleva abierta una novedad (bandeja del
+ * escritorio) o lo que tardó en resolverse (detalle).
+ *
+ * @param {Date | string | number} desde
+ * @param {Date | string | number} [hasta] Por defecto, ahora.
+ */
+export function formatearDuracion(desde, hasta = Date.now()) {
+  const minutos = Math.floor((new Date(hasta).getTime() - new Date(desde).getTime()) / 60_000)
+  if (minutos < 1) return 'menos de 1 min'
+  if (minutos < 60) return `${minutos} min`
+  const horas = Math.floor(minutos / 60)
+  if (horas < 24) return minutos % 60 === 0 ? `${horas} h` : `${horas} h ${minutos % 60} min`
+  const dias = Math.floor(horas / 24)
+  return horas % 24 === 0 ? `${dias} d` : `${dias} d ${horas % 24} h`
 }

@@ -12,6 +12,9 @@ import { Pendiente } from './paginas/Pendiente.jsx'
 // (RNF-05). Las pantallas de cada rol van en su propio paquete, con `React.lazy`.
 const Marco = lazy(() => import('./Marco.jsx'))
 const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
+const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
+const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
+const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 
@@ -61,10 +64,7 @@ export function Rutas() {
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.APROBADOR_AREA]} />}>
-              <Route
-                path="/bandeja"
-                element={<Pendiente titulo="Bandeja del área" sprint="Sprint 2" />}
-              />
+              <Route path="/bandeja" element={<Bandeja />} />
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.DIRECTOR_AGRICULTURA]} />}>
@@ -113,11 +113,33 @@ export function Rutas() {
             <Route path="/cuenta" element={<Cuenta />} />
           </Route>
 
-          {/* Registro y constancia: en el teléfono van sin las barras de navegación. */}
+          {/* Detalle de una novedad: lo consultan los cuatro roles, cada uno dentro de su
+              alcance (RF-18). En el teléfono trae su propia barra superior. */}
+          <Route element={<Marco sinBarraSuperior />}>
+            <Route
+              element={
+                <GuardianDeRol
+                  roles={[
+                    ROL.REPORTANTE,
+                    ROL.APROBADOR_AREA,
+                    ROL.DIRECTOR_AGRICULTURA,
+                    ROL.ADMINISTRADOR,
+                  ]}
+                />
+              }
+            >
+              <Route path="/novedades/:id" element={<DetalleNovedad />} />
+            </Route>
+          </Route>
+
+          {/* Pantallas de una sola tarea: en el teléfono van sin las barras de navegación. */}
           <Route element={<Marco enfocado />}>
             <Route element={<GuardianDeRol roles={[ROL.REPORTANTE]} />}>
               <Route path="/registrar" element={<RegistrarNovedad />} />
               <Route path="/registrar/recibida" element={<NovedadRecibida />} />
+            </Route>
+            <Route element={<GuardianDeRol roles={[ROL.APROBADOR_AREA]} />}>
+              <Route path="/novedades/:id/solucion" element={<RegistrarSolucion />} />
             </Route>
           </Route>
         </Route>

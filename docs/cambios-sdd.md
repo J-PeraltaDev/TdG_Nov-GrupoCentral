@@ -11,6 +11,10 @@ actualicen los documentos (lo exige la Definition of Done).
 | 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone         | Propuesto |
 | 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                   | Propuesto |
 | 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                       | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA` | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                   | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                        | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -92,3 +96,119 @@ pantalla de carga. Resultado completo en `docs/pruebas/sesion-sin-conexion.md`.
 > la renovación durante cerca de medio minuto. Con conexión, espera la sesión un máximo de cuatro
 > segundos. La sesión se renueva sola cuando vuelve la conexión, y el acceso a los datos lo decide
 > siempre el servidor (RNF-11).
+
+## 6 · Contratos de las funciones de atención (S2)
+
+**Sección:** SDD 5.3.2, Tabla 21, filas `registrar_solucion` y `sugerir_tipos_falla`.
+
+**Qué pasa.** La Tabla 21 dice que el tipo de falla llega por su identificador o por su nombre, y
+que las sugerencias traen la cantidad de novedades y la marca de coincidencia exacta, pero no fija
+cómo se declaran esos dos parámetros ni cómo se llaman las columnas del resultado. Al publicar los
+contratos del Sprint 2 hubo que decidirlo. No cambia el diseño: lo precisa, como prevé la nota de
+la misma tabla.
+
+**Texto propuesto para los parámetros de `registrar_solucion`:**
+
+> p_novedad_id uuid, p_solucion text, p_fecha_ejecucion date, p_tipo_falla_id uuid (opcional) y
+> p_tipo_falla_nombre text (opcional). Es una sola función, sin sobrecargas: el cliente envía el
+> identificador de un tipo existente o el nombre de un tipo; si llegan los dos, se usa el
+> identificador.
+
+**Texto propuesto para el resultado de `sugerir_tipos_falla`:**
+
+> Filas con id, nombre, cantidad_novedades y coincidencia_exacta de los tipos activos que coinciden
+> con el texto. RF-14
+
+## 7 · Rol que no corresponde a la acción: `SIN_PERMISO` (S2)
+
+**Sección:** SDD 6.1.3, algoritmo general de las funciones de transición, y Tabla 22.
+
+**Qué pasa.** El algoritmo general comprueba en un solo paso el estado, la acción y el rol, y
+responde `TRANSICION_INVALIDA` si la combinación no está permitida. La Tabla 22, en cambio, deja
+`SIN_PERMISO` para el rol o el alcance que no permiten la acción y `TRANSICION_INVALIDA` para el
+estado. Con el algoritmo al pie de la letra, un reportante que llamara a `tomar_novedad` recibiría
+el aviso de que la novedad cambió de estado y el cliente recargaría el detalle, que no es lo que
+pasó. Se implementó como la Tabla 22, en este orden: el perfil y el rol (`SIN_PERMISO`), el bloqueo
+de la fila y el alcance (`SIN_PERMISO`) y, por último, el estado (`TRANSICION_INVALIDA`). Así,
+además, un usuario de otro rol no llega a bloquear la fila.
+
+Estas comprobaciones, los destinatarios y la escritura de los avisos son comunes a todas las
+transiciones del sprint: viven en funciones auxiliares del esquema `private`, sin permiso de
+ejecución para los roles de la API (migración `rf10_transiciones_base`).
+
+**Texto propuesto (reemplaza las tres comprobaciones del algoritmo):**
+
+> u ← perfil del usuario autenticado. SI u no existe, NO u.activo O u.rol no es el de la acción →
+> ERROR SIN_PERMISO
+>
+> n ← la novedad, con bloqueo de la fila. SI n no existe O NO alcance(u, n) → ERROR SIN_PERMISO
+>
+> SI n.estado no admite la acción → ERROR TRANSICION_INVALIDA
+
+## 8 · Máximo de 500 caracteres en los textos de las transiciones (S2)
+
+**Sección:** SDD 6.1.3, Tabla 30 (columna de validaciones), y 7.3 (parámetros por validar).
+
+**Qué pasa.** La Tabla 30 pide que el motivo, la justificación y la solución no estén vacíos, pero
+no les pone un máximo, y la columna `observacion` del historial es un texto sin límite. Figma sí lo
+muestra: las hojas 15, 16 y 17 traen un contador «/500». Se adoptó ese límite (decisión 7 del plan
+del Sprint 2), igual al de la descripción de la novedad:
+
+- En el cliente, el parámetro `OBSERVACION_MAX_CARACTERES` de `src/core/config/parametros.js`; el
+  campo no deja escribir más y muestra el contador.
+- En el servidor, la auxiliar `private.texto_obligatorio`, que usan las funciones de transición:
+  quita los espacios y los saltos de línea de los extremos y responde `DATO_OBLIGATORIO` si el
+  texto queda vacío o pasa de 500 caracteres. No se agregó un `CHECK` a la tabla: el historial
+  solo se escribe desde esas funciones.
+
+**Texto propuesto (Tabla 30, validaciones de `rechazar_novedad`, `reasignar_novedad`,
+`escalar_novedad` y `registrar_solucion`):**
+
+> Motivo (o justificación, o solución) no vacío y de máximo 500 caracteres, sin contar los espacios
+> de los extremos.
+
+**Texto propuesto (parámetros configurables):**
+
+> Longitud máxima del motivo, la justificación, la observación y la solución: 500 caracteres.
+
+## 9 · Tipos de falla y fecha de ejecución: lo que el SDD deja abierto (S2)
+
+**Sección:** SDD 6.1.8 (algoritmo `resolver_tipo` y sugerencias) y 6.1.3, Tabla 30 (fila
+`registrar_solucion`).
+
+**Qué pasa.** Al implementar `registrar_solucion` y `sugerir_tipos_falla` hubo que precisar cuatro
+cosas que el SDD no fija. Ninguna cambia el diseño.
+
+1. **Cadena de fusiones** (decisión 21 del plan). El algoritmo dice que, si el nombre corresponde a
+   un tipo fusionado, se usa el destino de la última fusión. Ese destino pudo fusionarse después en
+   otro tipo: se sigue la cadena hasta llegar a un tipo activo. Si la cadena termina en un tipo
+   desactivado, responde `TIPO_FALLA_INVALIDO`.
+2. **«Hoy» es el día en Colombia.** La Tabla 30 pide que la fecha de ejecución no sea posterior a la
+   actual. El servidor está en UTC: después de las 7 p. m. en Colombia su fecha ya es la de mañana y
+   dejaría pasar una fecha futura. La función compara contra la fecha de `America/Bogota`, y el
+   cliente calcula su «hoy» de la misma manera.
+3. **Permisos de `sugerir_tipos_falla`** (decisión 6 del plan). Es `security definer` y verifica que
+   quien la llama sea un aprobador o un administrador activo (si no, `SIN_PERMISO`). Así la cantidad
+   de novedades de cada tipo es la de todo el sistema, que es lo que orienta hacia el tipo más
+   usado; con los permisos de quien consulta, un aprobador solo contaría las de su área. Sin texto
+   devuelve los ocho tipos más usados.
+4. **Orden de las guardas de `registrar_solucion`.** Primero lo que falta (`DATO_OBLIGATORIO`:
+   solución, fecha o tipo), después la fecha (`FECHA_INVALIDA`) y por último el tipo
+   (`TIPO_FALLA_INVALIDO`), de modo que un intento con datos inválidos no llega a crear un tipo.
+
+**Texto propuesto (6.1.8, en `resolver_tipo`):**
+
+> SI t existe Y fue fusionado: RETORNAR el destino de su última fusión; si ese destino también fue
+> fusionado, se sigue la cadena hasta un tipo activo; si termina en un tipo desactivado, ERROR
+> TIPO_FALLA_INVALIDO
+
+**Texto propuesto (6.1.8, sugerencias):**
+
+> La función se ejecuta con los privilegios de su propietario y verifica que el usuario sea un
+> aprobador de área o un administrador activo. La cantidad de novedades de cada tipo es la de todas
+> las áreas. Sin texto, devuelve los ocho tipos más usados.
+
+**Texto propuesto (Tabla 30, validaciones de `registrar_solucion`):**
+
+> Solución no vacía; fecha de ejecución no posterior a la fecha actual en Colombia
+> (America/Bogota); tipo existente activo o nombre nuevo normalizado sin duplicado (sección 6.1.8)
