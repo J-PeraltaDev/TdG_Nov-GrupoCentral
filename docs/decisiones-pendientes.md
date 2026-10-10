@@ -22,7 +22,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 15  | WebKit no abre en los equipos               | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase               | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
 | 17  | Pruebas que necesitan ingresar              | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
-| 18  | Primer administrador de producción          | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
+| 18  | Primer administrador de producción          | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 21  | Acciones del aprobador (13-B y 14-C)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
@@ -376,6 +376,11 @@ genera aviso: solo la ejecuta `service_role`.
 **Al 9 oct 2026 (cierre de RF-02, con las tres funciones de recuperación implementadas):** los
 mismos dieciséis. `private.solicitud_abierta` no genera aviso.
 
+**En «PROYECTO», el 10 oct 2026, después de aplicar las migraciones de los Sprints 2 y 3:** quince
+avisos, todos _WARN_ y de los mismos tipos: trece por las funciones RPC, el de
+`solicitar_recuperacion` para `anon` y el de las contraseñas filtradas. No sale el del segundo
+factor.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
@@ -476,7 +481,8 @@ administrador que ya debe existir: el primero hay que crearlo de otra forma.
 Como la comparten, el historial no distingue cuál de los dos hizo cada cosa; sirve para arrancar,
 y con la gestión de usuarios del Sprint 3 cada uno puede tener la suya.
 
-**Falta crearla.** Son dos pasos, en el panel de Supabase de «PROYECTO»:
+**Creada por el equipo** (ya existía el 10 oct 2026, cuando ingresó a la aplicación publicada).
+Quedan los pasos, por si hay que repetirlos. Son dos, en el panel de Supabase de «PROYECTO»:
 
 1. **Authentication → Users → Add user → Create new user:** el correo de la cuenta y una
    contraseña que solo conozcan los dos, con **Auto Confirm User** marcado (sin eso el ingreso

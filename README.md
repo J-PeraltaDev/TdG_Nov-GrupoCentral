@@ -13,8 +13,8 @@ Colombiano Jaime Isaza Cadavid.
 
 **Estado:** Sprint 3 (el director aprueba o rechaza lo escalado, la finca confirma el cierre o
 dice que la falla persiste, y el administrador gestiona usuarios, fincas y la recuperación de
-contraseñas), ya en `main` junto con los Sprints 1 y 2. En producción la base de datos sigue en
-el Sprint 1: las migraciones y las Edge Functions se aplican al cierre. El avance por sprint está en
+contraseñas), ya en `main` junto con los Sprints 1 y 2. Producción («PROYECTO») tiene sus
+migraciones y sus dos Edge Functions desde el 10 oct 2026. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
