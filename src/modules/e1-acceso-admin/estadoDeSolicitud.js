@@ -22,12 +22,17 @@ import { CODIGO_RECUPERACION_MAX_INTENTOS } from '../../core/config/parametros.j
  *   vencida          el código venció o agotó sus intentos sin usarse. No se reabre: la
  *                    persona pide otra desde la pantalla 02.
  *
+ * Si al usuario lo desactivaron, su solicitud abierta ya no admite un código ni sirve el que
+ * tenga: también es «vencida».
+ *
  * @param {Solicitud} solicitud
  * @param {Date | string | number} [ahora]
+ * @param {boolean} [usuarioActivo]
  * @returns {EstadoDeSolicitud}
  */
-export function estadoDeSolicitud(solicitud, ahora = Date.now()) {
+export function estadoDeSolicitud(solicitud, ahora = Date.now(), usuarioActivo = true) {
   if (solicitud.usado) return 'usada'
+  if (!usuarioActivo) return 'vencida'
   if (solicitud.expira_en === null) return 'pendiente'
   const vigente =
     new Date(solicitud.expira_en).getTime() > new Date(ahora).getTime() &&

@@ -36,16 +36,19 @@ export async function listarSolicitudes() {
 
 /**
  * Cuántas solicitudes esperan que el administrador les genere un código: es la insignia del
- * menú. Solo cuenta; no trae filas.
+ * menú. Solo cuenta; no trae filas. Las de un usuario desactivado no cuentan: ya no admiten un
+ * código (`SOLICITUD_INVALIDA`), así que nadie las puede atender.
  *
  * @returns {Promise<number>}
  */
 export async function contarSolicitudesPendientes() {
   const { count, error } = await supabase
     .from('solicitud_recuperacion')
-    .select('id', { count: 'exact', head: true })
+    // El usuario va embebido solo para filtrar por él.
+    .select('id, usuario!inner(activo)', { count: 'exact', head: true })
     .eq('usado', false)
     .is('expira_en', null)
+    .eq('usuario.activo', true)
   if (error) throw error
   return count ?? 0
 }

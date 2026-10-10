@@ -43,6 +43,14 @@ describe('Pantalla 32 · Estado de una solicitud de recuperación (RF-02; SDD 6.
     expect(estadoDeSolicitud(solicitud({ usado: true, expira_en: en(-90) }), AHORA)).toBe('usada')
   })
 
+  it('RF-02: si desactivaron al usuario, su solicitud abierta está vencida; la usada sigue usada', () => {
+    expect(estadoDeSolicitud(solicitud(), AHORA, false)).toBe('vencida')
+    expect(estadoDeSolicitud(solicitud({ expira_en: en(18) }), AHORA, false)).toBe('vencida')
+    expect(estadoDeSolicitud(solicitud({ usado: true, expira_en: en(18) }), AHORA, false)).toBe(
+      'usada',
+    )
+  })
+
   it('están abiertas las pendientes y las que tienen un código vigente', () => {
     expect(['pendiente', 'codigo_generado', 'usada', 'vencida'].map(estaAbierta)).toEqual([
       true,

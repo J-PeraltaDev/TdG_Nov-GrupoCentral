@@ -36,6 +36,30 @@ function errorDeFuncion(estado, cuerpo) {
   })
 }
 
+/**
+ * Una consulta de supabase-js simulada: anota cada método encadenado en `pasos` y, al
+ * esperarla, entrega `respuesta`.
+ */
+function consultaSimulada(respuesta) {
+  const pasos = []
+  const consulta = new Proxy(
+    {},
+    {
+      get(_, metodo) {
+        if (metodo === 'pasos') return pasos
+        if (metodo === 'then') {
+          return (resolver, rechazar) => Promise.resolve(respuesta).then(resolver, rechazar)
+        }
+        return (...argumentos) => {
+          pasos.push([metodo, ...argumentos])
+          return consulta
+        }
+      },
+    },
+  )
+  return consulta
+}
+
 beforeEach(() => {
   vi.mocked(supabase.rpc).mockReset()
   vi.mocked(supabase.from).mockReset()
@@ -255,26 +279,35 @@ describe('Recuperación de contraseña (RF-02; SDD, Tablas 20, 21 y 23)', () => 
   })
 
   it('RF-02 / CU-02 5: contarSolicitudesPendientes cuenta las que esperan un código, sin traer filas', async () => {
-    const is = vi.fn().mockResolvedValue({ count: 3, error: null })
-    const eq = vi.fn().mockReturnValue({ is })
-    const select = vi.fn().mockReturnValue({ eq })
-    vi.mocked(supabase.from).mockReturnValue({ select })
+    const consulta = consultaSimulada({ count: 3, error: null })
+    vi.mocked(supabase.from).mockReturnValue(consulta)
 
     await expect(contarSolicitudesPendientes()).resolves.toBe(3)
     expect(supabase.from).toHaveBeenCalledExactlyOnceWith('solicitud_recuperacion')
-    expect(select).toHaveBeenCalledExactlyOnceWith('id', { count: 'exact', head: true })
-    expect(eq).toHaveBeenCalledExactlyOnceWith('usado', false)
-    expect(is).toHaveBeenCalledExactlyOnceWith('expira_en', null)
+    expect(consulta.pasos).toEqual([
+      // `head`: solo la cuenta. El usuario va embebido para poder filtrar por él.
+      ['select', 'id, usuario!inner(activo)', { count: 'exact', head: true }],
+      ['eq', 'usado', false],
+      ['is', 'expira_en', null],
+      ['eq', 'usuario.activo', true],
+    ])
+  })
+
+  it('RF-02: contarSolicitudesPendientes no cuenta las de un usuario desactivado: ya no admiten un código', async () => {
+    const consulta = consultaSimulada({ count: 0, error: null })
+    vi.mocked(supabase.from).mockReturnValue(consulta)
+
+    await contarSolicitudesPendientes()
+
+    expect(consulta.pasos).toContainEqual(['eq', 'usuario.activo', true])
   })
 
   it('contarSolicitudesPendientes lanza el error de la consulta, y sin cuenta responde cero', async () => {
     const error = { code: '42501', message: 'permission denied' }
-    const is = vi.fn().mockResolvedValueOnce({ count: null, error })
-    vi.mocked(supabase.from).mockReturnValue({ select: () => ({ eq: () => ({ is }) }) })
-
+    vi.mocked(supabase.from).mockReturnValue(consultaSimulada({ count: null, error }))
     await expect(contarSolicitudesPendientes()).rejects.toBe(error)
 
-    is.mockResolvedValueOnce({ count: null, error: null })
+    vi.mocked(supabase.from).mockReturnValue(consultaSimulada({ count: null, error: null }))
     await expect(contarSolicitudesPendientes()).resolves.toBe(0)
   })
 

@@ -202,6 +202,20 @@ describe('Pantalla 32 · Recuperación de contraseñas (RF-02 / CU-02 5)', () =>
     expect(screen.queryByRole('button', { name: /Generar/ })).not.toBeInTheDocument()
   })
 
+  it('RF-02: la solicitud abierta de un usuario que fue desactivado ya no admite un código: va en «Atendidas», como vencida', async () => {
+    vi.mocked(listarUsuarios).mockResolvedValue(
+      USUARIOS.map((usuario) => (usuario.id === 'u-2' ? { ...usuario, activo: false } : usuario)),
+    )
+    abrir()
+
+    // Jairo tenía un código vigente; solo queda la de Yolanda.
+    expect(await screen.findByRole('tab', { name: 'Pendientes (1)' })).toBeVisible()
+    expect(screen.queryByText('Jairo Mena')).not.toBeInTheDocument()
+
+    await userEvent.click(pestana('Atendidas'))
+    expect(celdas('Jairo Mena').slice(3)).toEqual(['Vencida', '—'])
+  })
+
   it('sin solicitudes, cada pestaña lo dice', async () => {
     vi.mocked(listarSolicitudes).mockResolvedValue([])
     abrir()

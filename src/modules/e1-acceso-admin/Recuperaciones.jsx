@@ -210,7 +210,8 @@ export default function Recuperaciones() {
     const usuario = usuarios.find(({ id }) => id === solicitud.usuario_id)
     return {
       ...solicitud,
-      estado: estadoDeSolicitud(solicitud, ahora),
+      // Sin su usuario en la lista no hay a quién entregarle un código.
+      estado: estadoDeSolicitud(solicitud, ahora, usuario?.activo === true),
       nombre: usuario?.nombre ?? 'Usuario no disponible',
       correo: usuario?.correo ?? '',
       rolYAlcance: usuario ? rolYAlcance(usuario) : '',
