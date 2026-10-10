@@ -159,6 +159,8 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
 - **Rechazar novedad (Sprint 2):** el aviso «Novedad rechazada. La finca verá el motivo.»; el botón
   dice «Rechazando…» mientras se ejecuta; para los lectores de pantalla, «Motivos frecuentes»
   (grupo de accesos rápidos) y «Caracteres:» antes del contador.
+- **Escalar novedad (Sprint 2):** el aviso «Novedad escalada. Queda en espera del director.»; el
+  botón dice «Escalando…» mientras se ejecuta.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -184,7 +186,8 @@ carga bajo demanda: la bandeja (5,4 KB), el detalle (4,9 KB) y las acciones del 
 (0,8 KB), que solo descarga ese rol. Lo que sube es el CSS, 1,4 KB desde el Sprint 1.
 
 Con «Rechazar novedad» (RF-11): ≈ 185,7 KB. La hoja y su campo van en el paquete de las acciones
-del aprobador, que pasa a 2,8 KB.
+del aprobador, que pasa a 2,8 KB. Con «Escalar novedad» (RF-12) el total no cambia (185,7 KB) y
+ese paquete pasa a 3,5 KB.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -416,6 +419,13 @@ Lo que Figma no dibuja o deja abierto de las hojas que piden un texto antes de c
   La única excepción es `DATO_OBLIGATORIO`, que se corrige en la misma hoja.
 - **Después de rechazar** (decisión 9): la persona se queda en el detalle, ya rechazado y sin
   acciones, con el motivo en la línea de tiempo.
+- **Después de escalar** (decisión 9): también se queda en el detalle, ya escalado y sin acciones
+  para el aprobador, con la justificación en la línea de tiempo. En la bandeja la novedad pasa a
+  «En espera».
+- **Hoja 15, la novedad que se escala.** El recuadro lleva el código, el nombre de la finca tal
+  como está en el catálogo y la prioridad (Figma escribe «NOV-0150 · Pavarandó»).
+- **«Escalar novedad» deshabilitado** mientras la justificación esté vacía o tenga solo espacios
+  (CU-12 3a), igual que en la hoja 16.
 - **Motivos frecuentes de la hoja 16.** Son accesos rápidos, no un catálogo. Al tocar uno se
   escribe al comienzo del motivo y se conserva lo que la persona ya había escrito («Duplicada: ya
   está en atención como NOV-0149.», como el ejemplo de Figma); tocar otro lo reemplaza y tocar el

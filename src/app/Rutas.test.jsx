@@ -34,6 +34,7 @@ vi.mock('../core/supabase/repositorios/novedades.js', () => ({
   listarLineaDeTiempo: vi.fn().mockResolvedValue([]),
   tomarNovedad: vi.fn(),
   rechazarNovedad: vi.fn(),
+  escalarNovedad: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([

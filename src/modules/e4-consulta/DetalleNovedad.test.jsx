@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  escalarNovedad,
   listarLineaDeTiempo,
   obtenerNovedad,
   rechazarNovedad,
@@ -17,6 +18,7 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   listarLineaDeTiempo: vi.fn(),
   tomarNovedad: vi.fn(),
   rechazarNovedad: vi.fn(),
+  escalarNovedad: vi.fn(),
 }))
 
 const ID = '00000000-0000-4000-e000-000000000153'
@@ -121,6 +123,7 @@ beforeEach(() => {
   vi.mocked(listarLineaDeTiempo).mockReset()
   vi.mocked(tomarNovedad).mockReset()
   vi.mocked(rechazarNovedad).mockReset()
+  vi.mocked(escalarNovedad).mockReset()
 })
 
 afterEach(() => {
@@ -369,6 +372,43 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
     // El motivo queda en la línea de tiempo, que es donde lo ve la finca.
     const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
     expect(await linea.findByText('Duplicada')).toBeVisible()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
+
+  it('RF-12 / CU-12: al escalarla, el detalle queda Escalada, con la justificación en la línea de tiempo y sin acciones', async () => {
+    const enAtencion = { ...ASIGNADA, estado: 'en_atencion' }
+    conNovedad(enAtencion, [TOMADA, ...REGISTRO])
+    vi.mocked(escalarNovedad).mockImplementation(async (_, justificacion) => {
+      // Lo que el servidor entrega después de la transición.
+      conNovedad({ ...ASIGNADA, estado: 'escalada' }, [
+        paso(4, 'en_atencion', 'escalada', {
+          usuario: APROBADOR,
+          observacion: justificacion,
+          fecha_hora: '2026-09-24T13:04:00Z',
+        }),
+        TOMADA,
+        ...REGISTRO,
+      ])
+      return { id: ID, estado: 'escalada' }
+    })
+    abrir({ rol: 'aprobador' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Escalar al director' }))
+    // La hoja muestra la novedad que se escala.
+    const hoja = within(screen.getByRole('dialog', { name: 'Escalar al director de agricultura' }))
+    expect(hoja.getByText('NOV-0153')).toBeVisible()
+    expect(hoja.getByText(/Finca de prueba 01/)).toBeVisible()
+    await userEvent.type(
+      hoja.getByRole('textbox', { name: 'Justificación' }),
+      'Hay que comprar el motor.',
+    )
+    await userEvent.click(hoja.getByRole('button', { name: 'Escalar novedad' }))
+
+    expect(escalarNovedad).toHaveBeenCalledExactlyOnceWith(ID, 'Hay que comprar el motor.')
+    expect(await screen.findByText('Novedad escalada. Queda en espera del director.')).toBeVisible()
+    const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('Hay que comprar el motor.')).toBeVisible()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveFocus()
   })

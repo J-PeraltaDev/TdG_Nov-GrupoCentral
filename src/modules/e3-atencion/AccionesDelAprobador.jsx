@@ -1,23 +1,30 @@
 import { useState } from 'react'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
-import { rechazarNovedad, tomarNovedad } from '../../core/supabase/repositorios/novedades.js'
+import {
+  escalarNovedad,
+  rechazarNovedad,
+  tomarNovedad,
+} from '../../core/supabase/repositorios/novedades.js'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
+import iconoEscalar from '../../core/ui/iconos/arrow_circle_up.svg'
 import iconoTomar from '../../core/ui/iconos/back_hand.svg'
 import iconoRechazar from '../../core/ui/iconos/block.svg'
+import { HojaEscalar } from './HojaEscalar.jsx'
 import { HojaRechazar } from './HojaRechazar.jsx'
 import { useAccion } from './useAccion.js'
 
 /*
  * Acciones del aprobador de área en el detalle de una novedad (RF-10 a RF-17). Figma: barra de
- * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hoja 16 (3:1468).
+ * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hojas 15 (3:1356) y
+ * 16 (3:1468).
  *
  * El mapa de acciones dice qué permite la Tabla 35; aquí se pintan las que ya tienen su
  * manejador. Se carga bajo demanda y solo para el aprobador: los demás roles no la descargan.
  */
 
 /** Acciones que este módulo ya sabe ejecutar. Las demás llegan con su historia. */
-const CONSTRUIDAS = [ACCION.TOMAR, ACCION.RECHAZAR]
+const CONSTRUIDAS = [ACCION.TOMAR, ACCION.ESCALAR, ACCION.RECHAZAR]
 
 // Sobre la navegación inferior del teléfono cuando no hay barra de acciones; en el escritorio,
 // abajo a la derecha.
@@ -26,7 +33,7 @@ const AVISO_SUELTO =
 
 /**
  * @param {object} props
- * @param {{ id: string, estado: string }} props.novedad
+ * @param {{ id: string, estado: string, codigo: number, finca: string, prioridad: string }} props.novedad
  * @param {readonly string[]} props.acciones Las de `accionesDisponibles` para este usuario.
  * @param {() => void} props.alCambiar Recarga el detalle después de una acción.
  * @param {boolean} props.esEscritorio En el escritorio son botones bajo el encabezado; en el
@@ -56,7 +63,8 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
     return resultado
   }
 
-  // Como en Figma: la acción principal a todo el ancho y, debajo, las que comparten fila.
+  // Como en Figma: la acción principal y «Escalar al director» a todo el ancho y, debajo, las
+  // que comparten fila.
   const principal = puede(ACCION.TOMAR) ? (
     <Boton
       icono={iconoTomar}
@@ -68,6 +76,18 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
       className="w-full lg:w-auto"
     >
       {enCurso && lanzada === ACCION.TOMAR ? 'Tomando…' : 'Tomar para atención'}
+    </Boton>
+  ) : null
+
+  const escalar = puede(ACCION.ESCALAR) ? (
+    <Boton
+      tipo="secundario"
+      icono={iconoEscalar}
+      disabled={enCurso}
+      onClick={() => setHoja(ACCION.ESCALAR)}
+      className="w-full lg:w-auto"
+    >
+      Escalar al director
     </Boton>
   ) : null
 
@@ -84,26 +104,42 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
   ) : null
 
   const botones =
-    principal || enFila ? (
+    principal || escalar || enFila ? (
       <>
         {principal}
+        {escalar}
         {enFila ? <div className="flex gap-2.5 lg:contents">{enFila}</div> : null}
       </>
     ) : null
 
   const hojas = (
-    <HojaRechazar
-      abierta={hoja === ACCION.RECHAZAR}
-      alCerrar={cerrarHoja}
-      alConfirmar={(motivo) =>
-        confirmar(
-          ACCION.RECHAZAR,
-          () => rechazarNovedad(novedad.id, motivo),
-          'Novedad rechazada. La finca verá el motivo.',
-        )
-      }
-      enCurso={enCurso && lanzada === ACCION.RECHAZAR}
-    />
+    <>
+      <HojaEscalar
+        abierta={hoja === ACCION.ESCALAR}
+        novedad={novedad}
+        alCerrar={cerrarHoja}
+        alConfirmar={(justificacion) =>
+          confirmar(
+            ACCION.ESCALAR,
+            () => escalarNovedad(novedad.id, justificacion),
+            'Novedad escalada. Queda en espera del director.',
+          )
+        }
+        enCurso={enCurso && lanzada === ACCION.ESCALAR}
+      />
+      <HojaRechazar
+        abierta={hoja === ACCION.RECHAZAR}
+        alCerrar={cerrarHoja}
+        alConfirmar={(motivo) =>
+          confirmar(
+            ACCION.RECHAZAR,
+            () => rechazarNovedad(novedad.id, motivo),
+            'Novedad rechazada. La finca verá el motivo.',
+          )
+        }
+        enCurso={enCurso && lanzada === ACCION.RECHAZAR}
+      />
+    </>
   )
 
   const avisoTemporal = (className) =>
