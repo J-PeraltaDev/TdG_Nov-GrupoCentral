@@ -329,6 +329,9 @@ select throws_ok(
 );
 
 -- CU-02 9 y 9b · la Edge Function consume el código ------------------------------------------------
+-- La función solo ejecuta la RPC: no necesita leer la tabla, y en un proyecto donde las tablas no
+-- se exponen solas (el CI, «PROYECTO») service_role no puede. Lo que la prueba comprueba en la
+-- tabla lo lee como su dueño.
 
 reset role;
 set local role service_role;
@@ -353,11 +356,13 @@ select results_eq(
   $$ values ('CODIGO_INVALIDO') $$,
   'RF-02: sin código → CODIGO_INVALIDO'
 );
+reset role;
 select is(
   (select intentos_fallidos::int from public.solicitud_recuperacion where usuario_id = 'c2000000-0000-4000-8000-000000000002'),
   0,
   'RF-02: un código mal formado no gasta un intento'
 );
+set local role service_role;
 -- Un código de seis dígitos que no es el suyo.
 select results_eq(
   format(
@@ -367,12 +372,14 @@ select results_eq(
   $$ values ('CODIGO_INVALIDO', null::uuid) $$,
   'RF-02 / CU-02 9b: con un código incorrecto → CODIGO_INVALIDO'
 );
+reset role;
 select results_eq(
   $$ select intentos_fallidos::int, usado from public.solicitud_recuperacion
      where usuario_id = 'c2000000-0000-4000-8000-000000000002' $$,
   $$ values (1, false) $$,
   'RF-02 / CU-02 9b: suma un intento fallido y la solicitud sigue sirviendo'
 );
+set local role service_role;
 select results_eq(
   format(
     $f$ select resultado, usuario_id from public.consumir_codigo_recuperacion('  ANA@recuperar.pgtap.test ', %L) $f$,
@@ -381,11 +388,13 @@ select results_eq(
   $$ values ('OK', 'c2000000-0000-4000-8000-000000000002'::uuid) $$,
   'RF-02 / CU-02 9: con el código correcto → OK y el usuario, con el correo como lo escriba'
 );
+reset role;
 select is(
   (select usado from public.solicitud_recuperacion where usuario_id = 'c2000000-0000-4000-8000-000000000002'),
   true,
   'RF-02 / CU-02 9: el código queda usado'
 );
+set local role service_role;
 select results_eq(
   format(
     $f$ select resultado, usuario_id from public.consumir_codigo_recuperacion('ana@recuperar.pgtap.test', %L) $f$,
