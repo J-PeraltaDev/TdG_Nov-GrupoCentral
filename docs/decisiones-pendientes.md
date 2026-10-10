@@ -935,11 +935,14 @@ plan del Sprint 3:
 
 **Para decidir:**
 
-- **El administrador no tiene «Cuenta» en la barra del teléfono.** Su barra inferior trae Panel,
-  Historial, Usuarios y Avisos (SDD, Tabla 10); a «Cuenta», y desde ahí a Fincas, Tipos de falla
-  y Recuperación de contraseñas, llega solo por la dirección. En el escritorio no pasa. Viene del
-  Sprint 1 (el menú de RF-01) y se notó al probar 30 y 32 en el teléfono: falta decidir por dónde entra (por ejemplo,
-  el nombre de la barra superior).
+- **«Cuenta» en el teléfono del director y del administrador: resuelto el 10 oct 2026.** Su
+  barra inferior no la trae, ni en Figma ni en la Tabla 10 (Escaladas, Historial, Panel y Avisos;
+  Panel, Historial, Usuarios y Avisos), así que no tenían cómo cerrar la sesión ni, el
+  administrador, cómo llegar a Fincas, Tipos de falla y Recuperación de contraseñas, salvo
+  escribiendo la dirección. El equipo dejó la decisión a la implementación: en el teléfono, esos
+  dos roles llevan en la barra superior el avatar que ya tiene el escritorio, que abre «Cuenta» y,
+  para el administrador, carga la insignia de las solicitudes pendientes. La barra inferior no
+  cambia (`docs/cambios-sdd.md`, entrada 16). **Falta reflejarlo en Figma.**
 - **Quién limita las solicitudes.** `solicitar_recuperacion` se ejecuta sin sesión. Solo puede
   dejar una solicitud abierta por usuario, así que no llena la tabla, pero alguien que conozca
   los correos puede hacer que el administrador vea solicitudes que nadie pidió. Por eso el diálogo

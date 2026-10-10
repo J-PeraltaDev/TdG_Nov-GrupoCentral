@@ -291,6 +291,74 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(screen.getAllByRole('navigation', { name: 'Principal' })).toHaveLength(2)
   })
 
+  describe('«Cuenta» en el teléfono (RF-01 / CU-01 5)', () => {
+    /** La barra superior del teléfono: va antes que la del escritorio. */
+    const barraDelTelefono = async () => within((await screen.findAllByRole('banner'))[0])
+    const barraInferior = async () =>
+      within((await screen.findAllByRole('navigation', { name: 'Principal' }))[1])
+
+    afterEach(() => {
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(0)
+    })
+
+    it.each([
+      ['director', '/escaladas', 'Director de prueba'],
+      ['administrador', '/usuarios', 'Administrador de prueba'],
+    ])(
+      'el %s no tiene «Cuenta» en la barra inferior: la abre desde su avatar de la barra superior, y ahí cierra la sesión',
+      async (rol, inicio, nombre) => {
+        abrir(inicio, rol)
+
+        expect((await barraInferior()).queryByRole('link', { name: 'Cuenta' })).toBeNull()
+        const avatar = (await barraDelTelefono()).getByRole('link', { name: `Cuenta de ${nombre}` })
+        expect(avatar).toHaveAttribute('href', '/cuenta')
+
+        await userEvent.click(avatar)
+
+        expect(await screen.findByRole('heading', { level: 1, name: 'Cuenta' })).toBeVisible()
+        // El de la página: la barra lateral del escritorio tiene otro, de solo ícono.
+        expect(
+          within(screen.getByRole('main')).getByRole('button', { name: 'Cerrar sesión' }),
+        ).toBeVisible()
+      },
+    )
+
+    it.each([
+      ['reportante', '/novedades'],
+      ['aprobador', '/bandeja'],
+    ])(
+      'el %s ya tiene «Cuenta» en la barra inferior: su barra superior no la repite',
+      async (rol, inicio) => {
+        abrir(inicio, rol)
+
+        expect((await barraInferior()).getByRole('link', { name: 'Cuenta' })).toBeVisible()
+        expect((await barraDelTelefono()).queryByRole('link', { name: /^Cuenta de/ })).toBeNull()
+      },
+    )
+
+    it('RF-02: el avatar del administrador avisa de las solicitudes que esperan un código', async () => {
+      vi.mocked(contarSolicitudesPendientes).mockResolvedValue(2)
+      abrir('/usuarios', 'administrador')
+
+      expect(
+        await (
+          await barraDelTelefono()
+        ).findByRole('link', {
+          name: 'Cuenta de Administrador de prueba, 2 solicitudes pendientes',
+        }),
+      ).toBeVisible()
+    })
+
+    it('RF-02: sin solicitudes, el avatar no lleva insignia', async () => {
+      abrir('/usuarios', 'administrador')
+
+      const avatar = (await barraDelTelefono()).getByRole('link', {
+        name: 'Cuenta de Administrador de prueba',
+      })
+      expect(avatar).not.toHaveTextContent(/pendiente/)
+    })
+  })
+
   it('RF-23: el indicador de conexión está siempre a la vista', async () => {
     abrir('/novedades', 'reportante')
 
