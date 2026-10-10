@@ -434,6 +434,14 @@ Las de CU-03 ingresan cuatro veces por el formulario con el usuario que crean (d
 ingresos más por corrida), y las de CU-02, dos (cuatro más). Sumados a los seis de preparación,
 siguen lejos del límite de Auth.
 
+**Una falla intermitente, sin resolver.** El 9 oct, en una de tres corridas completas falló una
+prueba de CU-11 en el escritorio (el rechazo de una novedad asignada), al recorrer todas las
+páginas de «Mis novedades» con «Ver más»; sola, y en las otras dos corridas, pasó. No toca nada de
+RF-02. La causa probable es que esa lista crece con cada corrida, porque las pruebas dejan sus
+novedades en «staging», y hay que recorrerla entera mientras otras pruebas registran más. Un
+`staging:reset` la vacía; si vuelve a fallar, conviene que la prueba busque su novedad sin
+recorrer toda la lista.
+
 Una aserción de CU-14 cambió con la decisión 21 C: la transición a «resuelta» lleva ahora la
 solución como observación, y el texto de la solución sale dos veces en el detalle (en su bloque y
 en la línea de tiempo). La migración ya está en «staging»: en una rama anterior a
