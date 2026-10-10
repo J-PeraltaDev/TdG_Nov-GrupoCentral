@@ -87,6 +87,22 @@ function EtiquetaDeRol({ rolId }) {
   )
 }
 
+/**
+ * El correo, con permiso para partirse antes de la arroba: en una columna angosta queda
+ * «nombre» y «@dominio», no cortado en cualquier letra.
+ */
+function Correo({ correo }) {
+  const arroba = correo.lastIndexOf('@')
+  if (arroba < 1) return correo
+  return (
+    <>
+      {correo.slice(0, arroba)}
+      <wbr />
+      {correo.slice(arroba)}
+    </>
+  )
+}
+
 function TuCuenta() {
   return <span className={`${ETIQUETA} bg-primario-contenedor text-primario`}>Tu cuenta</span>
 }
@@ -145,7 +161,9 @@ function Tarjeta({ usuario, alcance, esPropio, acciones }) {
             <EstadoDelUsuario activo={usuario.activo} />
             {esPropio ? <TuCuenta /> : null}
           </div>
-          <p className="text-cuerpo-pequeno break-all text-texto-secundario">{usuario.correo}</p>
+          <p className="text-cuerpo-pequeno [overflow-wrap:anywhere] text-texto-secundario">
+            <Correo correo={usuario.correo} />
+          </p>
           <p className="text-cuerpo-pequeno text-texto">{alcance ? `${rol} · ${alcance}` : rol}</p>
           <p className="text-auxiliar text-texto-secundario">
             Último ingreso: {formatearUltimoIngreso(usuario.ultimo_ingreso)}
@@ -407,7 +425,9 @@ export default function Usuarios() {
                         </span>
                       </span>
                     </th>
-                    <td className={`${CELDA} px-2 break-all`}>{usuario.correo}</td>
+                    <td className={`${CELDA} px-2 [overflow-wrap:anywhere]`}>
+                      <Correo correo={usuario.correo} />
+                    </td>
                     <td className={`${CELDA} px-2`}>
                       <EtiquetaDeRol rolId={usuario.rol_id} />
                     </td>
