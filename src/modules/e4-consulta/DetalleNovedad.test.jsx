@@ -1,9 +1,10 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
+  decidirEscalamiento,
   escalarNovedad,
   listarLineaDeTiempo,
   obtenerNovedad,
@@ -22,6 +23,7 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   rechazarNovedad: vi.fn(),
   escalarNovedad: vi.fn(),
   reasignarNovedad: vi.fn(),
+  decidirEscalamiento: vi.fn(),
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
@@ -109,7 +111,7 @@ function conNovedad(novedad = ASIGNADA, transiciones = REGISTRO) {
   vi.mocked(listarLineaDeTiempo).mockResolvedValue(transiciones)
 }
 
-function abrir({ rol = 'aprobador', id = ID, origen } = {}) {
+function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
   return pintarConSesion(
     <Routes>
       <Route
@@ -126,7 +128,11 @@ function abrir({ rol = 'aprobador', id = ID, origen } = {}) {
       <Route path="/escaladas" element={<h1>Novedades escaladas</h1>} />
     </Routes>,
     {
-      ruta: origen ? { pathname: `/novedades/${id}`, state: { origen } } : `/novedades/${id}`,
+      ruta: {
+        pathname: `/novedades/${id}`,
+        hash: ancla,
+        state: origen ? { origen } : undefined,
+      },
       rol,
     },
   )
@@ -143,6 +149,7 @@ beforeEach(() => {
   vi.mocked(rechazarNovedad).mockReset()
   vi.mocked(escalarNovedad).mockReset()
   vi.mocked(reasignarNovedad).mockReset()
+  vi.mocked(decidirEscalamiento).mockReset()
   vi.mocked(listarAreas).mockReset()
 })
 
@@ -652,4 +659,181 @@ describe('Pantalla 22 · Detalle completo en el escritorio (RF-18 / CU-18)', () 
       '/bandeja',
     )
   })
+})
+
+describe('Pantallas 20 y 20-C · El director decide sobre una escalada (RF-13 / CU-13)', () => {
+  const DIRECTOR = { nombre: 'Director de prueba', rol_id: 3, area: null }
+  const ESCALADA = { ...ASIGNADA, estado: 'escalada' }
+  const ESCALAMIENTO = paso(4, 'en_atencion', 'escalada', {
+    usuario: APROBADOR,
+    observacion: 'Hay que comprar el motor.',
+    fecha_hora: '2026-09-24T13:04:00Z',
+  })
+  const HISTORIA = [ESCALAMIENTO, TOMADA, ...REGISTRO]
+  const justificacion = () =>
+    screen.queryByRole('region', { name: 'Justificación del escalamiento' })
+
+  it('RF-13 / CU-13 3: en el teléfono ve la justificación, quién escaló y la barra para decidir', async () => {
+    conNovedad(ESCALADA, HISTORIA)
+    abrir({ rol: 'director', origen: '/escaladas' })
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })).toBeVisible()
+    const recuadro = within(justificacion())
+    expect(recuadro.getByText('Hay que comprar el motor.')).toBeVisible()
+    expect(
+      recuadro.getByText('Carlos Mario Restrepo · Aprobador · Mantenimiento · 24 sep, 8:04 a. m.'),
+    ).toBeVisible()
+    expect(screen.getByRole('region', { name: 'Descripción del reporte' })).toHaveTextContent(
+      ASIGNADA.descripcion,
+    )
+
+    const barra = document.querySelector('[data-barra-de-acciones]')
+    expect(barra).toContainElement(await screen.findByRole('button', { name: 'Aprobar' }))
+    expect(barra).toContainElement(screen.getByRole('button', { name: 'Rechazar' }))
+    expect(screen.getByRole('link', { name: 'Volver a las escaladas' })).toHaveAttribute(
+      'href',
+      '/escaladas',
+    )
+  })
+
+  it('RF-13: si la novedad se escaló dos veces, muestra la justificación vigente', async () => {
+    conNovedad(ESCALADA, [
+      { ...ESCALAMIENTO, id: 8, observacion: 'Ahora falta el variador.' },
+      paso(7, 'resuelta', 'en_atencion', { observacion: 'Sigue sin girar.' }),
+      paso(6, 'aprobada', 'resuelta', { usuario: APROBADOR }),
+      paso(5, 'escalada', 'aprobada', { usuario: DIRECTOR }),
+      ...HISTORIA,
+    ])
+    abrir({ rol: 'director' })
+    await screen.findByRole('heading', { level: 1 })
+
+    const recuadro = within(justificacion())
+    expect(recuadro.getByText('Ahora falta el variador.')).toBeVisible()
+    expect(recuadro.queryByText('Hay que comprar el motor.')).not.toBeInTheDocument()
+  })
+
+  it('RF-13 / CU-13 3: en el escritorio el panel «Tu decisión» va junto al detalle', async () => {
+    simularPantalla('escritorio')
+    conNovedad(ESCALADA, HISTORIA)
+    abrir({ rol: 'director' })
+
+    const panel = within(await screen.findByRole('region', { name: 'Tu decisión' }))
+    expect(panel.getByRole('radio', { name: 'Aprobar' })).not.toBeChecked()
+    expect(panel.getByRole('radio', { name: 'Rechazar' })).not.toBeChecked()
+    expect(justificacion()).toBeVisible()
+    expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
+    // La línea de tiempo sigue completa, con su aclaración.
+    const linea = within(screen.getByRole('region', { name: 'Línea de tiempo' }))
+    expect(linea.getAllByRole('listitem')).toHaveLength(4)
+    expect(linea.getByText('El historial no se puede editar ni borrar.')).toBeVisible()
+  })
+
+  it('RF-13 / CU-13 6 y 7: al aprobar, el detalle queda Aprobada, con la observación en la línea de tiempo y sin panel', async () => {
+    simularPantalla('escritorio')
+    conNovedad(ESCALADA, HISTORIA)
+    vi.mocked(decidirEscalamiento).mockImplementation(async (_, __, observacion) => {
+      // Lo que el servidor entrega después de la transición.
+      conNovedad({ ...ASIGNADA, estado: 'aprobada' }, [
+        paso(5, 'escalada', 'aprobada', {
+          usuario: DIRECTOR,
+          observacion,
+          fecha_hora: '2026-09-24T13:05:00Z',
+        }),
+        ...HISTORIA,
+      ])
+      return { id: ID, estado: 'aprobada' }
+    })
+    abrir({ rol: 'director' })
+
+    await userEvent.click(await screen.findByRole('radio', { name: 'Aprobar' }))
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'Observación' }),
+      'Comprar con el proveedor habitual.',
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar decisión' }))
+
+    expect(decidirEscalamiento).toHaveBeenCalledExactlyOnceWith(
+      ID,
+      true,
+      'Comprar con el proveedor habitual.',
+    )
+    expect(
+      await screen.findByText(
+        'Novedad aprobada. Vuelve a Mantenimiento para ejecutar la solución.',
+      ),
+    ).toBeVisible()
+    const linea = within(screen.getByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('Comprar con el proveedor habitual.')).toBeVisible()
+    expect(screen.queryByRole('region', { name: 'Tu decisión' })).not.toBeInTheDocument()
+    expect(justificacion()).not.toBeInTheDocument()
+    // El aviso sobrevive a la recarga: el panel se fue, él no.
+    expect(screen.getByRole('status')).toHaveTextContent('Novedad aprobada.')
+    // El botón que tenía el foco ya no está: el foco pasa al contenido, no se pierde.
+    expect(screen.getByRole('main')).toHaveFocus()
+  })
+
+  it('RF-13 / CU-13 5a: en el teléfono rechaza desde su hoja y el detalle queda Rechazada, sin barra', async () => {
+    conNovedad(ESCALADA, HISTORIA)
+    vi.mocked(decidirEscalamiento).mockImplementation(async (_, __, observacion) => {
+      conNovedad({ ...ASIGNADA, estado: 'rechazada' }, [
+        paso(5, 'escalada', 'rechazada', { usuario: DIRECTOR, observacion }),
+        ...HISTORIA,
+      ])
+      return { id: ID, estado: 'rechazada' }
+    })
+    abrir({ rol: 'director' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Rechazar' }))
+    const hoja = within(screen.getByRole('dialog', { name: 'Rechazar' }))
+    expect(hoja.getByRole('button', { name: 'Confirmar decisión' })).toBeDisabled()
+    await userEvent.type(hoja.getByRole('textbox', { name: 'Observación' }), 'No hay presupuesto.')
+    await userEvent.click(hoja.getByRole('button', { name: 'Confirmar decisión' }))
+
+    expect(decidirEscalamiento).toHaveBeenCalledExactlyOnceWith(ID, false, 'No hay presupuesto.')
+    expect(
+      await screen.findByText('Novedad rechazada. El área y la finca verán tu observación.'),
+    ).toBeVisible()
+    const linea = within(screen.getByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('No hay presupuesto.')).toBeVisible()
+    expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('RF-13: «Ver historial» abre el detalle en la línea de tiempo', async () => {
+    conNovedad(ESCALADA, HISTORIA)
+    abrir({ rol: 'director', ancla: '#linea-de-tiempo' })
+
+    const linea = await screen.findByRole('region', { name: 'Línea de tiempo' })
+    expect(linea).toHaveAttribute('id', 'linea-de-tiempo')
+    await waitFor(() => expect(linea).toHaveFocus())
+  })
+
+  it.each(['aprobador', 'reportante', 'administrador'])(
+    'Tabla 35: el %s no decide sobre una escalada ni ve el recuadro del director',
+    async (rol) => {
+      conNovedad(ESCALADA, HISTORIA)
+      abrir({ rol })
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(justificacion()).not.toBeInTheDocument()
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      expect(screen.getByRole('region', { name: 'Descripción' })).toBeVisible()
+      // La justificación sigue en la línea de tiempo, como cualquier observación.
+      expect(screen.getByText('Hay que comprar el motor.')).toBeVisible()
+    },
+  )
+
+  it.each(['asignada', 'en_atencion', 'aprobada', 'resuelta', 'cerrada', 'rechazada'])(
+    'Tabla 35: el director no decide sobre una novedad %s',
+    async (estado) => {
+      simularPantalla('escritorio')
+      conNovedad({ ...ASIGNADA, estado }, HISTORIA)
+      abrir({ rol: 'director' })
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(screen.queryByRole('region', { name: 'Tu decisión' })).not.toBeInTheDocument()
+      expect(justificacion()).not.toBeInTheDocument()
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    },
+  )
 })

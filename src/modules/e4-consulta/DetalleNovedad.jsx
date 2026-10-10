@@ -1,22 +1,21 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
+import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
-import { ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
+import { firmaDe, ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
 import { listarLineaDeTiempo, obtenerNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Conexion } from '../../core/ui/Conexion.jsx'
-import { Estado } from '../../core/ui/Estado.jsx'
+import { EtiquetasDeNovedad } from '../../core/ui/EtiquetasDeNovedad.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
 import iconoVolver from '../../core/ui/iconos/arrow_back.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoSolucion from '../../core/ui/iconos/task_alt.svg'
 import { LineaDeTiempo } from '../../core/ui/LineaDeTiempo.jsx'
-import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { formatearCodigo } from '../../core/utils/codigo.js'
 import {
@@ -29,15 +28,21 @@ import {
   formatearHora,
   tiempoTranscurrido,
 } from '../../core/utils/fechas.js'
+import { JustificacionDelEscalamiento } from '../e3-atencion/JustificacionDelEscalamiento.jsx'
 import { SinPermiso } from './SinPermiso.jsx'
 
-// Las acciones del aprobador van en su propio paquete: los demás roles no lo descargan.
+// Las acciones de cada rol van en su propio paquete: los demás roles no lo descargan.
 const AccionesDelAprobador = lazy(() => import('../e3-atencion/AccionesDelAprobador.jsx'))
+const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirector.jsx'))
 
 /*
  * Detalle y línea de tiempo de una novedad (RF-18 / CU-18), para los cuatro roles. Figma:
  * 13 (3:764) y 14 (3:965) en el teléfono, 22 (4:2093) en el escritorio y 09 (2:1118) para la
  * novedad resuelta. Fuera del alcance del usuario, o si no existe, la pantalla 22-B.
+ *
+ * Para el director, una novedad escalada es la pantalla 20 (4:705; 20-C, 4:1054, en el
+ * teléfono): el mismo detalle con la justificación del escalamiento arriba y su decisión
+ * (RF-13 / CU-13).
  *
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
  * (Tabla 35) y cada rol trae las suyas; las evidencias y la consulta sin conexión llegan en
@@ -58,39 +63,10 @@ const VOLVER = {
 /** Mientras está en manos del área, el detalle dice hace cuánto se registró y quién la tomó. */
 const EN_MANOS_DEL_AREA = ['asignada', 'en_atencion', 'escalada', 'aprobada']
 
-const COLOR_DEL_AREA = {
-  Mantenimiento: 'text-area-mantenimiento',
-  Sistemas: 'text-area-sistemas',
-}
+/** La sección a la que lleva «Ver historial» desde la lista de escaladas (pantalla 19). */
+const ID_DE_LA_LINEA = 'linea-de-tiempo'
 
 const TARJETA = 'rounded-xl border border-borde bg-superficie'
-
-function Etiqueta({ children, className = 'text-texto-secundario' }) {
-  return (
-    <span
-      className={`rounded-md bg-gris-100 px-2 py-0.5 text-auxiliar-fuerte whitespace-nowrap ${className}`}
-    >
-      {children}
-    </span>
-  )
-}
-
-/** Estado, prioridad, área y finca: lo que identifica a la novedad de un vistazo. */
-function Etiquetas({ novedad }) {
-  return (
-    <>
-      <Estado estado={novedad.estado} />
-      <Prioridad prioridad={novedad.prioridad} />
-      <Etiqueta className={COLOR_DEL_AREA[novedad.area] ?? 'text-texto-secundario'}>
-        {novedad.area}
-      </Etiqueta>
-      {/* Figma escribe «Finca Juanca»; si el nombre ya empieza por «Finca», no se repite. */}
-      <Etiqueta>
-        {/^finca\b/i.test(novedad.finca) ? novedad.finca : `Finca ${novedad.finca}`}
-      </Etiqueta>
-    </>
-  )
-}
 
 /** «Registrada hace 3 h · Tomada por Jhon Fredy Mosquera, 7:15 a. m.», o `null`. */
 function seguimiento(novedad, transiciones) {
@@ -113,11 +89,24 @@ function seguimiento(novedad, transiciones) {
 const resolucion = (transiciones) =>
   transiciones.find(({ estado_nuevo }) => estado_nuevo === 'resuelta') ?? null
 
-function Seccion({ titulo, className = '', children }) {
-  const id = useId()
+/**
+ * @param {object} props
+ * @param {string} props.titulo
+ * @param {string} [props.id] Para llegar a la sección por la dirección (`#linea-de-tiempo`):
+ *   con él, la sección puede recibir el foco.
+ * @param {string} [props.className]
+ * @param {import('react').ReactNode} props.children
+ */
+function Seccion({ titulo, id, className = '', children }) {
+  const idDelTitulo = useId()
   return (
-    <section aria-labelledby={id} className={className}>
-      <h2 id={id} className="text-etiqueta-fuerte text-texto">
+    <section
+      id={id}
+      tabIndex={id ? -1 : undefined}
+      aria-labelledby={idDelTitulo}
+      className={`${id ? 'scroll-mt-20 outline-none' : ''} ${className}`}
+    >
+      <h2 id={idDelTitulo} className="text-etiqueta-fuerte text-texto">
         {titulo}
       </h2>
       {children}
@@ -149,18 +138,43 @@ function DatoEnCelda({ nombre, children }) {
   )
 }
 
-function Telefono({ novedad, transiciones }) {
+/**
+ * La justificación con que el área escaló, quién lo hizo y cuándo (pantallas 20 y 20-C). Es
+ * lo primero que lee el director antes de decidir.
+ */
+function Justificacion({ escalamiento }) {
+  if (!escalamiento?.observacion) return null
+  return (
+    <JustificacionDelEscalamiento
+      seccion
+      texto={escalamiento.observacion}
+      pie={[firmaDe(escalamiento.usuario), formatearFechaCorta(escalamiento.fecha_hora)]
+        .filter(Boolean)
+        .join(' · ')}
+    />
+  )
+}
+
+/**
+ * @param {object} props
+ * @param {object} props.novedad
+ * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion[]} props.transiciones
+ * @param {boolean} props.decide Quien la abre es el director y debe decidir (pantalla 20-C).
+ * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
+ */
+function Telefono({ novedad, transiciones, decide, escalamiento }) {
   const resuelta = novedad.solucion ? resolucion(transiciones) : null
   const linea = seguimiento(novedad, transiciones)
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
+      <Justificacion escalamiento={escalamiento} />
       <div
         role="group"
         aria-label="Datos de la novedad"
         className="flex flex-wrap items-center gap-1.5"
       >
-        <Etiquetas novedad={novedad} />
+        <EtiquetasDeNovedad novedad={novedad} />
       </div>
       {linea ? <p className="text-auxiliar text-texto-secundario">{linea}</p> : null}
 
@@ -193,7 +207,10 @@ function Telefono({ novedad, transiciones }) {
         </section>
       ) : null}
 
-      <Seccion titulo="Descripción" className={`flex flex-col gap-2.5 p-4 ${TARJETA}`}>
+      <Seccion
+        titulo={decide ? 'Descripción del reporte' : 'Descripción'}
+        className={`flex flex-col gap-2.5 p-4 ${TARJETA}`}
+      >
         <p className="text-cuerpo break-words text-texto">{novedad.descripcion}</p>
         <dl className="flex flex-col gap-2.5">
           <DatoEnFila nombre="Reportada por">
@@ -208,20 +225,45 @@ function Telefono({ novedad, transiciones }) {
         </dl>
       </Seccion>
 
-      <Seccion titulo="Línea de tiempo" className={`flex flex-col gap-3 px-4 pt-4 pb-1 ${TARJETA}`}>
+      <Seccion
+        titulo="Línea de tiempo"
+        id={ID_DE_LA_LINEA}
+        className={`flex flex-col gap-3 px-4 pt-4 pb-1 ${TARJETA}`}
+      >
         <LineaDeTiempo transiciones={transiciones} />
       </Seccion>
     </div>
   )
 }
 
-function Escritorio({ novedad, transiciones, acciones }) {
+/**
+ * @param {object} props
+ * @param {object} props.novedad
+ * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion[]} props.transiciones
+ * @param {import('react').ReactNode} props.acciones Las del aprobador, bajo el encabezado.
+ * @param {import('react').ReactNode} props.panel La decisión del director, a la derecha.
+ * @param {boolean} props.decide Quien la abre es el director y debe decidir (pantalla 20):
+ *   el panel ocupa la columna derecha y la línea de tiempo pasa bajo el contenido.
+ * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
+ */
+function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamiento }) {
   const resuelta = novedad.solucion ? resolucion(transiciones) : null
   const linea = seguimiento(novedad, transiciones)
+  const lineaDeTiempo = (
+    <Seccion
+      titulo="Línea de tiempo"
+      id={ID_DE_LA_LINEA}
+      className={`flex min-w-0 flex-col gap-3 px-4 pt-4 ${TARJETA} ${decide ? 'xl:col-start-1' : ''}`}
+    >
+      <LineaDeTiempo transiciones={transiciones} conPie />
+    </Seccion>
+  )
 
   return (
-    <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+    // Con menos ancho que `xl` todo va en una columna: el contenido, la decisión y la línea
+    // de tiempo, en ese orden.
+    <div className="grid gap-x-6 gap-y-4 xl:grid-cols-[minmax(0,1fr)_400px] xl:items-start">
+      <div className="flex min-w-0 flex-col gap-4 xl:col-start-1">
         <div className={`flex flex-col gap-2.5 p-5 ${TARJETA}`}>
           <div
             role="group"
@@ -231,12 +273,14 @@ function Escritorio({ novedad, transiciones, acciones }) {
             <h1 className="text-display text-texto" translate="no">
               {formatearCodigo(novedad.codigo)}
             </h1>
-            <Etiquetas novedad={novedad} />
+            <EtiquetasDeNovedad novedad={novedad} />
           </div>
           <p className="text-cuerpo-pequeno text-texto-secundario">{novedad.razon_social}</p>
           {linea ? <p className="text-auxiliar text-texto-secundario">{linea}</p> : null}
           {acciones}
         </div>
+
+        <Justificacion escalamiento={escalamiento} />
 
         <dl className={`grid grid-cols-2 gap-x-5 gap-y-4 p-5 ${TARJETA}`}>
           <DatoEnCelda nombre="Reportada por">{novedad.reportante}</DatoEnCelda>
@@ -261,7 +305,10 @@ function Escritorio({ novedad, transiciones, acciones }) {
           ) : null}
         </dl>
 
-        <Seccion titulo="Descripción" className={`flex flex-col gap-2 p-5 ${TARJETA}`}>
+        <Seccion
+          titulo={decide ? 'Descripción del reporte' : 'Descripción'}
+          className={`flex flex-col gap-2 p-5 ${TARJETA}`}
+        >
           <p className="text-cuerpo break-words text-texto">{novedad.descripcion}</p>
         </Seccion>
 
@@ -282,19 +329,22 @@ function Escritorio({ novedad, transiciones, acciones }) {
         ) : null}
       </div>
 
-      <Seccion
-        titulo="Línea de tiempo"
-        className={`flex flex-col gap-3 px-4 pt-4 xl:w-[400px] xl:flex-none ${TARJETA}`}
+      {/* El panel va siempre primero en esta columna: después de decidir desaparece, pero el
+          aviso que deja no se vuelve a montar. */}
+      <div
+        className={`flex min-w-0 flex-col gap-4 xl:col-start-2 ${decide ? 'xl:row-span-2' : ''}`}
       >
-        <LineaDeTiempo transiciones={transiciones} conPie />
-      </Seccion>
+        {panel}
+        {decide ? null : lineaDeTiempo}
+      </div>
+      {decide ? lineaDeTiempo : null}
     </div>
   )
 }
 
 export default function DetalleNovedad() {
   const { id } = useParams()
-  const { state } = useLocation()
+  const { state, hash } = useLocation()
   const navegar = useNavigate()
   const { perfil } = useSesion()
   const enLinea = useEnLinea()
@@ -349,8 +399,21 @@ export default function DetalleNovedad() {
   useEffect(() => {
     const cambio = Boolean(estadoAnterior.current && estado && estadoAnterior.current !== estado)
     estadoAnterior.current = estado
-    if (cambio && document.activeElement === document.body) raiz.current?.closest('main')?.focus()
+    // Sin desplazar la página: la persona sigue viendo lo que acaba de cambiar.
+    if (cambio && document.activeElement === document.body) {
+      raiz.current?.closest('main')?.focus({ preventScroll: true })
+    }
   }, [estado])
+
+  // «Ver historial» (pantalla 19) abre el detalle en la línea de tiempo: se lleva a la vista
+  // y recibe el foco, para que el teclado y el lector de pantalla sigan desde ahí.
+  const hayNovedad = Boolean(novedad)
+  useEffect(() => {
+    if (!hayNovedad || hash !== `#${ID_DE_LA_LINEA}`) return
+    const linea = document.getElementById(ID_DE_LA_LINEA)
+    linea?.scrollIntoView?.({ block: 'start' })
+    linea?.focus({ preventScroll: true })
+  }, [hayNovedad, hash])
 
   const origen = rutaDeOrigen(state, perfil.rol_id)
   const textoDeVolver = VOLVER[origen.split('?')[0]] ?? 'Volver'
@@ -370,16 +433,39 @@ export default function DetalleNovedad() {
     navegar('.', { replace: true, state: { origen: state?.origen } })
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
+  const disponibles = accionesDisponibles(perfil, novedad)
   const acciones =
     novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
       <Suspense fallback={null}>
         <AccionesDelAprobador
           novedad={novedad}
-          acciones={accionesDisponibles(perfil, novedad)}
+          acciones={disponibles}
           alCambiar={recargar}
           alSalir={volverALaBandeja}
           avisoDeLlegada={avisoDeLlegada}
           alQuitarAvisoDeLlegada={quitarAvisoDeLlegada}
+          esEscritorio={esEscritorio}
+        />
+      </Suspense>
+    ) : null
+
+  // El director decide sobre las escaladas (Tabla 35). Después de decidir ya no hay nada que
+  // elegir, pero el componente sigue montado para mostrar el aviso de lo que hizo.
+  const esDirector = perfil.rol_id === ROL.DIRECTOR_AGRICULTURA
+  const decide = esDirector && disponibles.includes(ACCION.APROBAR)
+  // La justificación vigente: la de la última vez que se escaló (el historial llega de la
+  // transición más reciente a la más antigua).
+  const escalamiento = decide
+    ? (transiciones.find(({ estado_nuevo }) => estado_nuevo === 'escalada') ?? null)
+    : null
+  const decision =
+    novedad && esDirector ? (
+      <Suspense fallback={null}>
+        <DecisionDelDirector
+          key={novedad.id}
+          novedad={novedad}
+          puedeDecidir={decide}
+          alCambiar={recargar}
           esEscritorio={esEscritorio}
         />
       </Suspense>
@@ -447,12 +533,25 @@ export default function DetalleNovedad() {
               <Icono src={iconoVolver} tamano={18} />
               {textoDeVolver}
             </Link>
-            <Escritorio novedad={novedad} transiciones={transiciones} acciones={acciones} />
+            <Escritorio
+              novedad={novedad}
+              transiciones={transiciones}
+              acciones={acciones}
+              panel={decision}
+              decide={decide}
+              escalamiento={escalamiento}
+            />
           </div>
         ) : (
           <>
-            <Telefono novedad={novedad} transiciones={transiciones} />
+            <Telefono
+              novedad={novedad}
+              transiciones={transiciones}
+              decide={decide}
+              escalamiento={escalamiento}
+            />
             {acciones}
+            {decision}
           </>
         )
       ) : null}

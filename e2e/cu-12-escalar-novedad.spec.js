@@ -7,8 +7,8 @@ import { HAY_CLAVE, ingresarComo, leerDeLaApi, MOTIVO_SIN_CLAVE } from './apoyo/
  * CU-12 · Escalar novedad a segunda instancia (RF-12). Pantalla 15 (hoja «Escalar al director
  * de agricultura»).
  *
- * El aviso al director se comprueba leyendo la API con su sesión: su bandeja (pantalla 19)
- * llega en el Sprint 3 y la pantalla de avisos, en el Sprint 5.
+ * El aviso al director se comprueba leyendo la API con su sesión: la pantalla de avisos llega
+ * en el Sprint 5. Su lista de escaladas (pantalla 19) se prueba con el CU-13.
  */
 
 const ESPERA_DE_SESION = { timeout: 20_000 }

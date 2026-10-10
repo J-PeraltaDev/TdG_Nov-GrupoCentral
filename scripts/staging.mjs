@@ -8,6 +8,7 @@
  *   npm run staging:types      regenera src/core/supabase/database.types.ts
  *   npm run staging:advisors   asesor de seguridad y rendimiento
  *   npm run staging:usuarios   pone la contraseña de los usuarios de prueba (.env.local)
+ *   npm run staging:functions  despliega en staging las Edge Functions de supabase/functions
  *
  * Usa la sesión de `npx supabase login`; no necesita la contraseña de la base.
  * El proyecto está fijo en este archivo a propósito: estos comandos nunca apuntan a
@@ -271,6 +272,12 @@ const comandos = {
     supabase(['migration', 'list', '--project-ref', STAGING], { mostrar: true }).estado,
   test: () => probar(resto),
   usuarios: ponerClaveALosUsuariosDePrueba,
+  // `--use-api` empaqueta las funciones en el servidor: sin él, el CLI necesita Docker
+  // (docs/adr/0012). Sin nombres despliega todas; `verify_jwt` sale de supabase/config.toml.
+  functions: () =>
+    supabase(['functions', 'deploy', '--use-api', '--project-ref', STAGING, ...resto], {
+      mostrar: true,
+    }).estado,
   types: () => {
     const { estado, salida, error } = supabase([
       'gen',

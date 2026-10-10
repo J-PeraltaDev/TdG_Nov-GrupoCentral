@@ -13,8 +13,8 @@ import {
  * CU-14 · Registrar solución aplicada (RF-14). Pantallas 18 (registrar solución y tipo de
  * falla) y 18-B (fecha posterior a hoy).
  *
- * La pantalla 18-C (novedad aprobada por el director) se cubre con pruebas unitarias: hasta
- * el Sprint 3 la aplicación no tiene cómo aprobar un escalamiento.
+ * La pantalla 18-C (novedad aprobada por el director) se prueba con el CU-13, que es donde el
+ * director aprueba el escalamiento (e2e/cu-13-decidir-escalamiento.spec.js).
  */
 
 const ESPERA_DE_SESION = { timeout: 20_000 }
