@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
+import { alPedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import {
   escalarNovedad,
@@ -103,6 +104,34 @@ describe('Acciones del aprobador en el detalle (RF-10 / CU-10, Figma 13, 13-B y 
       'Novedad tomada. Ya está En atención.',
     )
     expect(alCambiar).toHaveBeenCalledOnce()
+  })
+
+  it('RF-03 / RNF-11: si responde SIN_PERMISO, lo dice y pide releer el perfil (puede que ya no tenga ese rol)', async () => {
+    vi.mocked(tomarNovedad).mockRejectedValue({ message: 'SIN_PERMISO' })
+    const alPedirRevision = vi.fn()
+    const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
+    pintar()
+
+    await userEvent.click(tomar())
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No tienes permiso para esta acción.',
+    )
+    expect(alPedirRevision).toHaveBeenCalledOnce()
+    dejarDeEscuchar()
+  })
+
+  it('RF-10: otro error no pide releer el perfil', async () => {
+    vi.mocked(tomarNovedad).mockRejectedValue({ message: 'TRANSICION_INVALIDA' })
+    const alPedirRevision = vi.fn()
+    const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
+    pintar()
+
+    await userEvent.click(tomar())
+    await screen.findByRole('alert')
+
+    expect(alPedirRevision).not.toHaveBeenCalled()
+    dejarDeEscuchar()
   })
 
   it('RF-10: mientras la toma, el botón no admite otro toque', async () => {

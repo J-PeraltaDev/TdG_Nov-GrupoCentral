@@ -17,6 +17,7 @@ const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'
 const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
 const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
 const Fincas = lazy(() => import('../modules/e1-acceso-admin/Fincas.jsx'))
+const Usuarios = lazy(() => import('../modules/e1-acceso-admin/Usuarios.jsx'))
 const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
 const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
@@ -98,7 +99,7 @@ export function Rutas() {
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.ADMINISTRADOR]} />}>
-              <Route path="/usuarios" element={<Pendiente titulo="Usuarios" sprint="Sprint 3" />} />
+              <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/fincas" element={<Fincas />} />
               <Route
                 path="/tipos-de-falla"

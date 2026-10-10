@@ -21,7 +21,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 86 (más las 6 de preparación)       | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 92 (más las 6 de preparación)       | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -33,6 +33,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 27  | Detalles de las pantallas 19, 20 y 20-C    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 28  | Detalles de las pantallas 09, 09-B y 09-C  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 29  | Detalles de las pantallas 30 y 30-B        | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 30  | Detalles de las pantallas 28, 28-B y 29    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -207,6 +208,21 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   historial.»; en las tarjetas del teléfono, «2 novedades abiertas» y «2 reportantes». Para los
   lectores de pantalla: «Editar {finca}», «Desactivar {finca}», «Reactivar {finca}», «Página
   anterior», «Página siguiente» y «Administración» (la sección de «Cuenta»).
+- **Usuarios (Sprint 3):** los avisos «Usuario creado. Entrégale su contraseña inicial.»,
+  «Usuario actualizado.», «Usuario desactivado.» y «Usuario reactivado.»; los errores de cada
+  campo («Escribe el nombre completo.», «Escribe un correo válido.», «Usa mínimo 8 caracteres, con
+  al menos una letra y un número.», «Elige el rol.», «Elige la finca.», «Elige el área.» y, cuando
+  los rechaza el servidor, «Elige una finca activa.» y «Elige un área activa.»; Figma solo escribe
+  «Este correo ya está registrado»); «El correo no se puede cambiar.» al editar; «Elige la finca»
+  como opción vacía y «(inactiva)» junto a una finca desactivada; «Tu cuenta» en la fila propia,
+  «No puedes desactivar tu propia cuenta.» y «No puedes cambiar tu propio rol ni desactivar tu
+  cuenta.»; las advertencias «Es el único aprobador activo de {área}: sus novedades quedarán sin
+  quien las atienda.» y «Es el único reportante activo de {finca}, que tiene N novedades abiertas:
+  nadie podrá confirmar su cierre.»; «Nunca» como último ingreso de quien no ha entrado; «No hay
+  usuarios que coincidan.»; las opciones «Estado: Activos» y «Estado: Inactivos»; los botones
+  dicen «Guardando…» y «Desactivando…» mientras se ejecutan; en las tarjetas del teléfono,
+  «Último ingreso: hoy 7:18 a. m.». Para los lectores de pantalla: «Editar {nombre}», «Desactivar
+  {nombre}», «Reactivar {nombre}» y «Cerrar» (la equis del panel).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 - **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
@@ -378,8 +394,13 @@ pasaron las 74, más las seis de preparación. Con las seis de CU-15 (confirmar 
 persiste» y el recorrido completo del incremento, de registrar a cerrar con cada rol en su
 pantalla), pasaron las 80, más las seis de preparación. Con las seis de CU-04 (crear, repetir
 el nombre, editar y desactivar una finca propia; el diálogo de una finca del seed, que se cancela;
-y el intento de un rol que no es el administrador), **pasaron las 86, más las seis de preparación
-(92).**
+y el intento de un rol que no es el administrador), pasaron las 86, más las seis de preparación.
+Con las seis de CU-03 (el administrador crea un usuario, que ingresa; lo edita, lo desactiva y lo
+reactiva; el correo repetido y el aprobador sin área; y el intento de un rol que no es el
+administrador), **pasaron las 92, más las seis de preparación (98).**
+
+Las de CU-03 ingresan cuatro veces por el formulario con el usuario que crean (dos formatos: ocho
+ingresos más por corrida). Sumados a los seis de preparación, siguen lejos del límite de Auth.
 
 Una aserción de CU-14 cambió con la decisión 21 C: la transición a «resuelta» lleva ahora la
 solución como observación, y el texto de la solución sale dos veces en el detalle (en su bloque y
@@ -391,7 +412,8 @@ descripciones únicas: se acumulan en «staging» hasta el siguiente `staging:re
 CU-15 reutilizan uno de esos tipos y dejan sus novedades decididas, cerradas o de nuevo en
 atención; las de CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias
 páginas. Las de CU-04 crean una finca por corrida («Finca e2e …») y la dejan desactivada, para
-que no aparezca en los filtros de las demás pantallas.
+que no aparezca en los filtros de las demás pantallas. Las de CU-03 crean un usuario por corrida
+(`e2e-…@novedades.test`) y lo dejan desactivado: un usuario no se puede borrar.
 
 **Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
 pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
@@ -757,3 +779,59 @@ del Sprint 3:
   oficial se mantiene fuera del repositorio (punto 1).
 - **La carga de las fincas reales** no es parte de esta historia: es un paso del cierre del sprint
   (decisión 18).
+
+## 30 · Detalles de las pantallas 28, 28-B, 29 y 29-B (usuarios)
+
+Lo que Figma no dibuja o deja abierto, resuelto con las decisiones 13 a 16, 24, 25, 35, 37, 39 y 40
+del plan del Sprint 3:
+
+- **Inicio del administrador** (decisión 25). Entra a «Usuarios» hasta que llegue el panel de
+  reportes, en el Sprint 5; «Panel de reportes» sigue en el menú, como marcador. Cuando llegue,
+  basta cambiar una línea en `core/sesion/roles.js`.
+- **En el teléfono** (decisión 24). Figma solo dibuja 28 y 29 en el escritorio. La tabla pasa a
+  tarjetas y el panel de 29 ocupa la pantalla, con sus botones uno sobre otro.
+- **Editar usuario** (decisión 40). El mismo panel de 29, sin la contraseña y con el correo a la
+  vista pero fijo: el correo identifica la cuenta, y cambiar la contraseña es otro caso de uso
+  (RF-02). Un correo mal escrito se resuelve desactivando la cuenta y creando otra.
+- **Contraseña inicial** (decisión 15d). «Generar» arma una palabra y cuatro cifras
+  («Banano-4821», como el ejemplo de Figma) con el generador criptográfico del navegador; se
+  puede escribir otra, que debe cumplir la regla. Va a la vista, porque el administrador tiene
+  que entregarla, y no se guarda en ningún lado: al cerrar el panel desaparece. Por eso el aviso
+  dice «Entrégale su contraseña inicial».
+- **Cuánto protege una contraseña inicial así.** Son 32 palabras por 10 000 números: unas 320 000
+  combinaciones. Sirve para la entrega, no para durar. Hoy el usuario no tiene cómo cambiarla por
+  su cuenta (el texto de Figma dice «podrá cambiarla después»): la cambia por el caso de
+  recuperación (RF-02). **Para decidir:** si conviene obligar el cambio en el primer ingreso.
+- **El rol decide qué más se pregunta.** Reportante: «Finca asignada», entre las activas, con su
+  razón social. Aprobador de área: «Área», como en 29-B. Director y administrador: nada más. Al
+  cambiar de rol se borra lo que ya no aplica.
+- **La cuenta propia** (decisión 15a). Nadie se desactiva ni se cambia el rol a sí mismo: así
+  siempre queda un administrador activo. En la lista, la fila dice «Tu cuenta» y su botón de
+  desactivar está deshabilitado, con la razón; en el panel, el rol y el interruptor también. El
+  servidor lo impide de todos modos (403).
+- **Cuando el cambio deja un alcance sin nadie** (decisión 15b). Cambiar el rol, la finca o el
+  área, o desactivar, siempre se permite: el modelo no tiene responsable individual. Solo se
+  advierte, en el diálogo 28-B y en el panel, si era el único aprobador activo de su área o el
+  único reportante activo de una finca con novedades abiertas.
+- **Último ingreso** (decisión 39). Sale de Auth, por `listar_usuarios`: es el último ingreso
+  con contraseña, así que quien lleva días con la sesión abierta muestra una fecha vieja. Se
+  escribe como en Figma: «hoy 7:18 a. m.», «ayer», «22 sep».
+- **Reactivar** es un toque, sin diálogo (decisión 37).
+- **Si algo falla al guardar,** el panel no se cierra y conserva lo escrito, incluida la
+  contraseña: el correo repetido (6a) y cada dato que rechaza el servidor (6b) se señalan en su
+  campo, y el foco va al primero.
+- **El panel no se cierra al tocar el fondo,** a diferencia de las hojas y los diálogos: un toque
+  fuera no debe costar un formulario a medio llenar. Se cierra con Escape, con la equis o con
+  «Cancelar».
+- **Sesión abierta de un usuario que cambió** (decisión 16; `docs/cambios-sdd.md`, entrada 14).
+  La aplicación relee el perfil al volver a la pestaña (a lo sumo una vez por minuto) y cuando
+  una acción responde «No tienes permiso». Si lo desactivaron, queda en el ingreso con el aviso
+  01-C y sus novedades pendientes se conservan; si le cambiaron el rol, la finca o el área, pasa
+  a su inicio con el menú nuevo.
+- **Lo que no se puede deshacer.** Un usuario no se borra, ni siquiera uno creado por error: se
+  desactiva. Las pruebas de extremo a extremo dejan su usuario desactivado en «staging».
+- **Si la compensación de «crear» falla.** Si el perfil no se guarda, la función borra la cuenta
+  de Auth recién creada. Si ese borrado también falla (dos fallos seguidos), queda una cuenta sin
+  perfil: no puede ver nada, pero su correo queda ocupado y hay que borrarla desde el panel de
+  Supabase. No ha pasado; queda anotado.
+- **Nombres de las pruebas y de las capturas.** Personas, fincas y razones sociales inventadas.

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { alPedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { crearBorrador, enviarNovedad } from './enviarNovedad.js'
 
@@ -75,5 +76,19 @@ describe('enviarNovedad (RF-05)', () => {
       codigo: 'FINCA_NO_ASIGNADA',
       mensaje: 'Tu usuario no tiene una finca asignada.',
     })
+  })
+
+  it('RF-03 / CU-01 4b: si responde SIN_PERMISO, lo informa y pide releer el perfil', async () => {
+    vi.mocked(registrarNovedad).mockRejectedValue({ code: 'P0001', message: 'SIN_PERMISO' })
+    const alPedirRevision = vi.fn()
+    const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
+
+    await expect(enviarNovedad(BORRADOR)).resolves.toMatchObject({
+      ok: false,
+      codigo: 'SIN_PERMISO',
+    })
+
+    expect(alPedirRevision).toHaveBeenCalledOnce()
+    dejarDeEscuchar()
   })
 })

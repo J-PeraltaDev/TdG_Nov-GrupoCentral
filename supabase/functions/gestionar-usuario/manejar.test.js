@@ -12,12 +12,33 @@ const CREAR = {
   rol_id: 3,
 }
 
-/** Dependencias simuladas: quién llama y qué perfil tiene. */
+const CREADO = {
+  id: 'u-nuevo',
+  nombre: CREAR.nombre,
+  correo: CREAR.correo,
+  rol_id: 3,
+  finca_id: null,
+  area_id: null,
+  activo: true,
+}
+
+/** Dependencias simuladas: quién llama, qué perfil tiene y unas cuentas que siempre responden. */
 function dependencias({ sub = ADMINISTRADOR.id, perfil = ADMINISTRADOR } = {}) {
   return {
     token: 'un.token.cualquiera',
     identificar: vi.fn().mockResolvedValue(sub),
     leerPerfil: vi.fn().mockResolvedValue(perfil),
+    cuentas: {
+      leerUsuario: vi.fn().mockResolvedValue(CREADO),
+      fincaActiva: vi.fn().mockResolvedValue(true),
+      areaActiva: vi.fn().mockResolvedValue(true),
+      crearCuenta: vi.fn().mockResolvedValue({ id: CREADO.id }),
+      borrarCuenta: vi.fn().mockResolvedValue(undefined),
+      suspenderCuenta: vi.fn().mockResolvedValue(undefined),
+      reactivarCuenta: vi.fn().mockResolvedValue(undefined),
+      insertarUsuario: vi.fn(async (usuario) => ({ usuario })),
+      actualizarUsuario: vi.fn(async (id, cambios) => ({ ...CREADO, id, ...cambios })),
+    },
   }
 }
 
@@ -65,7 +86,7 @@ describe('gestionar-usuario · quién puede llamarla (SDD, Tabla 23)', () => {
   })
 })
 
-describe('gestionar-usuario · contrato (Sprint 3, antes de implementar)', () => {
+describe('gestionar-usuario · de la solicitud a la acción (RF-03 / CU-03)', () => {
   it('RF-03 / CU-03 6b: al administrador le señala los campos de una solicitud incompleta', async () => {
     expect(await manejar({ accion: 'crear' }, dependencias())).toEqual({
       estado: 400,
@@ -76,10 +97,70 @@ describe('gestionar-usuario · contrato (Sprint 3, antes de implementar)', () =>
     })
   })
 
-  it('una solicitud válida de un administrador responde 501 NO_IMPLEMENTADO', async () => {
-    expect(await manejar(CREAR, dependencias())).toEqual({
-      estado: 501,
-      cuerpo: { codigo: 'NO_IMPLEMENTADO' },
+  it('RNF-11: sin permiso o sin datos válidos no toca Auth ni la base de datos', async () => {
+    const sinPermiso = dependencias({ perfil: null })
+    await manejar(CREAR, sinPermiso)
+    const incompleta = dependencias()
+    await manejar({ accion: 'crear' }, incompleta)
+
+    for (const { cuentas } of [sinPermiso, incompleta]) {
+      for (const operacion of Object.values(cuentas)) expect(operacion).not.toHaveBeenCalled()
+    }
+  })
+
+  it('RF-03 / CU-03 6: «crear» crea la cuenta y responde 201 con el usuario, sin la contraseña', async () => {
+    const deps = dependencias()
+
+    const respuesta = await manejar(CREAR, deps)
+
+    expect(respuesta).toEqual({ estado: 201, cuerpo: { usuario: CREADO } })
+    expect(deps.cuentas.crearCuenta).toHaveBeenCalledExactlyOnceWith({
+      correo: CREAR.correo,
+      contrasena: CREAR.contrasena_inicial,
+    })
+    expect(JSON.stringify(respuesta)).not.toContain(CREAR.contrasena_inicial)
+  })
+
+  it('el correo llega a Auth y al perfil en minúsculas y sin espacios', async () => {
+    const deps = dependencias()
+
+    await manejar({ ...CREAR, correo: '  Persona@Novedades.TEST ' }, deps)
+
+    expect(deps.cuentas.crearCuenta.mock.calls[0][0].correo).toBe('persona@novedades.test')
+    expect(deps.cuentas.insertarUsuario.mock.calls[0][0].correo).toBe('persona@novedades.test')
+  })
+
+  it.each([
+    ['actualizar', { nombre: 'Otro nombre', rol_id: 3 }, 'actualizarUsuario'],
+    ['desactivar', {}, 'suspenderCuenta'],
+    ['activar', {}, 'reactivarCuenta'],
+  ])('«%s» llega a su acción y responde 200 con el usuario', async (accion, datos, operacion) => {
+    const deps = dependencias()
+
+    const respuesta = await manejar(
+      { accion, usuario_id: '00000000-0000-4000-a000-000000000009', ...datos },
+      deps,
+    )
+
+    expect(respuesta.estado).toBe(200)
+    expect(respuesta.cuerpo.usuario).toMatchObject({ correo: CREADO.correo })
+    expect(deps.cuentas[operacion]).toHaveBeenCalled()
+  })
+
+  it('Tabla 23: las acciones saben quién llama: el administrador no se desactiva a sí mismo', async () => {
+    const yo = '00000000-0000-4000-a000-000000000006'
+    const deps = dependencias({ sub: yo, perfil: { ...ADMINISTRADOR, id: yo } })
+
+    expect(await manejar({ accion: 'desactivar', usuario_id: yo }, deps)).toEqual({
+      estado: 403,
+      cuerpo: { codigo: 'SIN_PERMISO', campos: ['usuario_id'] },
+    })
+  })
+
+  it('una acción que no existe responde 400 y la señala', async () => {
+    expect(await manejar({ accion: 'borrar', usuario_id: 'u-1' }, dependencias())).toEqual({
+      estado: 400,
+      cuerpo: { codigo: 'DATO_OBLIGATORIO', campos: ['accion'] },
     })
   })
 })

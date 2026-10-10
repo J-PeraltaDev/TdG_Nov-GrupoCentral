@@ -19,6 +19,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar | Propuesto |
 | 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad               | Propuesto |
 | 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                           | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»        | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -378,3 +379,53 @@ Se agregó la vista `public.v_finca` (`rf04_vista_finca`):
 > La vista v_finca agrega a cada finca su razón social, la cantidad de novedades abiertas y la de
 > reportantes activos, para la pantalla de administración de fincas. Se define igual, con
 > security_invoker.
+
+## 14 · Cuentas: sesión viva, `gestionar-usuario` e inicio del administrador (S3)
+
+**Sección:** SDD 5.3.1, Tabla 19 (sesión); 6.1.10 y Tabla 23 (gestión de cuentas); Tabla 10 (pantalla
+de inicio de cada rol).
+
+**1. El perfil se relee con la sesión viva (complemento).** El SDD lee el perfil al ingresar y al
+abrir la aplicación. Con RF-03, un administrador puede desactivar a alguien, o cambiarle el rol o
+la finca, mientras esa persona tiene la aplicación abierta. La base de datos deja de responderle
+de inmediato (las políticas miran `usuario.activo` y el rol en cada consulta), pero el menú y las
+pantallas seguirían siendo los de antes. Ahora la aplicación relee el perfil:
+
+- al volver a la pestaña o a la ventana, a lo sumo una vez por minuto;
+- cuando una acción responde `SIN_PERMISO`.
+
+Si el usuario ya no está activo, cierra la sesión local, conserva las novedades pendientes de
+sincronizar y muestra en el ingreso el aviso 01-C. Si cambió el rol, la finca o el área, lo lleva
+a su pantalla de inicio con el menú nuevo.
+
+**2. `gestionar-usuario` (precisión de la Tabla 23).** Cada usuario vive en dos lugares, la
+cuenta de Auth y su perfil en `usuario`, y ninguna transacción cubre los dos. La función los toca
+en el orden que deja el fallo intermedio menos grave, y todas las acciones dan el mismo resultado
+si se repiten:
+
+- `crear`: primero la cuenta de Auth (con el correo confirmado) y después el perfil; si el perfil
+  no se guarda, borra la cuenta recién creada. Es el único borrado.
+- `desactivar`: primero `usuario.activo = false`, que corta los datos de inmediato, y después la
+  suspensión en Auth. `activar`, al revés.
+- `actualizar`: nombre, rol y finca o área; el correo no se edita. La finca o el área se
+  validan (que existan y estén activas) solo si cambian.
+- Nadie se desactiva ni se cambia el rol a sí mismo (403): así siempre queda un administrador.
+- `service_role` no tiene `delete` sobre `usuario`: un usuario se desactiva, nunca se borra.
+
+**3. Inicio del administrador (temporal).** La Tabla 10 dice que el administrador entra al panel
+de reportes, que llega en el Sprint 5. Mientras tanto entra a «Usuarios». No hay que cambiar el
+SDD: se vuelve a la Tabla 10 cuando exista el panel.
+
+**Texto propuesto (Tabla 19, fila nueva):**
+
+> Con la sesión abierta · Al volver a la aplicación y cuando una acción responde SIN_PERMISO · Se
+> relee el perfil. Usuario inactivo: se cierra la sesión local, se conservan las pendientes y se
+> muestra el aviso de usuario desactivado. Rol o alcance distinto: se actualiza el menú y se lleva
+> a su pantalla de inicio.
+
+**Texto propuesto (6.1.10, después de la descripción de gestionar-usuario):**
+
+> Como la cuenta de Auth y el perfil no se escriben en una misma transacción, la función crea
+> primero la cuenta y después el perfil (y borra la cuenta si el perfil falla), desactiva primero
+> el perfil y después suspende la cuenta, y reactiva en el orden contrario. Ninguna acción borra un
+> usuario existente, y nadie puede desactivarse ni cambiarse el rol a sí mismo.

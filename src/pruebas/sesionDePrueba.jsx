@@ -75,12 +75,20 @@ export function pintarConSesion(ui, { ruta = '/', rol = null, sesion = {} } = {}
     salir: vi.fn(),
     ...sesion,
   }
+  const arbol = (sesionVigente) => (
+    <MemoryRouter initialEntries={[ruta]}>
+      <ContextoSesion value={sesionVigente}>{ui}</ContextoSesion>
+    </MemoryRouter>
+  )
+  const utilidades = render(arbol(valor))
   return {
     sesion: valor,
-    ...render(
-      <MemoryRouter initialEntries={[ruta]}>
-        <ContextoSesion value={valor}>{ui}</ContextoSesion>
-      </MemoryRouter>,
-    ),
+    ...utilidades,
+    /**
+     * Cambia la sesión con la pantalla abierta, como cuando el proveedor relee el perfil.
+     *
+     * @param {object} cambios Campos de la sesión que cambian (`perfil`, `fase`…).
+     */
+    cambiarSesion: (cambios) => utilidades.rerender(arbol({ ...valor, ...cambios })),
   }
 }

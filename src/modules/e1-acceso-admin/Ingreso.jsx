@@ -25,7 +25,7 @@ const ID_DEL_AVISO = 'aviso-de-ingreso'
  *   primer ingreso. La 01-E (contraseña actualizada) llega con RF-02 en el Sprint 3.
  */
 export function Ingreso() {
-  const { fase, perfil, ingresar } = useSesion()
+  const { fase, perfil, ingresar, motivoDeSalida } = useSesion()
   const navegar = useNavigate()
   const enLinea = useEnLinea()
   /** @type {[import('../../core/sesion/sesion.js').MotivoDeRechazo | null, Function]} */
@@ -39,8 +39,12 @@ export function Ingreso() {
   // Quien ya tiene sesión no vuelve a ver el ingreso.
   if (fase === 'con_sesion') return <Navigate to={rutaDeInicio(perfil.rol_id)} replace />
 
+  // Lo último que pasó: el resultado del intento de ingreso o, antes de intentar, el motivo
+  // con que se cerró la sesión (un administrador desactivó al usuario mientras la tenía abierta).
+  const motivo = rechazo ?? motivoDeSalida ?? null
+
   // 01-D: el primer ingreso en un dispositivo necesita conexión (CU-01 2a).
-  const sinConexion = !enLinea || rechazo === 'sin_conexion'
+  const sinConexion = !enLinea || motivo === 'sin_conexion'
 
   async function alEnviar(evento) {
     evento.preventDefault()
@@ -80,17 +84,17 @@ export function Ingreso() {
         onSubmit={alEnviar}
         className="flex flex-col gap-4 rounded-2xl bg-superficie p-5 inset-ring inset-ring-borde"
       >
-        {rechazo === 'credenciales' ? (
+        {motivo === 'credenciales' ? (
           <Aviso tipo="error" icono={iconoError} role="alert" id={ID_DEL_AVISO}>
             Correo o contraseña incorrectos. Revisa los datos e intenta de nuevo.
           </Aviso>
         ) : null}
-        {rechazo === 'desactivado' ? (
+        {motivo === 'desactivado' ? (
           <Aviso icono={iconoCandado} role="alert" id={ID_DEL_AVISO}>
             Tu usuario está desactivado. Si crees que es un error, comunícate con un administrador.
           </Aviso>
         ) : null}
-        {rechazo === 'error' ? (
+        {motivo === 'error' ? (
           <Aviso tipo="error" icono={iconoError} role="alert" id={ID_DEL_AVISO}>
             No pudimos iniciar tu sesión. Intenta de nuevo en un momento.
           </Aviso>

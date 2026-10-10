@@ -1,4 +1,5 @@
 import { traducirError } from '../../core/errores/traducir.js'
+import { vigilarPermiso } from '../../core/sesion/perfilVigente.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
 
 /*
@@ -49,7 +50,9 @@ export function crearBorrador({ descripcion, prioridad, areaId }) {
  */
 export async function enviarNovedad(borrador) {
   try {
-    return { ok: true, novedad: await registrarNovedad(borrador) }
+    // Si responde SIN_PERMISO puede que lo hayan desactivado o que ya no sea reportante: el
+    // perfil se relee (RF-03).
+    return { ok: true, novedad: await vigilarPermiso(() => registrarNovedad(borrador)) }
   } catch (error) {
     return { ok: false, ...traducirError(error) }
   }

@@ -9,7 +9,7 @@ import {
   leerMeta,
   NOMBRE_BD,
 } from '../offline/bd.js'
-import { cerrarSesion, iniciarSesion, restaurarSesion } from './sesion.js'
+import { cerrarSesion, iniciarSesion, restaurarSesion, revisarSesion } from './sesion.js'
 
 // Cliente de Supabase simulado: las unitarias nunca llaman a la red.
 const supabase = vi.hoisted(() => ({
@@ -315,6 +315,54 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
       )
 
       expect(await restaurarSesion()).toBeNull()
+    })
+  })
+
+  describe('revisarSesion (RF-03 / CU-01 4b: el perfil se relee con la sesión viva)', () => {
+    const conSesion = () =>
+      supabase.auth.getSession.mockResolvedValue({
+        data: { session: { user: { id: 'u-1' } } },
+        error: null,
+      })
+
+    it('si el usuario fue desactivado, cierra la sesión local, dice por qué y conserva las pendientes', async () => {
+      await guardarMeta('perfil', { ...REPORTANTE, finca: FINCA, area: null })
+      const pendientes = await contarPendientes()
+      conSesion()
+      // La política ya no le deja leer ni su propia fila.
+      conTablas({ usuario: null })
+
+      expect(await revisarSesion()).toEqual({ perfil: null, desactivado: true })
+      expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
+      expect(await leerMeta('perfil')).toBeUndefined()
+      expect(await contarPendientes()).toBe(pendientes)
+    })
+
+    it('si le cambiaron el rol y el alcance, entrega el perfil nuevo y lo guarda', async () => {
+      await guardarMeta('perfil', { ...REPORTANTE, finca: FINCA, area: null })
+      conSesion()
+      conTablas({ usuario: { ...REPORTANTE, rol_id: 2, finca_id: null, area_id: 'area-m' } })
+
+      const { perfil, desactivado } = await revisarSesion()
+
+      expect(desactivado).toBe(false)
+      expect(perfil).toMatchObject({ rol_id: 2, finca_id: null, area: AREAS[0] })
+      expect((await leerMeta('perfil')).rol_id).toBe(2)
+    })
+
+    it('sin sesión no hay perfil, y no es porque lo hayan desactivado', async () => {
+      supabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null })
+
+      expect(await revisarSesion()).toEqual({ perfil: null, desactivado: false })
+    })
+
+    it('RNF-10: sin red sigue con el perfil guardado, sin cerrar nada', async () => {
+      const guardado = { ...REPORTANTE, finca: FINCA, area: null }
+      await guardarMeta('perfil', guardado)
+      conConexion(false)
+
+      expect(await revisarSesion()).toEqual({ perfil: guardado, desactivado: false })
+      expect(supabase.auth.signOut).not.toHaveBeenCalled()
     })
   })
 

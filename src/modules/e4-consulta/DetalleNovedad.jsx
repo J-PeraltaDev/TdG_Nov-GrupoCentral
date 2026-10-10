@@ -60,6 +60,7 @@ const VOLVER = {
   '/escaladas': 'Volver a las escaladas',
   '/historial': 'Volver al historial',
   '/panel': 'Volver al panel',
+  '/usuarios': 'Volver a usuarios',
 }
 
 /** Mientras está en manos del área, el detalle dice hace cuánto se registró y quién la tomó. */

@@ -9,6 +9,7 @@ import {
   formatearFechaSinHora,
   formatearFechaYSemana,
   formatearHora,
+  formatearUltimoIngreso,
   hoyEnColombia,
   inicioDelMesEnColombia,
   semanaDelAnio,
@@ -156,6 +157,32 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     expect(new Date(inicioDelMesEnColombia('2026-10-09T15:00:00Z')).toISOString()).toBe(
       '2026-10-01T05:00:00.000Z',
     )
+  })
+
+  it('RF-03: el último ingreso se escribe como en Figma (pantalla 28)', () => {
+    // 8:05 a. m. del 24 de septiembre de 2026 en Colombia.
+    const ahora = '2026-09-24T13:05:00Z'
+
+    expect(formatearUltimoIngreso('2026-09-24T12:18:00Z', ahora)).toBe('hoy 7:18 a. m.')
+    expect(formatearUltimoIngreso('2026-09-23T20:00:00Z', ahora)).toBe('ayer')
+    expect(formatearUltimoIngreso('2026-09-22T15:00:00Z', ahora)).toBe('22 sep')
+    expect(formatearUltimoIngreso('2026-08-12T15:00:00Z', ahora)).toBe('12 ago')
+    expect(formatearUltimoIngreso('2025-08-12T15:00:00Z', ahora)).toBe('12 ago 2025')
+  })
+
+  it('RF-03: «hoy» y «ayer» son los días de Colombia, no los de UTC', () => {
+    // 11:30 p. m. del 23 en Colombia: en UTC ya es 24, pero para quien mira a las 8:05 a. m.
+    // del 24 fue ayer.
+    expect(formatearUltimoIngreso('2026-09-24T04:30:00Z', '2026-09-24T13:05:00Z')).toBe('ayer')
+    // 12:10 a. m. del 24 en Colombia, visto a las 11:50 p. m. del mismo día.
+    expect(formatearUltimoIngreso('2026-09-24T05:10:00Z', '2026-09-25T04:50:00Z')).toBe(
+      'hoy 12:10 a. m.',
+    )
+  })
+
+  it('RF-03: quien nunca ha ingresado lo dice', () => {
+    expect(formatearUltimoIngreso(null)).toBe('Nunca')
+    expect(formatearUltimoIngreso(undefined)).toBe('Nunca')
   })
 
   it('RF-14: sin argumento, «hoy» es el momento actual', () => {

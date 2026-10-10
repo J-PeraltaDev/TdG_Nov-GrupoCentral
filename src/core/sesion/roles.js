@@ -13,12 +13,22 @@ const NOMBRES = {
   [ROL.ADMINISTRADOR]: 'Administrador',
 }
 
-/** Pantalla de inicio de cada rol (SDD, Tabla 10). */
+/** Como los escribe Figma en la administración de usuarios (pantallas 28 y 29). */
+const NOMBRES_COMPLETOS = {
+  ...NOMBRES,
+  [ROL.APROBADOR_AREA]: 'Aprobador de área',
+}
+
+/**
+ * Pantalla de inicio de cada rol (SDD, Tabla 10). La del administrador es el panel de reportes,
+ * que llega en el Sprint 5: mientras tanto entra a Usuarios, que es lo que más usa
+ * (docs/decisiones-pendientes.md).
+ */
 const INICIO = {
   [ROL.REPORTANTE]: '/novedades',
   [ROL.APROBADOR_AREA]: '/bandeja',
   [ROL.DIRECTOR_AGRICULTURA]: '/escaladas',
-  [ROL.ADMINISTRADOR]: '/panel',
+  [ROL.ADMINISTRADOR]: '/usuarios',
 }
 
 /** @param {number | null | undefined} rolId */
@@ -43,6 +53,15 @@ export function rutaDeOrigen(estado, rolId) {
 /** @param {number | null | undefined} rolId */
 export function nombreDeRol(rolId) {
   return NOMBRES[rolId] ?? ''
+}
+
+/**
+ * El nombre del rol sin abreviar: «Aprobador de área», no «Aprobador».
+ *
+ * @param {number | null | undefined} rolId
+ */
+export function nombreCompletoDeRol(rolId) {
+  return NOMBRES_COMPLETOS[rolId] ?? ''
 }
 
 /**
