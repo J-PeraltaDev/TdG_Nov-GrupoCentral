@@ -46,6 +46,104 @@ export async function registrarNovedad({
   return data
 }
 
+/*
+ * Transiciones de atención (SDD, Tabla 21 y 6.1.3). El cliente no escribe en `novedad`: cada
+ * cambio de estado es una función del servidor, que verifica el rol y el alcance, deja el
+ * historial y crea los avisos. Todas devuelven la novedad actualizada y lanzan el error de
+ * Supabase si fallan; el mensaje del error es un código de la Tabla 22 (`core/errores`).
+ */
+
+/**
+ * Toma para atención una novedad asignada al área del aprobador (RF-10).
+ *
+ * @param {string} novedadId
+ * @returns {Promise<Novedad>}
+ */
+export async function tomarNovedad(novedadId) {
+  const { data, error } = await supabase.rpc('tomar_novedad', { p_novedad_id: novedadId })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Rechaza una novedad del área del aprobador. Es un estado final (RF-11).
+ *
+ * @param {string} novedadId
+ * @param {string} motivo Obligatorio.
+ * @returns {Promise<Novedad>}
+ */
+export async function rechazarNovedad(novedadId, motivo) {
+  const { data, error } = await supabase.rpc('rechazar_novedad', {
+    p_novedad_id: novedadId,
+    p_motivo: motivo,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Reasigna la novedad a otra área. Después de esto sale del alcance del aprobador (RF-17).
+ *
+ * @param {string} novedadId
+ * @param {string} areaDestinoId Activa y distinta de la actual.
+ * @param {string} motivo Obligatorio.
+ * @returns {Promise<Novedad>}
+ */
+export async function reasignarNovedad(novedadId, areaDestinoId, motivo) {
+  const { data, error } = await supabase.rpc('reasignar_novedad', {
+    p_novedad_id: novedadId,
+    p_area_destino_id: areaDestinoId,
+    p_motivo: motivo,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Escala la novedad al director de agricultura (RF-12).
+ *
+ * @param {string} novedadId
+ * @param {string} justificacion Obligatoria.
+ * @returns {Promise<Novedad>}
+ */
+export async function escalarNovedad(novedadId, justificacion) {
+  const { data, error } = await supabase.rpc('escalar_novedad', {
+    p_novedad_id: novedadId,
+    p_justificacion: justificacion,
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Registra la solución aplicada y clasifica la novedad por tipo de falla (RF-14). El tipo va
+ * por su `id` si ya existe, o por su nombre si es nuevo: el servidor lo normaliza y no crea
+ * duplicados (SDD 6.1.8).
+ *
+ * @param {string} novedadId
+ * @param {object} datos
+ * @param {string} datos.solucion
+ * @param {string} datos.fecha_ejecucion Fecha sin hora (`2026-09-24`), no posterior a hoy.
+ * @param {string} [datos.tipo_falla_id] Un tipo existente.
+ * @param {string} [datos.tipo_falla_nombre] El nombre de un tipo, cuando no se eligió uno.
+ * @returns {Promise<Novedad>}
+ */
+export async function registrarSolucion(
+  novedadId,
+  { solucion, fecha_ejecucion, tipo_falla_id, tipo_falla_nombre },
+) {
+  const { data, error } = await supabase.rpc('registrar_solucion', {
+    p_novedad_id: novedadId,
+    p_solucion: solucion,
+    p_fecha_ejecucion: fecha_ejecucion,
+    ...(tipo_falla_id
+      ? { p_tipo_falla_id: tipo_falla_id }
+      : { p_tipo_falla_nombre: tipo_falla_nombre }),
+  })
+  if (error) throw error
+  return data
+}
+
 /**
  * Página de novedades del alcance del usuario, de la más reciente a la más antigua. Las
  * políticas de la base de datos limitan el resultado: el reportante solo recibe las de su
