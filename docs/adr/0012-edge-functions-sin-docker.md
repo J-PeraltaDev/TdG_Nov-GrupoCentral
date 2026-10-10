@@ -58,8 +58,11 @@ una función en el equipo antes de desplegarla.
 - A un origen de la aplicación se le devuelve su origen; a uno ajeno, nada.
 - Sin token, o con uno inventado, `gestionar-usuario` responde 401 antes de ejecutar el código.
 
-**Falta comprobar** que con el token de un administrador la función lo reconoce y que con el de
-otro rol responde 403: hay que ingresar con un usuario de prueba.
+- Con la sesión del administrador de prueba, `gestionar-usuario` lo reconoce: una solicitud
+  incompleta responde 400 con sus campos y una válida, 501 (`NO_IMPLEMENTADO`, mientras dure el
+  contrato). Con la sesión de un reportante responde 403 `SIN_PERMISO` en los dos casos, sin decir
+  qué campos faltan. «staging» firma los tokens con una clave asimétrica (ES256) y
+  `auth.getClaims` los verifica sin problema.
 
 ## Consecuencias
 
