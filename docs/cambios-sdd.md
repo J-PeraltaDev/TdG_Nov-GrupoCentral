@@ -14,6 +14,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                 | Propuesto |
 | 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA` | Propuesto |
 | 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                   | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                        | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -169,3 +170,45 @@ del Sprint 2), igual al de la descripción de la novedad:
 **Texto propuesto (parámetros configurables):**
 
 > Longitud máxima del motivo, la justificación, la observación y la solución: 500 caracteres.
+
+## 9 · Tipos de falla y fecha de ejecución: lo que el SDD deja abierto (S2)
+
+**Sección:** SDD 6.1.8 (algoritmo `resolver_tipo` y sugerencias) y 6.1.3, Tabla 30 (fila
+`registrar_solucion`).
+
+**Qué pasa.** Al implementar `registrar_solucion` y `sugerir_tipos_falla` hubo que precisar cuatro
+cosas que el SDD no fija. Ninguna cambia el diseño.
+
+1. **Cadena de fusiones** (decisión 21 del plan). El algoritmo dice que, si el nombre corresponde a
+   un tipo fusionado, se usa el destino de la última fusión. Ese destino pudo fusionarse después en
+   otro tipo: se sigue la cadena hasta llegar a un tipo activo. Si la cadena termina en un tipo
+   desactivado, responde `TIPO_FALLA_INVALIDO`.
+2. **«Hoy» es el día en Colombia.** La Tabla 30 pide que la fecha de ejecución no sea posterior a la
+   actual. El servidor está en UTC: después de las 7 p. m. en Colombia su fecha ya es la de mañana y
+   dejaría pasar una fecha futura. La función compara contra la fecha de `America/Bogota`, y el
+   cliente calcula su «hoy» de la misma manera.
+3. **Permisos de `sugerir_tipos_falla`** (decisión 6 del plan). Es `security definer` y verifica que
+   quien la llama sea un aprobador o un administrador activo (si no, `SIN_PERMISO`). Así la cantidad
+   de novedades de cada tipo es la de todo el sistema, que es lo que orienta hacia el tipo más
+   usado; con los permisos de quien consulta, un aprobador solo contaría las de su área. Sin texto
+   devuelve los ocho tipos más usados.
+4. **Orden de las guardas de `registrar_solucion`.** Primero lo que falta (`DATO_OBLIGATORIO`:
+   solución, fecha o tipo), después la fecha (`FECHA_INVALIDA`) y por último el tipo
+   (`TIPO_FALLA_INVALIDO`), de modo que un intento con datos inválidos no llega a crear un tipo.
+
+**Texto propuesto (6.1.8, en `resolver_tipo`):**
+
+> SI t existe Y fue fusionado: RETORNAR el destino de su última fusión; si ese destino también fue
+> fusionado, se sigue la cadena hasta un tipo activo; si termina en un tipo desactivado, ERROR
+> TIPO_FALLA_INVALIDO
+
+**Texto propuesto (6.1.8, sugerencias):**
+
+> La función se ejecuta con los privilegios de su propietario y verifica que el usuario sea un
+> aprobador de área o un administrador activo. La cantidad de novedades de cada tipo es la de todas
+> las áreas. Sin texto, devuelve los ocho tipos más usados.
+
+**Texto propuesto (Tabla 30, validaciones de `registrar_solucion`):**
+
+> Solución no vacía; fecha de ejecución no posterior a la fecha actual en Colombia
+> (America/Bogota); tipo existente activo o nombre nuevo normalizado sin duplicado (sección 6.1.8)

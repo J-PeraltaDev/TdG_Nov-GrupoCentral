@@ -14,6 +14,7 @@ const Marco = lazy(() => import('./Marco.jsx'))
 const MisNovedades = lazy(() => import('../modules/e4-consulta/MisNovedades.jsx'))
 const Bandeja = lazy(() => import('../modules/e3-atencion/Bandeja.jsx'))
 const DetalleNovedad = lazy(() => import('../modules/e4-consulta/DetalleNovedad.jsx'))
+const RegistrarSolucion = lazy(() => import('../modules/e3-atencion/RegistrarSolucion.jsx'))
 const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNovedad.jsx'))
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 
@@ -131,11 +132,14 @@ export function Rutas() {
             </Route>
           </Route>
 
-          {/* Registro y constancia: en el teléfono van sin las barras de navegación. */}
+          {/* Pantallas de una sola tarea: en el teléfono van sin las barras de navegación. */}
           <Route element={<Marco enfocado />}>
             <Route element={<GuardianDeRol roles={[ROL.REPORTANTE]} />}>
               <Route path="/registrar" element={<RegistrarNovedad />} />
               <Route path="/registrar/recibida" element={<NovedadRecibida />} />
+            </Route>
+            <Route element={<GuardianDeRol roles={[ROL.APROBADOR_AREA]} />}>
+              <Route path="/novedades/:id/solucion" element={<RegistrarSolucion />} />
             </Route>
           </Route>
         </Route>

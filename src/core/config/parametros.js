@@ -15,6 +15,12 @@ export const DESCRIPCION_MAX_CARACTERES = 500
  */
 export const OBSERVACION_MAX_CARACTERES = 500
 
+/**
+ * Nombre de un tipo de falla nuevo (RF-14). Solo limita el campo: la base de datos no le pone
+ * máximo. Cabe en una etiqueta y en las tablas de los reportes.
+ */
+export const TIPO_FALLA_NOMBRE_MAX_CARACTERES = 60
+
 /** Código temporal de recuperación de contraseña (RF-02). Se usa en el Sprint 3. */
 export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
 

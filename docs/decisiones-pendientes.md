@@ -15,7 +15,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 185,7 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 186,1 KB de 200 KB                                           | El equipo         |
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
@@ -28,6 +28,8 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 | 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
 | 23  | Contraste del «Área actual» de la hoja 17  | Se dejó la opacidad de Figma; medido y con propuesta                 | El equipo (Figma) |
+| 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 25  | Tipos de falla de prueba en «staging»      | Agregados al seed; **falta** un `staging:reset` para cargarlos       | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -166,6 +168,15 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   «Reasignando…» mientras se ejecuta; «No hay otra área activa.» si el catálogo no ofrece destino;
   «No pudimos cargar las áreas. Revisa tu conexión.», como en el registro; para los lectores de
   pantalla, «pasa a» entre el área actual y el destino.
+- **Registrar solución (Sprint 2):** los errores de cada campo («Describe qué se hizo.», «Indica la
+  fecha de ejecución.», «Elige un tipo de falla o crea uno nuevo.»; Figma solo escribe el de la
+  fecha posterior a hoy); el aviso «Solución registrada. La finca debe confirmar el cierre.»; el
+  botón dice «Guardando…» mientras se ejecuta; en el tipo de falla, «Escribe para buscar», «Elige
+  uno de la lista o crea uno nuevo.», «Tipo nuevo», «1 novedad» (Figma solo muestra el plural) y
+  «No pudimos buscar los tipos. Revisa tu conexión.»; para los lectores de pantalla, «Cerrar sin
+  registrar la solución», «Descripción de la novedad:», «Borrar lo escrito», «Cambiar el tipo de
+  falla», «Tipos de falla» (la lista) y el resultado de la búsqueda («2 tipos coinciden.», «Ningún
+  tipo coincide. Puedes crear uno nuevo.»).
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 
@@ -195,6 +206,10 @@ del aprobador, que pasa a 2,8 KB. Con «Escalar novedad» (RF-12) el total no ca
 ese paquete pasa a 3,5 KB. Con «Reasignar novedad» (RF-17) tampoco (185,7 KB); el paquete de las
 acciones queda en 5,0 KB, y la presentación de las áreas (1,2 KB), que comparte con el registro,
 tampoco entra en la ruta de ingreso.
+
+Con «Registrar solución» (RF-14), medido el 9 oct 2026: ≈ 186,1 KB (JavaScript 149,3 KB, CSS
+7,8 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 13,9 KB. La pantalla 18
+va en su propio paquete (6,0 KB), que solo descarga el aprobador cuando la abre.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -468,3 +483,50 @@ orden, la flecha y el texto «pasa a» para los lectores de pantalla dicen lo mi
 **Propuesta:** dejar la opacidad solo en el ícono y en el fondo de la tarjeta, y el texto con sus
 colores normales (`texto` y `texto-secundario` sobre `gris-100` pasan de 4,5:1). Es un cambio de
 una línea en `HojaReasignar.jsx`.
+
+## 24 · Detalles de la pantalla 18 (registrar solución, 18-B y 18-C)
+
+Lo que Figma no dibuja o deja abierto:
+
+- **Ruta propia.** La pantalla vive en `/novedades/:id/solucion`, sin las barras de navegación del
+  teléfono, como el registro. «Cerrar» vuelve al detalle. Si la novedad no admite la solución (no
+  está en atención ni aprobada, o es de otra área), la dirección lleva al detalle.
+- **En el escritorio** (decisión 4 del plan): una columna centrada dentro del marco, como el
+  registro, con el título en el contenido y «Cancelar» junto al botón.
+- **Fecha de ejecución** (decisión 16): es el campo de fecha del navegador, con hoy en Colombia por
+  defecto y como máximo. Por eso muestra la fecha como la escribe el dispositivo («09/10/2026») y
+  no «24 sep 2026», que es como la dibuja Figma. El mensaje de 18-B sí usa el formato de Figma.
+- **Contador en «¿Qué se hizo?»** (decisión 7): «0/500», aunque Figma no lo dibuja en este campo.
+- **Cuándo se valida.** «Marcar como resuelta» está siempre disponible; al pulsarlo se señala lo
+  que falta o la fecha que no puede ser, y el foco va al primer campo con error (CU-14 6a). La
+  misma pantalla resulta si el que rechaza la fecha es el servidor (`FECHA_INVALIDA`).
+- **Tipo de falla: hay que elegir.** No basta con escribir: se elige una sugerencia o «Crear tipo
+  nuevo». La lista va debajo del campo, como en Figma, y aparece desde la primera letra, después de
+  una espera de un cuarto de segundo. Enter elige la opción activa y nunca envía el formulario.
+- **«Crear tipo nuevo» deshabilitado** cuando hay una coincidencia exacta (CU-14 5a). El aviso «Ya
+  existe…» solo sale si lo escrito no es idéntico al nombre del tipo; si es idéntico, sobra.
+- **Tipo elegido.** Se muestra como en 18-C, con su cantidad de novedades (o «Tipo nuevo»), y con
+  un botón para cambiarlo, que Figma no dibuja.
+- **Nombre de un tipo nuevo.** El campo admite hasta 60 caracteres
+  (`TIPO_FALLA_NOMBRE_MAX_CARACTERES`); la base de datos no le pone máximo.
+- **18-C.** El recuadro muestra la última aprobación del director; si no dejó observación, va sin
+  las comillas. Hasta el Sprint 3 la aplicación no tiene cómo aprobar un escalamiento: está
+  cubierto con pruebas unitarias y con pgTAP, y su prueba de extremo a extremo queda para entonces.
+- **Después de registrar** (decisión 9): se vuelve al detalle, ya resuelto y sin acciones para el
+  aprobador, con el aviso «Solución registrada. La finca debe confirmar el cierre.». Si otra
+  persona cambió el estado antes, se vuelve al detalle con «La novedad cambió de estado.».
+- **Vista previa de la bandeja (12).** «Registrar solución» para una novedad en atención o aprobada;
+  «Tomar para atención» para una asignada.
+
+## 25 · Tipos de falla de prueba en «staging»
+
+`supabase/seed.sql` trae ahora cuatro tipos de falla de prueba («Biométrico», «Puentes y pasos»,
+«Torniquetes» y «Red e internet»), creados por el administrador de prueba, para que el
+autocompletado de la pantalla 18 tenga qué sugerir. El seed solo se carga con `npm run
+staging:reset`, que borra los datos de «staging»: **no se corrió**, a la espera de que el equipo lo
+autorice. Mientras tanto «staging» no tiene esos cuatro tipos, pero la pantalla funciona igual:
+quien registra una solución crea el tipo que necesite.
+
+Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
+…») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
+`staging:reset`.

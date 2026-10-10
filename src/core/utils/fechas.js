@@ -132,6 +132,18 @@ export function esMismoDiaEnColombia(fecha, otra = Date.now()) {
 }
 
 /**
+ * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
+ * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
+ * mañana en UTC.
+ *
+ * @param {Date | string | number} [ahora]
+ */
+export function hoyEnColombia(ahora = Date.now()) {
+  const { anio, mes, dia } = enColombia(ahora)
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+}
+
+/**
  * Tiempo transcurrido, en corto: «ahora», «hace 5 min», «hace 3 h», «hace 2 d».
  *
  * @param {Date | string | number} fecha

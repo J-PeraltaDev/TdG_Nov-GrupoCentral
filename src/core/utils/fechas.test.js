@@ -9,6 +9,7 @@ import {
   formatearFechaSinHora,
   formatearFechaYSemana,
   formatearHora,
+  hoyEnColombia,
   semanaDelAnio,
   tiempoTranscurrido,
 } from './fechas.js'
@@ -130,5 +131,28 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     expect(esMismoDiaEnColombia('2026-09-25T04:30:00Z', '2026-09-24T13:00:00Z')).toBe(true)
     expect(esMismoDiaEnColombia('2026-09-25T05:30:00Z', '2026-09-24T13:00:00Z')).toBe(false)
     expect(esMismoDiaEnColombia('2026-09-24T13:00:00Z', '2025-09-24T13:00:00Z')).toBe(false)
+  })
+
+  it('RF-14: «hoy» es el día de Colombia, también cuando en UTC ya es mañana', () => {
+    // 11:00 p. m. del 24 de septiembre en Colombia son las 4:00 a. m. del 25 en UTC.
+    expect(hoyEnColombia('2026-09-25T04:00:00Z')).toBe('2026-09-24')
+    // La medianoche de Colombia son las 5:00 a. m. en UTC.
+    expect(hoyEnColombia('2026-09-25T04:59:59Z')).toBe('2026-09-24')
+    expect(hoyEnColombia('2026-09-25T05:00:00Z')).toBe('2026-09-25')
+  })
+
+  it('RF-14: «hoy» va como AAAA-MM-DD, con ceros, que es lo que espera un campo de fecha', () => {
+    expect(hoyEnColombia('2026-01-05T15:00:00Z')).toBe('2026-01-05')
+    // El último día del año en Colombia, cuando en UTC ya empezó el siguiente.
+    expect(hoyEnColombia('2027-01-01T03:00:00Z')).toBe('2026-12-31')
+  })
+
+  it('RF-14: sin argumento, «hoy» es el momento actual', () => {
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-09-25T04:10:00Z') })
+    try {
+      expect(hoyEnColombia()).toBe('2026-09-24')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

@@ -542,16 +542,31 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
     expect(listarBandeja).toHaveBeenCalledTimes(2)
   })
 
-  it('RF-18 / CU-18 5: la vista previa solo ofrece tomar las asignadas', async () => {
+  it('RF-14 / CU-14 1: la vista previa de una aprobada ofrece registrar la solución, no tomarla', async () => {
     conBandeja()
     abrir()
     const [, segunda] = await filas()
 
-    // La segunda es una aprobada: su acción (registrar la solución) llega con su historia.
     await userEvent.click(within(segunda).getByRole('button', { name: 'NOV-0147' }))
 
     const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0147' }))
+    expect(vista.getByRole('link', { name: 'Registrar solución' })).toHaveAttribute(
+      'href',
+      '/novedades/n-147/solucion',
+    )
     expect(vista.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('RF-14: la vista previa de una novedad en atención también lleva a registrar la solución', async () => {
+    conBandeja()
+    abrir('/bandeja?pestana=en_atencion')
+    await filas()
+
+    const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0150' }))
+    expect(vista.getByRole('link', { name: 'Registrar solución' })).toHaveAttribute(
+      'href',
+      '/novedades/n-150/solucion',
+    )
   })
 
   it('RF-25 (14-C): si se pierde la conexión al tomarla, lo dice y deja reintentar', async () => {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarFincas } from '../../core/supabase/repositorios/catalogos.js'
@@ -21,6 +21,7 @@ import iconoError from '../../core/ui/iconos/error.svg'
 import iconoDesplegar from '../../core/ui/iconos/expand_more.svg'
 import iconoEnEspera from '../../core/ui/iconos/hourglass_top.svg'
 import iconoBandeja from '../../core/ui/iconos/inbox.svg'
+import iconoResolver from '../../core/ui/iconos/task_alt.svg'
 import { Pestanas } from '../../core/ui/Pestanas.jsx'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
@@ -357,6 +358,15 @@ export default function Bandeja() {
                     >
                       {enCurso ? 'Tomando…' : 'Tomar para atención'}
                     </Boton>
+                  ) : elegida.estado === 'en_atencion' || elegida.estado === 'aprobada' ? (
+                    <Link
+                      to={`/novedades/${elegida.id}/solucion`}
+                      state={{ origen }}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-control bg-primario px-4 text-etiqueta-fuerte whitespace-nowrap text-sobre-primario hover:bg-primario-hover"
+                    >
+                      <Icono src={iconoResolver} tamano={20} />
+                      Registrar solución
+                    </Link>
                   ) : null
                 }
               />
