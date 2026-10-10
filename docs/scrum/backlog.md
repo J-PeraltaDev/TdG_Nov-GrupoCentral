@@ -219,7 +219,7 @@ Pantallas de Figma (SDD, Tabla 36: 09, 15–18, 20, 22)
 - **CU-09** · Actores: Aprobador de área (primario).
 - **Precondición:** El aprobador de área inició sesión.
 - **Postcondición:** El aprobador conoce las novedades pendientes de su área.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -248,7 +248,7 @@ Pantallas de Figma (SDD, Tabla 36: 11, 12)
 - **CU-10** · Actores: Aprobador de área (primario).
 - **Precondición:** La novedad está en estado “asignada”, pertenece al área del aprobador y hay conexión.
 - **Postcondición:** La novedad queda “en atención” a cargo del área.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -274,7 +274,7 @@ Pantallas de Figma (SDD, Tabla 36: 13)
 - **CU-11** · Actores: Aprobador de área (primario).
 - **Precondición:** La novedad está “asignada” o “en atención” en el área del aprobador y hay conexión.
 - **Postcondición:** La novedad queda “rechazada” con su motivo registrado; el caso termina en ese estado final.
-- **Puntos:** por estimar
+- **Puntos:** 3
 
 Criterios de aceptación · curso normal
 
@@ -306,7 +306,7 @@ Pantallas de Figma (SDD, Tabla 36: 13, 14, 16)
 - **CU-12** · Actores: Aprobador de área (primario); Director de agricultura (receptor).
 - **Precondición:** La novedad está “en atención” en el área del aprobador y hay conexión.
 - **Postcondición:** La novedad queda “escalada” y visible para el director de agricultura.
-- **Puntos:** por estimar
+- **Puntos:** 3
 
 Criterios de aceptación · curso normal
 
@@ -336,7 +336,7 @@ Pantallas de Figma (SDD, Tabla 36: 14, 15)
 - **CU-14** · Actores: Aprobador de área (primario).
 - **Precondición:** La novedad está “en atención” o “aprobada” a cargo del área del aprobador y hay conexión.
 - **Postcondición:** La novedad queda “resuelta” con la solución y el tipo de falla registrados, en espera de la confirmación del reportante.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -371,7 +371,7 @@ Pantallas de Figma (SDD, Tabla 36: 14, 18)
 - **CU-17** · Actores: Aprobador de área (primario); aprobador de la otra área (receptor).
 - **Precondición:** La novedad está “asignada” o “en atención” en el área del aprobador y hay conexión.
 - **Postcondición:** La novedad queda en la bandeja de la otra área, en estado “asignada”.
-- **Puntos:** por estimar
+- **Puntos:** 3
 
 Criterios de aceptación · curso normal
 
@@ -403,7 +403,7 @@ Pantallas de Figma (SDD, Tabla 36: 13, 14, 17)
 - **CU-18** · Actores: Usuario (primario): reportante, aprobador de área, director de agricultura o administrador.
 - **Precondición:** El usuario inició sesión y tiene permiso sobre la novedad.
 - **Postcondición:** El usuario conoce el estado y el historial completo de la novedad.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
