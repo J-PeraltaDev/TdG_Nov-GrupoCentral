@@ -11,10 +11,10 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** Sprint 2 (atención en primera instancia: bandeja del área, detalle con línea de
-tiempo, y tomar, rechazar, escalar, reasignar y registrar la solución con su tipo de falla), en
-revisión. En `main` está el Sprint 1 (ingreso por rol, registro de la novedad con su código
-`NOV-####` y lista de novedades de la finca). El avance por sprint está en
+**Estado:** Sprint 3 (el director aprueba o rechaza lo escalado, la finca confirma el cierre o
+dice que la falla persiste, y el administrador gestiona usuarios, fincas y la recuperación de
+contraseñas), ya en `main` junto con los Sprints 1 y 2. Producción («PROYECTO») tiene sus
+migraciones y sus dos Edge Functions desde el 10 oct 2026. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
@@ -132,11 +132,23 @@ prueba y nunca llegan a producción.
 | `npm run staging:types`                  | Tipos de la base de datos para el autocompletado                |
 | `npm run staging:advisors`               | Asesor de seguridad y rendimiento de Supabase                   |
 | `npm run staging:usuarios`               | Pone tu contraseña a los usuarios de prueba                     |
+| `npm run staging:functions`              | Despliega las Edge Functions en «staging», sin Docker           |
 | `npm run db:*` · `test:db`               | Lo mismo con Supabase local; necesitan Docker (los usa el CI)   |
+
+**Edge Functions.** Hay dos, en `supabase/functions/`: `gestionar-usuario` (crea, actualiza,
+desactiva y reactiva cuentas; exige la sesión de un administrador) y `restablecer-contrasena`
+(valida el código temporal y fija la contraseña nueva; no exige sesión). Son lo único que usa la
+clave de servicio, que la plataforma les inyecta: no está en el repositorio ni en el cliente. Su
+lógica va en módulos `.js` puros, que se prueban con `npm run test` como el resto; `index.ts` solo
+arma las dependencias reales, y el CI lo revisa con `deno check`. Después de cambiar una:
+`npm run staging:functions` (con un nombre despliega solo esa) y una prueba contra «staging». Las
+razones están en [`docs/adr/0012`](docs/adr/0012-edge-functions-sin-docker.md).
 
 **Pruebas de extremo a extremo.** Corren contra el build real y contra «staging». Las que
 necesitan ingresar usan `CLAVE_USUARIOS_DE_PRUEBA` y se omiten si falta. Cada corrida deja
-novedades de prueba en «staging».
+novedades de prueba en «staging». Las que cambian una contraseña o desactivan algo lo hacen con
+usuarios (`e2e-…@novedades.test`) y fincas («Finca e2e …») que crea la propia prueba, y los dejan
+desactivados; a los del seed no les cambian nada. Todo eso se va con un `staging:reset`.
 
 Auth limita los ingresos por minuto, así que cada usuario de prueba ingresa una sola vez al
 comienzo de la corrida (`e2e/sesiones.setup.js`) y las pruebas reutilizan su sesión con
@@ -188,6 +200,9 @@ La Definition of Ready y la Definition of Done están en
   `supabase db push`, solo al cierre del sprint, después de la review y con el visto bueno del
   equipo. Configuración de Auth en
   [`docs/despliegue/supabase-auth.md`](docs/despliegue/supabase-auth.md).
+- **Edge Functions:** a «PROYECTO» también llegan al cierre del sprint, después de las
+  migraciones y con el visto bueno del equipo. Las despliega una persona; el comando está en la
+  misma guía.
 
 ## Licencias de terceros
 
