@@ -142,6 +142,9 @@ En la ventana del administrador, «Fincas».
   desactivando la cuenta de la demo mientras tiene la sesión abierta.
 - **Quien decide es la base de datos, no la pantalla:** el director no puede generar códigos ni
   ver las solicitudes aunque conozca la dirección, y sin sesión no se puede leer nada.
+- **En el teléfono,** el director y el administrador abren «Cuenta» desde su avatar, arriba a la
+  derecha: su barra inferior no la trae. Ahí está «Cerrar sesión» y, para el administrador,
+  Fincas, Tipos de falla y Recuperación de contraseñas.
 - **Cada decisión quedó en el historial,** que no se edita ni se borra, y generó su aviso. La
   pantalla de avisos llega en el Sprint 5.
 
@@ -157,12 +160,10 @@ En la ventana del administrador, «Fincas».
    razones que la finca no debería leer?
 2. Cuando la falla persiste, la novedad vuelve a quien la tenía. ¿O debería volver a la bandeja,
    para que la tome cualquiera del área?
-3. La contraseña inicial la entrega el administrador y la persona la puede seguir usando. ¿Se
-   obliga a cambiarla en el primer ingreso?
-4. El código de recuperación dura 30 minutos y admite cinco intentos. ¿Alcanza, pensando en que
+3. El código de recuperación dura 30 minutos y admite cinco intentos. ¿Alcanza, pensando en que
    se entrega por teléfono?
-5. ¿Quiénes van a ser administradores, además de la cuenta inicial?
-6. La política de tratamiento de datos es un borrador: ¿quién la revisa en la empresa y qué datos
+4. ¿Quiénes van a ser administradores, además de la cuenta inicial?
+5. La política de tratamiento de datos es un borrador: ¿quién la revisa en la empresa y qué datos
    de contacto del responsable van?
 
 ## Si algo falla en la demo

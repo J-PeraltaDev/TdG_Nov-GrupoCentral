@@ -35,7 +35,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 29  | Detalles de las pantallas 30 y 30-B         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 32  | Nombres de ejemplo de Figma en las capturas | Se dejaron; desde RF-04 las capturas usan nombres inventados         | El equipo         |
+| 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -843,7 +843,7 @@ del plan del Sprint 3:
 - **Cuánto protege una contraseña inicial así.** Son 32 palabras por 10 000 números: unas 320 000
   combinaciones. Sirve para la entrega, no para durar. Hoy el usuario no tiene cómo cambiarla por
   su cuenta (el texto de Figma dice «podrá cambiarla después»): la cambia por el caso de
-  recuperación (RF-02). **Para decidir:** si conviene obligar el cambio en el primer ingreso.
+  recuperación (RF-02). **Decidido el 10 oct 2026:** no se obliga a cambiarla en el primer ingreso.
 - **El rol decide qué más se pregunta.** Reportante: «Finca asignada», entre las activas, con su
   razón social. Aprobador de área: «Área», como en 29-B. Director y administrador: nada más. Al
   cambiar de rol se borra lo que ya no aplica.
@@ -973,7 +973,6 @@ Pero esos nombres de ejemplo sí quedaron en algunos archivos:
 No hay en el repositorio NIT, códigos ni ningún dato de la lista oficial, y esos nombres ya son
 visibles en ramas publicadas.
 
-**Para decidir:** si alguno de esos nombres es real y no debe estar en un repositorio público. Si
-es así, se repiten las capturas con nombres inventados y se cambian las tres pruebas (es una hora
-de trabajo); lo ya publicado seguiría en el historial de git, y quitarlo de ahí es otra
-conversación. Si son solo ejemplos, se dejan.
+**Decidido el 10 oct 2026:** algunos de esos nombres son reales y no importa. Se dejan como
+están, en las capturas y en las pruebas, y no hace falta repetir nada. Lo que sigue fuera del
+repositorio es la lista oficial (punto 1).
