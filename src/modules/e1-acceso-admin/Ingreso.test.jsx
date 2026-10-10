@@ -5,14 +5,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import { Ingreso } from './Ingreso.jsx'
 
-function abrir(ingresar = vi.fn(), sesion = {}) {
+function abrir(ingresar = vi.fn(), sesion = {}, estado = null) {
   return pintarConSesion(
     <Routes>
       <Route path="/ingresar" element={<Ingreso />} />
       <Route path="/novedades" element={<h1>Mis novedades</h1>} />
       <Route path="/bandeja" element={<h1>Bandeja del área</h1>} />
     </Routes>,
-    { ruta: '/ingresar', sesion: { ingresar, ...sesion } },
+    { ruta: { pathname: '/ingresar', state: estado }, sesion: { ingresar, ...sesion } },
   )
 }
 
@@ -110,6 +110,20 @@ describe('Pantalla 01 · Iniciar sesión (RF-01 / CU-01)', () => {
     expect(screen.getByLabelText('Contraseña')).not.toHaveAttribute('aria-invalid')
   })
 
+  it('RF-01 / CU-01 4a: si Auth frena los intentos, dice que hay que esperar y deja el formulario como está', async () => {
+    abrir(vi.fn().mockResolvedValue({ ok: false, motivo: 'demasiados_intentos' }))
+
+    await llenarYEnviar()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Demasiados intentos. Espera unos minutos e intenta de nuevo.',
+    )
+    // No es la contraseña lo que está mal: no se señala el campo.
+    expect(screen.getByLabelText('Contraseña')).not.toHaveAttribute('aria-invalid')
+    expect(screen.getByLabelText('Correo')).toHaveValue('reportante.01@novedades.test')
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeEnabled()
+  })
+
   it('RF-01 / CU-01 2a (01-D): sin conexión explica que el primer ingreso necesita internet y bloquea el botón', () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
     const ingresar = vi.fn()
@@ -193,5 +207,47 @@ describe('Pantalla 01-C · La sesión se cerró porque desactivaron al usuario (
     abrir()
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('Pantalla 01-E · Contraseña actualizada (RF-02 / CU-02 10)', () => {
+  const AVISO = 'Contraseña actualizada. Ya puedes ingresar.'
+  const DESDE_RECUPERAR = { contrasenaActualizada: true }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('RF-02 / CU-02 10: al volver de crear la contraseña, lo confirma sobre el formulario', () => {
+    abrir(vi.fn(), {}, DESDE_RECUPERAR)
+
+    const aviso = screen.getByText(AVISO).closest('[data-aviso]')
+    expect(aviso).toHaveAttribute('data-aviso', 'exito')
+    expect(aviso).toHaveAttribute('role', 'status')
+    expect(screen.getByLabelText('Correo')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeEnabled()
+  })
+
+  it('RF-02 / CU-02 10: ingresa con la contraseña nueva y va a su inicio', async () => {
+    abrir(vi.fn().mockResolvedValue({ ok: true, perfil: PERFILES.reportante }), {}, DESDE_RECUPERAR)
+
+    await llenarYEnviar()
+
+    expect(await screen.findByRole('heading', { name: 'Mis novedades' })).toBeVisible()
+  })
+
+  it('RF-01: si el siguiente intento falla, ese resultado reemplaza el aviso', async () => {
+    abrir(vi.fn().mockResolvedValue({ ok: false, motivo: 'credenciales' }), {}, DESDE_RECUPERAR)
+
+    await llenarYEnviar()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Correo o contraseña incorrectos')
+    expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+  })
+
+  it('RF-01: quien llega al ingreso por otro camino no ve ese aviso', () => {
+    abrir()
+
+    expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
   })
 })

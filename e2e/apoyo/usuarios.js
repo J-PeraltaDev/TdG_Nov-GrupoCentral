@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -224,4 +225,78 @@ export async function llamarALaApi(page, funcion, parametros) {
   )
   if (estado >= 400) throw new Error(`${funcion} respondió ${estado}: ${cuerpo?.message}`)
   return cuerpo
+}
+
+/**
+ * Llama a una Edge Function igual que lo haría la aplicación: con la clave publicable y, si la
+ * página ingresó, el token de su usuario. Sin sesión va solo la clave publicable, como en la
+ * recuperación de contraseña.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} funcion `gestionar-usuario` o `restablecer-contrasena`.
+ * @param {object} cuerpo
+ * @returns {Promise<{ estado: number, cuerpo: any }>}
+ */
+export function llamarAFuncion(page, funcion, cuerpo) {
+  return page.evaluate(
+    async ({ url, clave, nombre, solicitud }) => {
+      const guardada = Object.keys(localStorage).find((k) => /^sb-.+-auth-token$/.test(k))
+      const token = guardada ? JSON.parse(localStorage.getItem(guardada)).access_token : null
+      const respuesta = await fetch(`${url}/functions/v1/${nombre}`, {
+        method: 'POST',
+        headers: {
+          apikey: clave,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(solicitud),
+      })
+      return { estado: respuesta.status, cuerpo: await respuesta.json().catch(() => null) }
+    },
+    {
+      url: process.env.VITE_SUPABASE_URL,
+      clave: process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      nombre: funcion,
+      solicitud: cuerpo,
+    },
+  )
+}
+
+/**
+ * Crea un reportante propio de la prueba (`e2e-…@novedades.test`) con la sesión del
+ * administrador que tiene la página. Las pruebas que cambian una contraseña o desactivan a
+ * alguien lo hacen con un usuario así, nunca con los del seed. Un usuario no se puede borrar:
+ * la prueba lo deja desactivado con `desactivarUsuarioDePrueba`.
+ *
+ * @param {import('@playwright/test').Page} page Con la sesión del administrador.
+ * @param {string} marca Lo que distingue a este usuario: el proyecto y la hora.
+ * @returns {Promise<{ id: string, nombre: string, correo: string, contrasena: string }>}
+ */
+export async function crearUsuarioDePrueba(page, marca) {
+  const [finca] = await leerDeLaApi(
+    page,
+    `finca?select=id&nombre=eq.${encodeURIComponent('Finca de prueba 01')}`,
+  )
+  const nombre = `Usuario e2e ${marca}`
+  const correo = `e2e-${marca}@novedades.test`.toLowerCase()
+  // Al azar en cada corrida: no es la contraseña de nadie más ni queda escrita en ningún lado.
+  const contrasena = `Inicial-${randomInt(1000, 10_000)}`
+  const { estado, cuerpo } = await llamarAFuncion(page, 'gestionar-usuario', {
+    accion: 'crear',
+    nombre,
+    correo,
+    contrasena_inicial: contrasena,
+    rol_id: 1,
+    finca_id: finca.id,
+  })
+  if (estado !== 201) throw new Error(`No se creó el usuario de la prueba: ${estado}`)
+  return { id: cuerpo.usuario.id, nombre, correo, contrasena }
+}
+
+/**
+ * @param {import('@playwright/test').Page} page Con la sesión del administrador.
+ * @param {string} usuarioId
+ */
+export async function desactivarUsuarioDePrueba(page, usuarioId) {
+  await llamarAFuncion(page, 'gestionar-usuario', { accion: 'desactivar', usuario_id: usuarioId })
 }

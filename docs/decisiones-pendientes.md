@@ -15,13 +15,13 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 186,1 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                 | Medido: 188,3 KB de 200 KB                                           | El equipo         |
 | 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
 | 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 92 (más las 6 de preparación)       | El equipo         |
+| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
 | 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -34,6 +34,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 28  | Detalles de las pantallas 09, 09-B y 09-C  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 29  | Detalles de las pantallas 30 y 30-B        | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 30  | Detalles de las pantallas 28, 28-B y 29    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 31  | Detalles de las pantallas 02, 03 y 32      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -223,6 +224,22 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
   dicen «Guardando…» y «Desactivando…» mientras se ejecutan; en las tarjetas del teléfono,
   «Último ingreso: hoy 7:18 a. m.». Para los lectores de pantalla: «Editar {nombre}», «Desactivar
   {nombre}», «Reactivar {nombre}» y «Cerrar» (la equis del panel).
+- **Recuperación de contraseña (Sprint 3):** los errores de cada campo («Escribe un correo
+  válido.», «Escribe los seis dígitos del código.», «Usa mínimo 8 caracteres, con al menos una
+  letra y un número.», «Usa máximo 72 caracteres.» y «Las contraseñas no coinciden.»); «El código
+  no es válido. Revísalo; si sigue sin servir, pide uno nuevo.» (CU-02 9b, que Figma no dibuja);
+  sin conexión, «Necesitas internet para enviar la solicitud.» y «Necesitas internet para guardar
+  la contraseña.»; si el servidor falla, «No pudimos enviar la solicitud. Intenta de nuevo en un
+  momento.» y «No pudimos guardar la contraseña. Intenta de nuevo; si el código deja de servir,
+  pide uno nuevo.»; los botones dicen «Enviando…», «Guardando…» y «Generando…» mientras se
+  ejecutan. En la pantalla 32: los estados «Código generado», «Usada» y «Vencida» (Figma solo
+  escribe «Pendiente»); «Generar otro código»; «Copiado», «Código copiado.» y «No se pudo copiar.
+  Escríbelo o selecciónalo a mano.»; «Vence mañana a las…» cuando el código pasa de la
+  medianoche; «No hay solicitudes pendientes.» y «Todavía no hay solicitudes atendidas.»; en las
+  tarjetas del teléfono, «Solicitada hace 12 min». En el ingreso, «Demasiados intentos. Espera
+  unos minutos e intenta de nuevo.». Para los lectores de pantalla: «Volver al ingreso», «Volver
+  a recuperar contraseña», «Generar código para {nombre}», «Código: 4 8 2 7 1 9», «: cumplida» y
+  «: pendiente» en cada regla de la contraseña, y «, 2 solicitudes pendientes» en la insignia.
 - **Mensajes de error de la Tabla 22:** el SDD da la idea de cada uno; la redacción exacta está en
   `src/core/errores/traducir.js`.
 - **Códigos nuevos del Sprint 3:** «Este correo ya está registrado.» (el de Figma, pantalla 29),
@@ -260,6 +277,13 @@ tampoco entra en la ruta de ingreso.
 Con «Registrar solución» (RF-14), medido el 9 oct 2026: ≈ 186,1 KB (JavaScript 149,3 KB, CSS
 7,8 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 13,9 KB. La pantalla 18
 va en su propio paquete (6,0 KB), que solo descarga el aprobador cuando la abre.
+
+**Sprint 3, medido el 9 oct 2026 con «Recuperar contraseña» (RF-02):** ≈ 188,3 KB (JavaScript
+150,5 KB, CSS 8,8 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan unos 11,7 KB.
+Las pantallas del sprint van bajo demanda: la recuperación sin sesión no entra en el paquete del
+ingreso (02 pesa 3,1 KB; 03, 3,7 KB) y la pantalla 32 (4,2 KB) solo la descarga el
+administrador. En el paquete inicial entraron el aviso 01-E, el mensaje del límite de intentos y
+la relectura del perfil (RF-03): 1,2 KB de JavaScript en todo el sprint. El CSS sube 1,0 KB.
 
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
@@ -348,6 +372,9 @@ y `solicitar_recuperacion`. Los dos de Auth siguen igual. Y hay **uno de un tipo
 se puede ejecutar sin sesión, a propósito (`docs/adr/0013`). `consumir_codigo_recuperacion` no
 genera aviso: solo la ejecuta `service_role`.
 
+**Al 9 oct 2026 (cierre de RF-02, con las tres funciones de recuperación implementadas):** los
+mismos dieciséis. `private.solicitud_abierta` no genera aviso.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
@@ -397,10 +424,23 @@ el nombre, editar y desactivar una finca propia; el diálogo de una finca del se
 y el intento de un rol que no es el administrador), pasaron las 86, más las seis de preparación.
 Con las seis de CU-03 (el administrador crea un usuario, que ingresa; lo edita, lo desactiva y lo
 reactiva; el correo repetido y el aprobador sin área; y el intento de un rol que no es el
-administrador), **pasaron las 92, más las seis de preparación (98).**
+administrador), pasaron las 92, más las seis de preparación. Con las doce de CU-02 (el recorrido
+completo: la persona solicita, el administrador genera el código, ella crea su contraseña e
+ingresa con la nueva; el código incorrecto y el mismo código por segunda vez; el correo que no
+existe y el de un usuario desactivado; el formulario incompleto; y el intento de quien no es
+administrador), **pasaron las 104, más las seis de preparación (110).**
 
 Las de CU-03 ingresan cuatro veces por el formulario con el usuario que crean (dos formatos: ocho
-ingresos más por corrida). Sumados a los seis de preparación, siguen lejos del límite de Auth.
+ingresos más por corrida), y las de CU-02, dos (cuatro más). Sumados a los seis de preparación,
+siguen lejos del límite de Auth.
+
+**Una falla intermitente, sin resolver.** El 9 oct, en una de tres corridas completas falló una
+prueba de CU-11 en el escritorio (el rechazo de una novedad asignada), al recorrer todas las
+páginas de «Mis novedades» con «Ver más»; sola, y en las otras dos corridas, pasó. No toca nada de
+RF-02. La causa probable es que esa lista crece con cada corrida, porque las pruebas dejan sus
+novedades en «staging», y hay que recorrerla entera mientras otras pruebas registran más. Un
+`staging:reset` la vacía; si vuelve a fallar, conviene que la prueba busque su novedad sin
+recorrer toda la lista.
 
 Una aserción de CU-14 cambió con la decisión 21 C: la transición a «resuelta» lleva ahora la
 solución como observación, y el texto de la solución sale dos veces en el detalle (en su bloque y
@@ -413,12 +453,13 @@ CU-15 reutilizan uno de esos tipos y dejan sus novedades decididas, cerradas o d
 atención; las de CU-12 las dejan escaladas, y por eso la pantalla 19 de «staging» tiene varias
 páginas. Las de CU-04 crean una finca por corrida («Finca e2e …») y la dejan desactivada, para
 que no aparezca en los filtros de las demás pantallas. Las de CU-03 crean un usuario por corrida
-(`e2e-…@novedades.test`) y lo dejan desactivado: un usuario no se puede borrar.
+(`e2e-…@novedades.test`) y lo dejan desactivado: un usuario no se puede borrar. Las de CU-02
+crean dos, también desactivados al terminar, con sus solicitudes de recuperación; a los usuarios
+del seed no les cambian la contraseña ni el estado.
 
-**Para decidir en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
-pantalla muestra el mensaje general, «No pudimos iniciar tu sesión. Intenta de nuevo en un
-momento.». Le puede pasar a una persona que se equivoque varias veces seguidas con la contraseña;
-un mensaje propio, que diga que espere unos minutos, le serviría más.
+**Resuelto en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
+pantalla dice «Demasiados intentos. Espera unos minutos e intenta de nuevo.», sin señalar la
+contraseña. Antes mostraba el mensaje general.
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
@@ -835,3 +876,77 @@ del plan del Sprint 3:
   perfil: no puede ver nada, pero su correo queda ocupado y hay que borrarla desde el panel de
   Supabase. No ha pasado; queda anotado.
 - **Nombres de las pruebas y de las capturas.** Personas, fincas y razones sociales inventadas.
+
+## 31 · Detalles de las pantallas 02, 02-B, 03, 03-B, 01-E y 32 (recuperar contraseña)
+
+Lo que Figma no dibuja o deja abierto, resuelto con las decisiones 7 a 12, 27, 28 y 42 a 46 del
+plan del Sprint 3:
+
+- **En el escritorio** (decisión 46). Figma solo dibuja 01-E, 02 y 03 en el teléfono. En el
+  escritorio va la misma columna centrada del ingreso, con la barra superior a todo el ancho.
+- **02-B es la misma ruta que 02.** Al enviar, la pantalla cambia sin navegar: si se recarga,
+  vuelve al formulario. Dice siempre lo mismo, porque la aplicación no sabe si el correo existe
+  (CU-02 4a).
+- **El correo no va en la dirección.** De 02-B a 03, y de 03-B de vuelta a 02, viaja en el estado
+  de la navegación. Quien abre `/recuperar/codigo` directamente lo escribe.
+- **El código es un solo campo** con el aspecto de seis casillas (decisión 43): se puede pegar
+  completo, también como lo muestra la pantalla 32 («482 719»); el teclado del teléfono lo ofrece
+  si llegó por un mensaje, y un lector de pantalla anuncia un campo con su etiqueta, no seis sin
+  nombre. El cursor no se ve: la casilla donde cae el siguiente dígito lleva el borde del foco.
+- **Las reglas de la contraseña** (decisión 44). Figma las dibuja cumplidas. Sin cumplir llevan
+  un círculo vacío y, para quien no ve, dicen «pendiente»; cumplidas, el visto y «cumplida». Auth
+  solo exige ocho caracteres: la letra y el número los exigen la pantalla y la función.
+- **El ojo muestra las dos contraseñas,** la nueva y su confirmación.
+- **Código incorrecto y código vencido** (decisión 45). El incorrecto (9b) se dice bajo el campo y
+  se puede corregir; cada intento cuenta, y al quinto el código deja de servir. El vencido (9a,
+  03-B) es también el ya usado y el que agotó sus intentos: la persona no tiene que saber cuál de
+  los tres. El aviso de 03-B se va al cambiar el código.
+- **Si el servidor falla al guardar,** el mensaje avisa que el código pudo quedar gastado: se
+  gasta antes de cambiar la contraseña, para que nunca sirva dos veces.
+- **01-E** se muestra una vez, al volver de 03; el resultado del siguiente intento de ingreso lo
+  reemplaza.
+- **Las dos pantallas requieren conexión** (RF-02): sin ella el botón queda deshabilitado, con su
+  explicación.
+- **Los estados de la pantalla 32** (decisión 42). El SDD nombra cuatro y Figma dibuja uno.
+  «Pendientes» reúne las que esperan un código («Pendiente») y las que tienen uno vigente
+  («Código generado», con «Generar otro código», que deja sin efecto el anterior). «Atendidas»
+  reúne las usadas y las vencidas, sin acción. Es «Vencida» la que pasó de los 30 minutos, la que
+  agotó sus cinco intentos y la de un usuario al que desactivaron: ninguna se reabre, la persona
+  pide otra desde 02. El estado no se guarda: se deriva, y la pantalla lo recalcula cada 30
+  segundos.
+- **El número de la pestaña y el de la insignia no son el mismo.** «Pendientes (N)» cuenta las
+  filas de la pestaña. La insignia del menú cuenta solo las que esperan un código, que son las
+  que le piden algo al administrador.
+- **La insignia** (decisión 28). Una solicitud no genera un aviso, porque no es de una novedad:
+  la insignia es la única señal de que llegó. Se cuenta al entrar, cada minuto con la aplicación
+  a la vista y con conexión, y cuando la pantalla 32 cambia algo. En el teléfono va en «Cuenta»,
+  junto al nombre de la pantalla.
+- **El diálogo del código.** El ícono va sobre el título, como en los demás diálogos de la
+  aplicación (Figma lo pone al lado). No se cierra con un clic en el fondo: el código no se puede
+  volver a mostrar. Se cierra con «Listo» o con Escape; si se cierra sin entregarlo, queda
+  «Generar otro código». En el teléfono el código y «Copiar» van uno sobre otro, porque no caben
+  en un renglón. «Copiar» lo deja en el portapapeles sin el espacio.
+- **El tamaño del código** (32 px) sale de la altura que tiene en Figma (40 px). No es uno de los
+  doce estilos de texto: **falta confirmarlo.**
+- **Dónde vive el código.** En la memoria de la pantalla, mientras el diálogo está abierto. No se
+  guarda en el navegador ni se escribe en ningún registro; en la base de datos queda su resumen.
+- **En el teléfono** (decisión 24), la tabla de 32 pasa a tarjetas, con el botón a todo el ancho.
+
+**Para decidir:**
+
+- **El administrador no tiene «Cuenta» en la barra del teléfono.** Su barra inferior trae Panel,
+  Historial, Usuarios y Avisos (SDD, Tabla 10); a «Cuenta», y desde ahí a Fincas, Tipos de falla
+  y Recuperación de contraseñas, llega solo por la dirección. En el escritorio no pasa. Viene del
+  Sprint 1 (el menú de RF-01) y se notó al probar 30 y 32 en el teléfono: falta decidir por dónde entra (por ejemplo,
+  el nombre de la barra superior).
+- **Quién limita las solicitudes.** `solicitar_recuperacion` se ejecuta sin sesión. Solo puede
+  dejar una solicitud abierta por usuario, así que no llena la tabla, pero alguien que conozca
+  los correos puede hacer que el administrador vea solicitudes que nadie pidió. Por eso el diálogo
+  dice «Verifica la identidad de la persona antes de entregarlo». Si llega a ser un problema, el
+  límite por dirección va en la plataforma (`docs/adr/0013`).
+- **Bloquear el código de otro.** Quien conozca un correo puede gastar los cinco intentos del
+  código de esa persona antes de que lo use. No obtiene nada: la persona pide otro. Es el costo
+  de limitar los intentos; sin el límite, un código de seis dígitos se adivina.
+- **Las sesiones abiertas.** En la prueba contra «staging», después del cambio la sesión anterior
+  del usuario ya no se pudo renovar, pero su token de acceso siguió sirviendo hasta vencer (una
+  hora como máximo). Es el comportamiento de Auth; no se cambió.

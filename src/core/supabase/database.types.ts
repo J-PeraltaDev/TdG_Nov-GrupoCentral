@@ -453,6 +453,7 @@ export type Database = {
           creada_en: string
           expira_en: string | null
           id: string
+          intentos_fallidos: number
           usado: boolean
           usuario_id: string
         }
@@ -461,6 +462,7 @@ export type Database = {
           creada_en?: string
           expira_en?: string | null
           id?: string
+          intentos_fallidos?: number
           usado?: boolean
           usuario_id: string
         }
@@ -469,6 +471,7 @@ export type Database = {
           creada_en?: string
           expira_en?: string | null
           id?: string
+          intentos_fallidos?: number
           usado?: boolean
           usuario_id?: string
         }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, useOutletContext } from 'react-router'
 import { contarPendientes } from '../../core/offline/bd.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil } from '../../core/sesion/roles.js'
@@ -9,6 +9,7 @@ import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import iconoPendientes from '../../core/ui/iconos/cloud_off.svg'
 import iconoSalir from '../../core/ui/iconos/logout.svg'
+import { Insignia } from '../Insignia.jsx'
 import { MENU } from '../menu.js'
 
 /**
@@ -22,6 +23,8 @@ import { MENU } from '../menu.js'
 export function Cuenta() {
   const { perfil, salir } = useSesion()
   const navegar = useNavigate()
+  // Las cuenta el marco, que es el que tiene el menú.
+  const { insignias = {} } = useOutletContext() ?? {}
   const [pendientes, setPendientes] = useState(0)
   const [saliendo, setSaliendo] = useState(false)
 
@@ -81,6 +84,7 @@ export function Cuenta() {
             >
               <Icono src={icono} tamano={22} className="flex-none text-texto-secundario" />
               <span className="min-w-0 flex-1">{etiqueta}</span>
+              <Insignia cantidad={insignias[ruta]} />
               <Icono src={iconoIr} tamano={20} className="flex-none text-texto-secundario" />
             </Link>
           ))}

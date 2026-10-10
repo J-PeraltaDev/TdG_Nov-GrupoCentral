@@ -20,18 +20,37 @@ export async function solicitarRecuperacion(correo) {
 
 /**
  * Solicitudes de recuperación, de la más reciente a la más antigua. Solo las recibe el
- * administrador. El estado se deriva de `expira_en` y `usado` (SDD 6.1.10); el resumen del
- * código no se puede leer por la API.
+ * administrador. El estado se deriva de `expira_en`, `usado` e `intentos_fallidos` (SDD
+ * 6.1.10); el resumen del código no se puede leer por la API.
  *
- * @returns {Promise<{ id: string, usuario_id: string, expira_en: string | null, usado: boolean, creada_en: string }[]>}
+ * @returns {Promise<{ id: string, usuario_id: string, expira_en: string | null, usado: boolean, intentos_fallidos: number, creada_en: string }[]>}
  */
 export async function listarSolicitudes() {
   const { data, error } = await supabase
     .from('solicitud_recuperacion')
-    .select('id, usuario_id, expira_en, usado, creada_en')
+    .select('id, usuario_id, expira_en, usado, intentos_fallidos, creada_en')
     .order('creada_en', { ascending: false })
   if (error) throw error
   return data
+}
+
+/**
+ * Cuántas solicitudes esperan que el administrador les genere un código: es la insignia del
+ * menú. Solo cuenta; no trae filas. Las de un usuario desactivado no cuentan: ya no admiten un
+ * código (`SOLICITUD_INVALIDA`), así que nadie las puede atender.
+ *
+ * @returns {Promise<number>}
+ */
+export async function contarSolicitudesPendientes() {
+  const { count, error } = await supabase
+    .from('solicitud_recuperacion')
+    // El usuario va embebido solo para filtrar por él.
+    .select('id, usuario!inner(activo)', { count: 'exact', head: true })
+    .eq('usado', false)
+    .is('expira_en', null)
+    .eq('usuario.activo', true)
+  if (error) throw error
+  return count ?? 0
 }
 
 /**

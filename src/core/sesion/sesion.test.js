@@ -199,6 +199,24 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
       })
     })
 
+    it('RF-01 / CU-01 4a: si Auth frena los intentos (429), lo dice aparte: no es un error cualquiera', async () => {
+      supabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: null },
+        error: {
+          name: 'AuthApiError',
+          code: 'over_request_rate_limit',
+          status: 429,
+          message: 'Request rate limit reached',
+        },
+      })
+
+      expect(await iniciarSesion('alguien@novedades.test', 'una-clave')).toEqual({
+        ok: false,
+        motivo: 'demasiados_intentos',
+      })
+      expect(await leerMeta('perfil')).toBeUndefined()
+    })
+
     it('RF-01 / CU-01 2a: sin conexión no intenta ingresar', async () => {
       conConexion(false)
 

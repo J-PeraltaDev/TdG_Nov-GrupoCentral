@@ -4,22 +4,23 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                                                 | Estado    |
-| --- | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                          | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                     | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                             | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                       | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                           | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                     | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                     | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                       | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                            | Propuesto |
-| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                   | Propuesto |
-| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar | Propuesto |
-| 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad               | Propuesto |
-| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                           | Propuesto |
-| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»        | Propuesto |
+| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                                                    | Estado    |
+| --- | ------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                             | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                        | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                          | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                              | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                        | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                        | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                          | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                               | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                      | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar    | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                  | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                              | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»           | Propuesto |
+| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3          | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -429,3 +430,68 @@ SDD: se vuelve a la Tabla 10 cuando exista el panel.
 > primero la cuenta y después el perfil (y borra la cuenta si el perfil falla), desactiva primero
 > el perfil y después suspende la cuenta, y reactiva en el orden contrario. Ninguna acción borra un
 > usuario existente, y nadie puede desactivarse ni cambiarse el rol a sí mismo.
+
+## 15 · Recuperación de contraseña: intentos, una solicitud abierta y estados (S3)
+
+**Sección:** SDD 6.1.1, Tabla 26 (`solicitud_recuperacion`); 6.1.10 (recuperación mediada por el
+administrador); 7.3 (parámetros). Complementa el cambio 11, que publicó las firmas.
+
+**1. `solicitud_recuperacion` cambia (Tabla 26).** Un código tiene seis dígitos: un millón de
+posibilidades. Lo protege que dura 30 minutos y que admite pocos intentos, y la tabla no tenía
+cómo contarlos.
+
+- Columna nueva `intentos_fallidos smallint not null default 0`, entre 0 y 5. Cada código
+  incorrecto suma uno; al quinto, el código deja de servir. Un código nuevo los vuelve a cero.
+- `codigo_hash` y `expira_en` se llenan juntos (restricción).
+- Índice único parcial sobre `usuario_id` para las solicitudes sin usar y sin código: un usuario
+  no tiene dos esperando, ni con dos peticiones a la vez. Hace falta porque
+  `solicitar_recuperacion` se ejecuta sin sesión.
+- El administrador lee `intentos_fallidos`, para saber que un código quedó bloqueado. El resumen
+  del código sigue sin poder leerse por la API.
+
+**2. Una solicitud abierta por usuario (precisión de 6.1.10).** Está abierta la que no se ha usado
+y, o no tiene código, o lo tiene vigente (no venció ni agotó sus intentos). Con una abierta, pedir
+otra no crea nada y responde igual. Una que ya no está abierta no se reabre: la persona pide otra.
+La regla vive en una sola función, `private.solicitud_abierta`, que usan las tres.
+
+**3. El código (precisión de 6.1.10).**
+
+- Sale de `gen_random_bytes` (pgcrypto), con descarte para que los seis dígitos sean uniformes;
+  nunca de `random()`.
+- Se guarda como resumen con sal (`crypt`, bcrypt con costo 10). Con un millón de códigos
+  posibles el resumen no resiste a quien tenga la base de datos; el costo hace que recorrerlos
+  tome más que los 30 minutos que dura el código.
+- `consumir_codigo_recuperacion` responde `CODIGO_VENCIDO` solo a quien conoce el código (ya
+  usado, vencido o sin intentos) y `CODIGO_INVALIDO` en los demás casos, incluido el correo que
+  no existe, tardando lo mismo: ninguna respuesta dice si un correo está registrado. Devuelve el
+  resultado en lugar de lanzar una excepción, porque una excepción desharía la suma del intento.
+- `restablecer-contrasena` revisa la forma de la solicitud antes de tocar el código (una
+  contraseña que no cumple la regla no gasta un intento) y gasta el código **antes** de cambiar la
+  contraseña: si Auth falla, la persona pide otro. Un código nunca sirve dos veces.
+- Si al usuario lo desactivan, su solicitud deja de servir: no admite un código nuevo
+  (`SOLICITUD_INVALIDA`) ni se acepta el que tenía.
+
+**4. Estados de la solicitud (precisión de 6.1.10).** No se guardan: se derivan de `usado`,
+`expira_en` e `intentos_fallidos`. Pendiente (sin código), código generado (vigente), usada y
+vencida (pasó el tiempo, agotó los intentos o su usuario fue desactivado).
+
+**5. Parámetro nuevo (7.3):** máximo de intentos fallidos por código, 5. La vigencia sigue en 30
+minutos.
+
+**Texto propuesto (Tabla 26, fila `solicitud_recuperacion`):**
+
+> id, usuario_id, codigo_hash, expira_en, usado, intentos_fallidos, creada_en · codigo_hash y
+> expira_en se diligencian juntos al generar el código · intentos_fallidos entre 0 y 5 · Un
+> usuario tiene a lo sumo una solicitud sin usar y sin código (índice único parcial).
+
+**Texto propuesto (6.1.10, después de la descripción del código temporal):**
+
+> El código se genera con una fuente criptográfica y se guarda solo su resumen con sal. Admite
+> cinco intentos fallidos y 30 minutos; después, o una vez usado, deja de servir y la persona
+> solicita otro. Un usuario tiene una sola solicitud abierta. La validación responde igual para un
+> correo inexistente que para un código incorrecto, y el código se gasta antes de cambiar la
+> contraseña.
+
+**Texto propuesto (7.3, fila nueva):**
+
+> Intentos fallidos por código temporal · 5 · Al alcanzarlo, el código deja de servir.
