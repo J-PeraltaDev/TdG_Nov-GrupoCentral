@@ -3,38 +3,39 @@
 Dudas de diseño o de negocio que los documentos no resuelven. Ninguna bloquea: en cada una se
 tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la confirmen o la cambien.
 
-| N.º | Tema                                       | Qué se hizo mientras tanto                                           | La decide         |
-| --- | ------------------------------------------ | -------------------------------------------------------------------- | ----------------- |
-| 1   | Lista oficial de fincas y razones sociales | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
-| 2   | Base de datos de las vistas previas        | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
-| 3   | Dominio de los correos de la plataforma    | `@novedades.test` para los usuarios de prueba                        | El equipo         |
-| 4   | Valores de los parámetros configurables    | Los que propone el plan, en `parametros.js`                          | La empresa        |
-| 5   | Íconos de la app y conjunto de íconos      | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
-| 6   | Contraste del estado «escalada»            | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
-| 7   | Service worker propio o con Workbox        | Propio, sin dependencias nuevas                                      | El equipo         |
-| 8   | Versión de Node y de jsdom                 | jsdom 29, compatible con Node 24.14                                  | El equipo         |
-| 9   | Estados de interacción que Figma no dibuja | Solo el `hover` del botón primario                                   | El equipo (Figma) |
-| 10  | Textos que no están en Figma               | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                 | Medido: 188,3 KB de 200 KB                                           | El equipo         |
-| 12  | Borde del botón secundario                 | Se dejó el color de Figma                                            | El equipo (Figma) |
-| 13  | Detalles de las pantallas 04, 05 y 06      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 14  | Pantallas 05 y 06 en el escritorio         | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
-| 15  | WebKit no abre en los equipos              | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
-| 16  | Avisos del asesor de Supabase              | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar             | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
-| 18  | Primer administrador de producción         | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
-| 19  | Detalles de la bandeja del área (11 y 12)  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 20  | Detalles del detalle (13, 14, 22 y 22-B)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 21  | Acciones del aprobador (13-B y 14-C)       | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 22  | Hojas de las acciones (15, 16 y 17)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 23  | Contraste del «Área actual» de la hoja 17  | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
-| 24  | Detalles de la pantalla 18 (solución)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 25  | Tipos de falla de prueba en «staging»      | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
-| 27  | Detalles de las pantallas 19, 20 y 20-C    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 28  | Detalles de las pantallas 09, 09-B y 09-C  | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 29  | Detalles de las pantallas 30 y 30-B        | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 30  | Detalles de las pantallas 28, 28-B y 29    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 31  | Detalles de las pantallas 02, 03 y 32      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| N.º | Tema                                        | Qué se hizo mientras tanto                                           | La decide         |
+| --- | ------------------------------------------- | -------------------------------------------------------------------- | ----------------- |
+| 1   | Lista oficial de fincas y razones sociales  | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
+| 2   | Base de datos de las vistas previas         | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
+| 3   | Dominio de los correos de la plataforma     | `@novedades.test` para los usuarios de prueba                        | El equipo         |
+| 4   | Valores de los parámetros configurables     | Los que propone el plan, en `parametros.js`                          | La empresa        |
+| 5   | Íconos de la app y conjunto de íconos       | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
+| 6   | Contraste del estado «escalada»             | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
+| 7   | Service worker propio o con Workbox         | Propio, sin dependencias nuevas                                      | El equipo         |
+| 8   | Versión de Node y de jsdom                  | jsdom 29, compatible con Node 24.14                                  | El equipo         |
+| 9   | Estados de interacción que Figma no dibuja  | Solo el `hover` del botón primario                                   | El equipo (Figma) |
+| 10  | Textos que no están en Figma                | Redactados con tuteo; listados abajo                                 | El equipo         |
+| 11  | Peso de la ruta de ingreso                  | Medido: 188,3 KB de 200 KB                                           | El equipo         |
+| 12  | Borde del botón secundario                  | Se dejó el color de Figma                                            | El equipo (Figma) |
+| 13  | Detalles de las pantallas 04, 05 y 06       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 14  | Pantallas 05 y 06 en el escritorio          | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
+| 15  | WebKit no abre en los equipos               | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
+| 16  | Avisos del asesor de Supabase               | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
+| 17  | Pruebas que necesitan ingresar              | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
+| 18  | Primer administrador de producción          | **Decidido:** una sola cuenta, compartida. Falta crearla             | El equipo         |
+| 19  | Detalles de la bandeja del área (11 y 12)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 20  | Detalles del detalle (13, 14, 22 y 22-B)    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 21  | Acciones del aprobador (13-B y 14-C)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 22  | Hojas de las acciones (15, 16 y 17)         | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17   | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
+| 24  | Detalles de la pantalla 18 (solución)       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 25  | Tipos de falla de prueba en «staging»       | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
+| 27  | Detalles de las pantallas 19, 20 y 20-C     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 28  | Detalles de las pantallas 09, 09-B y 09-C   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 29  | Detalles de las pantallas 30 y 30-B         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 32  | Nombres de ejemplo de Figma en las capturas | Se dejaron; desde RF-04 las capturas usan nombres inventados         | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -950,3 +951,26 @@ plan del Sprint 3:
 - **Las sesiones abiertas.** En la prueba contra «staging», después del cambio la sesión anterior
   del usuario ya no se pudo renovar, pero su token de acceso siguió sirviendo hasta vencer (una
   hora como máximo). Es el comportamiento de Auth; no se cambió.
+
+## 32 · Nombres de ejemplo de Figma en capturas y pruebas
+
+El archivo de Figma trae datos de ejemplo: fincas («Juanca», «Truandó», «Pavarandó»…) y personas
+(«Paula Giraldo», «Hernán Darío Úsuga», «Carlos Mario Restrepo»…). La lista oficial de fincas y
+razones sociales se dejó fuera del repositorio, que es público (punto 1), y el seed usa marcadores.
+Pero esos nombres de ejemplo sí quedaron en algunos archivos:
+
+- **Capturas** de `docs/sprints/evidencias/S3/`: las de las pantallas 19, 20 y 09 (RF-13 y RF-15)
+  muestran fincas y personas de Figma, y las de la pantalla 30 (RF-04), a «Paula Giraldo» como
+  administradora. Las de 28, 29, 02, 03 y 32 ya usan nombres inventados («Altamira», «Camila
+  Torres Mejía»…). Las del Sprint 2 usan los marcadores del seed para las fincas («Finca de prueba
+  01») y el nombre de una persona de Figma («Carlos Mario Restrepo»).
+- **Pruebas unitarias y comentarios:** tres pruebas de `e3-atencion` usan «Juanca» o «Pavarandó»
+  como nombre de finca, y dos comentarios citan «Finca Juanca» para explicar cómo se escribe.
+
+No hay en el repositorio NIT, códigos ni ningún dato de la lista oficial, y esos nombres ya son
+visibles en ramas publicadas.
+
+**Para decidir:** si alguno de esos nombres es real y no debe estar en un repositorio público. Si
+es así, se repiten las capturas con nombres inventados y se cambian las tres pruebas (es una hora
+de trabajo); lo ya publicado seguiría en el historial de git, y quitarlo de ahí es otra
+conversación. Si son solo ejemplos, se dejan.
