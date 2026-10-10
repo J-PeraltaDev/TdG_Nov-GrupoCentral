@@ -83,7 +83,9 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
 
       await page.goto('/bandeja')
 
-      await expect(page).toHaveURL(/\/novedades$/)
+      // Al recargar, la aplicación recupera la sesión y vuelve a descargar el perfil antes de
+      // decidir adónde ir: se le da la misma espera que al ingreso.
+      await expect(page).toHaveURL(/\/novedades$/, ESPERA_DE_AUTH)
     })
 
     test('RF-01 / CU-01 5 y 6: cerrar la sesión vuelve al ingreso y ya no deja entrar', async ({
@@ -95,7 +97,7 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
       // El nombre y el botón también están en la barra lateral del escritorio: se usan los
       // de la página.
       const cuenta = page.getByRole('main')
-      await expect(cuenta.getByText(USUARIOS.reportante.nombre)).toBeVisible()
+      await expect(cuenta.getByText(USUARIOS.reportante.nombre)).toBeVisible(ESPERA_DE_AUTH)
       await cuenta.getByRole('button', { name: 'Cerrar sesión' }).click()
 
       await expect(page).toHaveURL(/\/ingresar$/)

@@ -26,6 +26,20 @@ export function rutaDeInicio(rolId) {
   return INICIO[rolId] ?? '/ingresar'
 }
 
+/**
+ * Pantalla desde la que se abrió el detalle de una novedad: la lista que lo enlazó la deja en
+ * el estado de la navegación (`state.origen`, con sus filtros). Si se llegó por la dirección,
+ * es la pantalla de inicio del rol. Solo se aceptan rutas de la aplicación.
+ *
+ * @param {unknown} estado `location.state`.
+ * @param {number | null | undefined} rolId
+ */
+export function rutaDeOrigen(estado, rolId) {
+  const origen = /** @type {any} */ (estado)?.origen
+  // Empieza por una sola «/»: descarta direcciones externas como «//otro.sitio».
+  return typeof origen === 'string' && /^\/[^/]/.test(origen) ? origen : rutaDeInicio(rolId)
+}
+
 /** @param {number | null | undefined} rolId */
 export function nombreDeRol(rolId) {
   return NOMBRES[rolId] ?? ''

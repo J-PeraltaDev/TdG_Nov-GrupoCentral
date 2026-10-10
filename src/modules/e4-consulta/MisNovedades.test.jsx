@@ -86,6 +86,21 @@ describe('Pantalla 04 · Mis novedades (RF-18)', () => {
     expect(listarNovedades).toHaveBeenCalledWith({ estados: ABIERTAS })
   })
 
+  it('RF-18 / CU-18 1: cada tarjeta abre el detalle de su novedad', async () => {
+    conNovedades()
+    abrir()
+    await screen.findAllByRole('listitem')
+
+    expect(screen.getByRole('link', { name: 'NOV-0153' })).toHaveAttribute(
+      'href',
+      '/novedades/n-153',
+    )
+    expect(screen.getByRole('link', { name: 'NOV-0149' })).toHaveAttribute(
+      'href',
+      '/novedades/n-149',
+    )
+  })
+
   it('RF-18: los filtros muestran cuántas hay abiertas y por confirmar', async () => {
     conNovedades({
       porConfirmar: [{ ...NOVEDADES[0], id: 'n-140', codigo: 140, estado: 'resuelta' }],

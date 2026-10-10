@@ -24,8 +24,10 @@ function Dato({ nombre, children }) {
  * @param {object} props
  * @param {object} props.novedad Fila de la bandeja.
  * @param {import('./reglasDeBandeja.js').ResumenDeTransiciones} [props.resumen]
+ * @param {string} props.origen Ruta de la bandeja, con su pestaña y su filtro: el detalle
+ *   vuelve a ella.
  */
-export function VistaPrevia({ novedad, resumen }) {
+export function VistaPrevia({ novedad, resumen, origen }) {
   const codigo = formatearCodigo(novedad.codigo)
   const justificacion = ['escalada', 'aprobada'].includes(novedad.estado)
     ? resumen?.justificacion
@@ -78,6 +80,7 @@ export function VistaPrevia({ novedad, resumen }) {
 
       <Link
         to={`/novedades/${novedad.id}`}
+        state={{ origen }}
         className="flex h-10 items-center justify-center rounded-control px-4 text-etiqueta-fuerte text-primario"
       >
         Ver detalle completo

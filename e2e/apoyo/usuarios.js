@@ -23,6 +23,13 @@ export const USUARIOS = {
     inicio: '/novedades',
     menu: ['Novedades', 'Registrar', 'Avisos', 'Cuenta'],
   },
+  // De otra finca y otra razón social: no ve las novedades del primero.
+  reportanteOtraFinca: {
+    correo: 'reportante.03@novedades.test',
+    nombre: 'Reportante de prueba 03',
+    inicio: '/novedades',
+    menu: ['Novedades', 'Registrar', 'Avisos', 'Cuenta'],
+  },
   aprobador: {
     correo: 'aprobador.mantenimiento@novedades.test',
     nombre: 'Aprobador de prueba Mantenimiento',

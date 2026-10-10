@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { useLocation, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarFincas } from '../../core/supabase/repositorios/catalogos.js'
@@ -113,6 +113,8 @@ export default function Bandeja() {
 
   // La pestaña y la finca viven en la URL: se vuelve a ellas con «atrás» y se pueden compartir.
   const [parametros, setParametros] = useSearchParams()
+  const { pathname, search } = useLocation()
+  const origen = pathname + search
   const pestana = PESTANAS.find(({ id }) => id === parametros.get('pestana')) ?? PESTANAS[0]
   // El filtro por finca solo existe en el escritorio (Figma 12).
   const fincaId = esEscritorio ? parametros.get('finca') : null
@@ -315,7 +317,7 @@ export default function Bandeja() {
                 elegidaId={elegida.id}
                 alElegir={setElegidaId}
               />
-              <VistaPrevia novedad={elegida} resumen={resumenes[elegida.id]} />
+              <VistaPrevia novedad={elegida} resumen={resumenes[elegida.id]} origen={origen} />
             </div>
           ) : (
             <ul className="flex flex-col gap-2.5">
@@ -325,6 +327,7 @@ export default function Bandeja() {
                   novedad={novedad}
                   pie="finca"
                   a={`/novedades/${novedad.id}`}
+                  origen={origen}
                 />
               ))}
             </ul>
