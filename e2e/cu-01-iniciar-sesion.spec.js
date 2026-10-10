@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import {
   HAY_CLAVE,
   ingresarComo,
+  ingresarPorElFormulario,
   llenarIngreso,
   menuVisible,
   MOTIVO_SIN_CLAVE,
@@ -9,6 +10,9 @@ import {
 } from './apoyo/usuarios.js'
 
 // CU-01 · Iniciar y cerrar sesión (RF-01). Corre contra una base con el seed de prueba.
+//
+// Aquí sí se ingresa por el formulario: es lo que se prueba. Las demás pruebas reutilizan la
+// sesión que cada usuario abrió al comienzo de la corrida (e2e/sesiones.setup.js).
 
 // Auth tarda en responder cuando varias pruebas ingresan al tiempo contra «staging».
 const ESPERA_DE_AUTH = { timeout: 20_000 }
@@ -34,7 +38,7 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
       test(`RF-01 / CU-01 curso normal: el ${rol} ingresa y ve el menú de su rol`, async ({
         page,
       }) => {
-        const usuario = await ingresarComo(page, rol)
+        const usuario = await ingresarPorElFormulario(page, rol)
 
         await expect(page).toHaveURL(new RegExp(`${usuario.inicio}$`))
         // En el escritorio la cuenta va en la barra superior, no en el menú lateral.
@@ -91,7 +95,8 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
     test('RF-01 / CU-01 5 y 6: cerrar la sesión vuelve al ingreso y ya no deja entrar', async ({
       page,
     }) => {
-      await ingresarComo(page, 'reportante')
+      // Con una sesión propia: al cerrarla no se le quita a las demás pruebas.
+      await ingresarPorElFormulario(page, 'reportante')
 
       await page.goto('/cuenta')
       // El nombre y el botón también están en la barra lateral del escritorio: se usan los

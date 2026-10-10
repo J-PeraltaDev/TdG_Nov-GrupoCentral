@@ -40,14 +40,21 @@ export function novedadesDeLaLista(page) {
  * @param {import('@playwright/test').Page} page
  */
 export async function cargarTodaLaLista(page) {
+  const panel = page.getByRole('tabpanel')
   const verMas = page.getByRole('button', { name: 'Ver más' })
   const novedades = novedadesDeLaLista(page)
+  // Primero tiene que estar la pantalla: recién llegada la página, todavía no hay panel ni
+  // «Cargando…», y sin esta espera la lista se daba por cargada antes de pedirla.
+  await expect(panel).toBeVisible()
   // La primera página ya llegó cuando desaparece «Cargando…».
-  await expect(page.getByRole('tabpanel').getByRole('status')).toHaveCount(0)
+  await expect(panel.getByRole('status')).toHaveCount(0)
   while (await verMas.isVisible()) {
     const antes = await novedades.count()
     await verMas.click()
     await expect.poll(() => novedades.count()).toBeGreaterThan(antes)
+    // Mientras trae la página siguiente el botón dice «Cargando…»: se espera a que vuelva a
+    // decir «Ver más» o a que desaparezca, para no dar la lista por terminada antes de tiempo.
+    await expect(page.getByRole('button', { name: 'Cargando…' })).toHaveCount(0)
   }
 }
 

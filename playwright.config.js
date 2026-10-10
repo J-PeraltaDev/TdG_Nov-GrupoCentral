@@ -22,6 +22,9 @@ export default defineConfig({
   workers: process.env.CI ? 2 : 4,
   // Mismo motivo: 5 s es poco para una pantalla que depende de un servidor remoto.
   expect: { timeout: 10_000 },
+  // Varias pruebas recorren un caso con tres o cuatro usuarios, cada uno en su navegador:
+  // con el servidor remoto, 30 s quedan justos.
+  timeout: 60_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
@@ -32,10 +35,34 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    { name: 'chromium-telefono', use: { ...devices['Desktop Chrome'], viewport: TELEFONO } },
-    { name: 'chromium-escritorio', use: { ...devices['Desktop Chrome'], viewport: ESCRITORIO } },
-    { name: 'webkit-telefono', use: { ...devices['Desktop Safari'], viewport: TELEFONO } },
-    { name: 'webkit-escritorio', use: { ...devices['Desktop Safari'], viewport: ESCRITORIO } },
+    // Cada usuario de prueba ingresa una vez y las pruebas reutilizan su sesión: Auth limita
+    // los ingresos por minuto (e2e/sesiones.setup.js). La sesión es un token, así que la que
+    // se abre en Chromium sirve también para WebKit.
+    {
+      name: 'sesiones',
+      testMatch: /sesiones\.setup\.js$/,
+      use: { ...devices['Desktop Chrome'], viewport: ESCRITORIO },
+    },
+    {
+      name: 'chromium-telefono',
+      dependencies: ['sesiones'],
+      use: { ...devices['Desktop Chrome'], viewport: TELEFONO },
+    },
+    {
+      name: 'chromium-escritorio',
+      dependencies: ['sesiones'],
+      use: { ...devices['Desktop Chrome'], viewport: ESCRITORIO },
+    },
+    {
+      name: 'webkit-telefono',
+      dependencies: ['sesiones'],
+      use: { ...devices['Desktop Safari'], viewport: TELEFONO },
+    },
+    {
+      name: 'webkit-escritorio',
+      dependencies: ['sesiones'],
+      use: { ...devices['Desktop Safari'], viewport: ESCRITORIO },
+    },
   ],
   webServer: {
     command: `npm run build && npm run preview -- --port ${PUERTO} --strictPort`,
