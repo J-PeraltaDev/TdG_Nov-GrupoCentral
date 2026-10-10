@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AreaDeTexto } from '../core/ui/AreaDeTexto.jsx'
 import { AvisoTemporal } from '../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../core/ui/Boton.jsx'
 import { Conexion } from '../core/ui/Conexion.jsx'
@@ -59,6 +60,7 @@ function Seccion({ titulo, nodo, children }) {
 export default function Componentes() {
   const [pestana, setPestana] = useState(PESTANAS[0].id)
   const [hojaAbierta, setHojaAbierta] = useState(false)
+  const [motivo, setMotivo] = useState('Duplicada: ya está en atención como NOV-0149.')
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 p-4 lg:p-8">
@@ -132,6 +134,26 @@ export default function Componentes() {
             alElegir={setPestana}
             idDelPanel="dev-panel"
             className="self-start"
+          />
+        </div>
+      </Seccion>
+
+      <Seccion titulo="Área de texto" nodo="3:1483">
+        <div className="grid gap-4 rounded-control bg-superficie p-4 lg:grid-cols-2">
+          <AreaDeTexto
+            etiqueta="Motivo del rechazo"
+            obligatorio
+            maximo={500}
+            value={motivo}
+            onChange={(evento) => setMotivo(evento.target.value)}
+          />
+          <AreaDeTexto
+            etiqueta="Con error"
+            obligatorio
+            maximo={500}
+            value=""
+            error="Falta un dato obligatorio. Revisa los campos e intenta de nuevo."
+            onChange={() => {}}
           />
         </div>
       </Seccion>

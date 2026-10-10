@@ -1,4 +1,23 @@
 import { useEffect, useId, useRef } from 'react'
+import { Icono } from './Icono.jsx'
+
+/**
+ * Ícono del título de una hoja: un círculo de 40 px con el color de la acción (Figma 3:1472).
+ *
+ * @param {object} props
+ * @param {string} props.src URL de un SVG de `iconos/`.
+ * @param {string} props.className Colores del círculo y del ícono, p. ej. `bg-error-suave
+ *   text-error`.
+ */
+export function IconoDeHoja({ src, className }) {
+  return (
+    <span
+      className={`flex size-10 flex-none items-center justify-center rounded-full ${className}`}
+    >
+      <Icono src={src} tamano={20} />
+    </span>
+  )
+}
 
 /**
  * Hoja inferior (Figma 15, 16 y 17): una decisión que interrumpe la ruta ordinaria del caso y

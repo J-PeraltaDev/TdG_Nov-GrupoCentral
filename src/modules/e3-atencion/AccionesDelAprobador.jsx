@@ -1,20 +1,23 @@
+import { useState } from 'react'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
-import { tomarNovedad } from '../../core/supabase/repositorios/novedades.js'
+import { rechazarNovedad, tomarNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import iconoTomar from '../../core/ui/iconos/back_hand.svg'
+import iconoRechazar from '../../core/ui/iconos/block.svg'
+import { HojaRechazar } from './HojaRechazar.jsx'
 import { useAccion } from './useAccion.js'
 
 /*
  * Acciones del aprobador de área en el detalle de una novedad (RF-10 a RF-17). Figma: barra de
- * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276).
+ * acciones de 13 (3:842) y 14 (3:1262), aviso de 13-B y de 14-C (3:1276), hoja 16 (3:1468).
  *
  * El mapa de acciones dice qué permite la Tabla 35; aquí se pintan las que ya tienen su
  * manejador. Se carga bajo demanda y solo para el aprobador: los demás roles no la descargan.
  */
 
 /** Acciones que este módulo ya sabe ejecutar. Las demás llegan con su historia. */
-const CONSTRUIDAS = [ACCION.TOMAR]
+const CONSTRUIDAS = [ACCION.TOMAR, ACCION.RECHAZAR]
 
 // Sobre la navegación inferior del teléfono cuando no hay barra de acciones; en el escritorio,
 // abajo a la derecha.
@@ -34,20 +37,74 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
     estado: novedad.estado,
     alCambiar,
   })
-  const disponibles = acciones.filter((accion) => CONSTRUIDAS.includes(accion))
+  // La hoja abierta, si hay alguna: cada acción que pide un texto tiene la suya.
+  const [hoja, setHoja] = useState(/** @type {string | null} */ (null))
+  // La última acción que se lanzó: su botón es el que dice que está en curso.
+  const [lanzada, setLanzada] = useState(/** @type {string | null} */ (null))
+  const puede = (accion) => CONSTRUIDAS.includes(accion) && acciones.includes(accion)
+  const cerrarHoja = () => setHoja(null)
 
-  const botones = disponibles.includes(ACCION.TOMAR) ? (
+  /**
+   * Ejecuta la acción de una hoja. Con cualquier resultado la hoja se cierra y el aviso va en
+   * el detalle (un aviso fuera de un diálogo modal no se ve ni se anuncia), salvo que falte un
+   * dato: ese se corrige en la misma hoja.
+   */
+  async function confirmar(nombre, accion, exito) {
+    setLanzada(nombre)
+    const resultado = await ejecutar(accion, { exito, codigosPropios: ['DATO_OBLIGATORIO'] })
+    if (resultado.ok || resultado.fallo.codigo !== 'DATO_OBLIGATORIO') cerrarHoja()
+    return resultado
+  }
+
+  // Como en Figma: la acción principal a todo el ancho y, debajo, las que comparten fila.
+  const principal = puede(ACCION.TOMAR) ? (
     <Boton
       icono={iconoTomar}
       disabled={enCurso}
-      onClick={() =>
+      onClick={() => {
+        setLanzada(ACCION.TOMAR)
         ejecutar(() => tomarNovedad(novedad.id), { exito: 'Novedad tomada. Ya está En atención.' })
-      }
+      }}
       className="w-full lg:w-auto"
     >
-      {enCurso ? 'Tomando…' : 'Tomar para atención'}
+      {enCurso && lanzada === ACCION.TOMAR ? 'Tomando…' : 'Tomar para atención'}
     </Boton>
   ) : null
+
+  const enFila = puede(ACCION.RECHAZAR) ? (
+    <Boton
+      tipo="secundario-peligro"
+      icono={iconoRechazar}
+      disabled={enCurso}
+      onClick={() => setHoja(ACCION.RECHAZAR)}
+      className="min-w-0 flex-1 lg:flex-none"
+    >
+      Rechazar
+    </Boton>
+  ) : null
+
+  const botones =
+    principal || enFila ? (
+      <>
+        {principal}
+        {enFila ? <div className="flex gap-2.5 lg:contents">{enFila}</div> : null}
+      </>
+    ) : null
+
+  const hojas = (
+    <HojaRechazar
+      abierta={hoja === ACCION.RECHAZAR}
+      alCerrar={cerrarHoja}
+      alConfirmar={(motivo) =>
+        confirmar(
+          ACCION.RECHAZAR,
+          () => rechazarNovedad(novedad.id, motivo),
+          'Novedad rechazada. La finca verá el motivo.',
+        )
+      }
+      enCurso={enCurso && lanzada === ACCION.RECHAZAR}
+    />
+  )
 
   const avisoTemporal = (className) =>
     aviso ? (
@@ -66,24 +123,28 @@ export default function AccionesDelAprobador({ novedad, acciones, alCambiar, esE
       <>
         {botones ? <div className="flex flex-wrap gap-2.5">{botones}</div> : null}
         {avisoTemporal(AVISO_SUELTO)}
+        {hojas}
       </>
     )
   }
 
   // El mismo contenedor con o sin barra: así el aviso no se vuelve a montar (ni a anunciar)
   // cuando la novedad cambia de estado y se quedan sin acciones. Sin acciones no hay barra y
-  // el aviso (por ejemplo, el de «novedad tomada») va suelto.
+  // el aviso (por ejemplo, el de «novedad rechazada») va suelto.
   return (
-    <div
-      data-barra-de-acciones={botones ? '' : undefined}
-      className={
-        botones
-          ? 'sticky bottom-0 z-10 mt-auto flex flex-col gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
-          : undefined
-      }
-    >
-      {avisoTemporal(botones ? 'absolute inset-x-4 bottom-full mb-4' : AVISO_SUELTO)}
-      {botones}
-    </div>
+    <>
+      <div
+        data-barra-de-acciones={botones ? '' : undefined}
+        className={
+          botones
+            ? 'sticky bottom-0 z-10 mt-auto flex flex-col gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
+            : undefined
+        }
+      >
+        {avisoTemporal(botones ? 'absolute inset-x-4 bottom-full mb-4' : AVISO_SUELTO)}
+        {botones}
+      </div>
+      {hojas}
+    </>
   )
 }
