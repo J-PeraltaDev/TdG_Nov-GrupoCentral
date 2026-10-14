@@ -119,6 +119,52 @@ export async function contarPendientes(reportanteId) {
   return pendientes.filter((p) => p.reportante_id === reportanteId).length
 }
 
+/** Todas las novedades descargadas (RF-24). */
+export async function leerNovedadesDescargadas() {
+  return (await abrir()).getAll('novedades')
+}
+
+/** @param {string} id */
+export async function leerNovedadDescargada(id) {
+  return (await abrir()).get('novedades', id)
+}
+
+/**
+ * @typedef {object} CambiosDeDescargadas
+ * @property {object[]} [guardar]
+ * @property {string[]} [borrar] Sus `id`.
+ * @property {{ clave: string, fecha: string }} [descarga] Cuándo se descargó una lista (`meta`,
+ *   clave `descarga:…`).
+ */
+
+/**
+ * Cambia las novedades descargadas en una sola transacción: `cambiar` recibe las que hay y
+ * devuelve qué guardar y qué borrar. Dos descargas a la vez no se pisan.
+ *
+ * @param {(actuales: object[]) => CambiosDeDescargadas} cambiar
+ */
+export async function cambiarNovedadesDescargadas(cambiar) {
+  const tx = (await abrir()).transaction(['novedades', 'meta'], 'readwrite')
+  const novedades = tx.objectStore('novedades')
+  const { guardar = [], borrar = [], descarga } = cambiar(await novedades.getAll())
+  await Promise.all([
+    ...guardar.map((novedad) => novedades.put(novedad)),
+    ...borrar.map((id) => novedades.delete(id)),
+    descarga ? tx.objectStore('meta').put(descarga.fecha, `descarga:${descarga.clave}`) : null,
+    tx.done,
+  ])
+}
+
+/** Borra las novedades descargadas y las fechas de sus listas (el perfil cambió de alcance). */
+export async function borrarNovedadesDescargadas() {
+  const tx = (await abrir()).transaction(['novedades', 'meta'], 'readwrite')
+  await Promise.all([
+    tx.objectStore('novedades').clear(),
+    tx.objectStore('meta').delete(IDBKeyRange.bound('descarga:', 'descarga:￿')),
+    tx.done,
+  ])
+}
+
 /**
  * Al cerrar la sesión se borran los datos descargados (novedades, catálogos y meta) y se
  * conservan las pendientes, que se envían cuando el mismo usuario vuelva a ingresar

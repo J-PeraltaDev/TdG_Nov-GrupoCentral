@@ -341,6 +341,24 @@ describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () 
     expect(await screen.findAllByRole('listitem')).toHaveLength(3)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
+
+  it('RF-24 / CU-24 (11-B): sin conexión muestra la bandeja descargada, con su fecha y el texto de Figma', async () => {
+    conBandeja()
+    vi.mocked(listarBandeja).mockImplementation(async () => ({
+      novedades: POR_ATENDER,
+      total: POR_ATENDER.length,
+      descargadaEn: haceMinutos(20),
+    }))
+    abrir()
+
+    expect(await screen.findAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByText('Sin conexión')).toBeVisible()
+    expect(
+      screen.getByText(
+        /^Bandeja descargada hoy \d{1,2}:\d{2} [ap]\. m\. Las acciones se habilitan al volver el internet\.$/,
+      ),
+    ).toBeVisible()
+  })
 })
 
 describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', () => {

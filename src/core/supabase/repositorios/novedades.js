@@ -1,9 +1,48 @@
+import { estaEnLinea } from '../../conexion/monitor.js'
+import { esErrorDeRed } from '../../errores/traducir.js'
+import { cambiarNovedadesDescargadas, leerNovedadDescargada } from '../../offline/bd.js'
+import {
+  guardarConteo,
+  guardarNovedad,
+  guardarPagina,
+  leerConteo,
+  leerNovedad,
+  leerPagina,
+  ORDEN,
+} from '../../offline/novedadesLocales.js'
 import { supabase } from '../cliente.js'
 
 /*
  * Repositorio de novedades (C-03, SDD 4.2.3). Aísla al resto del cliente de los detalles de
  * Supabase: las pantallas no llaman a `supabase` directamente.
+ *
+ * Las lecturas guardan lo que reciben en el dispositivo y, sin conexión, responden con lo
+ * descargado (RF-24): las listas, con `descargadaEn`; el detalle, con `descargada_en`.
  */
+
+/**
+ * Lee del servidor y guarda lo leído; si no hay conexión, o la red falla en el camino, lee del
+ * dispositivo. Sin conexión no se intenta el servidor: la API reintenta una lectura fallida
+ * durante unos 7 s.
+ *
+ * @template T
+ * @param {() => Promise<T>} delServidor
+ * @param {(resultado: T) => Promise<unknown>} guardar Si falla, la lectura sigue sirviendo.
+ * @param {() => Promise<T>} delDispositivo Lanza `SinDescarga` si no hay nada guardado.
+ * @returns {Promise<T>}
+ */
+async function conRespaldo(delServidor, guardar, delDispositivo) {
+  if (estaEnLinea()) {
+    try {
+      const resultado = await delServidor()
+      await guardar(resultado).catch(() => {})
+      return resultado
+    } catch (error) {
+      if (!esErrorDeRed(error)) throw error
+    }
+  }
+  return delDispositivo()
+}
 
 /** @typedef {import('../database.types').Database} Database */
 /** @typedef {Database['public']['Tables']['novedad']['Row']} Novedad */
@@ -205,18 +244,29 @@ export async function reportarFallaPersiste(novedadId, observacion) {
  * @param {object} opciones
  * @param {EstadoNovedad[]} opciones.estados
  * @param {number} [opciones.pagina] Empieza en 0.
- * @returns {Promise<{ novedades: object[], total: number }>}
+ * @returns {Promise<{ novedades: object[], total: number, descargadaEn?: string }>}
  */
 export async function listarNovedades({ estados, pagina = 0 }) {
   const desde = pagina * NOVEDADES_POR_PAGINA
-  const { data, error, count } = await supabase
-    .from('v_novedad')
-    .select(COLUMNAS_DE_LA_LISTA, { count: 'exact' })
-    .in('estado', estados)
-    .order('fecha_registro', { ascending: false })
-    .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
-  if (error) throw error
-  return { novedades: data, total: count ?? data.length }
+  const lista = {
+    clave: `novedades:${estados.join(',')}`,
+    filtro: (novedad) => estados.includes(novedad.estado),
+    orden: ORDEN.recientes,
+  }
+  return conRespaldo(
+    async () => {
+      const { data, error, count } = await supabase
+        .from('v_novedad')
+        .select(COLUMNAS_DE_LA_LISTA, { count: 'exact' })
+        .in('estado', estados)
+        .order('fecha_registro', { ascending: false })
+        .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+      if (error) throw error
+      return { novedades: data, total: count ?? data.length }
+    },
+    (resultado) => guardarPagina(lista, desde, resultado),
+    () => leerPagina(lista, desde, NOVEDADES_POR_PAGINA),
+  )
 }
 
 /**
@@ -225,12 +275,19 @@ export async function listarNovedades({ estados, pagina = 0 }) {
  * @param {EstadoNovedad[]} estados
  */
 export async function contarNovedades(estados) {
-  const { count, error } = await supabase
-    .from('v_novedad')
-    .select('id', { count: 'exact', head: true })
-    .in('estado', estados)
-  if (error) throw error
-  return count ?? 0
+  return conRespaldo(
+    async () => {
+      const { count, error } = await supabase
+        .from('v_novedad')
+        .select('id', { count: 'exact', head: true })
+        .in('estado', estados)
+      if (error) throw error
+      return count ?? 0
+    },
+    (cantidad) => guardarConteo(`novedades:${estados.join(',')}`, cantidad),
+    () =>
+      leerConteo(`novedades:${estados.join(',')}`, (novedad) => estados.includes(novedad.estado)),
+  )
 }
 
 /*
@@ -260,27 +317,57 @@ function consultarBandeja(columnas, opciones, { areaId, estados, fincaId }) {
 }
 
 /**
+ * Cómo se llama una lista de la bandeja en el dispositivo: sus estados y su finca.
+ *
+ * @param {FiltroDeBandeja} filtro
+ */
+const claveDeBandeja = ({ estados, fincaId }) => `bandeja:${estados.join(',')}:${fincaId ?? ''}`
+
+/**
+ * El mismo filtro, sobre lo descargado.
+ *
+ * @param {FiltroDeBandeja} filtro
+ */
+const filtroDeBandeja =
+  ({ areaId, estados, fincaId }) =>
+  (novedad) =>
+    novedad.area_id === areaId &&
+    estados.includes(novedad.estado) &&
+    (!fincaId || novedad.finca_id === fincaId)
+
+/**
  * Página de la bandeja del área: por prioridad (crítico, alto, normal, bajo: el orden del
  * tipo `prioridad_novedad`) y, dentro de cada una, de la más antigua a la más reciente.
  *
  * @param {FiltroDeBandeja & { pagina?: number }} opciones `pagina` empieza en 0.
- * @returns {Promise<{ novedades: object[], total: number }>}
+ * @returns {Promise<{ novedades: object[], total: number, descargadaEn?: string }>}
  */
 export async function listarBandeja({ pagina = 0, ...filtro }) {
   const desde = pagina * NOVEDADES_POR_PAGINA
-  const { data, error, count } = await consultarBandeja(
-    COLUMNAS_DE_LA_BANDEJA,
-    { count: 'exact' },
-    filtro,
+  const lista = {
+    clave: claveDeBandeja(filtro),
+    filtro: filtroDeBandeja(filtro),
+    orden: ORDEN.porPrioridad,
+  }
+  return conRespaldo(
+    async () => {
+      const { data, error, count } = await consultarBandeja(
+        COLUMNAS_DE_LA_BANDEJA,
+        { count: 'exact' },
+        filtro,
+      )
+        .order('prioridad', { ascending: true })
+        .order('fecha_registro', { ascending: true })
+        // Desempate estable: sin él, dos novedades con la misma fecha podrían repetirse o
+        // perderse entre una página y la siguiente.
+        .order('codigo', { ascending: true })
+        .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+      if (error) throw error
+      return { novedades: data, total: count ?? data.length }
+    },
+    (resultado) => guardarPagina(lista, desde, resultado),
+    () => leerPagina(lista, desde, NOVEDADES_POR_PAGINA),
   )
-    .order('prioridad', { ascending: true })
-    .order('fecha_registro', { ascending: true })
-    // Desempate estable: sin él, dos novedades con la misma fecha podrían repetirse o
-    // perderse entre una página y la siguiente.
-    .order('codigo', { ascending: true })
-    .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
-  if (error) throw error
-  return { novedades: data, total: count ?? data.length }
 }
 
 /**
@@ -289,9 +376,15 @@ export async function listarBandeja({ pagina = 0, ...filtro }) {
  * @param {FiltroDeBandeja} filtro
  */
 export async function contarBandeja(filtro) {
-  const { count, error } = await consultarBandeja('id', { count: 'exact', head: true }, filtro)
-  if (error) throw error
-  return count ?? 0
+  return conRespaldo(
+    async () => {
+      const { count, error } = await consultarBandeja('id', { count: 'exact', head: true }, filtro)
+      if (error) throw error
+      return count ?? 0
+    },
+    (cantidad) => guardarConteo(claveDeBandeja(filtro), cantidad),
+    () => leerConteo(claveDeBandeja(filtro), filtroDeBandeja(filtro)),
+  )
 }
 
 /**
@@ -331,20 +424,31 @@ const COLUMNAS_DE_LAS_ESCALADAS =
  * cada una, de la más antigua a la más reciente, como la bandeja del área.
  *
  * @param {{ pagina?: number }} [opciones] `pagina` empieza en 0.
- * @returns {Promise<{ novedades: object[], total: number }>}
+ * @returns {Promise<{ novedades: object[], total: number, descargadaEn?: string }>}
  */
 export async function listarEscaladas({ pagina = 0 } = {}) {
   const desde = pagina * NOVEDADES_POR_PAGINA
-  const { data, error, count } = await supabase
-    .from('v_novedad')
-    .select(COLUMNAS_DE_LAS_ESCALADAS, { count: 'exact' })
-    .eq('estado', 'escalada')
-    .order('prioridad', { ascending: true })
-    .order('fecha_registro', { ascending: true })
-    .order('codigo', { ascending: true })
-    .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
-  if (error) throw error
-  return { novedades: data, total: count ?? data.length }
+  const lista = {
+    clave: 'escaladas',
+    filtro: (novedad) => novedad.estado === 'escalada',
+    orden: ORDEN.porPrioridad,
+  }
+  return conRespaldo(
+    async () => {
+      const { data, error, count } = await supabase
+        .from('v_novedad')
+        .select(COLUMNAS_DE_LAS_ESCALADAS, { count: 'exact' })
+        .eq('estado', 'escalada')
+        .order('prioridad', { ascending: true })
+        .order('fecha_registro', { ascending: true })
+        .order('codigo', { ascending: true })
+        .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+      if (error) throw error
+      return { novedades: data, total: count ?? data.length }
+    },
+    (resultado) => guardarPagina(lista, desde, resultado),
+    () => leerPagina(lista, desde, NOVEDADES_POR_PAGINA),
+  )
 }
 
 /**
@@ -356,17 +460,32 @@ export async function listarEscaladas({ pagina = 0 } = {}) {
  */
 export async function listarEscalamientos(novedadIds) {
   if (novedadIds.length === 0) return []
-  const { data, error } = await supabase
-    .from('historial_transicion')
-    .select(
-      'id, novedad_id, observacion, fecha_hora, ' +
-        'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
-    )
-    .in('novedad_id', novedadIds)
-    .eq('estado_nuevo', 'escalada')
-    .order('id', { ascending: true })
-  if (error) throw error
-  return data
+  return conRespaldo(
+    async () => {
+      const { data, error } = await supabase
+        .from('historial_transicion')
+        .select(
+          'id, novedad_id, observacion, fecha_hora, ' +
+            'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
+        )
+        .in('novedad_id', novedadIds)
+        .eq('estado_nuevo', 'escalada')
+        .order('id', { ascending: true })
+      if (error) throw error
+      return data
+    },
+    // Llegan en orden: si una novedad se escaló más de una vez, queda la última.
+    (transiciones) =>
+      Promise.all(
+        transiciones.map((transicion) =>
+          guardarNovedad(transicion.novedad_id, { escalamiento: transicion }),
+        ),
+      ),
+    async () => {
+      const descargadas = await Promise.all(novedadIds.map((id) => leerNovedadDescargada(id)))
+      return descargadas.map((novedad) => novedad?.escalamiento).filter(Boolean)
+    },
+  )
 }
 
 /**
@@ -408,17 +527,29 @@ const COLUMNAS_DEL_DETALLE =
  * en los dos casos la base de datos responde sin filas (SDD 6.1.4) y la interfaz muestra la
  * pantalla 22-B.
  *
+ * Sin conexión, la versión descargada, con `descargada_en`; si no está, lanza `SinDescarga`.
+ *
  * @param {string} id uuid de la novedad.
  * @returns {Promise<object | null>}
  */
 export async function obtenerNovedad(id) {
-  const { data, error } = await supabase
-    .from('v_novedad')
-    .select(COLUMNAS_DEL_DETALLE)
-    .eq('id', id)
-    .maybeSingle()
-  if (error) throw error
-  return data
+  return conRespaldo(
+    async () => {
+      const { data, error } = await supabase
+        .from('v_novedad')
+        .select(COLUMNAS_DEL_DETALLE)
+        .eq('id', id)
+        .maybeSingle()
+      if (error) throw error
+      return data
+    },
+    // Si ya no se puede ver, tampoco se guarda lo que se había descargado de ella.
+    (novedad) =>
+      novedad
+        ? guardarNovedad(id, novedad, { completa: true })
+        : cambiarNovedadesDescargadas(() => ({ borrar: [id] })),
+    () => leerNovedad(id),
+  )
 }
 
 /**
@@ -426,20 +557,28 @@ export async function obtenerNovedad(id) {
  * áreas y el nombre, el rol y el área de quien hizo cada una. Los datos de las personas salen
  * de `usuario_publico`; nunca se pide el correo (ADR 0010).
  *
+ * Sin conexión, la descargada; `null` si nunca se descargó (la novedad llegó solo en una lista).
+ *
  * @param {string} novedadId
- * @returns {Promise<import('../../ui/LineaDeTiempo.jsx').Transicion[]>}
+ * @returns {Promise<import('../../ui/LineaDeTiempo.jsx').Transicion[] | null>}
  */
 export async function listarLineaDeTiempo(novedadId) {
-  const { data, error } = await supabase
-    .from('historial_transicion')
-    .select(
-      'id, estado_anterior, estado_nuevo, observacion, fecha_hora, ' +
-        'area_anterior:area!historial_transicion_area_anterior_id_fkey(nombre), ' +
-        'area_nueva:area!historial_transicion_area_nueva_id_fkey(nombre), ' +
-        'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
-    )
-    .eq('novedad_id', novedadId)
-    .order('id', { ascending: false })
-  if (error) throw error
-  return data
+  return conRespaldo(
+    async () => {
+      const { data, error } = await supabase
+        .from('historial_transicion')
+        .select(
+          'id, estado_anterior, estado_nuevo, observacion, fecha_hora, ' +
+            'area_anterior:area!historial_transicion_area_anterior_id_fkey(nombre), ' +
+            'area_nueva:area!historial_transicion_area_nueva_id_fkey(nombre), ' +
+            'usuario:usuario_publico!historial_transicion_usuario_id_fkey(nombre, rol_id, area)',
+        )
+        .eq('novedad_id', novedadId)
+        .order('id', { ascending: false })
+      if (error) throw error
+      return data
+    },
+    (transiciones) => guardarNovedad(novedadId, { linea_de_tiempo: transiciones }),
+    async () => (await leerNovedadDescargada(novedadId))?.linea_de_tiempo ?? null,
+  )
 }

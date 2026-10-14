@@ -9,7 +9,8 @@
 /**
  * @typedef {object} ErrorTraducido
  * @property {TipoDeError} tipo
- * @property {string} codigo Código de la Tabla 22, o RED, SESION_VENCIDA o DESCONOCIDO.
+ * @property {string} codigo Código de la Tabla 22, o RED, SIN_DESCARGA, SESION_VENCIDA o
+ *   DESCONOCIDO.
  * @property {string} mensaje Texto para mostrar a la persona.
  */
 
@@ -38,6 +39,9 @@ const MENSAJES = {
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'
 const MENSAJE_DE_SESION = 'Tu sesión venció. Ingresa de nuevo.'
 const MENSAJE_DESCONOCIDO = 'Algo salió mal. Intenta de nuevo.'
+// CU-24 3a: sin conexión y sin nada descargado de esa lista.
+const MENSAJE_SIN_DESCARGA =
+  'La primera consulta necesita conexión. Abre esta pantalla con internet para descargar tus novedades.'
 
 const FALLO_DE_RED = /failed to fetch|networkerror|network request failed|load failed|fetch failed/i
 
@@ -82,6 +86,10 @@ export function esErrorDeSesion(error) {
  * @returns {ErrorTraducido}
  */
 export function traducirError(error) {
+  // Lo lanza la consulta sin conexión (`core/offline/novedadesLocales.js`).
+  if (/** @type {any} */ (error)?.name === 'SinDescarga') {
+    return { tipo: 'red', codigo: 'SIN_DESCARGA', mensaje: MENSAJE_SIN_DESCARGA }
+  }
   if (esErrorDeRed(error)) return { tipo: 'red', codigo: 'RED', mensaje: MENSAJE_DE_RED }
   if (esErrorDeSesion(error)) {
     return { tipo: 'sesion', codigo: 'SESION_VENCIDA', mensaje: MENSAJE_DE_SESION }

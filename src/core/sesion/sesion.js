@@ -1,5 +1,11 @@
 import { esErrorDeRed } from '../errores/traducir.js'
-import { borrarDatosDeSesion, guardarCatalogo, guardarMeta, leerMeta } from '../offline/bd.js'
+import {
+  borrarDatosDeSesion,
+  borrarNovedadesDescargadas,
+  guardarCatalogo,
+  guardarMeta,
+  leerMeta,
+} from '../offline/bd.js'
 import { supabase } from '../supabase/cliente.js'
 
 /*
@@ -60,8 +66,19 @@ async function descargarPerfil(usuarioId) {
   return { perfil, areas: areas.data }
 }
 
-/** Guarda en el dispositivo lo que la aplicación necesita para abrir sin red. */
+/** Lo que decide qué novedades puede ver el usuario (RNF-11). */
+const ALCANCE = ['id', 'rol_id', 'finca_id', 'area_id']
+
+/**
+ * Guarda en el dispositivo lo que la aplicación necesita para abrir sin red. Si el perfil
+ * cambió de alcance, las novedades descargadas ya no son las suyas: se borran (decisión 13 del
+ * plan del Sprint 4).
+ */
 async function guardarEnElDispositivo({ perfil, areas }) {
+  const anterior = await leerMeta('perfil')
+  if (anterior && ALCANCE.some((campo) => anterior[campo] !== perfil[campo])) {
+    await borrarNovedadesDescargadas()
+  }
   await Promise.all([
     guardarMeta('perfil', perfil),
     guardarMeta('actualizado_en', new Date().toISOString()),

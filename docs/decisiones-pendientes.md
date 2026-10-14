@@ -1057,3 +1057,24 @@ repositorio es la lista oficial (punto 1).
   «Mis novedades», que se vuelve a leer cuando cambia la cola.
 - **08-B también sale arriba de «Mis novedades»** (decisión 7 del plan). «Ingresar» cierra la sesión
   local, conserva las pendientes y lleva al ingreso; al volver a ingresar, se envían.
+
+## 37 · Consulta sin conexión (04-B, 11-B y el detalle)
+
+- **Las pendientes en 04-B** van primero en «Abiertas», con y sin conexión, y se cuentan con ellas
+  («Abiertas (3)», como en Figma). Dicen «Sin código», la hora en que se registraron («hoy 6:52
+  a. m.» u otro día «22 sep, 6:52 a. m.») y abren la pantalla 08.
+- **La fecha de lo descargado.** Figma escribe «Estás viendo lo descargado el 24 sep 2026, 7:42
+  a. m.» (04-B) y «Bandeja descargada hoy 7:42 a. m.» (11-B). Las dos vistas usan la misma forma:
+  «hoy 7:42 a. m.» si fue hoy y «el 24 sep 2026, 7:42 a. m.» si fue otro día.
+- **Las escaladas del director (19)** no tienen dibujo sin conexión: llevan el aviso de 04-B
+  (decisión 15 del plan). Los contadores del mes («Aprobadas» y «Rechazadas») quedan en «–» sin
+  conexión: se cuentan en el historial y no se descargan.
+- **El detalle sin conexión** muestra «Datos del 24 sep, 7:42 a. m.» bajo las etiquetas, como en
+  09-D y 14-B, y no ofrece acciones. Las acciones deshabilitadas con su explicación llegan con
+  RF-25 (PR 5).
+- **Una pestaña que nunca se abrió con conexión** dice el texto de 3a, aunque otras sí se hayan
+  descargado. Su conteo, en cambio, es el de la última descarga.
+- **La bandeja del escritorio**, sin conexión, pierde las notas de reasignación y la vista previa
+  no trae el historial: no se descargan. La tabla y los conteos sí.
+- **La pantalla de registrar la solución (18)** se abre sin conexión con lo descargado, si lo hay.
+  Enviar falla como en 14-C hasta que RF-25 (PR 5) la deshabilite.

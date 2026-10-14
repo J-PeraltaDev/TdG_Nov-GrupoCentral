@@ -2,11 +2,13 @@ import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  cambiarNovedadesDescargadas,
   cerrarBd,
   contarPendientes,
   guardarMeta,
   leerCatalogo,
   leerMeta,
+  leerNovedadesDescargadas,
   NOMBRE_BD,
 } from '../offline/bd.js'
 import { cerrarSesion, iniciarSesion, restaurarSesion, revisarSesion } from './sesion.js'
@@ -71,6 +73,13 @@ function conTablas({ usuario, areas = AREAS, finca = FINCA }) {
 function conConexion(enLinea) {
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(enLinea)
 }
+
+/** Una novedad descargada de «Abiertas», como la deja una consulta con conexión (RF-24). */
+const descargarUna = () =>
+  cambiarNovedadesDescargadas(() => ({
+    guardar: [{ id: 'n-153', codigo: 153, estado: 'asignada' }],
+    descarga: { clave: 'novedades:abiertas', fecha: '2026-09-24T12:42:00.000Z' },
+  }))
 
 describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
   beforeEach(async () => {
@@ -358,6 +367,7 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
 
     it('si le cambiaron el rol y el alcance, entrega el perfil nuevo y lo guarda', async () => {
       await guardarMeta('perfil', { ...REPORTANTE, finca: FINCA, area: null })
+      await descargarUna()
       conSesion()
       conTablas({ usuario: { ...REPORTANTE, rol_id: 2, finca_id: null, area_id: 'area-m' } })
 
@@ -366,6 +376,20 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
       expect(desactivado).toBe(false)
       expect(perfil).toMatchObject({ rol_id: 2, finca_id: null, area: AREAS[0] })
       expect((await leerMeta('perfil')).rol_id).toBe(2)
+      // RF-24 (decisión 13 del plan): lo descargado era de otro alcance.
+      expect(await leerNovedadesDescargadas()).toEqual([])
+      expect(await leerMeta('descarga:novedades:abiertas')).toBeUndefined()
+    })
+
+    it('RF-24: con el mismo alcance, lo descargado se conserva', async () => {
+      await guardarMeta('perfil', { ...REPORTANTE, finca: FINCA, area: null })
+      await descargarUna()
+      conSesion()
+      conTablas({ usuario: { ...REPORTANTE, nombre: 'Otro nombre' } })
+
+      await revisarSesion()
+
+      expect(await leerNovedadesDescargadas()).toHaveLength(1)
     })
 
     it('sin sesión no hay perfil, y no es porque lo hayan desactivado', async () => {

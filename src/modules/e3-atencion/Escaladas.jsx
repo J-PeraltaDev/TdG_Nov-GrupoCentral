@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { Link } from 'react-router'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { firmaDe } from '../../core/sesion/roles.js'
@@ -20,7 +21,11 @@ import iconoEsperan from '../../core/ui/iconos/hourglass_top.svg'
 import iconoReloj from '../../core/ui/iconos/schedule.svg'
 import iconoAprobadas from '../../core/ui/iconos/verified.svg'
 import { formatearCodigo } from '../../core/utils/codigo.js'
-import { inicioDelMesEnColombia, tiempoTranscurrido } from '../../core/utils/fechas.js'
+import {
+  formatearDescarga,
+  inicioDelMesEnColombia,
+  tiempoTranscurrido,
+} from '../../core/utils/fechas.js'
 import { JustificacionDelEscalamiento } from './JustificacionDelEscalamiento.jsx'
 
 /*
@@ -30,6 +35,9 @@ import { JustificacionDelEscalamiento } from './JustificacionDelEscalamiento.jsx
  *
  * Decidir es abrir la novedad: la pantalla 20 es su detalle. Figma dibuja esta pantalla para
  * el escritorio; en el teléfono son las mismas tarjetas, en una columna.
+ *
+ * Sin conexión, la lista es la descargada, con el aviso de 04-B (RF-24; Figma no la dibuja sin
+ * conexión, decisión 15 del plan).
  */
 
 const ORIGEN = '/escaladas'
@@ -129,6 +137,7 @@ function Escalada({ novedad, escalamiento }) {
 
 export default function Escaladas() {
   const { perfil } = useSesion()
+  const enLinea = useEnLinea()
   const [intento, setIntento] = useState(0)
   const [lista, setLista] = useState({ intento: -1, novedades: [], total: 0, pagina: 0 })
   const [decisiones, setDecisiones] = useState(null)
@@ -159,7 +168,8 @@ export default function Escaladas() {
     return () => {
       vigente = false
     }
-  }, [perfil.id, intento])
+    // Sin conexión se lee lo descargado; al volver, lo del servidor.
+  }, [perfil.id, intento, enLinea])
 
   // La justificación de cada novedad está en su historial: se pide para las que se ven.
   const idsVisibles = lista.novedades.map(({ id }) => id).join(',')
@@ -186,7 +196,7 @@ export default function Escaladas() {
       const siguiente = lista.pagina + 1
       const pagina = await listarEscaladas({ pagina: siguiente })
       setLista((actual) => ({
-        intento: actual.intento,
+        ...actual,
         novedades: [...actual.novedades, ...pagina.novedades],
         total: pagina.total,
         pagina: siguiente,
@@ -212,6 +222,13 @@ export default function Escaladas() {
           Solicitudes de las áreas que necesitan tu autorización
         </p>
       </header>
+
+      {!cargando && lista.descargadaEn ? (
+        <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+          {/* La hora ya termina en punto («a. m.»), como en Figma. */}
+          Estás viendo lo descargado {formatearDescarga(lista.descargadaEn)}
+        </Aviso>
+      ) : null}
 
       <ul aria-label="Resumen de tus decisiones" className="grid grid-cols-3 gap-2 lg:gap-4">
         <Contador
