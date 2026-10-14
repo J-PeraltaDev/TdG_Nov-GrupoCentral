@@ -701,3 +701,28 @@ una sola «fecha de la última actualización».
 > mismo filtro, orden y paginación que el servidor, y muestran la fecha y la hora de la descarga de
 > esa lista (RF-09, RF-18); si esa lista no se ha descargado, informan que la primera consulta
 > requiere conexión.
+
+## 22 · Cómo se sabe que una novedad se registró sin conexión (S4)
+
+**Sección:** SDD 5.2 (detalle completo, Figura 12) y 6.1.11; 7.3 (decisiones por validar).
+
+**Qué pasa.** El SDD dice que la ficha «indica cuándo la novedad se registró sin conexión (RNF-09)»,
+y Figma lo escribe en la primera entrada de la línea de tiempo («21 sep, 6:48 a. m. · registrada
+sin conexión», pantalla 20). Pero ni la Tabla 26 ni `registrar_novedad` guardan ese dato.
+
+**Qué se hizo (complemento; plan del Sprint 4, decisión 25, opción A):** se deriva de las dos
+fechas que ya existen. Si `fecha_sincronizacion` es más de `REGISTRO_SIN_CONEXION_MINUTOS` (5,
+parámetro nuevo de `parametros.js`) posterior a `fecha_registro`, la novedad se registró sin
+conexión: un envío con conexión tarda segundos. La base no cambia. Lo dice la entrada del registro
+en la línea de tiempo del detalle, para los cuatro roles.
+
+**Texto propuesto (6.1.11, al final del párrafo del detalle):**
+
+> «Registrada sin conexión» se deriva de las dos fechas: si la sincronización llegó más de
+> `REGISTRO_SIN_CONEXION_MINUTOS` (5) después del registro en la finca, la entrada del registro
+> en la línea de tiempo lo indica. No se guarda en la base.
+
+**Texto propuesto (7.3, una fila nueva):**
+
+> El umbral de 5 minutos para «registrada sin conexión» se valida en el piloto con los tiempos
+> reales de envío desde las fincas.

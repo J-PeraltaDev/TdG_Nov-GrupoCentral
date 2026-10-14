@@ -76,6 +76,11 @@ vi.mock('../core/offline/sincronizador.js', () => ({
   useSincronizacionAutomatica: vi.fn(),
   reintentar: vi.fn(),
 }))
+// Las fotos (RF-08) tienen sus propias pruebas.
+vi.mock('../core/supabase/repositorios/evidencias.js', () => ({
+  listarEvidencias: vi.fn().mockResolvedValue([]),
+  subirEvidencia: vi.fn(),
+}))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
     { id: 'area-m', nombre: 'Mantenimiento' },

@@ -10,6 +10,7 @@ import iconoInfo from '../../core/ui/iconos/info.svg'
 import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { codigoLocal } from '../../core/utils/codigo.js'
 import { formatearFechaHora } from '../../core/utils/fechas.js'
+import { FOTOS_SIN_RED } from './medidasDeFoto.js'
 
 /*
  * Pantalla 07 · Guardada en el dispositivo (RF-21 / CU-21 3 a 5): la constancia local de una
@@ -83,6 +84,13 @@ export default function NovedadGuardada() {
         <Aviso tipo="info" icono={iconoInfo} className="w-full">
           No borres los datos del navegador ni desinstales la app hasta que se sincronice.
         </Aviso>
+
+        {/* CU-08 4b: había fotos elegidas, pero sin conexión no se guardan (decisión 21). */}
+        {state.conFotos ? (
+          <Aviso tipo="advertencia" icono={iconoSinConexion} className="w-full">
+            {FOTOS_SIN_RED}
+          </Aviso>
+        ) : null}
 
         <Link
           to="/pendientes"

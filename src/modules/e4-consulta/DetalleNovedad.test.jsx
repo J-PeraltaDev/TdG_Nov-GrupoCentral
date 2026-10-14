@@ -29,6 +29,11 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   confirmarResolucion: vi.fn(),
   reportarFallaPersiste: vi.fn(),
 }))
+// Las fotos (RF-08) tienen sus propias pruebas.
+vi.mock('../../core/supabase/repositorios/evidencias.js', () => ({
+  listarEvidencias: vi.fn().mockResolvedValue([]),
+  subirEvidencia: vi.fn(),
+}))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
 }))
@@ -143,6 +148,19 @@ function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
 }
 
 const dato = (nombre) => screen.getByText(nombre, { selector: 'dt' }).nextElementSibling
+
+/**
+ * Sin acciones de atención. El reportante, en un estado no final, sí puede adjuntar fotos (Tabla
+ * 35, RF-08); los demás no ven el bloque si la novedad no tiene fotos.
+ *
+ * @param {boolean} puedeAdjuntar
+ */
+async function sinAccionesSalvoFotos(puedeAdjuntar) {
+  if (puedeAdjuntar) await screen.findByRole('button', { name: 'Adjuntar foto' })
+  expect(screen.queryAllByRole('button').map((boton) => boton.textContent)).toEqual(
+    puedeAdjuntar ? ['Adjuntar foto'] : [],
+  )
+}
 
 beforeEach(() => {
   // Solo se fija la fecha: los temporizadores siguen siendo reales.
@@ -340,7 +358,7 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
       abrir({ rol })
       await screen.findByRole('heading', { level: 1, name: 'NOV-0153' })
 
-      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      await sinAccionesSalvoFotos(rol === 'reportante')
     },
   )
 
@@ -822,7 +840,7 @@ describe('Pantallas 20 y 20-C · El director decide sobre una escalada (RF-13 / 
       await screen.findByRole('heading', { level: 1 })
 
       expect(justificacion()).not.toBeInTheDocument()
-      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      await sinAccionesSalvoFotos(rol === 'reportante')
       expect(screen.getByRole('region', { name: 'Descripción' })).toBeVisible()
       // La justificación sigue en la línea de tiempo, como cualquier observación.
       expect(screen.getByText('Hay que comprar el motor.')).toBeVisible()
@@ -895,7 +913,7 @@ describe('Pantallas 09, 09-B y 09-C · La finca responde a una novedad resuelta 
       abrir({ rol: 'reportante' })
       await screen.findByRole('heading', { level: 1 })
 
-      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      await sinAccionesSalvoFotos(estado !== 'rechazada')
       expect(document.querySelector('[data-barra-de-acciones]')).toBeNull()
     },
   )
@@ -983,7 +1001,7 @@ describe('Pantallas 09, 09-B y 09-C · La finca responde a una novedad resuelta 
     expect(
       screen.queryByRole('region', { name: 'Solución registrada por Mantenimiento' }),
     ).not.toBeInTheDocument()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    await sinAccionesSalvoFotos(true)
     expect(screen.getByRole('main')).toHaveFocus()
   })
 })
@@ -1122,5 +1140,24 @@ describe('Detalle sin conexión (RF-24 / CU-24 6 y CU-18 3a; RF-25 / CU-25)', ()
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Esta novedad no está descargada. Ábrela con conexión.',
     )
+  })
+})
+
+describe('Registrada sin conexión (RNF-09; decisión 25 del plan)', () => {
+  it('RNF-09: si llegó al servidor horas después de registrarse, la línea de tiempo lo dice', async () => {
+    conNovedad({ ...ASIGNADA, fecha_sincronizacion: '2026-09-24T15:10:00Z' })
+    abrir()
+
+    const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
+    expect(linea.getByText(/· registrada sin conexión$/)).toBeVisible()
+  })
+
+  it('RNF-09: enviada con conexión (un minuto después), no', async () => {
+    conNovedad()
+    abrir()
+
+    const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
+    expect(await linea.findByText('Luz Marina Córdoba · Reportante')).toBeVisible()
+    expect(linea.queryByText(/registrada sin conexión/)).not.toBeInTheDocument()
   })
 })

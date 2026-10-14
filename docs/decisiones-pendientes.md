@@ -1102,3 +1102,25 @@ repositorio es la lista oficial (punto 1).
 - **Las acciones solo dependen del monitor de conexión.** Si el detalle llegó del dispositivo
   pero el monitor ya ve red, las acciones se habilitan: cada una la verifica el servidor contra
   el estado vigente (`TRANSICION_INVALIDA`).
+
+## 39 · Evidencias fotográficas en el cliente (05, 05-B, 05-D, 06, 07 y el detalle)
+
+- **Hasta 3 fotos en 05** (decisión 37 del plan; Figma dibuja una miniatura). Con 3, «Tomar foto» y
+  «Elegir de la galería» quedan no disponibles con «Máximo 3 fotos por novedad.».
+- **Mientras se reduce** una foto, «Reduciendo la foto…»; en el detalle, el recuadro dice
+  «Subiendo…». Figma no los dibuja.
+- **06 y 07 cuando hay fotos** (decisión 21). Si una foto no sube, 06 dice «La foto no se pudo
+  subir. Adjúntala desde el detalle.» (o «Las fotos no se pudieron subir. Adjúntalas desde el
+  detalle.»). Si la novedad va a la cola, 07 lo avisa con el texto de 05-B.
+- **El bloque «Evidencias» del detalle** sale si hay fotos o si el reportante puede adjuntar. Va
+  entre la descripción y la línea de tiempo, como en Figma. Cada foto abre la imagen completa en
+  otra pestaña, con el texto alternativo «Foto 1 de NOV-0145». Sin la leyenda de ejemplo de Figma
+  («Impresora»): `evidencia` no tiene leyenda (decisión 23).
+- **Sin conexión,** «Adjuntar foto» queda no disponible con «Las fotos necesitan conexión.»
+  (decisión 17), y las fotos se ven como recuadros grises.
+- **En el teléfono de 360 px** caben dos recuadros por fila y el tercero baja. En Figma (390 px)
+  caben en una fila.
+- **El ícono de cámara** de las tarjetas (04-B y 11-B) sale de `evidencia(count)` en la consulta
+  de la lista; se verificó que la API lo resuelve a través de `v_novedad`. El lector de pantalla
+  lo anuncia como «Tiene fotos».
+- **«Registrada sin conexión»** en la línea de tiempo se deriva de las dos fechas (cambio 22).

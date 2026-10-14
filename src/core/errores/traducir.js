@@ -34,6 +34,9 @@ const MENSAJES = {
   // CU-04 6a: lo arma el repositorio de fincas a partir de la restricción de unicidad. Va sin
   // punto, como lo escribe Figma (pantalla 30-B) bajo el campo.
   FINCA_EXISTENTE: 'Ya existe una finca con ese nombre en esta razón social',
+  // Sprint 4, RF-08: el disparador de `evidencia` (cambio 17 del SDD; plan, decisión 20).
+  LIMITE_DE_FOTOS: 'Esta novedad ya tiene 3 fotos.',
+  EVIDENCIA_INVALIDA: 'No pudimos guardar la foto. Intenta de nuevo.',
 }
 
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'

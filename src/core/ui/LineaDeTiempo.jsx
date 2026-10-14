@@ -47,8 +47,9 @@ function cambioDeArea(transicion) {
  * @param {object} props
  * @param {Transicion[]} props.transiciones De la más reciente a la más antigua.
  * @param {boolean} [props.conPie] Aclara que el historial no se puede cambiar (pantalla 22).
+ * @param {boolean} [props.registradaSinConexion] El registro lo dice (RNF-09, Figma 20).
  */
-export function LineaDeTiempo({ transiciones, conPie = false }) {
+export function LineaDeTiempo({ transiciones, conPie = false, registradaSinConexion = false }) {
   return (
     <>
       <ol className="flex flex-col gap-3">
@@ -84,6 +85,9 @@ export function LineaDeTiempo({ transiciones, conPie = false }) {
                     {formatearFechaCorta(transicion.fecha_hora)}
                   </time>
                   {cambioDeArea(transicion)}
+                  {registradaSinConexion && !transicion.estado_anterior
+                    ? ' · registrada sin conexión'
+                    : ''}
                 </p>
                 {transicion.observacion ? (
                   <p className="rounded-lg bg-gris-100 px-2.5 py-2 text-cuerpo-pequeno break-words text-texto">

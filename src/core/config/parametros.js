@@ -39,5 +39,9 @@ export const FOTO_CALIDAD_JPEG = 0.7
 export const FOTO_PESO_MAXIMO_BYTES = 1024 * 1024
 export const FOTOS_MAXIMO_POR_NOVEDAD = 3
 
+/** Una novedad que llegó al servidor más de 5 minutos después de registrarse se registró sin
+ * conexión (RNF-09; plan del Sprint 4, decisión 25): con conexión, el envío tarda segundos. */
+export const REGISTRO_SIN_CONEXION_MINUTOS = 5
+
 /** Zona horaria de todas las fechas que muestra la aplicación (SDD 6.1.11). */
 export const ZONA_HORARIA = 'America/Bogota'

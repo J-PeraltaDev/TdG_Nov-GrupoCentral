@@ -8,6 +8,7 @@ import {
 } from '../utils/fechas.js'
 import { Estado } from './Estado.jsx'
 import { Icono } from './Icono.jsx'
+import iconoFotos from './iconos/photo_camera.svg'
 import iconoTiempo from './iconos/schedule.svg'
 import { Prioridad } from './Prioridad.jsx'
 
@@ -84,6 +85,13 @@ export function TarjetaNovedad({ novedad, pie = 'area', a, origen }) {
               ? registradaEl(novedad.fecha_registro)
               : tiempoTranscurrido(novedad.fecha_registro)}
           </time>
+          {/* Tiene fotos (RF-08; `evidencia(count)` de la lista). */}
+          {novedad.evidencia?.[0]?.count > 0 ? (
+            <>
+              <Icono src={iconoFotos} tamano={14} />
+              <span className="sr-only">Tiene fotos</span>
+            </>
+          ) : null}
         </p>
       </article>
     </li>
