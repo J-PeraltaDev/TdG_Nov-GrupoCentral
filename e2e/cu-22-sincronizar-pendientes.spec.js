@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test'
+import { descripcionUnica, esperarQueFuncioneSinRed, llenarNovedad } from './apoyo/registro.js'
 import { PERFIL, simularIngresoAnterior } from './apoyo/sesionFabricada.js'
+import { HAY_CLAVE, MOTIVO_SIN_CLAVE, ingresarComo, leerDeLaApi } from './apoyo/usuarios.js'
 
 /*
- * RF-22 / CU-22 · Sincronizar pendientes, sobre el build con service worker, sin ingresar (sesión
- * fabricada). La sincronización real contra el servidor está en rnf-07-sincronizar-sin-duplicados.
+ * RF-22 / CU-22 · Sincronizar pendientes, sobre el build con service worker. El curso normal va
+ * contra «staging» con la sesión del reportante de prueba; los demás, sin ingresar (sesión
+ * fabricada). Cerrar la aplicación y volver está en rnf-07-sincronizar-sin-duplicados.
  */
 
 const MOTIVO_WEBKIT =
@@ -35,6 +38,42 @@ async function abrirSinRed(page, context, segundosParaVencer) {
   await context.setOffline(true)
   await page.goto('/novedades')
 }
+
+test('RF-22 / CU-22: con la aplicación abierta, al volver la red se envía sola y 08 muestra su código', async ({
+  page,
+  context,
+  browserName,
+}, testInfo) => {
+  test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
+  test.fixme(browserName === 'webkit', MOTIVO_WEBKIT)
+  await ingresarComo(page, 'reportante')
+  await esperarQueFuncioneSinRed(page)
+  await context.setOffline(true)
+
+  const descripcion = descripcionUnica(testInfo, 'Vuelve la red con la app abierta')
+  await page.goto('/registrar')
+  await llenarNovedad(page, { descripcion, prioridad: 'Normal', area: 'Mantenimiento' })
+  await page.getByRole('button', { name: 'Guardar en el dispositivo' }).click()
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+  ).toBeVisible()
+  await indicador(page).click()
+  await expect(page.getByText('En espera de conexión')).toBeVisible()
+
+  // Vuelve la red sin recargar ni cambiar de pantalla.
+  await context.setOffline(false)
+
+  await expect(page.getByText('Todo está sincronizado')).toBeVisible({ timeout: 30_000 })
+  await expect(indicador(page)).toHaveText('En línea')
+  const filas = await leerDeLaApi(
+    page,
+    `v_novedad?select=codigo&descripcion=eq.${encodeURIComponent(descripcion)}`,
+  )
+  expect(filas).toHaveLength(1)
+  await expect(
+    page.getByRole('list', { name: 'Pendientes de sincronizar' }).getByRole('listitem'),
+  ).toContainText(`Enviada · código NOV-${String(filas[0].codigo).padStart(4, '0')}`)
+})
 
 test('RF-23 / CU-23: desde cualquier pantalla, el indicador lleva a las pendientes (08), en el orden en que se registraron', async ({
   page,

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { descripcionUnica, llenarNovedad } from './apoyo/registro.js'
+import { descripcionUnica, esperarQueFuncioneSinRed, llenarNovedad } from './apoyo/registro.js'
 import { HAY_CLAVE, MOTIVO_SIN_CLAVE, ingresarComo, leerDeLaApi } from './apoyo/usuarios.js'
 
 /*
@@ -25,35 +25,7 @@ test.describe('RNF-07 a RNF-09 · Registrar sin red y sincronizar sin duplicados
     )
 
     await ingresarComo(page, 'reportante')
-    // Antes de cortar la red: la aplicación en caché y el perfil guardado en el dispositivo, como
-    // quedan después de un ingreso (RNF-10). Sin el perfil, sin red pediría ingresar.
-    // Se sondea desde la prueba: `waitForFunction` no espera promesas (la promesa misma ya es un
-    // valor verdadero) y daba por listo lo que todavía no estaba.
-    await expect
-      .poll(() => page.evaluate(async () => (await caches.keys()).length), { timeout: 20_000 })
-      .toBeGreaterThan(0)
-    await expect
-      .poll(
-        () =>
-          page.evaluate(
-            () =>
-              new Promise((resolver) => {
-                const solicitud = indexedDB.open('novedades')
-                solicitud.onsuccess = () => {
-                  const lectura = solicitud.result
-                    .transaction('meta')
-                    .objectStore('meta')
-                    .get('perfil')
-                  lectura.onsuccess = () => {
-                    solicitud.result.close()
-                    resolver(Boolean(lectura.result))
-                  }
-                }
-              }),
-          ),
-        { timeout: 20_000 },
-      )
-      .toBe(true)
+    await esperarQueFuncioneSinRed(page)
     await context.setOffline(true)
 
     const descripciones = [
