@@ -194,21 +194,34 @@ select throws_ok(
   'RF-04: el reportante no crea fincas'
 );
 
--- Evidencias (RF-08): solo en las novedades de su finca y a su nombre.
+-- Evidencias (RF-08): solo en las novedades de su finca y a su nombre. Desde el Sprint 4 la
+-- fila necesita su archivo en el bucket (rf08_evidencias_test.sql prueba el resto): se suben
+-- dos fotos primero.
+insert into storage.objects (bucket_id, name, owner_id, metadata)
+values
+  ('evidencias', '10000000-0000-4000-8000-0000000000d1/10000000-0000-4000-8000-000000000f01.jpg',
+   '10000000-0000-4000-8000-000000000001', '{"size": 1000}'),
+  ('evidencias', '10000000-0000-4000-8000-0000000000d1/10000000-0000-4000-8000-000000000f02.jpg',
+   '10000000-0000-4000-8000-000000000001', '{"size": 1000}');
+
 select lives_ok(
   $$ insert into public.evidencia (novedad_id, subida_por, ruta_storage, tamano_bytes)
-     values ('10000000-0000-4000-8000-0000000000d1', '10000000-0000-4000-8000-000000000001', 'pgtap/d1/foto-1.jpg', 1000) $$,
+     values ('10000000-0000-4000-8000-0000000000d1', '10000000-0000-4000-8000-000000000001',
+             '10000000-0000-4000-8000-0000000000d1/10000000-0000-4000-8000-000000000f01.jpg', 1000) $$,
   'RF-08: el reportante registra una evidencia de una novedad de su finca'
 );
+-- El disparador de evidencia corre antes que la política y no dice nada de la novedad ajena.
 select throws_ok(
   $$ insert into public.evidencia (novedad_id, subida_por, ruta_storage, tamano_bytes)
-     values ('10000000-0000-4000-8000-0000000000d2', '10000000-0000-4000-8000-000000000001', 'pgtap/d2/foto-1.jpg', 1000) $$,
-  '42501', null,
+     values ('10000000-0000-4000-8000-0000000000d2', '10000000-0000-4000-8000-000000000001',
+             '10000000-0000-4000-8000-0000000000d1/10000000-0000-4000-8000-000000000f02.jpg', 1000) $$,
+  'P0001', 'SIN_PERMISO',
   'RF-08: el reportante no registra evidencias de una novedad de otra finca'
 );
 select throws_ok(
   $$ insert into public.evidencia (novedad_id, subida_por, ruta_storage, tamano_bytes)
-     values ('10000000-0000-4000-8000-0000000000d1', '10000000-0000-4000-8000-000000000002', 'pgtap/d1/foto-2.jpg', 1000) $$,
+     values ('10000000-0000-4000-8000-0000000000d1', '10000000-0000-4000-8000-000000000002',
+             '10000000-0000-4000-8000-0000000000d1/10000000-0000-4000-8000-000000000f02.jpg', 1000) $$,
   '42501', null,
   'RF-08: nadie registra una evidencia a nombre de otro usuario'
 );
