@@ -7,7 +7,8 @@ import { PERFIL, simularIngresoAnterior } from './apoyo/sesionFabricada.js'
  * Sin ingresar: una sesión fabricada y una pendiente sembrada en IndexedDB. Con red, el servidor
  * rechazaría la sesión fabricada; por eso la parte «con red» se hace con las solicitudes a
  * Supabase cortadas (la red conectada sin internet de un portal cautivo) y, al final, con solo la
- * verificación del monitor respondiendo.
+ * verificación del monitor respondiendo. Se cortan en el contexto y no en la página: con el
+ * service worker activo, `page.route` no ve todas las solicitudes.
  */
 
 const PENDIENTE = {
@@ -43,7 +44,7 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
 
   // El navegador dice que volvió la red, pero Supabase no responde (portal cautivo): el
   // monitor no se deja engañar por el evento `online`.
-  await page.route(/supabase\.co\//, (ruta) => ruta.abort('internetdisconnected'))
+  await context.route(/supabase\.co\//, (ruta) => ruta.abort('internetdisconnected'))
   await context.setOffline(false)
   await expect(indicador(page)).toHaveText('Sin conexión · 1 pendiente')
   await page.waitForTimeout(2000)
@@ -53,7 +54,7 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
   // nota y el indicador vuelve a «En línea», con la pendiente todavía por enviar.
   // Las rutas nuevas se ponen antes de quitar la vieja: ninguna solicitud se cuela al servidor.
   const verificaciones = []
-  await page.route(/supabase\.co\/auth\/v1\/health/, (ruta) => {
+  await context.route(/supabase\.co\/auth\/v1\/health/, (ruta) => {
     verificaciones.push(Date.now())
     return ruta.fulfill({
       status: 200,
@@ -62,10 +63,10 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
       body: '{}',
     })
   })
-  await page.route(/supabase\.co\/(?!auth\/v1\/health)/, (ruta) =>
+  await context.route(/supabase\.co\/(?!auth\/v1\/health)/, (ruta) =>
     ruta.abort('internetdisconnected'),
   )
-  await page.unroute(/supabase\.co\//)
+  await context.unroute(/supabase\.co\//)
   await expect(indicador(page)).toHaveText('En línea · 1 pendiente', { timeout: 20_000 })
   expect(verificaciones.length).toBeGreaterThan(0)
 })
