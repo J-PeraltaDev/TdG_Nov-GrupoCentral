@@ -274,7 +274,9 @@ select throws_ok(
   'RF-08: una novedad cerrada no recibe evidencias, aunque el archivo exista'
 );
 
--- RNF-11 · solo el reportante activo de la finca sube ------------------------------------
+-- RNF-11 · al reporte solo le sube fotos el reportante activo de la finca ----------------
+-- El aprobador del área sube fotos de la solución, solo a una novedad resuelta (cambio 23;
+-- rf08_fotos_de_la_solucion_test.sql). d1 está asignada.
 
 set local request.jwt.claims = '{"sub": "b8000000-0000-4000-8000-000000000004", "role": "authenticated"}';
 select throws_ok(
@@ -283,14 +285,14 @@ select throws_ok(
              'b8000000-0000-4000-8000-0000000000d1/b8000000-0000-4000-8000-000000000141.jpg',
              'b8000000-0000-4000-8000-000000000004', '{"size": 10}') $$,
   '42501', null,
-  'RNF-11: el aprobador del área no sube fotos'
+  'RF-08: el aprobador del área no sube fotos a una novedad que no está resuelta'
 );
 select throws_ok(
   $$ insert into public.evidencia (novedad_id, subida_por, ruta_storage, tamano_bytes)
      values ('b8000000-0000-4000-8000-0000000000d1', 'b8000000-0000-4000-8000-000000000004',
              'b8000000-0000-4000-8000-0000000000d1/b8000000-0000-4000-8000-000000000102.jpg', 10) $$,
-  'P0001', 'SIN_PERMISO',
-  'RNF-11: ni registra evidencias'
+  'P0001', 'TRANSICION_INVALIDA',
+  'RF-08: ni registra evidencias en ella'
 );
 
 set local request.jwt.claims = '{"sub": "b8000000-0000-4000-8000-000000000006", "role": "authenticated"}';
