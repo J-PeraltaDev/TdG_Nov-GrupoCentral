@@ -343,6 +343,11 @@ ninguno usa Playwright. Una versión anterior de este documento decía lo contra
 **Propuesta:** agregar al CI un trabajo que levante Supabase local, genere una contraseña al azar
 para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
+**Hecho en el Sprint 4** (decisión 27 del plan): el trabajo `e2e` del CI levanta Supabase local,
+le pone a los usuarios del seed una contraseña al azar que no sale del trabajo y corre
+`npm run test:e2e` en Chromium y WebKit, a 360 × 800 y 1280 × 800. La primera semana no bloquea
+(`continue-on-error`); no sube `test-results/`.
+
 ## 16 · Avisos del asesor de Supabase
 
 El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
