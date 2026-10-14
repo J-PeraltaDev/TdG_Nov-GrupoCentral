@@ -1,10 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { encolar } from '../../core/offline/cola.js'
 import { alPedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { crearBorrador, enviarNovedad } from './enviarNovedad.js'
 
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   registrarNovedad: vi.fn(),
+}))
+vi.mock('../../core/offline/cola.js', () => ({
+  encolar: vi.fn(),
 }))
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -45,32 +49,64 @@ describe('enviarNovedad (RF-05)', () => {
     area_id: 'area-m',
   }
 
+  const PERFIL = { id: 'u-1', finca_id: 'finca-1' }
+
   beforeEach(() => {
     vi.mocked(registrarNovedad).mockReset()
+    vi.mocked(encolar)
+      .mockReset()
+      .mockImplementation(async (borrador) => ({ ok: true, pendiente: { ...borrador } }))
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('RF-05 / CU-05 5: devuelve la novedad que registró el servidor', async () => {
     const novedad = { id: 'n-1', codigo: 153, estado: 'asignada' }
     vi.mocked(registrarNovedad).mockResolvedValue(novedad)
 
-    await expect(enviarNovedad(BORRADOR)).resolves.toEqual({ ok: true, novedad })
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toEqual({ ok: true, novedad })
     expect(registrarNovedad).toHaveBeenCalledWith(BORRADOR)
   })
 
-  it('RNF-08: un corte de la red se informa como error de red, para poder reintentar', async () => {
+  it('RF-21 / CU-05 5a: si la red se cae al enviar, la guarda en el dispositivo con el mismo identificador y la misma fecha', async () => {
     vi.mocked(registrarNovedad).mockRejectedValue(new TypeError('Failed to fetch'))
 
-    await expect(enviarNovedad(BORRADOR)).resolves.toMatchObject({
-      ok: false,
-      tipo: 'red',
-      codigo: 'RED',
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toEqual({
+      ok: true,
+      pendiente: BORRADOR,
     })
+    expect(encolar).toHaveBeenCalledWith(BORRADOR, PERFIL)
+  })
+
+  it('RF-21 / CU-05 5a: sin conexión no intenta el envío: la guarda de una vez', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toMatchObject({ ok: true })
+    expect(registrarNovedad).not.toHaveBeenCalled()
+    expect(encolar).toHaveBeenCalledWith(BORRADOR, PERFIL)
+  })
+
+  it('Decisión 2: un error de sesión también la guarda, para que lo escrito no se pierda', async () => {
+    vi.mocked(registrarNovedad).mockRejectedValue({ status: 401, message: 'JWT expired' })
+
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toMatchObject({ ok: true })
+    expect(encolar).toHaveBeenCalled()
+  })
+
+  it('RF-21 / CU-21 2a y 2b: si el dispositivo no la pudo guardar, devuelve por qué', async () => {
+    const lleno = { ok: false, tipo: 'local', codigo: 'CUOTA_LLENA', mensaje: 'Sin espacio' }
+    vi.mocked(encolar).mockResolvedValue(lleno)
+    vi.mocked(registrarNovedad).mockRejectedValue(new TypeError('Failed to fetch'))
+
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toEqual(lleno)
   })
 
   it('RF-05: un error de negocio llega con el mensaje de la Tabla 22', async () => {
     vi.mocked(registrarNovedad).mockRejectedValue({ code: 'P0001', message: 'FINCA_NO_ASIGNADA' })
 
-    await expect(enviarNovedad(BORRADOR)).resolves.toEqual({
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toEqual({
       ok: false,
       tipo: 'negocio',
       codigo: 'FINCA_NO_ASIGNADA',
@@ -83,7 +119,7 @@ describe('enviarNovedad (RF-05)', () => {
     const alPedirRevision = vi.fn()
     const dejarDeEscuchar = alPedirRevisionDelPerfil(alPedirRevision)
 
-    await expect(enviarNovedad(BORRADOR)).resolves.toMatchObject({
+    await expect(enviarNovedad(BORRADOR, PERFIL)).resolves.toMatchObject({
       ok: false,
       codigo: 'SIN_PERMISO',
     })

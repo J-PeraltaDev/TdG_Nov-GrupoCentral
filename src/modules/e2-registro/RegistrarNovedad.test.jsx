@@ -1,10 +1,12 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { encolar } from '../../core/offline/cola.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
+import NovedadGuardada from './NovedadGuardada.jsx'
 import NovedadRecibida from './NovedadRecibida.jsx'
 import RegistrarNovedad from './RegistrarNovedad.jsx'
 
@@ -13,6 +15,9 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
+}))
+vi.mock('../../core/offline/cola.js', () => ({
+  encolar: vi.fn(),
 }))
 
 const AREAS = [
@@ -36,6 +41,7 @@ function abrir(rol = 'reportante') {
     <Routes>
       <Route path="/registrar" element={<RegistrarNovedad />} />
       <Route path="/registrar/recibida" element={<NovedadRecibida />} />
+      <Route path="/registrar/guardada" element={<NovedadGuardada />} />
       <Route path="/novedades" element={<h1>Mis novedades</h1>} />
     </Routes>,
     { ruta: '/registrar', rol },
@@ -56,9 +62,19 @@ async function llenar({
 const enviar = () => userEvent.click(screen.getByRole('button', { name: 'Enviar novedad' }))
 
 describe('Pantalla 05 · Registrar novedad (RF-05 / CU-05)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
     vi.mocked(registrarNovedad).mockReset()
     vi.mocked(listarAreas).mockReset().mockResolvedValue(AREAS)
+    vi.mocked(encolar)
+      .mockReset()
+      .mockImplementation(async (borrador, perfil) => ({
+        ok: true,
+        pendiente: { ...borrador, reportante_id: perfil.id, envio: 'pendiente' },
+      }))
   })
 
   it('RF-05 / CU-05 2: la finca del reportante viene precargada y no se puede cambiar', async () => {
@@ -185,28 +201,71 @@ describe('Pantalla 05 · Registrar novedad (RF-05 / CU-05)', () => {
     expect(new Date(enviado.fecha_registro).getTime()).toBeLessThanOrEqual(Date.now())
   })
 
-  it('RNF-08 / RNF-09: si la red se corta, conserva lo escrito y reintenta con el mismo identificador y la misma fecha', async () => {
-    vi.mocked(registrarNovedad)
-      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-      .mockResolvedValueOnce(REGISTRADA)
+  it('RF-21 / CU-05 5a: si la red se cae al enviar, la guarda en el dispositivo con el mismo identificador y la misma fecha (07)', async () => {
+    vi.mocked(registrarNovedad).mockRejectedValueOnce(new TypeError('Failed to fetch'))
     abrir()
     await llenar()
 
     await enviar()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('La novedad no se envió')
-    expect(screen.getByLabelText(/¿Qué está pasando\?/)).toHaveValue(
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+    ).toBeVisible()
+    const [[intentado]] = vi.mocked(registrarNovedad).mock.calls
+    const [[guardado, perfil]] = vi.mocked(encolar).mock.calls
+    expect(guardado.id_local).toBe(intentado.id_local)
+    expect(guardado.fecha_registro).toBe(intentado.fecha_registro)
+    expect(guardado).toMatchObject({
+      prioridad: 'critico',
+      area_id: 'area-m',
+      area: 'Mantenimiento',
+    })
+    expect(perfil.id).toBeTruthy()
+  })
+
+  it('RF-21 / CU-21: sin conexión muestra 05-B y guarda en el dispositivo sin intentar el envío', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    abrir()
+
+    expect(await screen.findByText('Sin conexión', { selector: 'p' })).toBeVisible()
+    expect(
+      screen.getByText(
+        'La novedad se guardará en este teléfono y se enviará sola cuando vuelva el internet.',
+      ),
+    ).toBeVisible()
+    expect(
+      screen.getByText('Se guardará en este teléfono con la fecha y hora actual y tu usuario'),
+    ).toBeVisible()
+
+    await llenar()
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar en el dispositivo' }))
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+    ).toBeVisible()
+    expect(registrarNovedad).not.toHaveBeenCalled()
+  })
+
+  it('RF-21 / CU-21 2a: si el teléfono no tiene espacio, lo dice y conserva lo escrito', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    vi.mocked(encolar).mockResolvedValue({
+      ok: false,
+      tipo: 'local',
+      codigo: 'CUOTA_LLENA',
+      mensaje:
+        'No se pudo guardar: el teléfono no tiene espacio. Libera espacio e intenta de nuevo.',
+    })
+    abrir()
+    await llenar()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar en el dispositivo' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se pudo guardar: el teléfono no tiene espacio.',
+    )
+    expect(screen.getByLabelText(/¿Qué está pasando?/)).toHaveValue(
       'El puente de la entrada se cayó',
     )
-    expect(screen.getByRole('radio', { name: /Crítico/ })).toBeChecked()
-    expect(screen.getByRole('radio', { name: /Mantenimiento/ })).toBeChecked()
-
-    await enviar()
-
-    expect(await screen.findByText('NOV-0153')).toBeVisible()
-    const [[primero], [segundo]] = vi.mocked(registrarNovedad).mock.calls
-    expect(segundo.id_local).toBe(primero.id_local)
-    expect(segundo.fecha_registro).toBe(primero.fecha_registro)
   })
 
   it('RF-05: un error del servidor se muestra con su mensaje y no se pierde el formulario', async () => {

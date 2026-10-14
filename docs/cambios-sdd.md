@@ -4,25 +4,26 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                                                                      | Estado    |
-| --- | ------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                               | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                          | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                  | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                            | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                          | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                          | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                            | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                 | Propuesto |
-| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                        | Propuesto |
-| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                      | Propuesto |
-| 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                    | Propuesto |
-| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                | Propuesto |
-| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                             | Propuesto |
-| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3          | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                   | Propuesto |
-| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10   | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                 | Propuesto |
-| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6   | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio | Propuesto |
+| N.º | Sprint | Documento y sección                                   | Qué cambia                                                                                                                                                      | Estado    |
+| --- | ------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)           | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                               | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)                         | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                          | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)                  | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                  | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                                   | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                            | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)                     | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                                   | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                          | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)                         | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                          | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)               | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                            | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                          | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                 | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                         | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                        | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3                    | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                      | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                                   | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                    | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)                 | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10               | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                             | Propuesto |
+| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3                    | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                   | Propuesto |
+| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10             | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                 | Propuesto |
+| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6             | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio | Propuesto |
+| 19  | S4     | SDD 6.1.5 («Registro de la novedad» y «Persistencia») | Precisión: un error de sesión al enviar también encola; el aviso de 07 siempre; sin `estimate()`; `persist()` también al encolar                                | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -553,3 +554,36 @@ periódicamente si el servidor responde», pero no dice contra qué, cada cuánt
 > respuesta lo confirma. Mientras el servidor no responde, el monitor consulta cada 15 s el
 > servicio de salud de Auth, con 5 s de espera máxima y en pausa con la pestaña oculta. El
 > indicador muestra la cantidad de pendientes del usuario y se anuncia una sola vez por cambio.
+
+## 19 · Registro sin conexión: error de sesión, aviso de 07 y persistencia (S4)
+
+**Sección:** SDD 6.1.5, «Registro de la novedad» (seudocódigo) y «Persistencia (RNF-07)».
+
+**Qué pasa.** El algoritmo dice qué hacer con un error de red («continuar como sin conexión») y con
+uno de negocio, pero no con uno de sesión (la sesión venció y no se pudo renovar). En persistencia,
+pide verificar la cuota y mostrar el aviso de 07 solo si el navegador no concedió el almacenamiento
+persistente; Figma lo dibuja siempre.
+
+**Qué se hizo (precisión; plan del Sprint 4, decisiones 1 a 3):**
+
+- Un error de **sesión** al enviar se trata como uno de red: la novedad va a la cola y aparece 07.
+  La sincronización pide el ingreso (08-B) y la envía con la sesión nueva. Así lo escrito no se
+  pierde.
+- 07 aparece solo después de que la transacción de IndexedDB terminó. Si falla, el formulario dice
+  por qué (almacenamiento lleno, `QuotaExceededError`, o cualquier otra falla) y conserva lo escrito.
+- El aviso de 07 sale **siempre**: es cierto en los dos casos y no hace falta preguntar si el
+  navegador concedió la persistencia.
+- **No se usa `navigator.storage.estimate()`:** es aproximado y no cambia nada; la cuota llena la
+  avisa la escritura misma. `persist()` se pide al ingresar y otra vez al encolar (Safari decide
+  según el uso).
+
+**Texto propuesto (6.1.5, seudocódigo de `registrar`):**
+
+> SI error de red O error de sesión: continuar como sin conexión
+
+**Texto propuesto (6.1.5, viñeta «Persistencia»):**
+
+> Persistencia (RNF-07): al ingresar y al guardar una pendiente, la aplicación solicita al navegador
+> almacenamiento persistente. La constancia de la pantalla 07 recomienda siempre no borrar los datos
+> del navegador hasta sincronizar. Si el almacenamiento está lleno, la escritura falla con
+> `QuotaExceededError` y el formulario lo informa (CU-21 2a).

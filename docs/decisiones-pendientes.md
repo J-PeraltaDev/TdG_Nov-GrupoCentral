@@ -37,6 +37,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
 | 34  | Detalles del indicador de conexión (RF-23)  | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
+| 35  | Registro sin conexión (05-B y 07)           | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»      | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -137,9 +138,10 @@ Redactados en español de Colombia, con tuteo, para que los revisen:
 - **Pantallas que llegan en otro sprint:** «Esta pantalla llega en el Sprint N.»
 - **Cuenta** (Figma no la dibuja para el Sprint 1): «Cerrar sesión»; con pendientes, «Tienes
   novedades sin enviar» y la explicación de que se conservan en el dispositivo (CU-01 5a).
-- **Registro, si la red falla al enviar** (Figma dibuja el caso sin conexión para el Sprint 4, no
-  este): «La novedad no se envió» · «No hay conexión. Revisa tu internet e intenta de nuevo. Lo
-  que escribiste sigue aquí.»
+- **Registro, si la red falla al enviar** (Sprint 1, reemplazado en el Sprint 4): «La novedad no
+  se envió» · «No hay conexión. Revisa tu internet e intenta de nuevo. Lo que escribiste sigue
+  aquí.» Desde el Sprint 4 la novedad va a la cola del dispositivo y aparece la pantalla 07, como
+  dice el SDD (punto 35).
 - **Registro, descripción muy larga:** «Usa máximo 500 caracteres» (el campo ya no deja pasar de
   500; es la red de seguridad).
 - **Registro, un solo faltante:** «Falta 1 dato obligatorio» (Figma solo muestra el plural).
@@ -1000,3 +1002,25 @@ repositorio es la lista oficial (punto 1).
   red, con esperas de 1, 2 y 4 s: sin red, una lista tarda unos 7 s en mostrar el error. El monitor
   pasa a «Sin conexión» con el primer fallo. La consulta sin conexión (RF-24, PR 4 del Sprint 4)
   lee del dispositivo sin esperar esos reintentos cuando el monitor ya sabe que no hay red.
+
+## 35 · Registro sin conexión (05-B y 07)
+
+- **2a y 2b** (CU-21), que Figma no dibuja. Con el almacenamiento lleno: «No se pudo guardar: el
+  teléfono no tiene espacio. Libera espacio e intenta de nuevo.» Con otra falla de escritura: «La
+  novedad no se guardó en el teléfono. Intenta de nuevo.» Los dos salen como aviso de error arriba
+  del formulario, que conserva lo escrito; el botón «Guardar en el dispositivo» es el reintento.
+- **La red que falla con conexión aparente** ya no muestra el mensaje interino del punto 10: la
+  novedad va a la cola con el mismo `id_local` y la misma fecha, y aparece 07 (SDD 6.1.5,
+  «continuar como sin conexión»).
+- **Un error de sesión al enviar también encola** (decisión 2 del plan): lo escrito no se pierde y
+  la sincronización pedirá el ingreso (08-B). Es una precisión al SDD (cambio 19).
+- **«Teléfono» también en el escritorio.** Figma escribe «Guardada en este teléfono», «La novedad se
+  guardará en este teléfono…» y «Se guardará en este teléfono…»; solo dibuja 05-B y 07 en el
+  teléfono. En el escritorio se usan los mismos textos. Si se prefiere «en este equipo» en el
+  escritorio, es un cambio de Figma.
+- **El aviso de 07** («No borres los datos del navegador…») sale siempre, como lo dibuja Figma
+  (decisión 3).
+- **El foco** va al título de 07 al llegar: quien registró con el teclado o con lector de pantalla
+  sigue desde ahí.
+- **`/pendientes`** es un marcador («Esta pantalla llega en el Sprint 4») hasta que llegue la 08
+  (RF-22).
