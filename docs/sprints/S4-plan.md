@@ -1,12 +1,13 @@
 # Sprint 4 · Plan de implementación
 
-- **Fechas:** 3–6 nov 2026 en el calendario (cuatro días; el 2 nov es festivo). El equipo va
-  adelantado (el Sprint 3 cerró el 10 oct): se propone empezar el día hábil siguiente a la
-  aprobación, desde el 14 oct, y contar cuatro días. Las fechas reales se anotan al aprobar.
+- **Fechas:** 14–19 oct 2026 (cuatro días hábiles: 14, 15, 16 y 19 oct). El calendario decía 3–6
+  nov; el equipo va adelantado (el Sprint 3 cerró el 10 oct) y empieza al aprobar.
 - **Historias:** HU-21, HU-22, HU-23, HU-24, HU-25 y HU-08 (RF-21 a RF-25 de la épica E5 y RF-08
   de la E2)
-- **Estado:** propuesto el 13 oct 2026. **Sin aprobar:** no se escribe código del sprint hasta que
-  el equipo apruebe el plan, los puntos y las decisiones.
+- **Estado:** aprobado el 13 oct 2026, con los puntos propuestos y las 41 decisiones con su
+  recomendación. El equipo autorizó las e2e que ingresan y la descarga de los cinco íconos, y dejó
+  los dispositivos reales a criterio de la implementación (decisión 29). Lo que cambie en la review
+  se ajusta en el PR que corresponda.
 
 **Meta:** el reportante registra y consulta sin conexión, y nada que cambie el estado se hace sin
 red.
@@ -57,18 +58,18 @@ Las cifras coinciden con las del cierre del Sprint 3. Datos nuevos:
 
 ## Antes de empezar
 
-| Necesidad                                                      | Para qué                                                                                                             | Estado al 13 oct 2026                                |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Aprobar este plan, los puntos y las decisiones del final       | Sin eso no se escribe código del sprint                                                                              | **Pendiente**                                        |
-| Fechas reales                                                  | El calendario dice 3–6 nov; se propone empezar desde el 14 oct                                                       | **Pendiente**                                        |
-| Autorizar que el agente corra las e2e que ingresan             | RNF-07 a RNF-09 se demuestran con una sincronización real. Cargan `.env.local` solas; la contraseña no pasa por aquí | **Pendiente** (en el Sprint 3 el equipo lo permitió) |
-| Autorizar o no que el agente recorra una vista previa de Pages | Ingresar con un usuario de prueba en la vista previa de un PR (`built-in-browser`)                                   | **Pendiente**                                        |
-| **Descargar cinco íconos** de Google                           | `download`, `photo_camera`, `image`, `add_a_photo` y `delete` (Figma 05-B, 05, 05-D y 09) no están en `iconos/`      | **Pendiente.** Origen y tamaño en la nota de abajo   |
-| Cuándo se aplica la migración del bucket en «PROYECTO»         | Tiene que estar antes de fusionar su PR (decisión 28)                                                                | **Pendiente**                                        |
-| Qué dispositivos reales hay                                    | Android de gama media e iPhone, para la lista de chequeo (decisión 29)                                               | **Pendiente**                                        |
-| El trabajo de e2e en el CI                                     | WebKit sigue sin verificar (decisión 27)                                                                             | **Pendiente**                                        |
-| Lo que sigue abierto del Sprint 3                              | #19 (la empresa), las etiquetas y reflejar en Figma las decisiones 31 a 47                                           | Pendiente del equipo                                 |
-| Avisar antes de un `staging:reset`                             | No se prevé ninguno: el bucket entra con `staging:push`. Sigue el de antes de la demo                                | —                                                    |
+| Necesidad                                                      | Para qué                                                                                                             | Estado al 13 oct 2026                              |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Aprobar este plan, los puntos y las decisiones del final       | Sin eso no se escribe código del sprint                                                                              | **Hecho** (13 oct)                                 |
+| Fechas reales                                                  | El calendario dice 3–6 nov; se propone empezar desde el 14 oct                                                       | **Hecho:** 14–19 oct                               |
+| Autorizar que el agente corra las e2e que ingresan             | RNF-07 a RNF-09 se demuestran con una sincronización real. Cargan `.env.local` solas; la contraseña no pasa por aquí | **Hecho** (13 oct)                                 |
+| Autorizar o no que el agente recorra una vista previa de Pages | Ingresar con un usuario de prueba en la vista previa de un PR (`built-in-browser`)                                   | Sin respuesta: no se hace                          |
+| **Descargar cinco íconos** de Google                           | `download`, `photo_camera`, `image`, `add_a_photo` y `delete` (Figma 05-B, 05, 05-D y 09) no están en `iconos/`      | **Hecho** (13 oct)                                 |
+| Cuándo se aplica la migración del bucket en «PROYECTO»         | Tiene que estar antes de fusionar su PR (decisión 28)                                                                | Con la recomendación; el OK se pide en ese momento |
+| Qué dispositivos reales hay                                    | Android de gama media e iPhone, para la lista de chequeo (decisión 29)                                               | **A criterio de la implementación:** ver la 29     |
+| El trabajo de e2e en el CI                                     | WebKit sigue sin verificar (decisión 27)                                                                             | **Sí** (con la recomendación)                      |
+| Lo que sigue abierto del Sprint 3                              | #19 (la empresa), las etiquetas y reflejar en Figma las decisiones 31 a 47                                           | Pendiente del equipo                               |
+| Avisar antes de un `staging:reset`                             | No se prevé ninguno: el bucket entra con `staging:push`. Sigue el de antes de la demo                                | —                                                  |
 
 **Los íconos.** `src/core/ui/iconos/LEEME.md` manda bajarlos de
 `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<nombre>/default/20px.svg`
@@ -176,7 +177,7 @@ la línea de corte, como dice el plan de arranque («planear esos sprints con me
 velocidad del Sprint 3 (≈ 8 puntos por día), cuatro días dan unos 33. Si al terminar el día 3 no
 están el PR 3 y el PR 4, RF-08 sale; nunca las pruebas de RF-21 a RF-25.
 
-Los puntos se anotan en `docs/scrum/backlog.md` y `backlog.json` cuando se aprueben.
+Adoptados el 13 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
 
 ---
 
@@ -580,15 +581,16 @@ el encargo decía algo distinto de lo que encontré, está dicho en la fila.
 
 ### Transversales
 
-| N.º | Decisión                   | Recomendación                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 25  | «registrada sin conexión»  | **Opción A (recomendada):** se deriva de `fecha_sincronizacion − fecha_registro` mayor que un umbral, parámetro nuevo `REGISTRO_SIN_CONEXION_MINUTOS = 5` en `parametros.js`. Sin cambios en la base; un envío con conexión tarda segundos. Va junto a la primera entrada de la línea de tiempo (20, 20-B y 20-C) y del detalle de los demás roles. **Opción B:** una columna nueva en `novedad` (cambio a la Tabla 26 y a `registrar_novedad`) |
-| 26  | Peso de la ruta de ingreso | Al ingreso solo llegan el monitor (lo usa `useEnLinea`, que está en el ingreso) y el `fetch` del cliente: ≈ 1,5 KB. Cola, sincronizador, almacén de novedades y disparadores van en el marco, que ya carga bajo demanda; 07, 08 y el reductor de fotos, cada uno en su paquete. Se mide en cada PR; si pasa de 200 KB, se detiene y se avisa                                                                                                    |
-| 27  | WebKit sin verificar       | **Sí al PR 0:** un trabajo `e2e` en el CI con Supabase local, una contraseña al azar para los usuarios del seed y Playwright en Chromium y WebKit, sin bloquear la primera semana. Es el sprint que más depende de Safari (almacenamiento, `persist()`, instalación). Si no se aprueba, queda la prueba manual en un iPhone (29)                                                                                                                |
-| 28  | Producción                 | La migración `rf08_evidencias` llega a «PROYECTO» **antes de fusionar el PR 6**, con el OK del equipo: `npx supabase db push --project-ref lyrdsmfalrchbdpmikmt --dry-run` (debe listar solo esa migración), `db push` con la misma referencia, una consulta de solo lectura a `storage.buckets` y el asesor de «PROYECTO». Sin `supabase link` ni `seed.sql`. Este sprint no trae Edge Functions. Si RF-08 sale, no se aplica nada             |
-| 29  | Dispositivos reales        | Las pruebas las hace el equipo, con la lista de chequeo de abajo                                                                                                                                                                                                                                                                                                                                                                                |
+| N.º | Decisión                   | Recomendación                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 25  | «registrada sin conexión»  | **Opción A (recomendada):** se deriva de `fecha_sincronizacion − fecha_registro` mayor que un umbral, parámetro nuevo `REGISTRO_SIN_CONEXION_MINUTOS = 5` en `parametros.js`. Sin cambios en la base; un envío con conexión tarda segundos. Va junto a la primera entrada de la línea de tiempo (20, 20-B y 20-C) y del detalle de los demás roles. **Opción B:** una columna nueva en `novedad` (cambio a la Tabla 26 y a `registrar_novedad`)                                                                                                                                                                                                                                                                   |
+| 26  | Peso de la ruta de ingreso | Al ingreso solo llegan el monitor (lo usa `useEnLinea`, que está en el ingreso) y el `fetch` del cliente: ≈ 1,5 KB. Cola, sincronizador, almacén de novedades y disparadores van en el marco, que ya carga bajo demanda; 07, 08 y el reductor de fotos, cada uno en su paquete. Se mide en cada PR; si pasa de 200 KB, se detiene y se avisa                                                                                                                                                                                                                                                                                                                                                                      |
+| 27  | WebKit sin verificar       | **Sí al PR 0:** un trabajo `e2e` en el CI con Supabase local, una contraseña al azar para los usuarios del seed y Playwright en Chromium y WebKit, sin bloquear la primera semana. Es el sprint que más depende de Safari (almacenamiento, `persist()`, instalación). Si no se aprueba, queda la prueba manual en un iPhone (29)                                                                                                                                                                                                                                                                                                                                                                                  |
+| 28  | Producción                 | La migración `rf08_evidencias` llega a «PROYECTO» **antes de fusionar el PR 6**, con el OK del equipo: `npx supabase db push --project-ref lyrdsmfalrchbdpmikmt --dry-run` (debe listar solo esa migración), `db push` con la misma referencia, una consulta de solo lectura a `storage.buckets` y el asesor de «PROYECTO». Sin `supabase link` ni `seed.sql`. Este sprint no trae Edge Functions. Si RF-08 sale, no se aplica nada                                                                                                                                                                                                                                                                               |
+| 29  | Dispositivos reales        | Las pruebas las hace el equipo, con la lista de chequeo de abajo. **Decidido el 13 oct a criterio de la implementación**, a partir de lo que usan hoy los reportantes (H14) y del plan de arranque («un Android de gama media y un PC de finca; un iPhone si hay»): **(1) obligatorio:** un Android de gama media (3 o 4 GB de RAM, Android 12 o más) con Chrome, instalado como aplicación; **(2) obligatorio:** un PC de escritorio con Windows y Chrome o Edge, como el de una oficina de finca; **(3) si alguien del equipo lo tiene:** un iPhone con iOS 17 o más, con Safari y la aplicación en la pantalla de inicio. Sin iPhone, WebKit queda cubierto solo por el CI (PR 0), y así se dice en el informe |
 
-**Lista de chequeo en un dispositivo real** (Android de gama media y, si hay, un iPhone):
+**Lista de chequeo en un dispositivo real** (los pasos 1 a 9 en el Android y en el iPhone; en el PC,
+del 2 al 7 y el 9, con la red cortada desde el sistema):
 
 1. Instalar la aplicación desde el navegador (en iPhone, «Agregar a inicio»).
 2. Ingresar con conexión y abrir «Mis novedades» y un detalle.
