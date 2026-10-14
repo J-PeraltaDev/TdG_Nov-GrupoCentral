@@ -71,7 +71,7 @@ describe('Pantalla 02 · Recuperar contraseña (RF-02 / CU-02 1 a 3)', () => {
       '2Un administrador te entrega un código temporal',
       '3Ingresas el código y tu contraseña nueva',
     ])
-    expect(screen.getByRole('status')).toHaveTextContent('En línea')
+    expect(document.querySelector('[data-conexion]')).toHaveTextContent('En línea')
   })
 
   it('la flecha vuelve al ingreso', () => {

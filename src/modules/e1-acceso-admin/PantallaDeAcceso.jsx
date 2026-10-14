@@ -1,5 +1,4 @@
 import { Link } from 'react-router'
-import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { Conexion } from '../../core/ui/Conexion.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
 import iconoVolver from '../../core/ui/iconos/arrow_back.svg'
@@ -16,8 +15,6 @@ import iconoVolver from '../../core/ui/iconos/arrow_back.svg'
  * @param {import('react').ReactNode} props.children
  */
 export function PantallaDeAcceso({ titulo, volver, children }) {
-  const enLinea = useEnLinea()
-
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 border-b border-borde bg-superficie">
@@ -31,7 +28,7 @@ export function PantallaDeAcceso({ titulo, volver, children }) {
             <Icono src={iconoVolver} tamano={24} />
           </Link>
           <h1 className="min-w-0 flex-1 truncate text-subtitulo text-texto">{titulo}</h1>
-          <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
+          <Conexion className="flex-none" />
         </div>
       </header>
 

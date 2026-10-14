@@ -306,7 +306,7 @@ describe('Pantallas 13 y 14 · Detalle de la novedad en el teléfono (RF-18 / CU
     abrir()
     await screen.findByRole('heading', { level: 1 })
 
-    expect(screen.getByRole('status')).toHaveTextContent('En línea')
+    expect(document.querySelector('[data-conexion]')).toHaveTextContent('En línea')
   })
 
   it('si no hay conexión lo informa y deja reintentar', async () => {

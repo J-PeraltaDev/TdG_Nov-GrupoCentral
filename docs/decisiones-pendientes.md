@@ -36,6 +36,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
+| 34  | Detalles del indicador de conexión (RF-23)  | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -982,3 +983,20 @@ visibles en ramas publicadas.
 **Decidido el 10 oct 2026:** algunos de esos nombres son reales y no importa. Se dejan como
 están, en las capturas y en las pruebas, y no hace falta repetir nada. Lo que sigue fuera del
 repositorio es la lista oficial (punto 1).
+
+## 34 · Detalles del indicador de conexión (RF-23)
+
+- **«En línea · N pendientes».** Figma dibuja tres variantes del indicador (En línea, Sin conexión y
+  En línea · sincronizando) y compone «Sin conexión · 1 pendiente» en 04-B y 07. No dibuja el caso
+  con red y pendientes que quedaron con error: se escribe «En línea · 2 pendientes», con «pendiente»
+  en singular cuando es una. Mientras sincroniza, no se cuentan.
+- **Un solo anuncio.** El indicador dejó de ser `role="status"`: en el marco hay uno por barra
+  (teléfono y escritorio) y cada pantalla de una sola tarea pinta el suyo. Una región
+  `aria-live="polite"` del marco dice el mismo texto, una vez por cambio. La pantalla de ingreso
+  muestra el indicador sin anunciarlo.
+- **Las pendientes de otra persona del dispositivo no se cuentan** (RNF-10), ni en el indicador ni
+  en la advertencia de «Cuenta» al cerrar la sesión.
+- **La API de datos reintenta sola.** `supabase-js` reintenta tres veces una lectura que falla por
+  red, con esperas de 1, 2 y 4 s: sin red, una lista tarda unos 7 s en mostrar el error. El monitor
+  pasa a «Sin conexión» con el primer fallo. La consulta sin conexión (RF-24, PR 4 del Sprint 4)
+  lee del dispositivo sin esperar esos reintentos cuando el monitor ya sabe que no hay red.

@@ -345,7 +345,7 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
 
     it('si el usuario fue desactivado, cierra la sesión local, dice por qué y conserva las pendientes', async () => {
       await guardarMeta('perfil', { ...REPORTANTE, finca: FINCA, area: null })
-      const pendientes = await contarPendientes()
+      const pendientes = await contarPendientes(REPORTANTE.id)
       conSesion()
       // La política ya no le deja leer ni su propia fila.
       conTablas({ usuario: null })
@@ -353,7 +353,7 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
       expect(await revisarSesion()).toEqual({ perfil: null, desactivado: true })
       expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
       expect(await leerMeta('perfil')).toBeUndefined()
-      expect(await contarPendientes()).toBe(pendientes)
+      expect(await contarPendientes(REPORTANTE.id)).toBe(pendientes)
     })
 
     it('si le cambiaron el rol y el alcance, entrega el perfil nuevo y lo guarda', async () => {
@@ -396,6 +396,7 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
           const tx = bd.transaction('pendientes', 'readwrite')
           tx.objectStore('pendientes').put({
             id_local: 'p-1',
+            reportante_id: REPORTANTE.id,
             fecha_registro: '2026-10-13T12:00:00Z',
           })
           tx.oncomplete = () => {
@@ -409,7 +410,7 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
 
       expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
       expect(await leerMeta('perfil')).toBeUndefined()
-      expect(await contarPendientes()).toBe(1)
+      expect(await contarPendientes(REPORTANTE.id)).toBe(1)
     })
 
     it('RF-01: cierra la sesión local aunque Auth no responda', async () => {

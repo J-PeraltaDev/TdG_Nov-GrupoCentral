@@ -20,6 +20,8 @@ let conexion = null
 
 function abrir() {
   conexion ??= openDB(NOMBRE_BD, VERSION_BD, {
+    // Regla para toda versión nueva: una actualización nunca borra `pendientes` (RNF-07); son
+    // novedades que todavía no existen en el servidor.
     upgrade(bd) {
       const pendientes = bd.createObjectStore('pendientes', { keyPath: 'id_local' })
       pendientes.createIndex('fecha_registro', 'fecha_registro')
@@ -30,6 +32,11 @@ function abrir() {
 
       bd.createObjectStore('catalogos')
       bd.createObjectStore('meta')
+    },
+    // Otra pestaña, o la versión nueva de la aplicación, necesita actualizar la base: esta
+    // conexión se cierra para no trabarla, y la próxima lectura abre una nueva.
+    blocking() {
+      cerrarBd()
     },
   })
   return conexion
@@ -69,9 +76,16 @@ export async function guardarCatalogo(nombre, datos) {
   await (await abrir()).put('catalogos', datos, nombre)
 }
 
-/** Cantidad de novedades pendientes de sincronizar (RF-23). */
-export async function contarPendientes() {
-  return (await abrir()).count('pendientes')
+/**
+ * Cantidad de novedades pendientes de sincronizar del usuario (RF-23). Las de otra persona que
+ * usó el dispositivo no se cuentan: solo se envían con su sesión (RNF-10).
+ *
+ * @param {string | null} reportanteId
+ */
+export async function contarPendientes(reportanteId) {
+  if (!reportanteId) return 0
+  const pendientes = await (await abrir()).getAll('pendientes')
+  return pendientes.filter((p) => p.reportante_id === reportanteId).length
 }
 
 /**
