@@ -14,7 +14,12 @@ const indicador = (page) => page.locator('[data-conexion]').filter({ visible: tr
 test('RF-21 / CU-21: sin red registra, ve 07 y la pendiente sobrevive a cerrar la aplicación', async ({
   page,
   context,
+  browserName,
 }) => {
+  test.fixme(
+    browserName === 'webkit',
+    'Playwright WebKit no abre la aplicación sin red («WebKit encountered an internal error»): se verifica en un iPhone real (plan del Sprint 4, decisión 29)',
+  )
   await page.goto('/ingresar')
   await page.evaluate(() => navigator.serviceWorker.ready)
   await simularIngresoAnterior(page, 3600)
