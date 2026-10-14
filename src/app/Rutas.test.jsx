@@ -71,6 +71,11 @@ vi.mock('../core/supabase/repositorios/recuperacion.js', () => ({
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
 }))
+// El marco envía las pendientes al abrir; la sincronización tiene sus propias pruebas.
+vi.mock('../core/offline/sincronizador.js', () => ({
+  useSincronizacionAutomatica: vi.fn(),
+  reintentar: vi.fn(),
+}))
 vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn().mockResolvedValue([
     { id: 'area-m', nombre: 'Mantenimiento' },
