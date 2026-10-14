@@ -67,7 +67,7 @@ test.describe('CU-05 · Registrar novedad', () => {
     await expect(page.getByRole('alert')).toHaveText('Faltan 2 datos obligatorios')
   })
 
-  test('RNF-08 / RNF-09: si la respuesta se pierde y se reintenta, no se duplica la novedad', async ({
+  test('RNF-08 / RNF-09 con RF-21 y RF-22: si la respuesta se pierde, queda en el teléfono y al reenviarse no se duplica', async ({
     page,
   }, testInfo) => {
     const descripcion = descripcionUnica(testInfo, 'La bomba de la empacadora no enciende')
@@ -86,23 +86,23 @@ test.describe('CU-05 · Registrar novedad', () => {
     await llenarNovedad(page, { descripcion, prioridad: 'Alto', area: 'Mantenimiento' })
     await enviarNovedad(page)
 
-    // Se informa, y el formulario conserva lo escrito.
-    await expect(page.getByRole('alert')).toContainText('La novedad no se envió')
-    await expect(page.getByLabel('¿Qué está pasando?')).toHaveValue(descripcion)
+    // RF-21: la red falló al enviar, así que la novedad queda en la cola del teléfono (07).
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+    ).toBeVisible()
 
-    // El reintento usa el mismo identificador local y la misma fecha de registro.
-    await enviarNovedad(page)
-    const codigo = await codigoDeLaConstancia(page)
-    expect(enviados).toHaveLength(2)
+    // RF-22: cuando el servidor vuelve a responder (el monitor lo verifica cada 15 s), se
+    // reenvía sola, con el mismo identificador local y la misma fecha de registro.
+    await expect.poll(() => enviados.length, { timeout: 30_000 }).toBe(2)
     expect(enviados[1].p_id_local).toBe(enviados[0].p_id_local)
     expect(enviados[1].p_fecha_registro).toBe(enviados[0].p_fecha_registro)
+    const indicador = page.locator('[data-conexion]').filter({ visible: true }).first()
+    await expect(indicador).toHaveText('En línea', { timeout: 15_000 })
 
-    // En la finca hay una sola novedad con esa descripción.
-    await page.getByRole('link', { name: 'Ver novedad' }).click()
-    await expect(page.getByRole('heading', { level: 1, name: codigo })).toBeVisible()
-    await page.getByRole('link', { name: 'Volver a mis novedades' }).click()
+    // En la finca hay una sola novedad con esa descripción, y ya tiene código.
+    await page.goto('/novedades')
     const tarjetas = page.getByRole('listitem').filter({ hasText: descripcion })
     await expect(tarjetas).toHaveCount(1)
-    await expect(tarjetas.getByRole('heading', { name: codigo })).toBeVisible()
+    await expect(tarjetas.getByRole('link', { name: /^NOV-\d{4,}$/ })).toBeVisible()
   })
 })
