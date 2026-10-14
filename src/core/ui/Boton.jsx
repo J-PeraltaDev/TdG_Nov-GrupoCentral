@@ -1,4 +1,5 @@
 import { Icono } from './Icono.jsx'
+import iconoCandado from './iconos/lock.svg'
 
 /** @typedef {'primario' | 'secundario' | 'secundario-peligro' | 'texto' | 'peligro'} TipoBoton */
 /** @typedef {'movil' | 'escritorio'} TamanoBoton */
@@ -38,6 +39,9 @@ const TAMANOS = {
  * @param {TamanoBoton} [props.tamano] Fuerza un tamaño; por defecto se adapta al ancho.
  * @param {string} [props.icono] URL de un SVG de `iconos/`, opcional.
  * @param {boolean} [props.disabled]
+ * @param {boolean} [props.noDisponible] Sin conexión (RF-25): se ve deshabilitado y con candado
+ *   (Figma 09-D y 14-B), pero sigue en el orden del teclado y se anuncia como no disponible
+ *   (`aria-disabled`); pulsarlo no hace nada. La explicación va con `aria-describedby`.
  * @param {string} [props.className]
  * @param {import('react').ReactNode} props.children
  * @param {import('react').ButtonHTMLAttributes<HTMLButtonElement>} [props.resto]
@@ -47,21 +51,27 @@ export function Boton({
   tamano,
   icono,
   disabled = false,
+  noDisponible = false,
   className = '',
   children,
   ...resto
 }) {
-  const apariencia = disabled ? DESHABILITADO : `${TIPOS_BOTON[tipo]} cursor-pointer`
+  const apariencia =
+    disabled || noDisponible ? DESHABILITADO : `${TIPOS_BOTON[tipo]} cursor-pointer`
+  const imagen = noDisponible ? iconoCandado : icono
 
   return (
     <button
       type="button"
       {...resto}
       disabled={disabled}
+      aria-disabled={noDisponible || undefined}
+      // También frena el envío del formulario, con el clic o con Enter en un campo.
+      onClick={noDisponible ? (evento) => evento.preventDefault() : resto.onClick}
       data-tipo={tipo}
       className={`inline-flex items-center justify-center gap-2 rounded-control whitespace-nowrap ${TAMANOS[tamano ?? 'adaptable']} ${apariencia} ${className}`}
     >
-      {icono ? <Icono src={icono} tamano={20} /> : null}
+      {imagen ? <Icono src={imagen} tamano={20} /> : null}
       {children}
     </button>
   )

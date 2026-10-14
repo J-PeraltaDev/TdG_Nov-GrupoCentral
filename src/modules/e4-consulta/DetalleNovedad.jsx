@@ -49,9 +49,8 @@ const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirecto
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
  * (Tabla 35) y cada rol trae las suyas; las evidencias llegan en el Sprint 4.
  *
- * Sin conexión, la última versión descargada, con «Datos del {fecha}» y sin acciones (RF-24 /
- * CU-18 3a; decisión 16 del plan). Las acciones deshabilitadas con su explicación (09-D, 14-B)
- * llegan con RF-25.
+ * Sin conexión, la última versión descargada, con «Datos del {fecha}» (RF-24 / CU-18 3a;
+ * decisión 16 del plan), y las acciones no disponibles, con su explicación (RF-25: 09-D, 14-B).
  */
 
 /** Sin conexión, la novedad que nunca se abrió con conexión (decisión 16 del plan). */
@@ -195,13 +194,15 @@ function Justificacion({ escalamiento }) {
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion[]} props.transiciones
  * @param {boolean} props.decide Quien la abre es el director y debe decidir (pantalla 20-C).
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
+ * @param {import('react').ReactNode} [props.avisoSinRed] El de 14-B, arriba.
  */
-function Telefono({ novedad, transiciones, decide, escalamiento }) {
+function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed }) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
+      {avisoSinRed}
       <Justificacion escalamiento={escalamiento} />
       <div
         role="group"
@@ -471,10 +472,8 @@ export default function DetalleNovedad() {
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const disponibles = accionesDisponibles(perfil, novedad)
-  // Lo descargado se consulta, pero no se actúa sobre ello (RF-25).
-  const conAcciones = Boolean(novedad && !novedad.descargada_en)
   const acciones =
-    conAcciones && perfil.rol_id === ROL.APROBADOR_AREA ? (
+    novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
       <Suspense fallback={null}>
         <AccionesDelAprobador
           novedad={novedad}
@@ -486,7 +485,7 @@ export default function DetalleNovedad() {
           esEscritorio={esEscritorio}
         />
       </Suspense>
-    ) : conAcciones && perfil.rol_id === ROL.REPORTANTE ? (
+    ) : novedad && perfil.rol_id === ROL.REPORTANTE ? (
       // La finca responde a una novedad resuelta (RF-15). Sigue montado después, para mostrar
       // el aviso de lo que acaba de hacer.
       <Suspense fallback={null}>
@@ -510,7 +509,7 @@ export default function DetalleNovedad() {
     ? ((transiciones ?? []).find(({ estado_nuevo }) => estado_nuevo === 'escalada') ?? null)
     : null
   const decision =
-    conAcciones && esDirector ? (
+    novedad && esDirector ? (
       <Suspense fallback={null}>
         <DecisionDelDirector
           key={novedad.id}
@@ -520,6 +519,15 @@ export default function DetalleNovedad() {
           esEscritorio={esEscritorio}
         />
       </Suspense>
+    ) : null
+  // 14-B: sin conexión, quien atiende o decide sabe de entrada por qué sus acciones no están
+  // disponibles (RF-25). Al director se le dice lo mismo (decisión 17 del plan).
+  const avisoSinRed =
+    novedad && !enLinea && (perfil.rol_id === ROL.APROBADOR_AREA || esDirector) ? (
+      <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+        Puedes consultar, pero tomar, rechazar, escalar, aprobar, resolver, cerrar y reasignar
+        necesitan internet, porque dependen del estado actual en el servidor.
+      </Aviso>
     ) : null
   // En el teléfono el título de la página va en la barra superior. Sin novedad que mostrar,
   // el título lo pone el contenido (22-B) y la barra solo dice «Novedad».
@@ -584,6 +592,7 @@ export default function DetalleNovedad() {
               <Icono src={iconoVolver} tamano={18} />
               {textoDeVolver}
             </Link>
+            {avisoSinRed}
             <Escritorio
               novedad={novedad}
               transiciones={transiciones}
@@ -600,6 +609,7 @@ export default function DetalleNovedad() {
               transiciones={transiciones}
               decide={decide}
               escalamiento={escalamiento}
+              avisoSinRed={avisoSinRed}
             />
             {acciones}
             {decision}

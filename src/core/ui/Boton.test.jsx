@@ -79,4 +79,35 @@ describe('Botón · sistema de diseño (SDD 5.2)', () => {
     const boton = screen.getByRole('button', { name: 'Reintentar' })
     expect(boton.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
   })
+
+  it('RF-25: «no disponible» se anuncia, sigue en el orden del teclado y pulsarlo no hace nada', async () => {
+    const alPulsar = vi.fn()
+    const alEnviar = vi.fn((evento) => evento.preventDefault())
+    render(
+      <form onSubmit={alEnviar}>
+        <Boton noDisponible onClick={alPulsar} aria-describedby="por-que">
+          Tomar para atención
+        </Boton>
+        <Boton type="submit" noDisponible>
+          Confirmar
+        </Boton>
+        <p id="por-que">Se habilitan al volver la conexión</p>
+      </form>,
+    )
+
+    const tomar = screen.getByRole('button', { name: 'Tomar para atención' })
+    expect(tomar).toHaveAttribute('aria-disabled', 'true')
+    expect(tomar).toBeEnabled()
+    expect(tomar).toHaveAccessibleDescription('Se habilitan al volver la conexión')
+    expect(tomar).toHaveClass('bg-gris-200', 'text-deshabilitado')
+
+    await userEvent.tab()
+    expect(tomar).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await userEvent.click(tomar)
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    expect(alPulsar).not.toHaveBeenCalled()
+    expect(alEnviar).not.toHaveBeenCalled()
+  })
 })
