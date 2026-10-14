@@ -42,7 +42,9 @@ describe('Traductor de errores (SDD, Tabla 22)', () => {
 
   it.each([
     ['HTTP 401', { status: 401, message: 'Unauthorized' }],
-    ['JWT vencido', { code: 'PGRST301', message: 'JWT expired' }],
+    ['JWT inválido', { code: 'PGRST301', message: 'JWT could not be decoded' }],
+    // El estado HTTP no viaja en el error de la API de datos: el código es lo que dice que venció.
+    ['JWT vencido', { code: 'PGRST303', message: 'JWT expired' }],
     ['sin sesión', { name: 'AuthSessionMissingError', message: 'Auth session missing!' }],
   ])('RNF-10: sesión vencida (%s) → tipo «sesion»', (_, error) => {
     expect(esErrorDeSesion(error)).toBe(true)

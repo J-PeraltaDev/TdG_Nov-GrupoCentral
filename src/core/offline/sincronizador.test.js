@@ -1,4 +1,5 @@
 import 'fake-indexeddb/auto'
+import { renderHook } from '@testing-library/react'
 import { IDBFactory } from 'fake-indexeddb'
 import { openDB } from 'idb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -6,7 +7,8 @@ import { alPedirRevisionDelPerfil } from '../sesion/perfilVigente.js'
 import { confirmarSesion } from '../sesion/sesion.js'
 import { registrarNovedad } from '../supabase/repositorios/novedades.js'
 import { cerrarBd, leerMeta, NOMBRE_BD, VERSION_BD } from './bd.js'
-import { leerSincronizacion, reintentar, sincronizar } from './sincronizador.js'
+import { leerSincronizacion } from './estadoDeSincronizacion.js'
+import { reintentar, sincronizar, useSincronizacionAutomatica } from './sincronizador.js'
 
 vi.mock('../supabase/repositorios/novedades.js', () => ({ registrarNovedad: vi.fn() }))
 vi.mock('../sesion/sesion.js', () => ({ confirmarSesion: vi.fn() }))
@@ -242,5 +244,39 @@ describe('Sincronización de las pendientes (RF-22 / CU-22, SDD 6.1.5 y Figura 1
     await sincronizar(YO)
 
     expect(Date.parse(await leerMeta('ultima_sincronizacion'))).toBeLessThanOrEqual(Date.now())
+  })
+
+  it('Decisión 5: al abrir con sesión sincroniza, y cada vez que el monitor vuelve a «en línea»', async () => {
+    await sembrar(pendiente(1))
+    navigator.onLine = false
+    vi.mocked(registrarNovedad).mockImplementation(async (p) => registrada(p, 151))
+
+    const { unmount } = renderHook(() => useSincronizacionAutomatica(YO))
+    await new Promise((r) => setTimeout(r, 50))
+    expect(registrarNovedad).not.toHaveBeenCalled()
+
+    navigator.onLine = true
+    window.dispatchEvent(new Event('online'))
+
+    await vi.waitFor(() => expect(registrarNovedad).toHaveBeenCalledTimes(1))
+    await vi.waitFor(async () => expect(await cola()).toEqual({}))
+    unmount()
+  })
+
+  it('RF-22 (08): cuenta las que ya intentó y dice cuál se está enviando', async () => {
+    await sembrar(pendiente(1), pendiente(2))
+    const vistos = []
+    vi.mocked(registrarNovedad).mockImplementation(async (p) => {
+      vistos.push({ ...leerSincronizacion() })
+      return registrada(p, 150)
+    })
+
+    await sincronizar(YO)
+
+    expect(vistos.map((v) => [v.total, v.hechas, v.enviando])).toEqual([
+      [2, 0, pendiente(1).id_local],
+      [2, 1, pendiente(2).id_local],
+    ])
+    expect(leerSincronizacion()).toMatchObject({ enCurso: false, hechas: 2, enviando: null })
   })
 })

@@ -1,10 +1,11 @@
-import { useSyncExternalStore } from 'react'
-import { estaEnLinea } from '../conexion/monitor.js'
+import { useEffect } from 'react'
+import { estaEnLinea, suscribir } from '../conexion/monitor.js'
 import { traducirError } from '../errores/traducir.js'
 import { pedirRevisionDelPerfil } from '../sesion/perfilVigente.js'
 import { confirmarSesion } from '../sesion/sesion.js'
 import { registrarNovedad } from '../supabase/repositorios/novedades.js'
 import { actualizarPendiente, borrarPendiente, guardarMeta, listarPendientes } from './bd.js'
+import { cambiarSincronizacion, leerSincronizacion } from './estadoDeSincronizacion.js'
 import { avisarCambioDePendientes } from './pendientes.js'
 
 /*
@@ -14,47 +15,14 @@ import { avisarCambioDePendientes } from './pendientes.js'
  */
 
 /**
- * @typedef {object} EstadoDeSincronizacion
- * @property {boolean} enCurso
- * @property {number} total Las que este ciclo intenta enviar.
- * @property {Array<object & { codigo: number }>} enviadas Las que llegaron en esta visita (08).
- * @property {boolean} sesionVencida 08-B.
- */
-
-/** @type {EstadoDeSincronizacion} */
-let estado = { enCurso: false, total: 0, enviadas: [], sesionVencida: false }
-const oyentes = new Set()
-
-function cambiar(cambios) {
-  estado = { ...estado, ...cambios }
-  for (const oyente of oyentes) oyente()
-}
-
-export const leerSincronizacion = () => estado
-
-/** @param {() => void} oyente */
-export function suscribirSincronizacion(oyente) {
-  oyentes.add(oyente)
-  return () => oyentes.delete(oyente)
-}
-
-/** @returns {EstadoDeSincronizacion} */
-export function useSincronizacion() {
-  return useSyncExternalStore(suscribirSincronizacion, leerSincronizacion, leerSincronizacion)
-}
-
-/** Al salir de 08, las enviadas dejan de mostrarse: ya están en «Mis novedades». */
-export const limpiarEnviadas = () => cambiar({ enviadas: [] })
-
-/**
  * Envía las pendientes del usuario (RF-22). Sin conexión, con otro ciclo en curso aquí o en otra
  * pestaña, no hace nada.
  *
  * @param {string} usuarioId
  */
 export async function sincronizar(usuarioId) {
-  if (estado.enCurso || !usuarioId || !estaEnLinea()) return
-  cambiar({ enCurso: true, total: 0, sesionVencida: false })
+  if (leerSincronizacion().enCurso || !usuarioId || !estaEnLinea()) return
+  cambiarSincronizacion({ enCurso: true, total: 0, hechas: 0, sesionVencida: false })
   try {
     if (navigator.locks?.request) {
       await navigator.locks.request('novedades-sincronizacion', { ifAvailable: true }, (lock) =>
@@ -64,7 +32,7 @@ export async function sincronizar(usuarioId) {
       await ciclo(usuarioId)
     }
   } finally {
-    cambiar({ enCurso: false })
+    cambiarSincronizacion({ enCurso: false, enviando: null })
   }
 }
 
@@ -83,6 +51,22 @@ export async function reintentar(usuarioId, idLocal) {
   return sincronizar(usuarioId)
 }
 
+/**
+ * Los disparadores automáticos (decisión 5 del plan): al abrir la aplicación con sesión (también
+ * después de volver a ingresar) y cada vez que el monitor de conexión pasa a «en línea».
+ *
+ * @param {string} usuarioId
+ */
+export function useSincronizacionAutomatica(usuarioId) {
+  useEffect(() => {
+    const intentar = () => {
+      if (estaEnLinea()) sincronizar(usuarioId)
+    }
+    intentar()
+    return suscribir(intentar)
+  }, [usuarioId])
+}
+
 async function ciclo(usuarioId) {
   // Las que quedaron «enviando» (se cerró la aplicación a mitad) vuelven a la cola; el ciclo
   // automático no repite las que rechazó una regla de negocio: esas se reintentan a mano.
@@ -92,25 +76,30 @@ async function ciclo(usuarioId) {
   if (porEnviar.length > 0) {
     const sesion = await confirmarSesion()
     if (sesion === 'red') return
-    if (sesion === 'vencida') return cambiar({ sesionVencida: true })
+    if (sesion === 'vencida') return cambiarSincronizacion({ sesionVencida: true })
 
-    cambiar({ total: porEnviar.length })
+    cambiarSincronizacion({ total: porEnviar.length })
     for (const p of porEnviar) {
       const intento = { ...p, envio: 'enviando', intentos: p.intentos + 1 }
       await actualizarPendiente(intento)
+      cambiarSincronizacion({ enviando: p.id_local })
       try {
         const novedad = await registrarNovedad(p)
         await borrarPendiente(p.id_local)
-        cambiar({ enviadas: [...estado.enviadas, { ...p, codigo: novedad.codigo }] })
+        cambiarSincronizacion({
+          enviadas: [...leerSincronizacion().enviadas, { ...p, codigo: novedad.codigo }],
+          hechas: leerSincronizacion().hechas + 1,
+        })
         await avisarCambioDePendientes()
       } catch (error) {
         const fallo = traducirError(error)
         if (fallo.tipo === 'sesion') {
           await actualizarPendiente({ ...p, envio: 'pendiente' })
-          cambiar({ sesionVencida: true })
+          cambiarSincronizacion({ sesionVencida: true })
           break
         }
         await actualizarPendiente({ ...intento, envio: 'error', ultimo_error: fallo })
+        cambiarSincronizacion({ hechas: leerSincronizacion().hechas + 1 })
         if (fallo.tipo === 'red') break
         // Puede que lo hayan desactivado o que ya no sea reportante: no se marca toda la cola.
         if (fallo.codigo === 'SIN_PERMISO') {

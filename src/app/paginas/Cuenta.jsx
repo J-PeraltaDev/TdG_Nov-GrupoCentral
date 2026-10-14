@@ -53,7 +53,19 @@ export function Cuenta() {
       </div>
 
       {pendientes > 0 ? (
-        <Aviso tipo="advertencia" icono={iconoPendientes} titulo="Tienes novedades sin enviar">
+        <Aviso
+          tipo="advertencia"
+          icono={iconoPendientes}
+          titulo="Tienes novedades sin enviar"
+          accion={
+            <Link
+              to="/pendientes"
+              className="relative inline-flex h-10 flex-none items-center rounded-control px-4 text-etiqueta-fuerte whitespace-nowrap text-primario after:absolute after:inset-x-0 after:-inset-y-1"
+            >
+              Ver pendientes
+            </Link>
+          }
+        >
           {pendientes === 1
             ? 'Hay 1 novedad pendiente de sincronizar.'
             : `Hay ${pendientes} novedades pendientes de sincronizar.`}{' '}

@@ -1,6 +1,12 @@
 import { act, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cambiarSincronizacion } from '../offline/estadoDeSincronizacion.js'
 import { AnuncioDeConexion, Conexion } from './Conexion.jsx'
+
+// Las pendientes del usuario: cada prueba dice cuántas hay.
+const cola = vi.hoisted(() => ({ cantidad: 0 }))
+vi.mock('../offline/pendientes.js', () => ({ usePendientes: () => cola.cantidad }))
 
 // Las 3 variantes de Figma (nodo 1:116).
 const VARIANTES = [
@@ -14,6 +20,8 @@ const indicador = () => document.querySelector('[data-conexion]')
 describe('Conexión · sistema de diseño (RF-23)', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    cola.cantidad = 0
+    cambiarSincronizacion({ enCurso: false, total: 0 })
   })
 
   it.each(VARIANTES)('%s: muestra «%s»', (estado, etiqueta) => {
@@ -66,6 +74,48 @@ describe('Conexión · sistema de diseño (RF-23)', () => {
       window.dispatchEvent(new Event('offline'))
     })
     expect(indicador()).toHaveTextContent('Sin conexión')
+  })
+})
+
+describe('Conexión · enlace a las pendientes y sincronización (RF-22, RF-23)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    cola.cantidad = 0
+    cambiarSincronizacion({ enCurso: false, total: 0 })
+  })
+
+  it('RF-23: con pendientes es el enlace a la pantalla 08, con un nombre que dice adónde lleva', () => {
+    cola.cantidad = 2
+    render(
+      <MemoryRouter>
+        <Conexion />
+      </MemoryRouter>,
+    )
+
+    const enlace = screen.getByRole('link', { name: 'En línea · 2 pendientes: ver la lista' })
+    expect(enlace).toHaveAttribute('href', '/pendientes')
+  })
+
+  it('RF-23: sin pendientes no es un enlace', () => {
+    render(<Conexion />)
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('RF-22 / CU-22: mientras envía dice «En línea · sincronizando», y el anuncio también', () => {
+    cola.cantidad = 2
+    cambiarSincronizacion({ enCurso: true, total: 2 })
+    render(
+      <MemoryRouter>
+        <Conexion />
+        <AnuncioDeConexion />
+      </MemoryRouter>,
+    )
+
+    expect(indicador()).toHaveTextContent('En línea · sincronizando')
+    expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent(
+      'En línea · sincronizando',
+    )
   })
 })
 
