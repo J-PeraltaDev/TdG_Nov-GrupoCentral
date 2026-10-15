@@ -67,7 +67,7 @@ test.describe('CU-05 · Registrar novedad', () => {
     await expect(page.getByRole('alert')).toHaveText('Faltan 2 datos obligatorios')
   })
 
-  test('RNF-08 / RNF-09: si la respuesta se pierde y se reintenta, no se duplica la novedad', async ({
+  test('RNF-08 / RNF-09 con RF-21: si la respuesta se pierde, queda en el teléfono con el mismo identificador y la misma fecha', async ({
     page,
   }, testInfo) => {
     const descripcion = descripcionUnica(testInfo, 'La bomba de la empacadora no enciende')
@@ -86,23 +86,35 @@ test.describe('CU-05 · Registrar novedad', () => {
     await llenarNovedad(page, { descripcion, prioridad: 'Alto', area: 'Mantenimiento' })
     await enviarNovedad(page)
 
-    // Se informa, y el formulario conserva lo escrito.
-    await expect(page.getByRole('alert')).toContainText('La novedad no se envió')
-    await expect(page.getByLabel('¿Qué está pasando?')).toHaveValue(descripcion)
-
-    // El reintento usa el mismo identificador local y la misma fecha de registro.
-    await enviarNovedad(page)
-    const codigo = await codigoDeLaConstancia(page)
-    expect(enviados).toHaveLength(2)
-    expect(enviados[1].p_id_local).toBe(enviados[0].p_id_local)
-    expect(enviados[1].p_fecha_registro).toBe(enviados[0].p_fecha_registro)
-
-    // En la finca hay una sola novedad con esa descripción.
-    await page.getByRole('link', { name: 'Ver novedad' }).click()
-    await expect(page.getByRole('heading', { level: 1, name: codigo })).toBeVisible()
-    await page.getByRole('link', { name: 'Volver a mis novedades' }).click()
-    const tarjetas = page.getByRole('listitem').filter({ hasText: descripcion })
-    await expect(tarjetas).toHaveCount(1)
-    await expect(tarjetas.getByRole('heading', { name: codigo })).toBeVisible()
+    // RF-21: la red falló al enviar, así que la novedad queda en la cola del teléfono (07), con el
+    // mismo identificador local y la misma fecha del envío que se perdió. El reenvío sin duplicar
+    // es de RF-22.
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+    ).toBeVisible()
+    expect(enviados).toHaveLength(1)
+    const cola = await page.evaluate(
+      () =>
+        new Promise((resolver, rechazar) => {
+          const solicitud = indexedDB.open('novedades')
+          solicitud.onerror = () => rechazar(solicitud.error)
+          solicitud.onsuccess = () => {
+            const lectura = solicitud.result
+              .transaction('pendientes')
+              .objectStore('pendientes')
+              .getAll()
+            lectura.onsuccess = () => {
+              solicitud.result.close()
+              resolver(lectura.result)
+            }
+          }
+        }),
+    )
+    expect(cola.filter((p) => p.descripcion === descripcion)).toEqual([
+      expect.objectContaining({
+        id_local: enviados[0].p_id_local,
+        fecha_registro: enviados[0].p_fecha_registro,
+      }),
+    ])
   })
 })
