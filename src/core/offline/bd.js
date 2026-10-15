@@ -77,6 +77,17 @@ export async function guardarCatalogo(nombre, datos) {
 }
 
 /**
+ * Guarda una pendiente y resuelve solo cuando la transacción terminó: la escritura quedó en el
+ * dispositivo (RF-21, SDD 6.1.5 «esperar oncomplete»).
+ *
+ * @param {object} pendiente
+ */
+export async function guardarPendiente(pendiente) {
+  const tx = (await abrir()).transaction('pendientes', 'readwrite')
+  await Promise.all([tx.store.put(pendiente), tx.done])
+}
+
+/**
  * Cantidad de novedades pendientes de sincronizar del usuario (RF-23). Las de otra persona que
  * usó el dispositivo no se cuentan: solo se envían con su sesión (RNF-10).
  *

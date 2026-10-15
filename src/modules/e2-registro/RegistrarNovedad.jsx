@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { DESCRIPCION_MAX_CARACTERES } from '../../core/config/parametros.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
@@ -10,6 +11,7 @@ import { Icono } from '../../core/ui/Icono.jsx'
 import iconoFinca from '../../core/ui/iconos/agriculture.svg'
 import iconoElegida from '../../core/ui/iconos/check_circle.svg'
 import iconoCerrar from '../../core/ui/iconos/close.svg'
+import iconoGuardar from '../../core/ui/iconos/download.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoBloqueado from '../../core/ui/iconos/lock.svg'
@@ -22,9 +24,9 @@ import { crearBorrador, enviarNovedad } from './enviarNovedad.js'
 import { resumenDeFaltantes, validarNovedad } from './validarNovedad.js'
 
 /*
- * Pantalla 05 · Registrar novedad y 05-C · Campos obligatorios faltantes (RF-05, CU-05).
- * Figma 2:423 y 2:657. La fotografía (RF-08) y el registro sin conexión (05-B, RF-21) llegan
- * en el Sprint 4.
+ * Pantalla 05 · Registrar novedad, 05-B · Sin conexión: guardar en el dispositivo y 05-C ·
+ * Campos obligatorios faltantes (RF-05, RF-21, CU-05 y CU-21). Figma 2:423, 2:538 y 2:657. Sin
+ * conexión, o si la red se cae al enviar, la novedad queda en el dispositivo (pantalla 07).
  */
 
 /** Las cuatro prioridades con su criterio: ayudan a elegir sin tener que recordar. */
@@ -79,6 +81,7 @@ function ErrorDeCampo({ id, className = '', children }) {
 export default function RegistrarNovedad() {
   const { perfil } = useSesion()
   const navegar = useNavigate()
+  const enLinea = useEnLinea()
 
   /** @type {[{ id: string, nombre: string }[] | null, Function]} `null` mientras cargan. */
   const [areas, setAreas] = useState(null)
@@ -147,13 +150,15 @@ export default function RegistrarNovedad() {
       descripcion: descripcion.trim(),
       prioridad,
       area_id: areaId,
+      // El nombre, para mostrar la pendiente sin red (07, 04-B y 08).
+      area: areas?.find((a) => a.id === areaId)?.nombre ?? '',
     }
 
     setEnviando(true)
-    const resultado = await enviarNovedad(borrador.current)
+    const resultado = await enviarNovedad(borrador.current, perfil)
     setEnviando(false)
 
-    if (resultado.ok) {
+    if (resultado.ok && resultado.novedad) {
       const area = areas?.find((a) => a.id === resultado.novedad.area_id)
       navegar('/registrar/recibida', {
         replace: true,
@@ -161,7 +166,13 @@ export default function RegistrarNovedad() {
       })
       return
     }
-    // Error de negocio o de red: se informa y el formulario conserva lo escrito.
+    if (resultado.ok) {
+      // Sin conexión, o la red se cayó al enviar: quedó en el dispositivo (RF-21).
+      navegar('/registrar/guardada', { replace: true, state: { pendiente: resultado.pendiente } })
+      return
+    }
+    // Error de negocio, o el dispositivo no la pudo guardar (CU-21 2a y 2b): se informa y el
+    // formulario conserva lo escrito.
     setFallo(resultado)
   }
 
@@ -189,23 +200,19 @@ export default function RegistrarNovedad() {
         <div className="flex flex-1 flex-col gap-5 px-4 pt-4 pb-6 lg:px-8 lg:pt-8">
           <h1 className="sr-only text-titulo text-texto lg:not-sr-only">Registrar novedad</h1>
 
+          {enLinea ? null : (
+            <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+              La novedad se guardará en este teléfono y se enviará sola cuando vuelva el internet.
+            </Aviso>
+          )}
+
           {faltantes > 0 ? (
             <Aviso tipo="error" icono={iconoError} role="alert">
               {resumenDeFaltantes(faltantes)}
             </Aviso>
           ) : null}
 
-          {fallo?.tipo === 'red' ? (
-            <Aviso
-              tipo="advertencia"
-              icono={iconoSinConexion}
-              titulo="La novedad no se envió"
-              role="alert"
-            >
-              {fallo.mensaje} Lo que escribiste sigue aquí.
-            </Aviso>
-          ) : null}
-          {fallo && fallo.tipo !== 'red' ? (
+          {fallo ? (
             <Aviso tipo="error" icono={iconoError} role="alert">
               {fallo.mensaje}
             </Aviso>
@@ -400,10 +407,17 @@ export default function RegistrarNovedad() {
             formulario. */}
         <div className="sticky bottom-0 flex flex-col gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-4px_6px_rgb(0_0_0/0.06)] lg:static lg:border-t-0 lg:bg-transparent lg:px-8 lg:pt-0 lg:pb-8 lg:shadow-none">
           <p className="text-center text-auxiliar text-texto-secundario">
-            Se registrará con la fecha y hora actual y tu usuario
+            {enLinea
+              ? 'Se registrará con la fecha y hora actual y tu usuario'
+              : 'Se guardará en este teléfono con la fecha y hora actual y tu usuario'}
           </p>
-          <Boton type="submit" icono={iconoEnviar} disabled={enviando} className="w-full">
-            {enviando ? 'Enviando…' : 'Enviar novedad'}
+          <Boton
+            type="submit"
+            icono={enLinea ? iconoEnviar : iconoGuardar}
+            disabled={enviando}
+            className="w-full"
+          >
+            {enviando ? 'Enviando…' : enLinea ? 'Enviar novedad' : 'Guardar en el dispositivo'}
           </Boton>
         </div>
       </form>

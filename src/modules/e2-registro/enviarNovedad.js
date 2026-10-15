@@ -1,17 +1,18 @@
+import { estaEnLinea } from '../../core/conexion/monitor.js'
 import { traducirError } from '../../core/errores/traducir.js'
+import { encolar } from '../../core/offline/cola.js'
 import { vigilarPermiso } from '../../core/sesion/perfilVigente.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
 
 /*
- * Envío de una novedad (SDD 6.1.5, «Registro de la novedad»).
+ * Envío de una novedad (SDD 6.1.5, «Registro de la novedad», y Figura 18).
  *
  * El identificador local y la fecha real de registro se generan una sola vez, antes del
  * primer envío, y se conservan en los reintentos: así una caída de la red a mitad del envío
  * no crea duplicados (RNF-08) ni cambia la fecha del registro (RNF-09).
  *
- * Sprint 4: este es el único punto que cambia para el registro sin conexión. Cuando el
- * resultado sea de tipo «red», en lugar de devolverlo se guarda el borrador en el almacén
- * `pendientes` y se muestra la constancia local (pantalla 07).
+ * Sin conexión, o si la red falla al enviar, el borrador se guarda tal cual en la cola del
+ * dispositivo (RF-21) y la sincronización lo envía después (RF-22).
  */
 
 /**
@@ -21,6 +22,7 @@ import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
  * @property {string} descripcion
  * @property {string} prioridad
  * @property {string} area_id
+ * @property {string} [area] Nombre del área, para mostrarla sin red.
  */
 
 /**
@@ -40,20 +42,27 @@ export function crearBorrador({ descripcion, prioridad, areaId }) {
 }
 
 /**
- * Envía el borrador al servidor.
+ * Envía el borrador al servidor o, si no se puede, lo guarda en el dispositivo.
  *
  * @param {Borrador} borrador
+ * @param {{ id: string, finca_id: string | null }} perfil Quién registra: dueño de la pendiente.
  * @returns {Promise<
  *   | { ok: true, novedad: import('../../core/supabase/repositorios/novedades.js').Novedad }
- *   | ({ ok: false } & import('../../core/errores/traducir.js').ErrorTraducido)
+ *   | { ok: true, pendiente: import('../../core/offline/cola.js').Pendiente }
+ *   | ({ ok: false } & { tipo: string, codigo: string, mensaje: string })
  * >}
  */
-export async function enviarNovedad(borrador) {
+export async function enviarNovedad(borrador, perfil) {
+  if (!estaEnLinea()) return encolar(borrador, perfil)
   try {
     // Si responde SIN_PERMISO puede que lo hayan desactivado o que ya no sea reportante: el
     // perfil se relee (RF-03).
     return { ok: true, novedad: await vigilarPermiso(() => registrarNovedad(borrador)) }
   } catch (error) {
-    return { ok: false, ...traducirError(error) }
+    const fallo = traducirError(error)
+    // SDD 6.1.5: «si error de red: continuar como sin conexión». Con la sesión vencida, también:
+    // lo escrito no se pierde y la sincronización pedirá el ingreso (08-B; decisión 2).
+    if (fallo.tipo === 'red' || fallo.tipo === 'sesion') return encolar(borrador, perfil)
+    return { ok: false, ...fallo }
   }
 }
