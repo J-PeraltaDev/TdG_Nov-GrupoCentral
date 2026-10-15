@@ -23,11 +23,18 @@ export const PERFIL = {
   area: null,
 }
 
+const API = new URL(process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321')
+
 // supabase-js guarda la sesión con la clave sb-<primer tramo del host del proyecto>-auth-token.
-const PROYECTO = new URL(process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321').hostname.split(
-  '.',
-)[0]
-export const CLAVE_DE_SESION = `sb-${PROYECTO}-auth-token`
+export const CLAVE_DE_SESION = `sb-${API.hostname.split('.')[0]}-auth-token`
+
+/**
+ * Las solicitudes a la API de Supabase de la corrida, para cortarlas o simularlas con
+ * `context.route`: «staging» (`….supabase.co`) en los equipos y la local (`127.0.0.1:54321`) en el
+ * CI. `resto` es una expresión regular para lo que sigue al origen, p. ej. `'auth/v1/health'`.
+ */
+export const apiDeSupabase = (resto = '') =>
+  new RegExp(`^${API.origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/${resto}`)
 
 /**
  * Deja en el navegador la sesión y el perfil de un ingreso anterior, y las pendientes que se le

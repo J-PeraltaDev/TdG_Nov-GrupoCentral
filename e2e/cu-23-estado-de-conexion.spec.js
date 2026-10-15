@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { PERFIL, simularIngresoAnterior } from './apoyo/sesionFabricada.js'
+import { PERFIL, simularIngresoAnterior, apiDeSupabase } from './apoyo/sesionFabricada.js'
 
 /*
  * RF-23 / CU-23 · Mostrar estado de conexión y pendientes, sobre el build con service worker.
@@ -49,7 +49,7 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
 
   // El navegador dice que volvió la red, pero Supabase no responde (portal cautivo): el
   // monitor no se deja engañar por el evento `online`.
-  await context.route(/supabase\.co\//, (ruta) => ruta.abort('internetdisconnected'))
+  await context.route(apiDeSupabase(), (ruta) => ruta.abort('internetdisconnected'))
   await context.setOffline(false)
   await expect(indicador(page)).toHaveText('Sin conexión · 1 pendiente')
   await page.waitForTimeout(2000)
@@ -59,7 +59,7 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
   // nota y el indicador vuelve a «En línea», con la pendiente todavía por enviar.
   // Las rutas nuevas se ponen antes de quitar la vieja: ninguna solicitud se cuela al servidor.
   const verificaciones = []
-  await context.route(/supabase\.co\/auth\/v1\/health/, (ruta) => {
+  await context.route(apiDeSupabase('auth/v1/health'), (ruta) => {
     verificaciones.push(Date.now())
     return ruta.fulfill({
       status: 200,
@@ -68,10 +68,10 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
       body: '{}',
     })
   })
-  await context.route(/supabase\.co\/(?!auth\/v1\/health)/, (ruta) =>
+  await context.route(apiDeSupabase('(?!auth/v1/health)'), (ruta) =>
     ruta.abort('internetdisconnected'),
   )
-  await context.unroute(/supabase\.co\//)
+  await context.unroute(apiDeSupabase())
   await expect(indicador(page)).toHaveText('En línea · 1 pendiente', { timeout: 20_000 })
   expect(verificaciones.length).toBeGreaterThan(0)
 })
