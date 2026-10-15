@@ -2,7 +2,6 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { OBSERVACION_MAX_CARACTERES } from '../../core/config/parametros.js'
-import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import {
@@ -334,7 +333,6 @@ export default function RegistrarSolucion() {
   const { id } = useParams()
   const { state } = useLocation()
   const { perfil } = useSesion()
-  const enLinea = useEnLinea()
   const esEscritorio = useEsEscritorio()
 
   const idValido = UUID.test(id ?? '')
@@ -412,7 +410,7 @@ export default function RegistrarSolucion() {
               </p>
             ) : null}
           </div>
-          <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
+          <Conexion className="flex-none" />
         </header>
       )}
 

@@ -1,7 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
-import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { firmaDe, ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
@@ -350,7 +349,6 @@ export default function DetalleNovedad() {
   const { state, hash } = useLocation()
   const navegar = useNavigate()
   const { perfil } = useSesion()
-  const enLinea = useEnLinea()
   const esEscritorio = useEsEscritorio()
 
   const idValido = UUID.test(id ?? '')
@@ -509,7 +507,7 @@ export default function DetalleNovedad() {
           >
             {codigo ?? 'Novedad'}
           </TituloDeLaBarra>
-          <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
+          <Conexion className="flex-none" />
         </header>
       )}
 

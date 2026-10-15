@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { obtenerNovedad } from '../core/supabase/repositorios/novedades.js'
@@ -362,8 +362,11 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it('RF-23: el indicador de conexión está siempre a la vista', async () => {
     abrir('/novedades', 'reportante')
 
-    expect((await screen.findAllByRole('status')).some((e) => e.textContent === 'En línea')).toBe(
-      true,
+    // Las barras pintan uno por formato; ninguno se anuncia solo (decisión 12 del Sprint 4).
+    await waitFor(() =>
+      expect(
+        [...document.querySelectorAll('[data-conexion]')].some((e) => e.textContent === 'En línea'),
+      ).toBe(true),
     )
   })
 

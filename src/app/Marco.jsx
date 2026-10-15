@@ -1,8 +1,9 @@
+import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
-import { useEnLinea } from '../core/conexion/useEnLinea.js'
+import { vigilarPendientes } from '../core/offline/pendientes.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil, iniciales, rutaDeOrigen } from '../core/sesion/roles.js'
-import { Conexion } from '../core/ui/Conexion.jsx'
+import { AnuncioDeConexion, Conexion } from '../core/ui/Conexion.jsx'
 import { Icono } from '../core/ui/Icono.jsx'
 import iconoMarca from '../core/ui/iconos/eco.svg'
 import iconoSalir from '../core/ui/iconos/logout.svg'
@@ -79,7 +80,7 @@ function CuentaDelTelefono({ perfil, pendientes }) {
   )
 }
 
-function BarraSuperiorDelTelefono({ perfil, enLinea, ruta, cuenta }) {
+function BarraSuperiorDelTelefono({ perfil, ruta, cuenta }) {
   const { titulo, subtitulo } = titulosDelTelefono(perfil, ruta)
 
   return (
@@ -98,14 +99,14 @@ function BarraSuperiorDelTelefono({ perfil, enLinea, ruta, cuenta }) {
           <p className="truncate text-auxiliar text-texto-secundario">{subtitulo}</p>
         ) : null}
       </div>
-      <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
+      <Conexion className="flex-none" />
       <Campana />
       {cuenta}
     </header>
   )
 }
 
-function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
+function BarraSuperiorDelEscritorio({ perfil }) {
   return (
     <header className="sticky top-0 z-10 hidden items-center gap-3 border-b border-borde bg-superficie px-8 py-3 lg:flex">
       {/* El buscador por código llega con el historial (RF-19, Sprint 5). */}
@@ -122,7 +123,7 @@ function BarraSuperiorDelEscritorio({ perfil, enLinea }) {
         />
       </label>
       <span className="flex-1" />
-      <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} />
+      <Conexion />
       <Campana />
       <Link to="/cuenta" aria-label={`Cuenta de ${perfil.nombre}`} className="rounded-full">
         <Avatar nombre={perfil.nombre} />
@@ -249,7 +250,13 @@ function NavegacionInferior({ items, origen }) {
 export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   const { perfil } = useSesion()
   const navegar = useNavigate()
-  const enLinea = useEnLinea()
+  // El indicador cuenta las pendientes de quien ingresó, no las de otra persona (RNF-10).
+  useEffect(() => {
+    vigilarPendientes(perfil.id)
+    return () => {
+      vigilarPendientes(null)
+    }
+  }, [perfil.id])
   const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
   const insignias = useInsignias(perfil.rol_id)
@@ -269,6 +276,8 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
     // Cuando una pantalla pinta su barra de acciones ([data-barra-de-acciones]), esta ocupa
     // el lugar de la navegación inferior del teléfono.
     <div className="group/marco flex min-h-dvh flex-col lg:flex-row">
+      <AnuncioDeConexion />
+
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-superficie focus:px-4 focus:py-3 focus:text-etiqueta-fuerte focus:text-primario"
@@ -288,7 +297,6 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
         {enfocado || sinBarraSuperior ? null : (
           <BarraSuperiorDelTelefono
             perfil={perfil}
-            enLinea={enLinea}
             ruta={ruta}
             cuenta={
               cuentaEnLaBarraSuperior ? (
@@ -297,7 +305,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
             }
           />
         )}
-        <BarraSuperiorDelEscritorio perfil={perfil} enLinea={enLinea} />
+        <BarraSuperiorDelEscritorio perfil={perfil} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
           {/* «Cuenta» pinta en el teléfono las pantallas que aquí solo caben en el

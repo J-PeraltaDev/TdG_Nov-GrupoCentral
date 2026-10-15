@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { DESCRIPCION_MAX_CARACTERES } from '../../core/config/parametros.js'
-import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
@@ -80,7 +79,6 @@ function ErrorDeCampo({ id, className = '', children }) {
 export default function RegistrarNovedad() {
   const { perfil } = useSesion()
   const navegar = useNavigate()
-  const enLinea = useEnLinea()
 
   /** @type {[{ id: string, nombre: string }[] | null, Function]} `null` mientras cargan. */
   const [areas, setAreas] = useState(null)
@@ -184,7 +182,7 @@ export default function RegistrarNovedad() {
         <p aria-hidden="true" className="min-w-0 flex-1 truncate text-subtitulo text-texto">
           Registrar novedad
         </p>
-        <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} className="flex-none" />
+        <Conexion className="flex-none" />
       </header>
 
       <form noValidate onSubmit={alEnviar} className="mx-auto flex w-full max-w-xl flex-1 flex-col">

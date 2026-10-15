@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router'
-import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Conexion } from '../../core/ui/Conexion.jsx'
@@ -32,7 +31,6 @@ function Dato({ etiqueta, children }) {
 export default function NovedadRecibida() {
   const { perfil } = useSesion()
   const { state } = useLocation()
-  const enLinea = useEnLinea()
   const [copiado, setCopiado] = useState(false)
 
   // La constancia se muestra justo después de registrar; si se abre la ruta directamente,
@@ -55,7 +53,7 @@ export default function NovedadRecibida() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex justify-end px-4 py-2 lg:hidden">
-        <Conexion estado={enLinea ? 'en_linea' : 'sin_conexion'} />
+        <Conexion />
       </div>
 
       <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 pt-10 pb-6 lg:px-8">

@@ -23,6 +23,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3            | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                     | Propuesto |
 | 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10     | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                   | Propuesto |
 | 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22 | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos | Propuesto |
+| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6     | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -564,3 +565,35 @@ definer`): bloquea la novedad (`for update`), repite el alcance del reportante, 
 
 > | `LIMITE_DE_FOTOS` | La novedad ya tiene el máximo de fotos | «Esta novedad ya tiene 3 fotos.» |
 > | `EVIDENCIA_INVALIDA` | La fila no corresponde a un archivo de la novedad | «No pudimos guardar la foto. Intenta de nuevo.» |
+
+## 18 · Monitor de conexión: fuentes, verificación y anuncio (S4)
+
+**Sección:** SDD 6.1.5, viñeta «Monitor de conexión (RF-23, RF-25)», y 5.3.6 (Tabla 24, fila
+«Eventos de conexión»).
+
+**Qué pasa.** El SDD dice que el monitor «combina el estado que informa el navegador con la
+detección de fallos de red en las solicitudes» y que «mientras está sin conexión, verifica
+periódicamente si el servidor responde», pero no dice contra qué, cada cuánto ni cómo se anuncia.
+
+**Qué se hizo (complemento; plan del Sprint 4, decisiones 11 y 12):**
+
+- Hay conexión si el navegador dice que la hay (`navigator.onLine` y sus eventos) **y** el servidor
+  no dejó de responder. El cliente único de Supabase avisa al monitor de cada solicitud: un fallo
+  de red (`TypeError` de `fetch`) lo pasa a «Sin conexión»; cualquier respuesta lo confirma. Una
+  red «conectada» sin internet (portal cautivo, señal débil) ya no engaña al indicador.
+- Mientras el servidor no responde, el monitor verifica cada **15 s** contra `/auth/v1/health`, con
+  la clave publicable, **5 s** de espera máxima y sin caché, y en pausa con la pestaña oculta. Es
+  otro origen: el service worker no la toca. Al volver el evento `online` verifica de inmediato.
+- El indicador muestra también las pendientes **del usuario** («Sin conexión · 1 pendiente», «En
+  línea · 2 pendientes»). Se actualiza al cambiar la cola, en esta pestaña o en otra
+  (`BroadcastChannel`).
+- El indicador ya no se anuncia por sí mismo: varias barras pintan uno a la vez. El marco tiene
+  una sola región `aria-live="polite"` con el mismo texto.
+
+**Texto propuesto (6.1.5, al final de la viñeta «Monitor de conexión»):**
+
+> El estado sale de los eventos de conexión del navegador y de cada solicitud del cliente de
+> Supabase: un fallo de red marca «sin conexión» aunque el navegador diga que hay red, y cualquier
+> respuesta lo confirma. Mientras el servidor no responde, el monitor consulta cada 15 s el
+> servicio de salud de Auth, con 5 s de espera máxima y en pausa con la pestaña oculta. El
+> indicador muestra la cantidad de pendientes del usuario y se anuncia una sola vez por cambio.

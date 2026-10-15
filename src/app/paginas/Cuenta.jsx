@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router'
-import { contarPendientes } from '../../core/offline/bd.js'
+import { usePendientes } from '../../core/offline/pendientes.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil } from '../../core/sesion/roles.js'
 import { Icono } from '../../core/ui/Icono.jsx'
@@ -25,18 +25,9 @@ export function Cuenta() {
   const navegar = useNavigate()
   // Las cuenta el marco, que es el que tiene el menú.
   const { insignias = {} } = useOutletContext() ?? {}
-  const [pendientes, setPendientes] = useState(0)
+  // Las del usuario, no las de otra persona del dispositivo (RNF-10). Las cuenta el marco.
+  const pendientes = usePendientes()
   const [saliendo, setSaliendo] = useState(false)
-
-  useEffect(() => {
-    let vigente = true
-    contarPendientes()
-      .then((cantidad) => vigente && setPendientes(cantidad))
-      .catch(() => {})
-    return () => {
-      vigente = false
-    }
-  }, [])
 
   // Lo que el menú de este rol solo muestra en el escritorio: en el teléfono se abre desde aquí.
   const soloEnElEscritorio = (MENU[perfil.rol_id] ?? []).filter((item) => item.soloEscritorio)

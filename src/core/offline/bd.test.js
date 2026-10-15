@@ -61,7 +61,11 @@ describe('Almacenamiento local · IndexedDB (SDD 6.1.5, Tabla 32)', () => {
     await guardarCatalogo('areas', [{ id: 'a-1' }])
     await cerrarBd()
     const bd = await openDB(NOMBRE_BD, VERSION_BD)
-    await bd.put('pendientes', { id_local: 'p-1', fecha_registro: '2026-10-13T12:00:00Z' })
+    await bd.put('pendientes', {
+      id_local: 'p-1',
+      reportante_id: 'u-1',
+      fecha_registro: '2026-10-13T12:00:00Z',
+    })
     await bd.put('novedades', { id: 'n-1', estado: 'asignada', actualizado_en: '2026-10-13' })
     bd.close()
 
@@ -69,6 +73,39 @@ describe('Almacenamiento local · IndexedDB (SDD 6.1.5, Tabla 32)', () => {
 
     expect(await leerMeta('perfil')).toBeUndefined()
     expect(await leerCatalogo('areas')).toBeUndefined()
-    expect(await contarPendientes()).toBe(1)
+    expect(await contarPendientes('u-1')).toBe(1)
+  })
+
+  it('RNF-10: cuenta solo las pendientes del usuario, no las de otra persona del dispositivo', async () => {
+    await leerMeta('abrir')
+    await cerrarBd()
+    const bd = await openDB(NOMBRE_BD, VERSION_BD)
+    for (const [id_local, reportante_id] of [
+      ['p-1', 'u-1'],
+      ['p-2', 'u-1'],
+      ['p-3', 'u-2'],
+    ]) {
+      await bd.put('pendientes', { id_local, reportante_id, fecha_registro: '2026-10-13' })
+    }
+    bd.close()
+
+    expect(await contarPendientes('u-1')).toBe(2)
+    expect(await contarPendientes('u-2')).toBe(1)
+    expect(await contarPendientes(null)).toBe(0)
+  })
+
+  it('Decisión 4: otra pestaña (o la versión nueva) que actualiza la base no queda trabada', async () => {
+    await leerMeta('abrir')
+    let trabada = false
+
+    const nueva = await openDB(NOMBRE_BD, VERSION_BD + 1, {
+      blocked: () => {
+        trabada = true
+      },
+    })
+
+    expect(trabada).toBe(false)
+    expect(nueva.version).toBe(VERSION_BD + 1)
+    nueva.close()
   })
 })
