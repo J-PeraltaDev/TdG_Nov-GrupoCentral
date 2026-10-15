@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { esperarQueFuncioneSinRed } from './apoyo/registro.js'
+import { registrarPorLaApi } from './apoyo/novedades.js'
+import { descripcionUnica, esperarQueFuncioneSinRed } from './apoyo/registro.js'
 import { simularIngresoAnterior } from './apoyo/sesionFabricada.js'
 import { HAY_CLAVE, MOTIVO_SIN_CLAVE, ingresarComo } from './apoyo/usuarios.js'
 
@@ -12,22 +13,28 @@ import { HAY_CLAVE, MOTIVO_SIN_CLAVE, ingresarComo } from './apoyo/usuarios.js'
 const MOTIVO_WEBKIT =
   'Playwright WebKit no abre la aplicación sin red («WebKit encountered an internal error»): se verifica en un iPhone real (plan del Sprint 4, decisión 29)'
 
-const CODIGO = /^NOV-\d{4,}$/
-
 test('RF-24 / CU-24 y CU-18 3a: lo que el reportante abrió con red lo ve sin red, con la fecha de la descarga', async ({
   page,
   context,
   browserName,
-}) => {
+}, testInfo) => {
   test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
   test.fixme(browserName === 'webkit', MOTIVO_WEBKIT)
   await ingresarComo(page, 'reportante')
   await esperarQueFuncioneSinRed(page)
 
-  // Con red: «Mis novedades» y el detalle de la primera.
-  const primera = page.getByRole('link', { name: CODIGO }).first()
-  const codigo = (await primera.textContent()).trim()
-  await primera.click()
+  // Una novedad propia: las demás pruebas cambian de estado las del mismo reportante, y una que
+  // cambia de estado pierde, como debe, la línea de tiempo descargada.
+  const novedad = await registrarPorLaApi(page, {
+    descripcion: descripcionUnica(testInfo, 'La consulto sin red'),
+    prioridad: 'normal',
+    area: 'Mantenimiento',
+  })
+  const codigo = `NOV-${String(novedad.codigo).padStart(4, '0')}`
+
+  // Con red: «Mis novedades» y su detalle.
+  await page.goto('/novedades')
+  await page.getByRole('link', { name: codigo }).click()
   await expect(page.getByRole('heading', { level: 1, name: codigo })).toBeVisible()
   await expect(page.getByText(/^Registrada en finca$/).first()).toBeVisible()
   await page.goto('/novedades')

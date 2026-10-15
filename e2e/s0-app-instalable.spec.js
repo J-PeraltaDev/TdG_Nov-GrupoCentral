@@ -54,7 +54,12 @@ test.describe('Aplicación instalable', () => {
   test('RNF-05: después de la primera carga abre sin red, en cualquier ruta', async ({
     page,
     context,
+    browserName,
   }) => {
+    test.fixme(
+      browserName === 'webkit',
+      'Playwright WebKit no abre la aplicación sin red («WebKit encountered an internal error»): se verifica en un iPhone real (plan del Sprint 4, decisión 29)',
+    )
     await page.goto('/ingresar')
     // Espera a que el service worker termine de precachear.
     await page.evaluate(() => navigator.serviceWorker.ready)

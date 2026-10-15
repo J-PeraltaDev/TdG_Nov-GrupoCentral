@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { descripcionUnica, esperarQueFuncioneSinRed, llenarNovedad } from './apoyo/registro.js'
-import { PERFIL, simularIngresoAnterior } from './apoyo/sesionFabricada.js'
+import { PERFIL, simularIngresoAnterior, apiDeSupabase } from './apoyo/sesionFabricada.js'
 import { HAY_CLAVE, MOTIVO_SIN_CLAVE, ingresarComo, leerDeLaApi } from './apoyo/usuarios.js'
 
 /*
@@ -102,7 +102,7 @@ test('RF-22 / CU-22 3a: si la sesión ya no sirve al volver la red, pide el ingr
   await abrirSinRed(page, context, -3600)
 
   // Vuelve la red, pero el servidor ya no acepta la sesión: el token venció y no se renueva.
-  await context.route(/supabase\.co\//, (ruta) => {
+  await context.route(apiDeSupabase(), (ruta) => {
     const url = ruta.request().url()
     const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' }
     if (url.includes('/auth/v1/health'))

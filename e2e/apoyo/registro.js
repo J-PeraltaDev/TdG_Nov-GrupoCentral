@@ -51,6 +51,11 @@ export const enviarNovedad = (page) => page.getByRole('button', { name: 'Enviar 
  * @param {import('@playwright/test').Page} page
  */
 export async function esperarQueFuncioneSinRed(page) {
+  // La caché aparece apenas empieza la instalación; sin red, las navegaciones las atiende solo un
+  // service worker activo. En el CI, más lento, la red se cortaba antes.
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+  })
   await expect
     .poll(() => page.evaluate(async () => (await caches.keys()).length), { timeout: 20_000 })
     .toBeGreaterThan(0)
