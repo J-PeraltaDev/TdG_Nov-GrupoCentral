@@ -20,7 +20,7 @@ const VIGENCIA_DE_LA_URL_S = 300
  * @param {string} novedadId
  * @param {Blob} foto Un JPEG.
  * @param {string} usuarioId Quien la sube: la política exige que sea quien tiene la sesión.
- * @returns {Promise<{ id: string, ruta_storage: string, subida_en: string }>}
+ * @returns {Promise<{ id: string, ruta_storage: string, subida_en: string, transicion_id: number | null }>}
  */
 export async function subirEvidencia(novedadId, foto, usuarioId) {
   const ruta = `${novedadId}/${crypto.randomUUID()}.jpg`
@@ -36,7 +36,7 @@ export async function subirEvidencia(novedadId, foto, usuarioId) {
       subida_por: usuarioId,
       tamano_bytes: foto.size,
     })
-    .select('id, ruta_storage, subida_en')
+    .select('id, ruta_storage, subida_en, transicion_id')
     .single()
   if (error) throw error
   return data
@@ -44,18 +44,19 @@ export async function subirEvidencia(novedadId, foto, usuarioId) {
 
 /**
  * Las fotos de una novedad, en el orden en que se subieron, cada una con su URL firmada: todas
- * en una sola llamada. Sin conexión, las que se descargaron, sin URL: se dibujan como recuadros
- * (09-D y 14-B).
+ * en una sola llamada. Las del reporte tienen `transicion_id` nulo; las de la solución, la
+ * transición → resuelta de su intento (cambio 23). Sin conexión, las que se descargaron, sin
+ * URL: se dibujan como recuadros (09-D y 14-B).
  *
  * @param {string} novedadId
- * @returns {Promise<{ id: string, ruta_storage: string, subida_en: string, url: string | null }[]>}
+ * @returns {Promise<{ id: string, ruta_storage: string, subida_en: string, transicion_id: number | null, url: string | null }[]>}
  */
 export function listarEvidencias(novedadId) {
   return conRespaldo(
     async () => {
       const { data, error } = await supabase
         .from('evidencia')
-        .select('id, ruta_storage, subida_en')
+        .select('id, ruta_storage, subida_en, transicion_id')
         .eq('novedad_id', novedadId)
         .order('subida_en', { ascending: true })
       if (error) throw error
@@ -73,10 +74,11 @@ export function listarEvidencias(novedadId) {
     // Se guardan sin la URL, que vence a los 5 minutos.
     (evidencias) =>
       guardarNovedad(novedadId, {
-        evidencias: evidencias.map(({ id, ruta_storage, subida_en }) => ({
+        evidencias: evidencias.map(({ id, ruta_storage, subida_en, transicion_id }) => ({
           id,
           ruta_storage,
           subida_en,
+          transicion_id,
         })),
       }),
     async () =>

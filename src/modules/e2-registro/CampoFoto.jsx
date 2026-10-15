@@ -24,12 +24,22 @@ import { FOTOS_SIN_RED, formatearPeso } from './medidasDeFoto.js'
  * Campo «Foto (opcional)» de la pantalla 05 (RF-08 / CU-08). Figma: 05 (2:514), 05-B (2:634) y
  * 05-D (2:777). «Tomar foto» abre la cámara del teléfono y «Elegir de la galería», las fotos
  * guardadas; cada foto se reduce antes de mostrarse. Hasta 3 por novedad (decisión 37 del plan).
+ * También es el campo «Fotos de la solución» de la pantalla 18 (cambio 23).
  *
  * @param {object} props
  * @param {FotoElegida[]} props.fotos
  * @param {(fotos: FotoElegida[]) => void} props.alCambiar
+ * @param {string} [props.etiqueta]
+ * @param {string} [props.notaSinRed] Por qué no se puede sin conexión.
+ * @param {string} [props.notaDelMaximo] Por qué no se puede agregar otra.
  */
-export function CampoFoto({ fotos, alCambiar }) {
+export function CampoFoto({
+  fotos,
+  alCambiar,
+  etiqueta = 'Foto',
+  notaSinRed = FOTOS_SIN_RED,
+  notaDelMaximo = 'Máximo 3 fotos por novedad.',
+}) {
   const sinRed = !useEnLinea()
   const lleno = fotos.length >= FOTOS_MAXIMO_POR_NOVEDAD
   const idDeLaNota = useId()
@@ -74,7 +84,7 @@ export function CampoFoto({ fotos, alCambiar }) {
     alCambiar(fotos.filter(({ id }) => id !== quitada.id))
   }
 
-  const nota = sinRed ? FOTOS_SIN_RED : lleno ? 'Máximo 3 fotos por novedad.' : null
+  const nota = sinRed ? notaSinRed : lleno ? notaDelMaximo : null
   const boton = {
     tipo: /** @type {const} */ ('secundario'),
     disabled: reduciendo,
@@ -86,7 +96,7 @@ export function CampoFoto({ fotos, alCambiar }) {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-etiqueta text-texto">
-        Foto <span className="text-texto-secundario">(opcional)</span>
+        {etiqueta} <span className="text-texto-secundario">(opcional)</span>
       </p>
       <Boton {...boton} icono={iconoCamara} onClick={() => camara.current?.click()}>
         Tomar foto

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { abrirRegistro, descripcionUnica, enviarNovedad, llenarNovedad } from './apoyo/registro.js'
-import { HAY_CLAVE, ingresarComo, MOTIVO_SIN_CLAVE } from './apoyo/usuarios.js'
+import { registrarPorLaApi } from './apoyo/novedades.js'
+import { HAY_CLAVE, ingresarComo, llamarALaApi, MOTIVO_SIN_CLAVE } from './apoyo/usuarios.js'
 
 /*
  * RF-08 / CU-08 · Adjuntar evidencia fotográfica, sobre el build y contra «staging». En el
@@ -86,5 +87,66 @@ test.describe('CU-08 · Adjuntar evidencia fotográfica', () => {
         'Las fotos necesitan conexión. Podrás adjuntarla desde el detalle cuando la novedad se sincronice.',
       ),
     ).toBeVisible()
+  })
+})
+
+test.describe('CU-08 y CU-14 · Fotos de la solución (cambio 23)', () => {
+  test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
+
+  const sesionDe = async (browser, rol) => {
+    const contexto = await browser.newContext()
+    const page = await contexto.newPage()
+    await ingresarComo(page, rol)
+    return { contexto, page }
+  }
+
+  test('RF-08 (cambio 23): el aprobador registra la solución con una foto; la ve dentro de la solución, y la finca también', async ({
+    browser,
+  }, testInfo) => {
+    // La finca registra; el aprobador la toma (por la API) y registra la solución en 18.
+    const reportante = await sesionDe(browser, 'reportante')
+    const novedad = await registrarPorLaApi(reportante.page, {
+      descripcion: descripcionUnica(testInfo, 'La bomba del lote 3 no arranca'),
+      prioridad: 'alto',
+      area: 'Mantenimiento',
+    })
+    const aprobador = await sesionDe(browser, 'aprobador')
+    await llamarALaApi(aprobador.page, 'tomar_novedad', { p_novedad_id: novedad.id })
+
+    const { page } = aprobador
+    await page.goto(`/novedades/${novedad.id}/solucion`)
+    await page.getByRole('textbox', { name: '¿Qué se hizo?' }).fill('Se cambió el capacitor.')
+    // Un tipo que ya existe en «staging», para no crear uno por corrida.
+    await page.getByRole('combobox', { name: 'Tipo de falla' }).fill('Tipo e2e')
+    // Por su nombre: mientras busca, la lista solo trae «Buscando…», que no se puede elegir.
+    await page
+      .getByRole('option', { name: /^Tipo e2e/ })
+      .first()
+      .click()
+    await page
+      .getByLabel('Elegir de la galería')
+      .setInputFiles(await imagenDePrueba(page, 'bomba-arreglada.png'))
+    await expect(
+      page.getByRole('list', { name: 'Fotos elegidas' }).getByText(/^Reducida a \d+ KB$/),
+    ).toBeVisible()
+    await page.getByRole('button', { name: 'Marcar como resuelta' }).click()
+
+    await expect(page).toHaveURL(new RegExp(`/novedades/${novedad.id}$`))
+    await expect(
+      page.getByText('Solución registrada. La finca debe confirmar el cierre.'),
+    ).toBeVisible()
+    const enLaSolucion = (pagina) =>
+      pagina
+        .getByRole('region', { name: /^Solución (registrada por Mantenimiento|aplicada)$/ })
+        .getByRole('img', { name: /^Foto 1 de la solución de NOV-\d{4,}$/ })
+    await expect(enLaSolucion(page)).toBeVisible()
+    await expect.poll(() => enLaSolucion(page).evaluate((foto) => foto.naturalWidth)).toBe(1600)
+
+    // La finca la ve en la solución que tiene que confirmar.
+    await reportante.page.goto(`/novedades/${novedad.id}`)
+    await expect(enLaSolucion(reportante.page)).toBeVisible()
+
+    await aprobador.contexto.close()
+    await reportante.contexto.close()
   })
 })

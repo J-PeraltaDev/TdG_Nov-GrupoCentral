@@ -1154,3 +1154,26 @@ El orden de una foto es: registrar la novedad, subir el archivo y después inser
   de la lista; se verificó que la API lo resuelve a través de `v_novedad`. El lector de pantalla
   lo anuncia como «Tiene fotos».
 - **«Registrada sin conexión»** en la línea de tiempo se deriva de las dos fechas (cambio 22).
+
+## 40 · Fotos de la solución (cambio 23, a pedido del equipo)
+
+Figma no tiene estas piezas. Se armaron con los componentes que ya existían y falta dibujarlas en
+Figma (18, 09 y 22).
+
+- **En 18,** «Fotos de la solución (opcional)» va después de «Tipo de falla», con el mismo campo
+  de 05: «Tomar foto», «Elegir de la galería» y las miniaturas que se pueden quitar. Al llegar a 3
+  dice «Máximo 3 fotos por solución.»; sin red, «Las fotos necesitan conexión.».
+- **El aviso al volver al detalle** es el de siempre si todas subieron («Solución registrada. La
+  finca debe confirmar el cierre.»). Si no: «Solución registrada, pero la foto no se pudo subir.
+  Adjúntala desde el detalle.» o «Solución registrada, pero las fotos no se pudieron subir.
+  Adjúntalas desde el detalle.».
+- **En el detalle,** las fotos van dentro del bloque verde de la solución, debajo de sus datos
+  («Solución registrada por {área}» en el teléfono, «Solución aplicada» en el escritorio), con las
+  mismas miniaturas de «Evidencias». Las ven los cuatro roles.
+- **«Adjuntar foto»** (el recuadro punteado de «Evidencias») aparece dentro de la solución para el
+  aprobador del área mientras la novedad está resuelta; sin red queda no disponible con «Las fotos
+  necesitan conexión.». El reportante sigue adjuntando las suyas en «Evidencias».
+- **Texto alternativo:** «Foto 1 de la solución de NOV-0145»; la lista se anuncia como «Fotos de
+  la solución».
+- **Soluciones anteriores:** si la falla persistió, el detalle muestra solo las fotos de la
+  solución vigente. Las anteriores siguen guardadas, atadas a su solución (cambio 23).

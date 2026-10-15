@@ -33,7 +33,8 @@ export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
  * límite lo aplica el servidor (`private.solicitud_abierta`); aquí es para decir «Vencida». */
 export const CODIGO_RECUPERACION_MAX_INTENTOS = 5
 
-/** Evidencias fotográficas (RF-08). Se usan en el Sprint 4. */
+/** Evidencias fotográficas (RF-08). Se usan en el Sprint 4. El máximo vale para las fotos del
+ * reporte y, aparte, para las de cada solución (cambio 23); el servidor lo repite. */
 export const FOTO_LADO_MAYOR_PX = 1600
 export const FOTO_CALIDAD_JPEG = 0.7
 export const FOTO_PESO_MAXIMO_BYTES = 1024 * 1024

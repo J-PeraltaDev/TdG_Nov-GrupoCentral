@@ -14,6 +14,7 @@ import {
   reportarFallaPersiste,
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
+import { listarEvidencias } from '../../core/supabase/repositorios/evidencias.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import DetalleNovedad from './DetalleNovedad.jsx'
@@ -538,7 +539,8 @@ describe('Acciones en el detalle (RF-18 / CU-18 5 y RF-10 / CU-10)', () => {
     const aviso = await screen.findByText('Solución registrada. La finca debe confirmar el cierre.')
     expect(aviso.closest('[data-aviso-temporal]')).toHaveAttribute('role', 'status')
     expect(await screen.findByText('Se cambió el motor del torniquete.')).toBeVisible()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    // Sin acciones de atención; solo agregar fotos a la solución (cambio 23).
+    await sinAccionesSalvoFotos(true)
     expect(screen.queryByRole('link', { name: 'Registrar solución' })).not.toBeInTheDocument()
   })
 
@@ -1159,5 +1161,68 @@ describe('Registrada sin conexión (RNF-09; decisión 25 del plan)', () => {
     const linea = within(await screen.findByRole('region', { name: 'Línea de tiempo' }))
     expect(await linea.findByText('Luz Marina Córdoba · Reportante')).toBeVisible()
     expect(linea.queryByText(/registrada sin conexión/)).not.toBeInTheDocument()
+  })
+})
+
+describe('Fotos del reporte y de la solución (RF-08; cambio 23)', () => {
+  // HISTORIA_RESUELTA: la transición 4 es la → resuelta del intento vigente.
+  const foto = (n, transicion_id) => ({
+    id: `e-${n}`,
+    ruta_storage: `${ID}/${n}.jpg`,
+    subida_en: '2026-09-23T21:50:00Z',
+    transicion_id,
+    url: `https://firmada/${n}`,
+  })
+
+  afterEach(() => {
+    vi.mocked(listarEvidencias).mockResolvedValue([])
+  })
+
+  it('RF-08: las del reporte van en «Evidencias» y las de la solución vigente, dentro de la solución', async () => {
+    vi.mocked(listarEvidencias).mockResolvedValue([foto(1, null), foto(2, 4), foto(3, 2)])
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    abrir({ rol: 'reportante' })
+
+    const solucion = within(
+      await screen.findByRole('region', { name: 'Solución registrada por Mantenimiento' }),
+    )
+    expect(
+      await solucion.findByRole('img', { name: 'Foto 1 de la solución de NOV-0153' }),
+    ).toHaveAttribute('src', 'https://firmada/2')
+    const evidencias = within(screen.getByRole('region', { name: 'Evidencias' }))
+    expect(evidencias.getByRole('img', { name: 'Foto 1 de NOV-0153' })).toHaveAttribute(
+      'src',
+      'https://firmada/1',
+    )
+    // La 3 es de un intento anterior (la falla persistió): no se mezcla con la solución vigente.
+    expect(screen.getAllByRole('img')).toHaveLength(2)
+    // La finca no agrega fotos a la solución; al reporte, sí.
+    expect(solucion.queryByRole('button', { name: 'Adjuntar foto' })).not.toBeInTheDocument()
+    expect(evidencias.getByRole('button', { name: 'Adjuntar foto' })).toBeEnabled()
+  })
+
+  it('RF-08 (cambio 23): con la solución registrada, el aprobador del área le agrega fotos', async () => {
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    abrir({ rol: 'aprobador' })
+
+    const solucion = within(
+      await screen.findByRole('region', { name: 'Solución registrada por Mantenimiento' }),
+    )
+    expect(await solucion.findByRole('button', { name: 'Adjuntar foto' })).toBeEnabled()
+    expect(screen.queryByRole('region', { name: 'Evidencias' })).not.toBeInTheDocument()
+  })
+
+  it('RF-08: el director ve las fotos de la solución, pero no agrega', async () => {
+    vi.mocked(listarEvidencias).mockResolvedValue([foto(2, 4)])
+    conNovedad(RESUELTA, HISTORIA_RESUELTA)
+    abrir({ rol: 'director' })
+
+    const solucion = within(
+      await screen.findByRole('region', { name: 'Solución registrada por Mantenimiento' }),
+    )
+    expect(
+      await solucion.findByRole('img', { name: 'Foto 1 de la solución de NOV-0153' }),
+    ).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Adjuntar foto' })).not.toBeInTheDocument()
   })
 })

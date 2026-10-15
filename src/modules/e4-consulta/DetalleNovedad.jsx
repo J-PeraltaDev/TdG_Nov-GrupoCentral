@@ -30,7 +30,8 @@ import {
   tiempoTranscurrido,
 } from '../../core/utils/fechas.js'
 import { JustificacionDelEscalamiento } from '../e3-atencion/JustificacionDelEscalamiento.jsx'
-import { Evidencias } from './Evidencias.jsx'
+import { Evidencias, Fotos } from './Evidencias.jsx'
+import { useEvidencias } from './useEvidencias.js'
 import { SinPermiso } from './SinPermiso.jsx'
 
 // Las acciones de cada rol van en su propio paquete: los demás roles no lo descargan.
@@ -49,7 +50,8 @@ const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirecto
  * pantalla 09: confirmar el cierre o indicar que la falla persiste (RF-15 / CU-15).
  *
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
- * (Tabla 35) y cada rol trae las suyas. Las fotos van en el bloque «Evidencias» (RF-08).
+ * (Tabla 35) y cada rol trae las suyas. Las fotos del reporte van en el bloque «Evidencias» y
+ * las de la solución, dentro de la solución (RF-08; cambio 23).
  *
  * Sin conexión, la última versión descargada, con «Datos del {fecha}» (RF-24 / CU-18 3a;
  * decisión 16 del plan), y las acciones no disponibles, con su explicación (RF-25: 09-D, 14-B).
@@ -212,8 +214,17 @@ function Justificacion({ escalamiento }) {
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  * @param {import('react').ReactNode} [props.avisoSinRed] El de 14-B, arriba.
  * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
+ * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
  */
-function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed, evidencias }) {
+function Telefono({
+  novedad,
+  transiciones,
+  decide,
+  escalamiento,
+  avisoSinRed,
+  evidencias,
+  fotosDeLaSolucion,
+}) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
 
@@ -257,6 +268,7 @@ function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed, ev
               </DatoEnFila>
             ) : null}
           </dl>
+          {fotosDeLaSolucion}
         </section>
       ) : null}
 
@@ -301,8 +313,18 @@ function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed, ev
  *   el panel ocupa la columna derecha y la línea de tiempo pasa bajo el contenido.
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
+ * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
  */
-function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamiento, evidencias }) {
+function Escritorio({
+  novedad,
+  transiciones,
+  acciones,
+  panel,
+  decide,
+  escalamiento,
+  evidencias,
+  fotosDeLaSolucion,
+}) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
   const lineaDeTiempo = (
@@ -382,6 +404,7 @@ function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamien
               Solución aplicada
             </h2>
             <p className="text-cuerpo break-words text-texto">{novedad.solucion}</p>
+            {fotosDeLaSolucion}
           </section>
         ) : null}
 
@@ -494,6 +517,7 @@ export default function DetalleNovedad() {
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const disponibles = accionesDisponibles(perfil, novedad)
+  const { evidencias: fotos, recargar: recargarFotos } = useEvidencias(novedad?.id)
   const acciones =
     novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
       <Suspense fallback={null}>
@@ -546,9 +570,29 @@ export default function DetalleNovedad() {
     <Evidencias
       key={novedad.id}
       novedad={novedad}
+      fotos={fotos?.filter(({ transicion_id }) => transicion_id == null) ?? null}
       puedeAdjuntar={disponibles.includes(ACCION.ADJUNTAR_FOTO)}
+      alAdjuntar={recargarFotos}
     />
   ) : null
+  // Las de la solución vigente: las de su transición → resuelta (cambio 23). Un intento anterior
+  // (la falla persistió) conserva las suyas en la base, pero aquí no se mezclan.
+  const intentoVigente = novedad?.solucion ? resolucion(transiciones ?? [])?.id : undefined
+  const fotosDelIntento = intentoVigente
+    ? (fotos ?? []).filter(({ transicion_id }) => transicion_id === intentoVigente)
+    : []
+  const puedeAdjuntarALaSolucion = disponibles.includes(ACCION.ADJUNTAR_FOTO_SOLUCION)
+  const fotosDeLaSolucion =
+    novedad && (fotosDelIntento.length > 0 || puedeAdjuntarALaSolucion) ? (
+      <Fotos
+        key={novedad.id}
+        novedad={novedad}
+        fotos={fotosDelIntento}
+        deLaSolucion
+        puedeAdjuntar={puedeAdjuntarALaSolucion}
+        alAdjuntar={recargarFotos}
+      />
+    ) : null
   // 14-B: sin conexión, quien atiende o decide sabe de entrada por qué sus acciones no están
   // disponibles (RF-25). Al director se le dice lo mismo (decisión 17 del plan).
   const avisoSinRed =
@@ -630,6 +674,7 @@ export default function DetalleNovedad() {
               decide={decide}
               escalamiento={escalamiento}
               evidencias={evidencias}
+              fotosDeLaSolucion={fotosDeLaSolucion}
             />
           </div>
         ) : (
@@ -641,6 +686,7 @@ export default function DetalleNovedad() {
               escalamiento={escalamiento}
               avisoSinRed={avisoSinRed}
               evidencias={evidencias}
+              fotosDeLaSolucion={fotosDeLaSolucion}
             />
             {acciones}
             {decision}

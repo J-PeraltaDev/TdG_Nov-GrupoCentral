@@ -774,3 +774,90 @@ en la línea de tiempo del detalle, para los cuatro roles.
 
 > El umbral de 5 minutos para «registrada sin conexión» se valida en el piloto con los tiempos
 > reales de envío desde las fincas.
+
+## 23 · Fotos de la solución: también las adjunta el aprobador del área (S4)
+
+**Sección:** SRS RF-08; CU-08 y CU-14; SDD 5.2.3 (y la fila de la pantalla 18), 6.1.1 (Tabla 26,
+fila `evidencia`), 6.1.4 (Tabla 31), 6.1.7, 6.1.11 (Tabla 35) y la fila de RF-08 en la Tabla 36.
+
+**Qué pasa.** RF-08, CU-08 y la Tabla 31 dejan adjuntar fotos solo al reportante, y Figma no
+dibuja fotos en la pantalla 18 ni en la solución del detalle. El equipo pidió (14 oct) que el
+aprobador del área también deje fotos de lo que hizo, con el estilo del resto de la aplicación.
+
+**Qué se hizo** (servidor en el PR #31, migraciones `rf08_fotos_de_la_solucion` y
+`rf08_una_politica_de_insercion`; cliente en el PR #37):
+
+- **Columna nueva `evidencia.transicion_id`** (bigint, nula, clave foránea a
+  `historial_transicion`). Es nula en las fotos del reporte; en las de la solución apunta a la
+  transición «→ resuelta» de esa solución. La pone el disparador, no el cliente. Si la falla
+  persiste y el área registra otra solución, cada una conserva sus fotos (la solución anterior ya
+  quedaba en el historial, cambio 12).
+- **Quién sube.** El reportante de la finca, como antes, mientras la novedad no sea final. El
+  aprobador del área de la novedad, solo mientras está `resuelta`: al registrar la solución (18)
+  y desde el detalle, hasta que la finca responda. Una sola política de inserción cubre a los dos,
+  para no dejar dos políticas permisivas (aviso del asesor).
+- **Máximo de 3 por grupo:** 3 del reporte y 3 por cada solución. El disparador cuenta solo las
+  del mismo `transicion_id`; lo demás no cambia (bloqueo de la novedad, archivo en su carpeta y
+  tamaño real).
+- **La lectura no cambia:** quien puede ver la novedad ve todas sus fotos.
+- **Pantalla 18:** campo «Fotos de la solución (opcional)», el mismo de 05. Las fotos suben
+  después de `registrar_solucion`; si una no sube, la solución queda registrada y el aviso lo dice.
+- **Detalle:** las fotos de la solución vigente van dentro de su bloque, para los cuatro roles, y
+  el aprobador del área tiene ahí «Adjuntar foto» mientras la novedad está resuelta. Las del
+  reporte siguen en «Evidencias». Las de soluciones anteriores no se muestran.
+
+**Texto propuesto (SRS, RF-08, primer párrafo):**
+
+> El sistema debe permitir que el reportante adjunte fotografías como evidencia al registrar una
+> novedad de su finca o al consultarla mientras no esté cerrada ni rechazada, y que el aprobador
+> de área adjunte fotografías de la solución al registrarla o mientras la novedad esté resuelta.
+
+**Texto propuesto (SRS, RF-08, una regla de negocio nueva):**
+
+> - Las fotografías de la solución quedan asociadas a la solución registrada: si la falla persiste
+>   y se registra otra solución, cada una conserva las suyas.
+
+**Texto propuesto (CU-08):**
+
+> - Actores: Reportante (primario); aprobador de área, para las fotografías de la solución.
+> - Referencias: RF-08. Extiende CU-05, CU-14 y CU-18.
+> - Precondición: El reportante está registrando una novedad de su finca o consultando una que no
+>   está cerrada ni rechazada, o el aprobador de área está registrando la solución de una novedad
+>   de su área o consultando una de su área que está resuelta.
+
+**Texto propuesto (CU-14):** en Referencias, «Extendido por CU-08 y CU-25», y el paso 5 del
+aprobador de área:
+
+> Selecciona un tipo existente o confirma uno nuevo, completa los demás datos, adjunta
+> fotografías de la solución si lo desea (CU-08) y confirma.
+
+**Texto propuesto (SDD 5.2.3, al final de la frase del registro de la solución):**
+
+> Admite además fotografías opcionales de la solución, que el detalle muestra junto a ella (RF-08).
+
+En la tabla de pantallas, la fila 18 suma RF-08; en la Tabla 36, la fila de RF-08 suma las
+pantallas 18 y 22.
+
+**Texto propuesto (6.1.1, Tabla 26, fila `evidencia`):** en las columnas, «transicion_id FK NULL»
+después de «subida_por FK», y en las restricciones, después de «Ruta única en el bucket
+evidencias (RF-08).»:
+
+> transicion_id es nulo en las fotografías del reporte; en las de la solución, es la transición a
+> resuelta de esa solución.
+
+**Texto propuesto (6.1.4, Tabla 31, columna Inserción de las filas `evidencia` y «Objetos del
+bucket evidencias»):**
+
+> Reportante de la finca; aprobador del área mientras la novedad está resuelta (en `evidencia`,
+> además, subida_por = usuario).
+
+**Texto propuesto (6.1.7, una viñeta nueva después de la cuarta):**
+
+> - El aprobador de área puede adjuntar fotografías de la solución al registrarla (pantalla 18) y
+>   desde el detalle mientras la novedad esté resuelta. Se suben después de registrar la solución
+>   y el servidor las asocia a la transición a resuelta de esa solución. El máximo de fotografías
+>   se aplica por separado a las del reporte y a las de cada solución.
+
+**Texto propuesto (6.1.11, Tabla 35, fila «Resuelta», columna del aprobador):**
+
+> Adjuntar foto de la solución (en espera de la finca)
