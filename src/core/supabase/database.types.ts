@@ -99,6 +99,7 @@ export type Database = {
           subida_en: string
           subida_por: string
           tamano_bytes: number
+          transicion_id: number | null
         }
         Insert: {
           id?: string
@@ -107,6 +108,7 @@ export type Database = {
           subida_en?: string
           subida_por: string
           tamano_bytes: number
+          transicion_id?: number | null
         }
         Update: {
           id?: string
@@ -115,6 +117,7 @@ export type Database = {
           subida_en?: string
           subida_por?: string
           tamano_bytes?: number
+          transicion_id?: number | null
         }
         Relationships: [
           {
@@ -143,6 +146,13 @@ export type Database = {
             columns: ["subida_por"]
             isOneToOne: false
             referencedRelation: "usuario_publico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidencia_transicion_id_fkey"
+            columns: ["transicion_id"]
+            isOneToOne: false
+            referencedRelation: "historial_transicion"
             referencedColumns: ["id"]
           },
         ]

@@ -36,6 +36,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
+| 33  | Evidencias: archivos huérfanos y «staging»  | Se aceptan los huérfanos; el bucket se vacía desde el panel          | El equipo         |
 | 34  | Detalles del indicador de conexión (RF-23)  | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
 | 35  | Registro sin conexión (05-B y 07)           | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»      | El equipo (Figma) |
 
@@ -346,6 +347,24 @@ ninguno usa Playwright. Una versión anterior de este documento decía lo contra
 **Propuesta:** agregar al CI un trabajo que levante Supabase local, genere una contraseña al azar
 para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
+**Hecho en el Sprint 4** (decisión 27 del plan): el trabajo `e2e` del CI levanta Supabase local,
+le pone a los usuarios del seed una contraseña al azar que no sale del trabajo y corre
+`npm run test:e2e` en Chromium y WebKit, a 360 × 800 y 1280 × 800. La primera semana no bloquea
+(`continue-on-error`); no sube `test-results/`.
+
+**Primera corrida (14 oct 2026, #30):** 206 pasan, 4 intermitentes y 6 fallan, en 5,8 minutos.
+
+- **WebKit no abre la aplicación sin red en Playwright.** Las tres pruebas que recargan o navegan
+  con `setOffline(true)` (RNF-10 con el token vigente y vencido, y RNF-05) fallan en WebKit con
+  «WebKit encountered an internal error», antes de que la aplicación haga nada. No se encontró si es
+  de Playwright o de WebKit, y aquí no se puede abrir WebKit para aislarlo. Quedan como `fixme` en
+  WebKit (pendientes de verificar, no borradas) y se verifican en un iPhone real (plan del Sprint 4,
+  decisión 29). En Chromium pasan.
+- **Intermitentes o con datos del seed:** CU-15 3a y 3b en WebKit (un clic que no llega a tiempo),
+  CU-05 4a en el escritorio de WebKit (la misma navegación) y CU-04 3b en el teléfono de Chromium
+  (necesita una finca del seed con novedades abiertas, que la base local recién creada no tiene).
+  Quedan anotadas; el trabajo sigue sin bloquear.
+
 ## 16 · Avisos del asesor de Supabase
 
 El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
@@ -383,6 +402,10 @@ mismos dieciséis. `private.solicitud_abierta` no genera aviso.
 avisos, todos _WARN_ y de los mismos tipos: trece por las funciones RPC, el de
 `solicitar_recuperacion` para `anon` y el de las contraseñas filtradas. No sale el del segundo
 factor.
+
+**Al 14 oct 2026 (bucket de evidencias, RF-08):** los mismos dieciséis en «staging». Las dos
+funciones nuevas viven en `private` y no generan avisos: `novedad_de_la_ruta` no es `security
+definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente.
 
 ## 17 · Pruebas que necesitan ingresar
 
@@ -985,6 +1008,26 @@ visibles en ramas publicadas.
 **Decidido el 10 oct 2026:** algunos de esos nombres son reales y no importa. Se dejan como
 están, en las capturas y en las pruebas, y no hace falta repetir nada. Lo que sigue fuera del
 repositorio es la lista oficial (punto 1).
+
+## 33 · Evidencias: archivos huérfanos y el bucket de «staging»
+
+El orden de una foto es: registrar la novedad, subir el archivo y después insertar la fila de
+`evidencia` (SDD 6.1.7). Si la fila no llega (se cae la red entre los dos pasos), el archivo queda
+**huérfano** en el bucket.
+
+- **Se acepta y se documenta** (plan del Sprint 4, decisión 21). Nadie lo ve: la política de
+  lectura exige la fila. Pesa como máximo 1 MB. Borrarlo desde el cliente exigiría darle permiso de
+  borrado, que la Tabla 31 no da. Si un día ocupan espacio, se borran desde el panel de Supabase
+  (borrar por SQL no sirve: Storage lo rechaza y dejaría los archivos sin su fila).
+- **`staging:reset` no vacía el bucket** (el script del CLI no toca `storage.buckets` ni
+  `storage.objects`): las fotos de las pruebas se quedan después de un reset, aunque sus novedades
+  ya no existan. Son imágenes de pocos KB que generan las pruebas. Antes de la demo, una persona
+  vacía el bucket `evidencias` desde el panel de «staging».
+- **Comprobado el 14 oct 2026 contra «staging»** con la API real de Storage y la sesión del
+  reportante de prueba: tres subidas con sus filas (el tamaño se toma del archivo), la cuarta
+  rechazada, un archivo que no es JPEG y uno de más de 1 MB rechazados, URLs firmadas para el
+  reportante y el aprobador del área y no para el reportante de otra finca ni sin sesión, ningún
+  borrado y ninguna URL pública. Quedó la novedad NOV-2939 con tres fotos de 134 bytes.
 
 ## 34 · Detalles del indicador de conexión (RF-23)
 

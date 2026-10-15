@@ -84,3 +84,53 @@ jobs:
 
       - name: Pruebas de base de datos (pgTAP)
         run: supabase test db
+
+  e2e:
+    name: Extremo a extremo · Chromium y WebKit
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Los equipos no abren WebKit (decisiones-pendientes, punto 15): aquí se prueba Safari
+    # (RNF-04). Primera semana sin bloquear (plan del Sprint 4, decisión 27); si es estable, se
+    # quita esta línea.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.120.0
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Levantar Supabase local (migraciones y seed)
+        run: supabase start
+
+      # La contraseña nace aquí, al azar, y no sale del trabajo: el repositorio es público.
+      - name: Contraseña de los usuarios de prueba y variables de la app
+        run: |
+          eval "$(supabase status -o env)"
+          clave="$(openssl rand -hex 16)"
+          echo "::add-mask::$clave"
+          {
+            echo "VITE_SUPABASE_URL=$API_URL"
+            echo "VITE_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY:-$ANON_KEY}"
+            echo "CLAVE_USUARIOS_DE_PRUEBA=$clave"
+          } >> "$GITHUB_ENV"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -v clave="$clave" <<'SQL'
+          update auth.users
+             set encrypted_password = extensions.crypt(:'clave', extensions.gen_salt('bf'))
+           where email like '%@novedades.test';
+          SQL
+
+      - name: Navegadores de Playwright
+        run: npx playwright install --with-deps chromium webkit
+
+      # Sin artefactos: test-results/ guarda lo escrito en los campos, contraseña incluida.
+      - name: Pruebas de extremo a extremo
+        run: npm run test:e2e
