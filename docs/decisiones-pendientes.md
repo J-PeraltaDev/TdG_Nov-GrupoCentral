@@ -15,13 +15,13 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                    | jsdom 29, compatible con Node 24.14                                  | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja    | Solo el `hover` del botón primario                                   | El equipo (Figma) |
 | 10  | Textos que no están en Figma                  | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                    | Medido: 188,3 KB de 200 KB                                           | El equipo         |
+| 11  | Peso de la ruta de ingreso                    | Medido: 187,8 KB de 200 KB; Lighthouse: 97 y 100                     | El equipo         |
 | 12  | Borde del botón secundario                    | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio            | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
-| 15  | WebKit no abre en los equipos                 | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
+| 15  | WebKit no abre en los equipos                 | El CI corre Chromium y WebKit; sin red en WebKit, `fixme`            | El equipo         |
 | 16  | Avisos del asesor de Supabase                 | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar                | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
+| 17  | Pruebas que necesitan ingresar                | **Al día:** el 14 oct pasaron las 135 (más las 6 de preparación)     | El equipo         |
 | 18  | Primer administrador de producción            | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
@@ -295,6 +295,23 @@ ingreso (02 pesa 3,1 KB; 03, 3,7 KB) y la pantalla 32 (4,2 KB) solo la descarga 
 administrador. En el paquete inicial entraron el aviso 01-E, el mensaje del límite de intentos y
 la relectura del perfil (RF-03): 1,2 KB de JavaScript en todo el sprint. El CSS sube 1,0 KB.
 
+**Sprint 4, medido el 14 oct 2026 al cierre (con las fotos de la solución):** ≈ 187,8 KB
+(JavaScript 149,9 KB, CSS 8,8 KB, fuente 26,8 KB y registro del service worker 2,2 KB). Quedan
+unos 12,2 KB.
+
+- Al paquete inicial entraron el monitor de conexión y el aviso del cliente.
+- Lo demás del sprint va bajo demanda: 07 (1,2 KB), 08 (6 KB), la reducción de fotos (solo se
+  carga al elegir una) y el bloque «Evidencias».
+
+**Lighthouse 13.5.0, el 14 oct 2026,** sobre `/ingresar` con el build local:
+
+- rendimiento 97 en el teléfono emulado (FCP 1,9 s, LCP 2,3 s, bloqueo 0 ms, CLS 0) y 100 en el
+  escritorio;
+- accesibilidad y buenas prácticas, 100 en los dos.
+
+Lo único con efecto medible: 93 KB del JavaScript inicial no se usan en el ingreso. Lighthouse
+estima 450 ms menos de LCP en el teléfono si salen de la carga inicial.
+
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
 en cada PR; si el margen se agota, habrá que decidir qué sale de la carga inicial.
@@ -412,6 +429,12 @@ factor.
 funciones nuevas viven en `private` y no generan avisos: `novedad_de_la_ruta` no es `security
 definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente.
 
+**Al 14 oct 2026 (fotos de la solución, cambio 23):** los mismos dieciséis.
+
+- La primera versión dejó dos políticas de inserción permisivas en `evidencia`
+  (`multiple_permissive_policies`). Se unieron en una con `rf08_una_politica_de_insercion`.
+- `private.solucion_vigente` no genera aviso: no es `security definer`.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
@@ -497,6 +520,15 @@ del seed no les cambian la contraseña ni el estado.
 **Resuelto en el Sprint 3 (RF-01):** cuando Auth limita los intentos de ingreso (429), la
 pantalla dice «Demasiados intentos. Espera unos minutos e intenta de nuevo.», sin señalar la
 contraseña. Antes mostraba el mensaje general.
+
+**Sprint 4 (14 oct 2026):** con las 30 nuevas del sprint (15 en cada tamaño: CU-21 a CU-25,
+RNF-07 y CU-08, también las fotos de la solución), **pasaron las 135 en Chromium, más las seis de
+preparación (141)**.
+
+- No suman ingresos. Las que sincronizan contra «staging» reutilizan las sesiones de
+  `sesiones.setup.js`, y las que no necesitan el servidor usan una sesión fabricada.
+- Las de CU-08 dejan fotos de pocos KB en el bucket de «staging», que `staging:reset` no borra
+  (punto 33).
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
