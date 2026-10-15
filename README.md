@@ -15,7 +15,7 @@ Colombiano Jaime Isaza Cadavid.
 consulta sin conexión, las pendientes se envían solas al volver la señal, las acciones que cambian
 el estado se bloquean sin red y las novedades llevan fotos. `main` tiene los Sprints 1 a 3.
 Producción («PROYECTO») tiene las migraciones y las dos Edge Functions del Sprint 3, desde el 10
-oct 2026; las de las fotos se aplican antes de fusionar #31. El avance por sprint está en
+oct 2026, y las de las fotos desde el 14 oct. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
