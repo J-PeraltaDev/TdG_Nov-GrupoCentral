@@ -691,3 +691,57 @@ pone el estado HTTP en el error que entrega `supabase-js`.
 **Texto propuesto (5.3.6, Tabla 24, primera columna de la fila):**
 
 > Cambios del monitor de conexión (eventos online y offline y respuestas del servidor)
+
+## 21 · Consulta sin conexión: qué se guarda, qué se retira y los conteos (S4)
+
+**Sección:** SDD 6.1.5, Tabla 32 (almacenes `novedades` y `meta`) y la viñeta «Consulta (RF-24)».
+
+**Qué pasa.** La Tabla 32 dice que `novedades` guarda la última versión descargada de cada
+novedad, «con su línea de tiempo», y que «se reemplaza en cada consulta con conexión». Pero cada
+consulta trae solo una lista o una novedad. No dice qué pasa con una novedad que salió de una
+lista porque cambió de estado o de área, ni con los conteos de las pestañas que no se abrieron.
+Tampoco dice qué pasa si el perfil cambia de rol o de alcance sin cerrar la sesión. Y `meta` tiene
+una sola «fecha de la última actualización».
+
+**Qué se hizo (precisión; plan del Sprint 4, decisiones 13 a 16):**
+
+- **Qué se guarda.** Cada consulta con conexión guarda lo que trae, combinado por `id` con lo que
+  ya había: «Mis novedades», la bandeja, las escaladas del director (con su escalamiento) y el
+  detalle con su línea de tiempo. Si la novedad cambió de estado, su línea de tiempo guardada se
+  descarta hasta que se vuelva a abrir con conexión.
+- **Qué se retira.** Una novedad guardada que, por su lugar en el orden, tendría que haber
+  llegado en una página y no llegó, ya no está en esa lista: se borra. También se borra si el
+  servidor ya no deja verla.
+- **Cómo se arma una lista sin conexión.** Con el mismo filtro, orden, páginas de 20 y «Ver más»
+  que el servidor. Los conteos de las pestañas y de los contadores son los de la última descarga,
+  aunque esa pestaña no se haya abierto (Figma 04-B y 11-B).
+- **`meta` por lista.** Guarda la fecha de descarga de cada lista (`descarga:…`) y sus conteos
+  (`descarga:conteo:…`). Sin conexión, cada vista muestra la de su lista.
+- **Sin esperar a la red.** Si el monitor ya sabe que no hay conexión, la lectura va directo al
+  dispositivo, sin los cerca de 7 s de reintentos de la API (punto 34 de las decisiones
+  pendientes). Si la red falla en el camino, también responde con lo descargado.
+- **Cuándo se borra.** Al cerrar la sesión, como ya decía la tabla, y también si el perfil vuelve
+  del servidor con otro rol, finca o área.
+- **CU-24 3a.** Una lista que nunca se descargó dice «La primera consulta necesita conexión. Abre
+  esta pantalla con internet para descargar tus novedades.» En el detalle, «Esta novedad no está
+  descargada. Ábrela con conexión.» Es un código interno del cliente (`SIN_DESCARGA`), no de la
+  Tabla 22.
+
+**Texto propuesto (Tabla 32, fila `novedades`, «Ciclo de vida»):**
+
+> Se actualiza con cada consulta con conexión, combinada por `id`; se retiran las que ya no están
+> en la lista consultada. Se borra al cerrar sesión o si cambian el rol, la finca o el área del
+> usuario.
+
+**Texto propuesto (Tabla 32, fila `meta`, «Contenido»):**
+
+> Usuario dueño de los datos, fecha de descarga y conteos de cada lista, y versión del esquema
+> local
+
+**Texto propuesto (6.1.5, viñeta «Consulta (RF-24)»):**
+
+> Consulta (RF-24): cada consulta con conexión de Mis novedades, de la bandeja, de las escaladas o
+> del detalle actualiza el almacén novedades. Sin conexión, las vistas leen de ese almacén con el
+> mismo filtro, orden y paginación que el servidor, y muestran la fecha y la hora de la descarga de
+> esa lista (RF-09, RF-18); si esa lista no se ha descargado, informan que la primera consulta
+> requiere conexión.

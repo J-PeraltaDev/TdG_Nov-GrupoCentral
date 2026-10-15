@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarFincas } from '../../core/supabase/repositorios/catalogos.js'
@@ -26,6 +27,7 @@ import { Pestanas } from '../../core/ui/Pestanas.jsx'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
+import { formatearDescarga } from '../../core/utils/fechas.js'
 import { PESTANAS, resumirTransiciones } from './reglasDeBandeja.js'
 import { TablaDeBandeja } from './TablaDeBandeja.jsx'
 import { useAccion } from './useAccion.js'
@@ -36,7 +38,8 @@ import { VistaPrevia } from './VistaPrevia.jsx'
  * (escritorio). RF-09 / CU-09. Figma 3:295, 3:524 y 3:587.
  *
  * La base de datos limita la lista al área del aprobador (RNF-11) y la entrega ya ordenada
- * por prioridad y antigüedad. La bandeja sin conexión (11-B) llega en el Sprint 4.
+ * por prioridad y antigüedad. Sin conexión, la bandeja es la descargada, con su fecha (11-B,
+ * Figma 3:407; RF-24).
  */
 
 const ID_DE_LA_LISTA = 'bandeja-lista'
@@ -158,6 +161,7 @@ export default function Bandeja() {
   const [elegidaId, setElegidaId] = useState(null)
 
   const areaId = perfil.area_id
+  const enLinea = useEnLinea()
   const consulta = `${pestana.id}:${fincaId ?? ''}:${intento}`
 
   // La página y los conteos de las otras dos pestañas no dependen entre sí: van en paralelo.
@@ -187,7 +191,8 @@ export default function Bandeja() {
     return () => {
       vigente = false
     }
-  }, [areaId, fincaId, pestana, consulta])
+    // Sin conexión se lee lo descargado; al volver, lo del servidor.
+  }, [areaId, fincaId, pestana, consulta, enLinea])
 
   // Solo el escritorio usa el catálogo de fincas (el filtro) y el historial (las notas del
   // estado y la vista previa): el teléfono no los pide (RNF-05).
@@ -235,7 +240,7 @@ export default function Bandeja() {
       setLista((actual) =>
         actual.consulta === consulta
           ? {
-              consulta,
+              ...actual,
               novedades: [...actual.novedades, ...pagina.novedades],
               total: pagina.total,
               pagina: siguiente,
@@ -289,6 +294,14 @@ export default function Bandeja() {
           Novedades no cerradas de tu área, por prioridad y antigüedad
         </p>
       </header>
+
+      {!cargando && lista.descargadaEn ? (
+        <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+          {/* La hora ya termina en punto («a. m.»), como en Figma. */}
+          Bandeja descargada {formatearDescarga(lista.descargadaEn)} Las acciones se habilitan al
+          volver el internet.
+        </Aviso>
+      ) : null}
 
       {esEscritorio ? (
         <div className="flex items-end gap-4">

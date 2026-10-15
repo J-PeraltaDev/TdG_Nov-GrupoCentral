@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { firmaDe, ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
@@ -46,9 +47,15 @@ const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirecto
  * pantalla 09: confirmar el cierre o indicar que la falla persiste (RF-15 / CU-15).
  *
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
- * (Tabla 35) y cada rol trae las suyas; las evidencias y la consulta sin conexión llegan en
- * el Sprint 4.
+ * (Tabla 35) y cada rol trae las suyas; las evidencias llegan en el Sprint 4.
+ *
+ * Sin conexión, la última versión descargada, con «Datos del {fecha}» y sin acciones (RF-24 /
+ * CU-18 3a; decisión 16 del plan). Las acciones deshabilitadas con su explicación (09-D, 14-B)
+ * llegan con RF-25.
  */
+
+/** Sin conexión, la novedad que nunca se abrió con conexión (decisión 16 del plan). */
+const NO_DESCARGADA = 'Esta novedad no está descargada. Ábrela con conexión.'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -90,6 +97,31 @@ function seguimiento(novedad, transiciones) {
 /** La transición que dejó la novedad resuelta: quién registró la solución y cuándo. */
 const resolucion = (transiciones) =>
   transiciones.find(({ estado_nuevo }) => estado_nuevo === 'resuelta') ?? null
+
+/**
+ * La línea de tiempo, o por qué no está: la novedad llegó al dispositivo solo en una lista.
+ *
+ * @param {{ transiciones: import('../../core/ui/LineaDeTiempo.jsx').Transicion[] | null, conPie?: boolean }} props
+ */
+function Historial({ transiciones, conPie = false }) {
+  return transiciones ? (
+    <LineaDeTiempo transiciones={transiciones} conPie={conPie} />
+  ) : (
+    <p className="pb-4 text-cuerpo-pequeno text-texto-secundario">
+      La línea de tiempo se descarga cuando abres la novedad con conexión.
+    </p>
+  )
+}
+
+/** «Datos del 24 sep, 7:42 a. m.»: lo que se ve sin conexión es lo descargado (09-D, 14-B). */
+function DatosDel({ novedad }) {
+  if (!novedad.descargada_en) return null
+  return (
+    <p className="text-auxiliar text-advertencia">
+      Datos del {formatearFechaCorta(novedad.descargada_en)}
+    </p>
+  )
+}
 
 /**
  * @param {object} props
@@ -165,8 +197,8 @@ function Justificacion({ escalamiento }) {
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  */
 function Telefono({ novedad, transiciones, decide, escalamiento }) {
-  const resuelta = novedad.solucion ? resolucion(transiciones) : null
-  const linea = seguimiento(novedad, transiciones)
+  const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
+  const linea = seguimiento(novedad, transiciones ?? [])
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
@@ -179,6 +211,7 @@ function Telefono({ novedad, transiciones, decide, escalamiento }) {
         <EtiquetasDeNovedad novedad={novedad} />
       </div>
       {linea ? <p className="text-auxiliar text-texto-secundario">{linea}</p> : null}
+      <DatosDel novedad={novedad} />
 
       {novedad.solucion ? (
         <section
@@ -232,7 +265,7 @@ function Telefono({ novedad, transiciones, decide, escalamiento }) {
         id={ID_DE_LA_LINEA}
         className={`flex flex-col gap-3 px-4 pt-4 pb-1 ${TARJETA}`}
       >
-        <LineaDeTiempo transiciones={transiciones} />
+        <Historial transiciones={transiciones} />
       </Seccion>
     </div>
   )
@@ -249,15 +282,15 @@ function Telefono({ novedad, transiciones, decide, escalamiento }) {
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  */
 function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamiento }) {
-  const resuelta = novedad.solucion ? resolucion(transiciones) : null
-  const linea = seguimiento(novedad, transiciones)
+  const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
+  const linea = seguimiento(novedad, transiciones ?? [])
   const lineaDeTiempo = (
     <Seccion
       titulo="Línea de tiempo"
       id={ID_DE_LA_LINEA}
       className={`flex min-w-0 flex-col gap-3 px-4 pt-4 ${TARJETA} ${decide ? 'xl:col-start-1' : ''}`}
     >
-      <LineaDeTiempo transiciones={transiciones} conPie />
+      <Historial transiciones={transiciones} conPie />
     </Seccion>
   )
 
@@ -279,6 +312,7 @@ function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamien
           </div>
           <p className="text-cuerpo-pequeno text-texto-secundario">{novedad.razon_social}</p>
           {linea ? <p className="text-auxiliar text-texto-secundario">{linea}</p> : null}
+          <DatosDel novedad={novedad} />
           {acciones}
         </div>
 
@@ -350,6 +384,7 @@ export default function DetalleNovedad() {
   const navegar = useNavigate()
   const { perfil } = useSesion()
   const esEscritorio = useEsEscritorio()
+  const enLinea = useEnLinea()
 
   const idValido = UUID.test(id ?? '')
   const [intento, setIntento] = useState(0)
@@ -381,7 +416,8 @@ export default function DetalleNovedad() {
     return () => {
       vigente = false
     }
-  }, [id, idValido, consulta])
+    // Sin conexión se lee lo descargado; al volver, lo del servidor.
+  }, [id, idValido, consulta, enLinea])
 
   const recargar = useCallback(() => setIntento((n) => n + 1), [])
 
@@ -435,8 +471,10 @@ export default function DetalleNovedad() {
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const disponibles = accionesDisponibles(perfil, novedad)
+  // Lo descargado se consulta, pero no se actúa sobre ello (RF-25).
+  const conAcciones = Boolean(novedad && !novedad.descargada_en)
   const acciones =
-    novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
+    conAcciones && perfil.rol_id === ROL.APROBADOR_AREA ? (
       <Suspense fallback={null}>
         <AccionesDelAprobador
           novedad={novedad}
@@ -448,7 +486,7 @@ export default function DetalleNovedad() {
           esEscritorio={esEscritorio}
         />
       </Suspense>
-    ) : novedad && perfil.rol_id === ROL.REPORTANTE ? (
+    ) : conAcciones && perfil.rol_id === ROL.REPORTANTE ? (
       // La finca responde a una novedad resuelta (RF-15). Sigue montado después, para mostrar
       // el aviso de lo que acaba de hacer.
       <Suspense fallback={null}>
@@ -469,10 +507,10 @@ export default function DetalleNovedad() {
   // La justificación vigente: la de la última vez que se escaló (el historial llega de la
   // transición más reciente a la más antigua).
   const escalamiento = decide
-    ? (transiciones.find(({ estado_nuevo }) => estado_nuevo === 'escalada') ?? null)
+    ? ((transiciones ?? []).find(({ estado_nuevo }) => estado_nuevo === 'escalada') ?? null)
     : null
   const decision =
-    novedad && esDirector ? (
+    conAcciones && esDirector ? (
       <Suspense fallback={null}>
         <DecisionDelDirector
           key={novedad.id}
@@ -529,7 +567,7 @@ export default function DetalleNovedad() {
               </Boton>
             }
           >
-            {fallo.mensaje}
+            {fallo.codigo === 'SIN_DESCARGA' ? NO_DESCARGADA : fallo.mensaje}
           </Aviso>
         </div>
       ) : null}

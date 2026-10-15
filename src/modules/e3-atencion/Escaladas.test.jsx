@@ -191,6 +191,21 @@ describe('Pantalla 19 · Novedades escaladas (RF-13 / CU-13)', () => {
     expect(listarEscalamientos).not.toHaveBeenCalled()
   })
 
+  it('RF-24 / CU-24: sin conexión muestra las escaladas descargadas, con el aviso de 04-B', async () => {
+    vi.mocked(listarEscaladas).mockResolvedValue({
+      novedades: NOVEDADES,
+      total: 2,
+      descargadaEn: hace(1),
+    })
+    abrir()
+
+    expect(await screen.findAllByRole('article')).toHaveLength(2)
+    expect(screen.getByText('Sin conexión')).toBeVisible()
+    expect(
+      screen.getByText(/^Estás viendo lo descargado hoy \d{1,2}:\d{2} [ap]\. m\.$/),
+    ).toBeVisible()
+  })
+
   it('RF-13: si la consulta falla, avisa y deja reintentar', async () => {
     vi.mocked(listarEscaladas).mockRejectedValueOnce(new TypeError('Failed to fetch'))
     abrir()

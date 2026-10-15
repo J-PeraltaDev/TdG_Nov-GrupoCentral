@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { listarPendientes } from '../../core/offline/bd.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import MisNovedades from './MisNovedades.jsx'
@@ -10,6 +11,11 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   NOVEDADES_POR_PAGINA: 20,
   listarNovedades: vi.fn(),
   contarNovedades: vi.fn(),
+}))
+// La cola de pendientes del dispositivo (RF-21): aquí solo importa cómo se ven.
+vi.mock('../../core/offline/bd.js', async (original) => ({
+  ...(await original()),
+  listarPendientes: vi.fn().mockResolvedValue([]),
 }))
 
 const ABIERTAS = ['registrada', 'asignada', 'en_atencion', 'escalada', 'aprobada']
@@ -223,5 +229,66 @@ describe('Pantalla 04 · Mis novedades (RF-18)', () => {
 
     expect(await screen.findAllByRole('listitem')).toHaveLength(2)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('Pantalla 04-B · Consulta sin conexión (RF-24 / CU-24)', () => {
+  beforeEach(() => {
+    vi.mocked(listarNovedades).mockReset()
+    vi.mocked(contarNovedades).mockReset()
+    vi.mocked(listarPendientes).mockResolvedValue([])
+  })
+
+  it('RF-24 / CU-24 3 y 4: muestra lo descargado y cuándo se descargó', async () => {
+    vi.mocked(listarNovedades).mockResolvedValue({
+      novedades: NOVEDADES,
+      total: 2,
+      descargadaEn: haceHoras(1),
+    })
+    vi.mocked(contarNovedades).mockResolvedValue(2)
+    abrir()
+
+    expect(await screen.findAllByRole('listitem')).toHaveLength(2)
+    expect(screen.getByText('Sin conexión')).toBeVisible()
+    expect(
+      screen.getByText(/^Estás viendo lo descargado hoy \d{1,2}:\d{2} [ap]\. m\.$/),
+    ).toBeVisible()
+  })
+
+  it('RF-24 / CU-24 3: las pendientes van primero en «Abiertas», sin código, y abren la pantalla 08', async () => {
+    conNovedades()
+    vi.mocked(listarPendientes).mockResolvedValue([
+      {
+        id_local: '7f3a0000-0000-4000-8000-000000000001',
+        descripcion: 'El rodillo del cable vía del lote 5 está suelto.',
+        prioridad: 'normal',
+        area: 'Mantenimiento',
+        fecha_registro: haceHoras(0),
+      },
+    ])
+    abrir()
+
+    const [primera, ...resto] = await screen.findAllByRole('listitem')
+    expect(resto).toHaveLength(2)
+    const enLaPendiente = within(primera)
+    expect(enLaPendiente.getByRole('link', { name: 'Sin código' })).toHaveAttribute(
+      'href',
+      '/pendientes',
+    )
+    expect(enLaPendiente.getByText('Pendiente de sincronizar')).toBeVisible()
+    expect(enLaPendiente.getByText(/^hoy /)).toBeVisible()
+    // Se cuentan con las abiertas, como en Figma 04-B.
+    expect(screen.getByRole('button', { name: 'Abiertas (3)' })).toBeVisible()
+  })
+
+  it('RF-24 / CU-24 3a: sin nada descargado, la primera consulta necesita conexión', async () => {
+    const sinDescarga = Object.assign(new Error(), { name: 'SinDescarga' })
+    vi.mocked(listarNovedades).mockRejectedValue(sinDescarga)
+    vi.mocked(contarNovedades).mockResolvedValue(0)
+    abrir()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'La primera consulta necesita conexión. Abre esta pantalla con internet para descargar tus novedades.',
+    )
   })
 })

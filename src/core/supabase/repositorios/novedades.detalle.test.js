@@ -5,6 +5,8 @@ import { listarLineaDeTiempo, obtenerNovedad } from './novedades.js'
 
 // Se simula el módulo del cliente, no la red: aquí importa qué consulta se arma.
 vi.mock('../cliente.js', () => ({ supabase: { from: vi.fn() } }))
+// Con conexión: aquí importa la consulta al servidor; sin conexión, novedades.sinConexion.test.js.
+vi.mock('../../conexion/monitor.js', () => ({ estaEnLinea: () => true }))
 
 /** Anota cada método que se le encadena a la consulta y, al esperarla, entrega la respuesta. */
 function simularConsulta(respuesta) {

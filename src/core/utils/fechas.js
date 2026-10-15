@@ -149,6 +149,19 @@ export function formatearUltimoIngreso(fecha, ahora = Date.now()) {
 }
 
 /**
+ * Cuándo se descargó lo que se ve sin conexión, como lo escriben 04-B y 11-B: «hoy 7:42 a. m.»
+ * o, si fue otro día, «el 24 sep 2026, 7:42 a. m.».
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearDescarga(fecha, ahora = Date.now()) {
+  return esMismoDiaEnColombia(fecha, ahora)
+    ? `hoy ${formatearHora(fecha)}`
+    : `el ${formatearFechaHora(fecha)}`
+}
+
+/**
  * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
  * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
  * mañana en UTC.

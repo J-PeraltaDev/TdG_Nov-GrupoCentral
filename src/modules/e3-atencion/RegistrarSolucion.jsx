@@ -351,7 +351,8 @@ export default function RegistrarSolucion() {
     let vigente = true
     Promise.all([obtenerNovedad(id), listarLineaDeTiempo(id)])
       .then(([novedad, transiciones]) => {
-        if (vigente) setResultado({ id, novedad, transiciones, fallo: null })
+        // Sin conexión, la línea de tiempo puede no estar descargada (`null`).
+        if (vigente) setResultado({ id, novedad, transiciones: transiciones ?? [], fallo: null })
       })
       .catch((error) => {
         if (vigente) {

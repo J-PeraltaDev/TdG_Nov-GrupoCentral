@@ -987,3 +987,55 @@ describe('Pantallas 09, 09-B y 09-C · La finca responde a una novedad resuelta 
     expect(screen.getByRole('main')).toHaveFocus()
   })
 })
+
+describe('Detalle sin conexión (RF-24 / CU-24 6 y CU-18 3a)', () => {
+  // Descargada a las 7:42 a. m. de Colombia.
+  const DESCARGADA = { ...ASIGNADA, descargada_en: '2026-09-24T12:42:00Z' }
+
+  it('RF-24 / CU-24 6: muestra la versión descargada con su fecha y sin acciones', async () => {
+    conNovedad(DESCARGADA)
+    abrir()
+
+    expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
+    expect(screen.getByText(ASIGNADA.descripcion)).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+  })
+
+  it('RF-24: en el escritorio también, bajo el encabezado', async () => {
+    simularPantalla('escritorio')
+    conNovedad(DESCARGADA)
+    abrir()
+
+    expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+  })
+
+  it('RF-24: la finca no confirma ni devuelve lo descargado; eso necesita conexión', async () => {
+    conNovedad({ ...RESUELTA, descargada_en: '2026-09-24T12:42:00Z' }, HISTORIA_RESUELTA)
+    abrir({ rol: 'reportante' })
+
+    expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Confirmar cierre' })).not.toBeInTheDocument()
+  })
+
+  it('RF-24: si la novedad llegó solo en una lista, dice que la línea de tiempo se descarga al abrirla con conexión', async () => {
+    conNovedad(DESCARGADA, null)
+    abrir()
+
+    expect(
+      await screen.findByText(
+        'La línea de tiempo se descarga cuando abres la novedad con conexión.',
+      ),
+    ).toBeVisible()
+  })
+
+  it('RF-24: una novedad que nunca se abrió con conexión no está en el dispositivo', async () => {
+    vi.mocked(obtenerNovedad).mockRejectedValue(Object.assign(new Error(), { name: 'SinDescarga' }))
+    vi.mocked(listarLineaDeTiempo).mockResolvedValue(null)
+    abrir()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Esta novedad no está descargada. Ábrela con conexión.',
+    )
+  })
+})

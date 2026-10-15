@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
+import { listarPendientes } from '../../core/offline/bd.js'
 import { useSincronizacion } from '../../core/offline/estadoDeSincronizacion.js'
 import { usePendientes } from '../../core/offline/pendientes.js'
+import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -13,12 +16,16 @@ import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoPorConfirmar from '../../core/ui/iconos/task_alt.svg'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
+import { formatearDescarga } from '../../core/utils/fechas.js'
 import { SesionVencida } from '../e5-sin-conexion/SesionVencida.jsx'
 
 /*
- * Pantalla 04 · Mis novedades y 04-C · Finca sin novedades abiertas (RF-18). Figma 2:36 y
- * 2:291. La base de datos limita la lista a la finca del reportante (RNF-11). Cada tarjeta
- * abre el detalle de su novedad; la consulta sin conexión (04-B) llega en el Sprint 4.
+ * Pantalla 04 · Mis novedades, 04-B · Consulta sin conexión y 04-C · Finca sin novedades
+ * abiertas (RF-18, RF-24). Figma 2:36, 2:160 y 2:291. La base de datos limita la lista a la
+ * finca del reportante (RNF-11). Cada tarjeta abre el detalle de su novedad.
+ *
+ * Sin conexión, la lista es la descargada, con su fecha (04-B). Las pendientes de sincronizar
+ * van arriba de «Abiertas», con y sin conexión, y abren la pantalla 08 (decisión 14 del plan).
  */
 
 /** Pestañas de Figma: agrupan los estados según lo que el reportante espera de cada caso. */
@@ -69,10 +76,26 @@ export default function MisNovedades() {
   const [lista, setLista] = useState({ consulta: '', novedades: [], total: 0, pagina: 0 })
   const [fallo, setFallo] = useState(null)
   const [cargandoMas, setCargandoMas] = useState(false)
+  const { perfil } = useSesion()
+  const enLinea = useEnLinea()
   const pendientes = usePendientes()
+  const [enCola, setEnCola] = useState(/** @type {object[]} */ ([]))
   const { sesionVencida } = useSincronizacion()
 
   const consulta = `${pestana.id}:${intento}`
+
+  // Las pendientes del usuario (RNF-10), cada vez que cambia la cola.
+  useEffect(() => {
+    let vigente = true
+    listarPendientes(perfil.id)
+      .then((lista) => {
+        if (vigente) setEnCola(lista)
+      })
+      .catch(() => {})
+    return () => {
+      vigente = false
+    }
+  }, [perfil.id, pendientes])
 
   // Los conteos de los filtros y la primera página no dependen entre sí: van en paralelo.
   useEffect(() => {
@@ -96,8 +119,9 @@ export default function MisNovedades() {
     return () => {
       vigente = false
     }
-    // Cuando la sincronización envía una pendiente, la lista se vuelve a pedir: ya tiene código.
-  }, [pestana, consulta, pendientes])
+    // Se vuelve a pedir cuando la sincronización envía una pendiente (ya tiene código) y cuando
+    // cambia la conexión: sin ella se lee lo descargado; al volver, lo del servidor.
+  }, [pestana, consulta, pendientes, enLinea])
 
   async function verMas() {
     setCargandoMas(true)
@@ -109,7 +133,7 @@ export default function MisNovedades() {
       setLista((actual) =>
         actual.consulta === consulta
           ? {
-              consulta,
+              ...actual,
               novedades: [...actual.novedades, ...pagina.novedades],
               total: pagina.total,
               pagina: siguiente,
@@ -126,7 +150,9 @@ export default function MisNovedades() {
   const cargando = lista.consulta !== consulta
   const porConfirmar = conteos.por_confirmar ?? 0
   const hayMas = lista.novedades.length < lista.total
-  const vacia = !cargando && !fallo && lista.novedades.length === 0
+  // Las pendientes van en «Abiertas» y se cuentan con ellas (Figma 04-B).
+  const sinCodigo = pestana.id === 'abiertas' ? enCola : []
+  const vacia = !cargando && !fallo && lista.novedades.length === 0 && sinCodigo.length === 0
   const sinAbiertas = vacia && pestana.id === 'abiertas'
   // Con la lista a la vista, el reintento es volver a pedir la página que faltó.
   const reintentar = lista.novedades.length > 0 ? verMas : () => setIntento((n) => n + 1)
@@ -146,6 +172,13 @@ export default function MisNovedades() {
 
       {/* 08-B también aquí, en la pantalla de inicio del reportante (decisión 7 del plan). */}
       {sesionVencida && pendientes > 0 ? <SesionVencida cantidad={pendientes} /> : null}
+
+      {!cargando && lista.descargadaEn ? (
+        <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+          {/* La hora ya termina en punto («a. m.»), como en Figma. */}
+          Estás viendo lo descargado {formatearDescarga(lista.descargadaEn)}
+        </Aviso>
+      ) : null}
 
       {porConfirmar > 0 && pestana.id !== 'por_confirmar' ? (
         <div className="flex items-center gap-3 rounded-xl bg-exito-suave py-2.5 pr-2.5 pl-3.5">
@@ -168,7 +201,11 @@ export default function MisNovedades() {
       >
         {PESTANAS.map((opcion) => {
           const elegida = opcion.id === pestana.id
-          const conteo = opcion.conConteo ? conteos[opcion.id] : null
+          const delServidor = opcion.conConteo ? conteos[opcion.id] : null
+          const conteo =
+            delServidor !== null && opcion.id === 'abiertas'
+              ? delServidor + enCola.length
+              : delServidor
           return (
             <button
               key={opcion.id}
@@ -206,8 +243,15 @@ export default function MisNovedades() {
           </p>
         ) : null}
 
-        {!cargando && lista.novedades.length > 0 ? (
+        {!cargando && lista.novedades.length + sinCodigo.length > 0 ? (
           <ul className="flex flex-col gap-2.5">
+            {sinCodigo.map((pendiente) => (
+              <TarjetaNovedad
+                key={pendiente.id_local}
+                novedad={{ ...pendiente, id: pendiente.id_local, estado: 'pendiente' }}
+                a="/pendientes"
+              />
+            ))}
             {lista.novedades.map((novedad) => (
               <TarjetaNovedad
                 key={novedad.id}

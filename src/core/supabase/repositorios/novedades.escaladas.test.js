@@ -6,6 +6,8 @@ import { contarDecisionesDelMes, listarEscaladas, listarEscalamientos } from './
 
 // Se simula el módulo del cliente, no la red: aquí importa qué consulta se arma.
 vi.mock('../cliente.js', () => ({ supabase: { from: vi.fn() } }))
+// Con conexión: aquí importa la consulta al servidor; sin conexión, novedades.sinConexion.test.js.
+vi.mock('../../conexion/monitor.js', () => ({ estaEnLinea: () => true }))
 
 /**
  * Simula el constructor de consultas de supabase-js: anota cada método que se le encadena y,

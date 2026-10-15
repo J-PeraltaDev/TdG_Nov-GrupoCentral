@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   esMismoDiaEnColombia,
+  formatearDescarga,
   formatearDuracion,
   formatearFechaConSemana,
   formatearFechaCorta,
@@ -168,6 +169,13 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     expect(formatearUltimoIngreso('2026-09-22T15:00:00Z', ahora)).toBe('22 sep')
     expect(formatearUltimoIngreso('2026-08-12T15:00:00Z', ahora)).toBe('12 ago')
     expect(formatearUltimoIngreso('2025-08-12T15:00:00Z', ahora)).toBe('12 ago 2025')
+  })
+
+  it('RF-24: cuándo se descargó lo que se ve sin conexión, como en 04-B y 11-B', () => {
+    const ahora = '2026-09-24T13:05:00Z'
+
+    expect(formatearDescarga('2026-09-24T12:42:00Z', ahora)).toBe('hoy 7:42 a. m.')
+    expect(formatearDescarga('2026-09-23T12:42:00Z', ahora)).toBe('el 23 sep 2026, 7:42 a. m.')
   })
 
   it('RF-03: «hoy» y «ayer» son los días de Colombia, no los de UTC', () => {
