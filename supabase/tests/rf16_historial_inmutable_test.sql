@@ -43,8 +43,10 @@ select throws_ok(
   'P0001', 'HISTORIAL_INMUTABLE',
   'RNF-12 / CU-16: borrar del historial lanza una excepción, también para el propietario'
 );
+-- Con `cascade`: sin él, lo frena antes la llave foránea de `evidencia.transicion_id` (cambio
+-- 23 de docs/cambios-sdd.md). Así se prueba el disparador, que lo frena de todos modos.
 select throws_ok(
-  'truncate public.historial_transicion',
+  'truncate public.historial_transicion cascade',
   'P0001', 'HISTORIAL_INMUTABLE',
   'RNF-12 / CU-16: vaciar el historial lanza una excepción, también para el propietario'
 );
