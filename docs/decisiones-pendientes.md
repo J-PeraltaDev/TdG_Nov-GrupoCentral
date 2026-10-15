@@ -3,41 +3,47 @@
 Dudas de diseño o de negocio que los documentos no resuelven. Ninguna bloquea: en cada una se
 tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la confirmen o la cambien.
 
-| N.º | Tema                                        | Qué se hizo mientras tanto                                           | La decide         |
-| --- | ------------------------------------------- | -------------------------------------------------------------------- | ----------------- |
-| 1   | Lista oficial de fincas y razones sociales  | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
-| 2   | Base de datos de las vistas previas         | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
-| 3   | Dominio de los correos de la plataforma     | `@novedades.test` para los usuarios de prueba                        | El equipo         |
-| 4   | Valores de los parámetros configurables     | Los que propone el plan, en `parametros.js`                          | La empresa        |
-| 5   | Íconos de la app y conjunto de íconos       | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
-| 6   | Contraste del estado «escalada»             | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
-| 7   | Service worker propio o con Workbox         | Propio, sin dependencias nuevas                                      | El equipo         |
-| 8   | Versión de Node y de jsdom                  | jsdom 29, compatible con Node 24.14                                  | El equipo         |
-| 9   | Estados de interacción que Figma no dibuja  | Solo el `hover` del botón primario                                   | El equipo (Figma) |
-| 10  | Textos que no están en Figma                | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                  | Medido: 188,3 KB de 200 KB                                           | El equipo         |
-| 12  | Borde del botón secundario                  | Se dejó el color de Figma                                            | El equipo (Figma) |
-| 13  | Detalles de las pantallas 04, 05 y 06       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 14  | Pantallas 05 y 06 en el escritorio          | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
-| 15  | WebKit no abre en los equipos               | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
-| 16  | Avisos del asesor de Supabase               | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar              | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
-| 18  | Primer administrador de producción          | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |
-| 19  | Detalles de la bandeja del área (11 y 12)   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 20  | Detalles del detalle (13, 14, 22 y 22-B)    | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 21  | Acciones del aprobador (13-B y 14-C)        | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 22  | Hojas de las acciones (15, 16 y 17)         | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 23  | Contraste del «Área actual» de la hoja 17   | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
-| 24  | Detalles de la pantalla 18 (solución)       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 25  | Tipos de falla de prueba en «staging»       | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
-| 27  | Detalles de las pantallas 19, 20 y 20-C     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 28  | Detalles de las pantallas 09, 09-B y 09-C   | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 29  | Detalles de las pantallas 30 y 30-B         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
-| 34  | Detalles del indicador de conexión (RF-23)  | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
-| 35  | Registro sin conexión (05-B y 07)           | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»      | El equipo (Figma) |
+| N.º | Tema                                          | Qué se hizo mientras tanto                                           | La decide         |
+| --- | --------------------------------------------- | -------------------------------------------------------------------- | ----------------- |
+| 1   | Lista oficial de fincas y razones sociales    | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
+| 2   | Base de datos de las vistas previas           | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
+| 3   | Dominio de los correos de la plataforma       | `@novedades.test` para los usuarios de prueba                        | El equipo         |
+| 4   | Valores de los parámetros configurables       | Los que propone el plan, en `parametros.js`                          | La empresa        |
+| 5   | Íconos de la app y conjunto de íconos         | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
+| 6   | Contraste del estado «escalada»               | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
+| 7   | Service worker propio o con Workbox           | Propio, sin dependencias nuevas                                      | El equipo         |
+| 8   | Versión de Node y de jsdom                    | jsdom 29, compatible con Node 24.14                                  | El equipo         |
+| 9   | Estados de interacción que Figma no dibuja    | Solo el `hover` del botón primario                                   | El equipo (Figma) |
+| 10  | Textos que no están en Figma                  | Redactados con tuteo; listados abajo                                 | El equipo         |
+| 11  | Peso de la ruta de ingreso                    | Medido: 188,3 KB de 200 KB                                           | El equipo         |
+| 12  | Borde del botón secundario                    | Se dejó el color de Figma                                            | El equipo (Figma) |
+| 13  | Detalles de las pantallas 04, 05 y 06         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 14  | Pantallas 05 y 06 en el escritorio            | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
+| 15  | WebKit no abre en los equipos                 | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
+| 16  | Avisos del asesor de Supabase                 | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
+| 17  | Pruebas que necesitan ingresar                | **Al día:** el 9 oct pasaron las 104 (más las 6 de preparación)      | El equipo         |
+| 18  | Primer administrador de producción            | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |
+| 19  | Detalles de la bandeja del área (11 y 12)     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 20  | Detalles del detalle (13, 14, 22 y 22-B)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 21  | Acciones del aprobador (13-B y 14-C)          | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 22  | Hojas de las acciones (15, 16 y 17)           | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17     | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
+| 24  | Detalles de la pantalla 18 (solución)         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 25  | Tipos de falla de prueba en «staging»         | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
+| 27  | Detalles de las pantallas 19, 20 y 20-C       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 28  | Detalles de las pantallas 09, 09-B y 09-C     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 29  | Detalles de las pantallas 30 y 30-B           | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 30  | Detalles de las pantallas 28, 28-B y 29       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 31  | Detalles de las pantallas 02, 03 y 32         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
+| 32  | Nombres de ejemplo de Figma en las capturas   | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
+| 33  | Evidencias: archivos huérfanos y «staging»    | Se aceptan los huérfanos; el bucket se vacía desde el panel          | El equipo         |
+| 34  | Detalles del indicador de conexión (RF-23)    | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
+| 35  | Registro sin conexión (05-B y 07)             | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»      | El equipo (Figma) |
+| 36  | Pantallas 08 y 08-B (RF-22)                   | El indicador lleva a 08; títulos del avance; reintentos sin red      | El equipo (Figma) |
+| 37  | Consulta sin conexión (04-B, 11-B y detalle)  | Pendientes en «Abiertas»; fecha de la descarga; conteos              | El equipo (Figma) |
+| 38  | Acciones sin conexión (14-B, 09-D y director) | No disponibles, con su explicación; textos en singular               | El equipo (Figma) |
+| 39  | Evidencias fotográficas en el cliente         | 3 fotos en 05; avisos de 06 y 07; bloque del detalle                 | El equipo (Figma) |
+| 40  | Fotos de la solución (aprobador)              | **Nuevo, a pedido del equipo:** campo en 18 y fotos en la solución   | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -383,6 +389,10 @@ mismos dieciséis. `private.solicitud_abierta` no genera aviso.
 avisos, todos _WARN_ y de los mismos tipos: trece por las funciones RPC, el de
 `solicitar_recuperacion` para `anon` y el de las contraseñas filtradas. No sale el del segundo
 factor.
+
+**Al 14 oct 2026 (bucket de evidencias, RF-08):** los mismos dieciséis en «staging». Las dos
+funciones nuevas viven en `private` y no generan avisos: `novedad_de_la_ruta` no es `security
+definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente.
 
 ## 17 · Pruebas que necesitan ingresar
 
@@ -985,6 +995,26 @@ visibles en ramas publicadas.
 **Decidido el 10 oct 2026:** algunos de esos nombres son reales y no importa. Se dejan como
 están, en las capturas y en las pruebas, y no hace falta repetir nada. Lo que sigue fuera del
 repositorio es la lista oficial (punto 1).
+
+## 33 · Evidencias: archivos huérfanos y el bucket de «staging»
+
+El orden de una foto es: registrar la novedad, subir el archivo y después insertar la fila de
+`evidencia` (SDD 6.1.7). Si la fila no llega (se cae la red entre los dos pasos), el archivo queda
+**huérfano** en el bucket.
+
+- **Se acepta y se documenta** (plan del Sprint 4, decisión 21). Nadie lo ve: la política de
+  lectura exige la fila. Pesa como máximo 1 MB. Borrarlo desde el cliente exigiría darle permiso de
+  borrado, que la Tabla 31 no da. Si un día ocupan espacio, se borran desde el panel de Supabase
+  (borrar por SQL no sirve: Storage lo rechaza y dejaría los archivos sin su fila).
+- **`staging:reset` no vacía el bucket** (el script del CLI no toca `storage.buckets` ni
+  `storage.objects`): las fotos de las pruebas se quedan después de un reset, aunque sus novedades
+  ya no existan. Son imágenes de pocos KB que generan las pruebas. Antes de la demo, una persona
+  vacía el bucket `evidencias` desde el panel de «staging».
+- **Comprobado el 14 oct 2026 contra «staging»** con la API real de Storage y la sesión del
+  reportante de prueba: tres subidas con sus filas (el tamaño se toma del archivo), la cuarta
+  rechazada, un archivo que no es JPEG y uno de más de 1 MB rechazados, URLs firmadas para el
+  reportante y el aprobador del área y no para el reportante de otra finca ni sin sesión, ningún
+  borrado y ninguna URL pública. Quedó la novedad NOV-2939 con tres fotos de 134 bytes.
 
 ## 34 · Detalles del indicador de conexión (RF-23)
 
