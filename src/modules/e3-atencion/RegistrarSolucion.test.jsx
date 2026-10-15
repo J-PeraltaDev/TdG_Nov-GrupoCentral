@@ -7,9 +7,11 @@ import {
   obtenerNovedad,
   registrarSolucion,
 } from '../../core/supabase/repositorios/novedades.js'
+import { subirEvidencia } from '../../core/supabase/repositorios/evidencias.js'
 import { sugerirTiposFalla } from '../../core/supabase/repositorios/tiposFalla.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
-import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
+import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
+import { reducirFoto } from '../e2-registro/reducirFoto.js'
 import RegistrarSolucion from './RegistrarSolucion.jsx'
 
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
@@ -20,6 +22,11 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
 vi.mock('../../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn(),
 }))
+vi.mock('../../core/supabase/repositorios/evidencias.js', () => ({
+  subirEvidencia: vi.fn(),
+}))
+// La codificación de las fotos necesita el navegador: se prueba en la e2e.
+vi.mock('../e2-registro/reducirFoto.js', () => ({ reducirFoto: vi.fn() }))
 
 const ID = '00000000-0000-4000-e000-000000000149'
 // 11:10 p. m. del 24 de septiembre en Colombia: en UTC ya es 25.
@@ -479,5 +486,81 @@ describe('Registrar solución en el escritorio (RF-14)', () => {
       'href',
       `/novedades/${ID}`,
     )
+  })
+})
+
+describe('Fotos de la solución en la pantalla 18 (RF-08; cambio 23)', () => {
+  const FOTO = new Blob([new Uint8Array(4096)], { type: 'image/jpeg' })
+
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:miniatura')
+    URL.revokeObjectURL = vi.fn()
+    vi.mocked(reducirFoto).mockReset().mockResolvedValue(FOTO)
+    vi.mocked(subirEvidencia).mockReset().mockResolvedValue({ id: 'e-1' })
+    vi.mocked(registrarSolucion).mockResolvedValue({ id: ID, estado: 'resuelta' })
+  })
+
+  async function elegirFotos(...nombres) {
+    for (const nombre of nombres) {
+      await userEvent.upload(
+        screen.getByLabelText('Elegir de la galería'),
+        new File(['foto'], nombre, { type: 'image/jpeg' }),
+      )
+    }
+    await screen.findAllByRole('button', { name: /^Quitar / })
+  }
+
+  it('RF-08 (cambio 23): primero registra la solución y después sube cada foto, a nombre del aprobador', async () => {
+    conNovedad()
+    abrir()
+    await listo()
+    expect(screen.getByText('Fotos de la solución')).toBeVisible()
+
+    await llenar()
+    await elegirFotos('antes.jpg', 'despues.jpg')
+    await userEvent.click(enviar())
+
+    expect(await screen.findByRole('heading', { name: 'Detalle de la novedad' })).toBeVisible()
+    expect(registrarSolucion).toHaveBeenCalledOnce()
+    expect(registrarSolucion.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(subirEvidencia).mock.invocationCallOrder[0],
+    )
+    expect(vi.mocked(subirEvidencia).mock.calls).toEqual([
+      [ID, FOTO, PERFILES.aprobador.id],
+      [ID, FOTO, PERFILES.aprobador.id],
+    ])
+    expect(screen.getByTestId('aviso')).toHaveTextContent(
+      'Solución registrada. La finca debe confirmar el cierre.',
+    )
+  })
+
+  it('RF-08: si una foto no sube, la solución ya quedó y el detalle lo dice', async () => {
+    vi.mocked(subirEvidencia).mockRejectedValueOnce(new Error('EVIDENCIA_INVALIDA'))
+    conNovedad()
+    abrir()
+    await listo()
+
+    await llenar()
+    await elegirFotos('despues.jpg')
+    await userEvent.click(enviar())
+
+    expect(await screen.findByRole('heading', { name: 'Detalle de la novedad' })).toBeVisible()
+    expect(screen.getByTestId('aviso')).toHaveTextContent(
+      'Solución registrada, pero la foto no se pudo subir. Adjúntala desde el detalle.',
+    )
+  })
+
+  it('RF-08: si la solución no se registra, no se sube ninguna foto', async () => {
+    vi.mocked(registrarSolucion).mockRejectedValue(new Error('TIPO_FALLA_INVALIDO'))
+    conNovedad()
+    abrir()
+    await listo()
+
+    await llenar()
+    await elegirFotos('despues.jpg')
+    await userEvent.click(enviar())
+
+    expect(await screen.findByText(/Ese tipo de falla no está disponible/)).toBeVisible()
+    expect(subirEvidencia).not.toHaveBeenCalled()
   })
 })

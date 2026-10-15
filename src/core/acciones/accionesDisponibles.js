@@ -20,6 +20,8 @@ export const ACCION = Object.freeze({
   CONFIRMAR_CIERRE: 'confirmar_cierre',
   FALLA_PERSISTE: 'falla_persiste',
   CORREGIR_TIPO_FALLA: 'corregir_tipo_falla',
+  // Cambio 23 (a pedido del equipo): el aprobador del área agrega fotos a la solución.
+  ADJUNTAR_FOTO_SOLUCION: 'adjuntar_foto_solucion',
 })
 
 /** @typedef {typeof ACCION[keyof typeof ACCION]} Accion */
@@ -57,6 +59,7 @@ const TABLA_35 = {
   },
   resuelta: {
     [ROL.REPORTANTE]: [ACCION.CONFIRMAR_CIERRE, ACCION.FALLA_PERSISTE, ACCION.ADJUNTAR_FOTO],
+    [ROL.APROBADOR_AREA]: [ACCION.ADJUNTAR_FOTO_SOLUCION],
   },
   cerrada: {
     [ROL.ADMINISTRADOR]: [ACCION.CORREGIR_TIPO_FALLA],

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
+import { REGISTRO_SIN_CONEXION_MINUTOS } from '../../core/config/parametros.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
@@ -29,6 +30,8 @@ import {
   tiempoTranscurrido,
 } from '../../core/utils/fechas.js'
 import { JustificacionDelEscalamiento } from '../e3-atencion/JustificacionDelEscalamiento.jsx'
+import { Evidencias, Fotos } from './Evidencias.jsx'
+import { useEvidencias } from './useEvidencias.js'
 import { SinPermiso } from './SinPermiso.jsx'
 
 // Las acciones de cada rol van en su propio paquete: los demás roles no lo descargan.
@@ -47,7 +50,8 @@ const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirecto
  * pantalla 09: confirmar el cierre o indicar que la falla persiste (RF-15 / CU-15).
  *
  * Lo que se ve lo decide la base de datos (RNF-11). Las acciones salen del mapa de acciones
- * (Tabla 35) y cada rol trae las suyas; las evidencias llegan en el Sprint 4.
+ * (Tabla 35) y cada rol trae las suyas. Las fotos del reporte van en el bloque «Evidencias» y
+ * las de la solución, dentro de la solución (RF-08; cambio 23).
  *
  * Sin conexión, la última versión descargada, con «Datos del {fecha}» (RF-24 / CU-18 3a;
  * decisión 16 del plan), y las acciones no disponibles, con su explicación (RF-25: 09-D, 14-B).
@@ -98,13 +102,27 @@ const resolucion = (transiciones) =>
   transiciones.find(({ estado_nuevo }) => estado_nuevo === 'resuelta') ?? null
 
 /**
+ * Si la novedad se registró sin conexión: llegó al servidor más tarde que un envío con conexión
+ * (RNF-09; decisión 25 del plan). Se deriva de las dos fechas; la base no lo guarda.
+ *
+ * @param {{ fecha_registro: string, fecha_sincronizacion: string }} novedad
+ */
+const registradaSinConexion = ({ fecha_registro, fecha_sincronizacion }) =>
+  Date.parse(fecha_sincronizacion) - Date.parse(fecha_registro) >
+  REGISTRO_SIN_CONEXION_MINUTOS * 60_000
+
+/**
  * La línea de tiempo, o por qué no está: la novedad llegó al dispositivo solo en una lista.
  *
- * @param {{ transiciones: import('../../core/ui/LineaDeTiempo.jsx').Transicion[] | null, conPie?: boolean }} props
+ * @param {{ novedad: object, transiciones: import('../../core/ui/LineaDeTiempo.jsx').Transicion[] | null, conPie?: boolean }} props
  */
-function Historial({ transiciones, conPie = false }) {
+function Historial({ novedad, transiciones, conPie = false }) {
   return transiciones ? (
-    <LineaDeTiempo transiciones={transiciones} conPie={conPie} />
+    <LineaDeTiempo
+      transiciones={transiciones}
+      conPie={conPie}
+      registradaSinConexion={registradaSinConexion(novedad)}
+    />
   ) : (
     <p className="pb-4 text-cuerpo-pequeno text-texto-secundario">
       La línea de tiempo se descarga cuando abres la novedad con conexión.
@@ -195,8 +213,18 @@ function Justificacion({ escalamiento }) {
  * @param {boolean} props.decide Quien la abre es el director y debe decidir (pantalla 20-C).
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  * @param {import('react').ReactNode} [props.avisoSinRed] El de 14-B, arriba.
+ * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
+ * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
  */
-function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed }) {
+function Telefono({
+  novedad,
+  transiciones,
+  decide,
+  escalamiento,
+  avisoSinRed,
+  evidencias,
+  fotosDeLaSolucion,
+}) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
 
@@ -240,6 +268,7 @@ function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed }) 
               </DatoEnFila>
             ) : null}
           </dl>
+          {fotosDeLaSolucion}
         </section>
       ) : null}
 
@@ -261,12 +290,14 @@ function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed }) 
         </dl>
       </Seccion>
 
+      {evidencias}
+
       <Seccion
         titulo="Línea de tiempo"
         id={ID_DE_LA_LINEA}
         className={`flex flex-col gap-3 px-4 pt-4 pb-1 ${TARJETA}`}
       >
-        <Historial transiciones={transiciones} />
+        <Historial novedad={novedad} transiciones={transiciones} />
       </Seccion>
     </div>
   )
@@ -281,8 +312,19 @@ function Telefono({ novedad, transiciones, decide, escalamiento, avisoSinRed }) 
  * @param {boolean} props.decide Quien la abre es el director y debe decidir (pantalla 20):
  *   el panel ocupa la columna derecha y la línea de tiempo pasa bajo el contenido.
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
+ * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
+ * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
  */
-function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamiento }) {
+function Escritorio({
+  novedad,
+  transiciones,
+  acciones,
+  panel,
+  decide,
+  escalamiento,
+  evidencias,
+  fotosDeLaSolucion,
+}) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
   const lineaDeTiempo = (
@@ -291,7 +333,7 @@ function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamien
       id={ID_DE_LA_LINEA}
       className={`flex min-w-0 flex-col gap-3 px-4 pt-4 ${TARJETA} ${decide ? 'xl:col-start-1' : ''}`}
     >
-      <Historial transiciones={transiciones} conPie />
+      <Historial novedad={novedad} transiciones={transiciones} conPie />
     </Seccion>
   )
 
@@ -362,8 +404,11 @@ function Escritorio({ novedad, transiciones, acciones, panel, decide, escalamien
               Solución aplicada
             </h2>
             <p className="text-cuerpo break-words text-texto">{novedad.solucion}</p>
+            {fotosDeLaSolucion}
           </section>
         ) : null}
+
+        {evidencias}
       </div>
 
       {/* El panel va siempre primero en esta columna: después de decidir desaparece, pero el
@@ -472,6 +517,7 @@ export default function DetalleNovedad() {
   const codigo = novedad ? formatearCodigo(novedad.codigo) : null
 
   const disponibles = accionesDisponibles(perfil, novedad)
+  const { evidencias: fotos, recargar: recargarFotos } = useEvidencias(novedad?.id)
   const acciones =
     novedad && perfil.rol_id === ROL.APROBADOR_AREA ? (
       <Suspense fallback={null}>
@@ -519,6 +565,33 @@ export default function DetalleNovedad() {
           esEscritorio={esEscritorio}
         />
       </Suspense>
+    ) : null
+  const evidencias = novedad ? (
+    <Evidencias
+      key={novedad.id}
+      novedad={novedad}
+      fotos={fotos?.filter(({ transicion_id }) => transicion_id == null) ?? null}
+      puedeAdjuntar={disponibles.includes(ACCION.ADJUNTAR_FOTO)}
+      alAdjuntar={recargarFotos}
+    />
+  ) : null
+  // Las de la solución vigente: las de su transición → resuelta (cambio 23). Un intento anterior
+  // (la falla persistió) conserva las suyas en la base, pero aquí no se mezclan.
+  const intentoVigente = novedad?.solucion ? resolucion(transiciones ?? [])?.id : undefined
+  const fotosDelIntento = intentoVigente
+    ? (fotos ?? []).filter(({ transicion_id }) => transicion_id === intentoVigente)
+    : []
+  const puedeAdjuntarALaSolucion = disponibles.includes(ACCION.ADJUNTAR_FOTO_SOLUCION)
+  const fotosDeLaSolucion =
+    novedad && (fotosDelIntento.length > 0 || puedeAdjuntarALaSolucion) ? (
+      <Fotos
+        key={novedad.id}
+        novedad={novedad}
+        fotos={fotosDelIntento}
+        deLaSolucion
+        puedeAdjuntar={puedeAdjuntarALaSolucion}
+        alAdjuntar={recargarFotos}
+      />
     ) : null
   // 14-B: sin conexión, quien atiende o decide sabe de entrada por qué sus acciones no están
   // disponibles (RF-25). Al director se le dice lo mismo (decisión 17 del plan).
@@ -600,6 +673,8 @@ export default function DetalleNovedad() {
               panel={decision}
               decide={decide}
               escalamiento={escalamiento}
+              evidencias={evidencias}
+              fotosDeLaSolucion={fotosDeLaSolucion}
             />
           </div>
         ) : (
@@ -610,6 +685,8 @@ export default function DetalleNovedad() {
               decide={decide}
               escalamiento={escalamiento}
               avisoSinRed={avisoSinRed}
+              evidencias={evidencias}
+              fotosDeLaSolucion={fotosDeLaSolucion}
             />
             {acciones}
             {decision}

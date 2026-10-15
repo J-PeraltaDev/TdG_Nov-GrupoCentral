@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
+import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Conexion } from '../../core/ui/Conexion.jsx'
 import { Estado } from '../../core/ui/Estado.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
 import iconoRecibida from '../../core/ui/iconos/check.svg'
 import iconoCopiar from '../../core/ui/iconos/content_copy.svg'
+import iconoAdvertencia from '../../core/ui/iconos/warning.svg'
 import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { formatearCodigo } from '../../core/utils/codigo.js'
 import { formatearFechaHora, semanaDelAnio } from '../../core/utils/fechas.js'
@@ -93,6 +95,15 @@ export default function NovedadRecibida() {
           {area || 'El área'} ya la tiene en su bandeja. Te avisaremos cada vez que cambie de
           estado.
         </p>
+
+        {/* CU-08: la novedad quedó registrada, pero alguna foto no subió (decisión 21). */}
+        {state.fotosNoSubidas > 0 ? (
+          <Aviso tipo="advertencia" icono={iconoAdvertencia} role="alert" className="w-full">
+            {state.fotosNoSubidas === 1
+              ? 'La foto no se pudo subir. Adjúntala desde el detalle.'
+              : 'Las fotos no se pudieron subir. Adjúntalas desde el detalle.'}
+          </Aviso>
+        ) : null}
 
         <Link
           to={`/novedades/${novedad.id}`}

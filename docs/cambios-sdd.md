@@ -4,27 +4,31 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                                   | Qué cambia                                                                                                                                                        | Estado    |
-| --- | ------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)           | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                                 | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)                         | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                            | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)                  | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                    | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                                   | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                              | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)                     | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                  | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                                   | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                            | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)                         | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                            | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)               | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                              | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                          | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                   | Propuesto |
-| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                         | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                          | Propuesto |
-| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3                    | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                        | Propuesto |
-| 12  | S3     | SDD 6.1.3, Tabla 30                                   | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                      | Propuesto |
-| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)                 | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                  | Propuesto |
-| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10               | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                               | Propuesto |
-| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3                    | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                     | Propuesto |
-| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10             | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                   | Propuesto |
-| 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22         | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos | Propuesto |
-| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6             | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio   | Propuesto |
-| 19  | S4     | SDD 6.1.5 («Registro de la novedad» y «Persistencia») | Precisión: un error de sesión al enviar también encola; el aviso de 07 siempre; sin `estimate()`; `persist()` también al encolar                                  | Propuesto |
+| N.º | Sprint | Documento y sección                                       | Qué cambia                                                                                                                                                           | Estado    |
+| --- | ------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)               | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                                    | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)                             | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                               | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)                      | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                       | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                                       | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                                 | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)                         | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                     | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                                       | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                               | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)                             | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                               | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)                   | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                                 | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                              | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                      | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                             | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                             | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3                        | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                           | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                                       | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                         | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)                     | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                     | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10                   | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                                  | Propuesto |
+| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3                        | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                        | Propuesto |
+| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10                 | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                      | Propuesto |
+| 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22             | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos    | Propuesto |
+| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6                 | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio      | Propuesto |
+| 19  | S4     | SDD 6.1.5 («Registro de la novedad» y «Persistencia»)     | Precisión: un error de sesión al enviar también encola; el aviso de 07 siempre; sin `estimate()`; `persist()` también al encolar                                     | Propuesto |
+| 20  | S4     | SDD 6.1.5 («Sincronización de las pendientes») y 5.3.6    | Complemento: disparadores (el monitor, no el evento `online`), Web Locks entre pestañas, solo las del usuario, `SIN_PERMISO` y el error de sesión de la API de datos | Propuesto |
+| 21  | S4     | SDD 6.1.5 (Tabla 32 y «Consulta»)                         | Precisión: qué guarda el almacén `novedades`, qué retira, cómo arma las listas sin conexión y cuándo se borra; fecha y conteos de cada lista                         | Propuesto |
+| 22  | S4     | SDD 5.2, 6.1.11 y 7.3                                     | Complemento: «registrada sin conexión» se deriva de las dos fechas con un umbral configurable                                                                        | Propuesto |
+| 23  | S4     | SRS RF-08, CU-08 y CU-14; SDD Tablas 26, 31 y 35, y 6.1.7 | **Cambio:** el aprobador del área adjunta fotos de la solución; `evidencia.transicion_id` las ata a su intento                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -745,3 +749,115 @@ una sola «fecha de la última actualización».
 > mismo filtro, orden y paginación que el servidor, y muestran la fecha y la hora de la descarga de
 > esa lista (RF-09, RF-18); si esa lista no se ha descargado, informan que la primera consulta
 > requiere conexión.
+
+## 22 · Cómo se sabe que una novedad se registró sin conexión (S4)
+
+**Sección:** SDD 5.2 (detalle completo, Figura 12) y 6.1.11; 7.3 (decisiones por validar).
+
+**Qué pasa.** El SDD dice que la ficha «indica cuándo la novedad se registró sin conexión (RNF-09)»,
+y Figma lo escribe en la primera entrada de la línea de tiempo («21 sep, 6:48 a. m. · registrada
+sin conexión», pantalla 20). Pero ni la Tabla 26 ni `registrar_novedad` guardan ese dato.
+
+**Qué se hizo (complemento; plan del Sprint 4, decisión 25, opción A):** se deriva de las dos
+fechas que ya existen. Si `fecha_sincronizacion` es más de `REGISTRO_SIN_CONEXION_MINUTOS` (5,
+parámetro nuevo de `parametros.js`) posterior a `fecha_registro`, la novedad se registró sin
+conexión: un envío con conexión tarda segundos. La base no cambia. Lo dice la entrada del registro
+en la línea de tiempo del detalle, para los cuatro roles.
+
+**Texto propuesto (6.1.11, al final del párrafo del detalle):**
+
+> «Registrada sin conexión» se deriva de las dos fechas: si la sincronización llegó más de
+> `REGISTRO_SIN_CONEXION_MINUTOS` (5) después del registro en la finca, la entrada del registro
+> en la línea de tiempo lo indica. No se guarda en la base.
+
+**Texto propuesto (7.3, una fila nueva):**
+
+> El umbral de 5 minutos para «registrada sin conexión» se valida en el piloto con los tiempos
+> reales de envío desde las fincas.
+
+## 23 · Fotos de la solución: también las adjunta el aprobador del área (S4)
+
+**Sección:** SRS RF-08; CU-08 y CU-14; SDD 5.2.3 (y la fila de la pantalla 18), 6.1.1 (Tabla 26,
+fila `evidencia`), 6.1.4 (Tabla 31), 6.1.7, 6.1.11 (Tabla 35) y la fila de RF-08 en la Tabla 36.
+
+**Qué pasa.** RF-08, CU-08 y la Tabla 31 dejan adjuntar fotos solo al reportante, y Figma no
+dibuja fotos en la pantalla 18 ni en la solución del detalle. El equipo pidió (14 oct) que el
+aprobador del área también deje fotos de lo que hizo, con el estilo del resto de la aplicación.
+
+**Qué se hizo** (servidor en el PR #31, migraciones `rf08_fotos_de_la_solucion` y
+`rf08_una_politica_de_insercion`; cliente en el PR #37):
+
+- **Columna nueva `evidencia.transicion_id`** (bigint, nula, clave foránea a
+  `historial_transicion`). Es nula en las fotos del reporte; en las de la solución apunta a la
+  transición «→ resuelta» de esa solución. La pone el disparador, no el cliente. Si la falla
+  persiste y el área registra otra solución, cada una conserva sus fotos (la solución anterior ya
+  quedaba en el historial, cambio 12).
+- **Quién sube.** El reportante de la finca, como antes, mientras la novedad no sea final. El
+  aprobador del área de la novedad, solo mientras está `resuelta`: al registrar la solución (18)
+  y desde el detalle, hasta que la finca responda. Una sola política de inserción cubre a los dos,
+  para no dejar dos políticas permisivas (aviso del asesor).
+- **Máximo de 3 por grupo:** 3 del reporte y 3 por cada solución. El disparador cuenta solo las
+  del mismo `transicion_id`; lo demás no cambia (bloqueo de la novedad, archivo en su carpeta y
+  tamaño real).
+- **La lectura no cambia:** quien puede ver la novedad ve todas sus fotos.
+- **Pantalla 18:** campo «Fotos de la solución (opcional)», el mismo de 05. Las fotos suben
+  después de `registrar_solucion`; si una no sube, la solución queda registrada y el aviso lo dice.
+- **Detalle:** las fotos de la solución vigente van dentro de su bloque, para los cuatro roles, y
+  el aprobador del área tiene ahí «Adjuntar foto» mientras la novedad está resuelta. Las del
+  reporte siguen en «Evidencias». Las de soluciones anteriores no se muestran.
+
+**Texto propuesto (SRS, RF-08, primer párrafo):**
+
+> El sistema debe permitir que el reportante adjunte fotografías como evidencia al registrar una
+> novedad de su finca o al consultarla mientras no esté cerrada ni rechazada, y que el aprobador
+> de área adjunte fotografías de la solución al registrarla o mientras la novedad esté resuelta.
+
+**Texto propuesto (SRS, RF-08, una regla de negocio nueva):**
+
+> - Las fotografías de la solución quedan asociadas a la solución registrada: si la falla persiste
+>   y se registra otra solución, cada una conserva las suyas.
+
+**Texto propuesto (CU-08):**
+
+> - Actores: Reportante (primario); aprobador de área, para las fotografías de la solución.
+> - Referencias: RF-08. Extiende CU-05, CU-14 y CU-18.
+> - Precondición: El reportante está registrando una novedad de su finca o consultando una que no
+>   está cerrada ni rechazada, o el aprobador de área está registrando la solución de una novedad
+>   de su área o consultando una de su área que está resuelta.
+
+**Texto propuesto (CU-14):** en Referencias, «Extendido por CU-08 y CU-25», y el paso 5 del
+aprobador de área:
+
+> Selecciona un tipo existente o confirma uno nuevo, completa los demás datos, adjunta
+> fotografías de la solución si lo desea (CU-08) y confirma.
+
+**Texto propuesto (SDD 5.2.3, al final de la frase del registro de la solución):**
+
+> Admite además fotografías opcionales de la solución, que el detalle muestra junto a ella (RF-08).
+
+En la tabla de pantallas, la fila 18 suma RF-08; en la Tabla 36, la fila de RF-08 suma las
+pantallas 18 y 22.
+
+**Texto propuesto (6.1.1, Tabla 26, fila `evidencia`):** en las columnas, «transicion_id FK NULL»
+después de «subida_por FK», y en las restricciones, después de «Ruta única en el bucket
+evidencias (RF-08).»:
+
+> transicion_id es nulo en las fotografías del reporte; en las de la solución, es la transición a
+> resuelta de esa solución.
+
+**Texto propuesto (6.1.4, Tabla 31, columna Inserción de las filas `evidencia` y «Objetos del
+bucket evidencias»):**
+
+> Reportante de la finca; aprobador del área mientras la novedad está resuelta (en `evidencia`,
+> además, subida_por = usuario).
+
+**Texto propuesto (6.1.7, una viñeta nueva después de la cuarta):**
+
+> - El aprobador de área puede adjuntar fotografías de la solución al registrarla (pantalla 18) y
+>   desde el detalle mientras la novedad esté resuelta. Se suben después de registrar la solución
+>   y el servidor las asocia a la transición a resuelta de esa solución. El máximo de fotografías
+>   se aplica por separado a las del reporte y a las de cada solución.
+
+**Texto propuesto (6.1.11, Tabla 35, fila «Resuelta», columna del aprobador):**
+
+> Adjuntar foto de la solución (en espera de la finca)

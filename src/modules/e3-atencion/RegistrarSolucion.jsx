@@ -5,6 +5,7 @@ import { OBSERVACION_MAX_CARACTERES } from '../../core/config/parametros.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
+import { subirEvidencia } from '../../core/supabase/repositorios/evidencias.js'
 import {
   listarLineaDeTiempo,
   obtenerNovedad,
@@ -31,6 +32,7 @@ import {
   formatearFechaSinHora,
   hoyEnColombia,
 } from '../../core/utils/fechas.js'
+import { CampoFoto } from '../e2-registro/CampoFoto.jsx'
 import { SinPermiso } from '../e4-consulta/SinPermiso.jsx'
 import { SelectorDeTipoDeFalla } from './SelectorDeTipoDeFalla.jsx'
 import { useAccion } from './useAccion.js'
@@ -41,6 +43,9 @@ import { useAccion } from './useAccion.js'
  *
  * Es una pantalla de una sola tarea, como el registro: en el teléfono va sin las barras de
  * navegación. Al terminar vuelve al detalle, que muestra la novedad ya resuelta.
+ *
+ * «Fotos de la solución» no está en Figma: lo pidió el equipo (cambio 23 de cambios-sdd). Es el
+ * mismo campo de la pantalla 05; las fotos se suben después de registrar la solución.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -100,6 +105,7 @@ function Resumen({ descripcion }) {
  */
 function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscritorio }) {
   const navegar = useNavigate()
+  const { perfil } = useSesion()
   const hoy = hoyEnColombia()
   const idDeAyudaDeFecha = useId()
   // Sin conexión se puede escribir, pero no guardar: el botón dice por qué (RF-25).
@@ -117,6 +123,8 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
   const [errores, setErrores] = useState(
     /** @type {{ solucion?: string, fecha?: string, tipo?: string, general?: string }} */ ({}),
   )
+  /** @type {[import('../e2-registro/CampoFoto.jsx').FotoElegida[], Function]} */
+  const [fotos, setFotos] = useState([])
   const quitarError = (campo) =>
     setErrores((antes) => (antes[campo] ? { ...antes, [campo]: undefined } : antes))
 
@@ -146,14 +154,24 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
     if (faltantes.fecha) return campoFecha.current?.focus()
     if (faltantes.tipo) return campoTipo.current?.focus()
 
+    let fotosNoSubidas = 0
     const { ok, fallo } = await ejecutar(
-      () =>
-        registrarSolucion(novedad.id, {
+      async () => {
+        const resuelta = await registrarSolucion(novedad.id, {
           solucion: solucion.trim(),
           fecha_ejecucion: fecha,
           tipo_falla_id: tipo.id,
           tipo_falla_nombre: tipo.id ? null : tipo.nombre,
-        }),
+        })
+        // Cambio 23: con la solución ya registrada, sus fotos. Si una no sube, la solución quedó
+        // y desde el detalle se adjunta otra vez.
+        for (const { foto } of fotos) {
+          await subirEvidencia(novedad.id, foto, perfil.id).catch(() => {
+            fotosNoSubidas += 1
+          })
+        }
+        return resuelta
+      },
       {
         codigosPropios: [
           'DATO_OBLIGATORIO',
@@ -167,7 +185,12 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
             replace: true,
             state: {
               ...estadoDeNavegacion,
-              aviso: 'Solución registrada. La finca debe confirmar el cierre.',
+              aviso:
+                fotosNoSubidas === 0
+                  ? 'Solución registrada. La finca debe confirmar el cierre.'
+                  : fotosNoSubidas === 1
+                    ? 'Solución registrada, pero la foto no se pudo subir. Adjúntala desde el detalle.'
+                    : 'Solución registrada, pero las fotos no se pudieron subir. Adjúntalas desde el detalle.',
             },
           }),
       },
@@ -288,6 +311,14 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
             setTipo(valor)
             quitarError('tipo')
           }}
+        />
+
+        <CampoFoto
+          fotos={fotos}
+          alCambiar={setFotos}
+          etiqueta="Fotos de la solución"
+          notaSinRed="Las fotos necesitan conexión."
+          notaDelMaximo="Máximo 3 fotos por solución."
         />
       </div>
 

@@ -4,14 +4,21 @@ import { Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { encolar } from '../../core/offline/cola.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
+import { subirEvidencia } from '../../core/supabase/repositorios/evidencias.js'
 import { registrarNovedad } from '../../core/supabase/repositorios/novedades.js'
-import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
+import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import NovedadGuardada from './NovedadGuardada.jsx'
 import NovedadRecibida from './NovedadRecibida.jsx'
+import { reducirFoto } from './reducirFoto.js'
 import RegistrarNovedad from './RegistrarNovedad.jsx'
 
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   registrarNovedad: vi.fn(),
+}))
+// Las fotos (RF-08) tienen sus propias pruebas.
+vi.mock('../../core/supabase/repositorios/evidencias.js', () => ({
+  listarEvidencias: vi.fn().mockResolvedValue([]),
+  subirEvidencia: vi.fn(),
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
@@ -19,6 +26,8 @@ vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
 vi.mock('../../core/offline/cola.js', () => ({
   encolar: vi.fn(),
 }))
+// La codificación de las fotos necesita el navegador: se prueba en la e2e.
+vi.mock('./reducirFoto.js', () => ({ reducirFoto: vi.fn() }))
 
 const AREAS = [
   { id: 'area-m', nombre: 'Mantenimiento' },
@@ -313,5 +322,83 @@ describe('Pantalla 05 · Registrar novedad (RF-05 / CU-05)', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Cerrar sin registrar' }))
 
     expect(screen.getByRole('heading', { level: 1, name: 'Mis novedades' })).toBeVisible()
+  })
+})
+
+describe('Pantalla 05 con fotos (RF-08 / CU-08; decisión 21 del plan)', () => {
+  const FOTO = new Blob([new Uint8Array(2048)], { type: 'image/jpeg' })
+
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:miniatura')
+    URL.revokeObjectURL = vi.fn()
+    vi.mocked(reducirFoto).mockReset().mockResolvedValue(FOTO)
+    vi.mocked(subirEvidencia).mockReset().mockResolvedValue({ id: 'e-1' })
+    vi.mocked(registrarNovedad).mockReset().mockResolvedValue(REGISTRADA)
+    vi.mocked(listarAreas).mockReset().mockResolvedValue(AREAS)
+    vi.mocked(encolar)
+      .mockReset()
+      .mockImplementation(async (borrador, perfil) => ({
+        ok: true,
+        pendiente: { ...borrador, reportante_id: perfil.id, envio: 'pendiente' },
+      }))
+  })
+
+  async function elegirFotos(...nombres) {
+    for (const nombre of nombres) {
+      await userEvent.upload(
+        screen.getByLabelText('Elegir de la galería'),
+        new File(['foto'], nombre, { type: 'image/jpeg' }),
+      )
+    }
+    await screen.findAllByRole('button', { name: /^Quitar / })
+  }
+
+  it('RF-08 / CU-08 4: primero registra la novedad y después sube cada foto, a su nombre', async () => {
+    abrir()
+    await llenar()
+    await elegirFotos('1.jpg', '2.jpg')
+
+    await enviar()
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Novedad recibida' })).toBeVisible()
+    expect(registrarNovedad).toHaveBeenCalledOnce()
+    expect(vi.mocked(subirEvidencia).mock.calls).toEqual([
+      [REGISTRADA.id, FOTO, PERFILES.reportante.id],
+      [REGISTRADA.id, FOTO, PERFILES.reportante.id],
+    ])
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('RF-08: si una foto no sube, la novedad ya quedó y la constancia (06) lo dice', async () => {
+    vi.mocked(subirEvidencia).mockRejectedValueOnce(new Error('EVIDENCIA_INVALIDA'))
+    abrir()
+    await llenar()
+    await elegirFotos('1.jpg')
+
+    await enviar()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'La foto no se pudo subir. Adjúntala desde el detalle.',
+    )
+    expect(screen.getByText('NOV-0153')).toBeVisible()
+  })
+
+  it('CU-08 4b: si la red se cae al enviar, la novedad va a la cola sin las fotos y 07 lo dice', async () => {
+    vi.mocked(registrarNovedad).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    abrir()
+    await llenar()
+    await elegirFotos('1.jpg')
+
+    await enviar()
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Guardada en este teléfono' }),
+    ).toBeVisible()
+    expect(subirEvidencia).not.toHaveBeenCalled()
+    expect(
+      screen.getByText(
+        'Las fotos necesitan conexión. Podrás adjuntarla desde el detalle cuando la novedad se sincronice.',
+      ),
+    ).toBeVisible()
   })
 })

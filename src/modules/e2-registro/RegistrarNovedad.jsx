@@ -4,6 +4,7 @@ import { DESCRIPCION_MAX_CARACTERES } from '../../core/config/parametros.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { listarAreas } from '../../core/supabase/repositorios/catalogos.js'
+import { subirEvidencia } from '../../core/supabase/repositorios/evidencias.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Conexion } from '../../core/ui/Conexion.jsx'
@@ -20,13 +21,15 @@ import iconoSinMarcar from '../../core/ui/iconos/radio_button_unchecked.svg'
 import iconoEnviar from '../../core/ui/iconos/send.svg'
 import { PRESENTACION_DEL_AREA } from '../../core/ui/presentacionDelArea.js'
 import { Prioridad } from '../../core/ui/Prioridad.jsx'
+import { CampoFoto } from './CampoFoto.jsx'
 import { crearBorrador, enviarNovedad } from './enviarNovedad.js'
 import { resumenDeFaltantes, validarNovedad } from './validarNovedad.js'
 
 /*
- * Pantalla 05 · Registrar novedad, 05-B · Sin conexión: guardar en el dispositivo y 05-C ·
- * Campos obligatorios faltantes (RF-05, RF-21, CU-05 y CU-21). Figma 2:423, 2:538 y 2:657. Sin
- * conexión, o si la red se cae al enviar, la novedad queda en el dispositivo (pantalla 07).
+ * Pantalla 05 · Registrar novedad, 05-B · Sin conexión: guardar en el dispositivo, 05-C ·
+ * Campos obligatorios faltantes y 05-D · Foto no válida (RF-05, RF-08, RF-21; CU-05, CU-08 y
+ * CU-21). Figma 2:423, 2:538, 2:657 y 2:777. Sin conexión, o si la red se cae al enviar, la
+ * novedad queda en el dispositivo (pantalla 07), sin las fotos.
  */
 
 /** Las cuatro prioridades con su criterio: ayudan a elegir sin tener que recordar. */
@@ -96,6 +99,8 @@ export default function RegistrarNovedad() {
   /** @type {[import('../../core/errores/traducir.js').ErrorTraducido | null, Function]} */
   const [fallo, setFallo] = useState(null)
   const [enviando, setEnviando] = useState(false)
+  /** @type {[import('./CampoFoto.jsx').FotoElegida[], Function]} */
+  const [fotos, setFotos] = useState([])
 
   // El identificador local y la fecha real de registro se fijan antes del primer envío y se
   // conservan en los reintentos (RNF-08, RNF-09).
@@ -156,19 +161,32 @@ export default function RegistrarNovedad() {
 
     setEnviando(true)
     const resultado = await enviarNovedad(borrador.current, perfil)
-    setEnviando(false)
 
     if (resultado.ok && resultado.novedad) {
+      // CU-08 4: primero la novedad, después cada foto. Si una no sube, la novedad ya quedó y la
+      // constancia (06) lo dice (decisión 21).
+      let fotosNoSubidas = 0
+      for (const { foto } of fotos) {
+        await subirEvidencia(resultado.novedad.id, foto, perfil.id).catch(() => {
+          fotosNoSubidas += 1
+        })
+      }
+      setEnviando(false)
       const area = areas?.find((a) => a.id === resultado.novedad.area_id)
       navegar('/registrar/recibida', {
         replace: true,
-        state: { novedad: resultado.novedad, area: area?.nombre ?? '' },
+        state: { novedad: resultado.novedad, area: area?.nombre ?? '', fotosNoSubidas },
       })
       return
     }
+    setEnviando(false)
     if (resultado.ok) {
-      // Sin conexión, o la red se cayó al enviar: quedó en el dispositivo (RF-21).
-      navegar('/registrar/guardada', { replace: true, state: { pendiente: resultado.pendiente } })
+      // Sin conexión, o la red se cayó al enviar: quedó en el dispositivo, sin las fotos (RF-21,
+      // CU-08 4b).
+      navegar('/registrar/guardada', {
+        replace: true,
+        state: { pendiente: resultado.pendiente, conFotos: fotos.length > 0 },
+      })
       return
     }
     // Error de negocio, o el dispositivo no la pudo guardar (CU-21 2a y 2b): se informa y el
@@ -401,6 +419,8 @@ export default function RegistrarNovedad() {
               </ErrorDeCampo>
             ) : null}
           </fieldset>
+
+          <CampoFoto fotos={fotos} alCambiar={setFotos} />
         </div>
 
         {/* En el teléfono la barra de acciones queda fija abajo; en el escritorio cierra el

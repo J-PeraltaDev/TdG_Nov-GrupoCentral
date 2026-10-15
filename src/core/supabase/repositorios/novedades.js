@@ -1,5 +1,3 @@
-import { estaEnLinea } from '../../conexion/monitor.js'
-import { esErrorDeRed } from '../../errores/traducir.js'
 import { cambiarNovedadesDescargadas, leerNovedadDescargada } from '../../offline/bd.js'
 import {
   guardarConteo,
@@ -11,6 +9,7 @@ import {
   ORDEN,
 } from '../../offline/novedadesLocales.js'
 import { supabase } from '../cliente.js'
+import { conRespaldo } from './conRespaldo.js'
 
 /*
  * Repositorio de novedades (C-03, SDD 4.2.3). Aísla al resto del cliente de los detalles de
@@ -20,36 +19,14 @@ import { supabase } from '../cliente.js'
  * descargado (RF-24): las listas, con `descargadaEn`; el detalle, con `descargada_en`.
  */
 
-/**
- * Lee del servidor y guarda lo leído; si no hay conexión, o la red falla en el camino, lee del
- * dispositivo. Sin conexión no se intenta el servidor: la API reintenta una lectura fallida
- * durante unos 7 s.
- *
- * @template T
- * @param {() => Promise<T>} delServidor
- * @param {(resultado: T) => Promise<unknown>} guardar Si falla, la lectura sigue sirviendo.
- * @param {() => Promise<T>} delDispositivo Lanza `SinDescarga` si no hay nada guardado.
- * @returns {Promise<T>}
- */
-async function conRespaldo(delServidor, guardar, delDispositivo) {
-  if (estaEnLinea()) {
-    try {
-      const resultado = await delServidor()
-      await guardar(resultado).catch(() => {})
-      return resultado
-    } catch (error) {
-      if (!esErrorDeRed(error)) throw error
-    }
-  }
-  return delDispositivo()
-}
-
 /** @typedef {import('../database.types').Database} Database */
 /** @typedef {Database['public']['Tables']['novedad']['Row']} Novedad */
 /** @typedef {Database['public']['Enums']['estado_novedad']} EstadoNovedad */
 
 /** Columnas de `v_novedad` que usa la lista (RF-18): solo las necesarias (RNF-06). */
-const COLUMNAS_DE_LA_LISTA = 'id, codigo, descripcion, prioridad, estado, area, fecha_registro'
+// `evidencia(count)`: cuántas fotos tiene, para el ícono de cámara de la tarjeta (RF-08, 04-B).
+const COLUMNAS_DE_LA_LISTA =
+  'id, codigo, descripcion, prioridad, estado, area, fecha_registro, evidencia(count)'
 
 /** Tamaño de página de las listas. */
 export const NOVEDADES_POR_PAGINA = 20
@@ -296,7 +273,8 @@ export async function contarNovedades(estados) {
 
 /** Columnas de `v_novedad` que usa la bandeja: solo las necesarias (RNF-06). */
 const COLUMNAS_DE_LA_BANDEJA =
-  'id, codigo, descripcion, prioridad, estado, area_id, area, finca_id, finca, fecha_registro'
+  'id, codigo, descripcion, prioridad, estado, area_id, area, finca_id, finca, fecha_registro, ' +
+  'evidencia(count)'
 
 /**
  * @typedef {object} FiltroDeBandeja

@@ -73,4 +73,28 @@ describe('Tarjeta de novedad (Figma 2:36 y 3:338)', () => {
 
     expect(tarjeta.queryByRole('link')).not.toBeInTheDocument()
   })
+
+  it('RF-08 (04-B, 11-B): la cámara dice que la novedad tiene fotos', () => {
+    expect(pintar().queryByText('Tiene fotos')).not.toBeInTheDocument()
+    document.body.innerHTML = ''
+
+    const conFotos = pintar({ novedad: { ...NOVEDAD, evidencia: [{ count: 2 }] } })
+
+    expect(conFotos.getByText('Tiene fotos')).toHaveClass('sr-only')
+  })
+
+  it('RF-21 (04-B): una pendiente dice «Sin código» y la hora en que se registró', () => {
+    const tarjeta = pintar({
+      novedad: {
+        ...NOVEDAD,
+        codigo: null,
+        estado: 'pendiente',
+        fecha_registro: '2026-09-24T11:52:00Z',
+      },
+    })
+
+    expect(tarjeta.getByRole('heading', { name: 'Sin código' })).toBeVisible()
+    expect(tarjeta.getByText('Pendiente de sincronizar')).toBeVisible()
+    expect(tarjeta.getByText('hoy 6:52 a. m.')).toBeVisible()
+  })
 })

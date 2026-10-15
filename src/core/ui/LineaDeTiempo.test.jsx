@@ -71,6 +71,13 @@ describe('Línea de tiempo (RF-18 / CU-18 4, Figma 3:817 y 4:2212)', () => {
     expect(creacion.getByText('21 sep, 6:48 a. m.')).toBeVisible()
   })
 
+  it('RNF-09 (Figma 20): la creación dice si se registró sin conexión; las demás, no', () => {
+    render(<LineaDeTiempo transiciones={COMPLETA} registradaSinConexion />)
+
+    expect(within(pasos()[4]).getByText(/· registrada sin conexión$/)).toBeVisible()
+    expect(screen.getAllByText(/registrada sin conexión/)).toHaveLength(1)
+  })
+
   it('RF-07: el enrutamiento se presenta como acción del sistema, con el área', () => {
     render(<LineaDeTiempo transiciones={COMPLETA} />)
 

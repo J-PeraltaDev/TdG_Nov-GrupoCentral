@@ -26,6 +26,7 @@ const {
   CONFIRMAR_CIERRE,
   FALLA_PERSISTE,
   CORREGIR_TIPO_FALLA,
+  ADJUNTAR_FOTO_SOLUCION,
 } = ACCION
 
 // La Tabla 35 del SDD, celda por celda: estado × rol → acciones, en su orden.
@@ -51,7 +52,8 @@ const TABLA_35 = [
   ['aprobada', 'director', []],
   ['aprobada', 'administrador', []],
   ['resuelta', 'reportante', [CONFIRMAR_CIERRE, FALLA_PERSISTE, ADJUNTAR_FOTO]],
-  ['resuelta', 'aprobador', []],
+  // Cambio 23: con la solución registrada, el aprobador del área le agrega fotos.
+  ['resuelta', 'aprobador', [ADJUNTAR_FOTO_SOLUCION]],
   ['resuelta', 'director', []],
   ['resuelta', 'administrador', []],
   ['cerrada', 'reportante', []],

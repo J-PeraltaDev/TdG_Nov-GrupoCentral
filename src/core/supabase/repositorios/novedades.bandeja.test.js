@@ -76,6 +76,7 @@ describe('Consultas de la bandeja del área (RF-09)', () => {
       'finca_id',
       'finca',
       'fecha_registro',
+      'evidencia(count)',
     ])
   })
 
