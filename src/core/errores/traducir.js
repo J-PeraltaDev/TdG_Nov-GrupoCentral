@@ -67,7 +67,14 @@ export function esErrorDeRed(error) {
 export function esErrorDeSesion(error) {
   if (!error || typeof error !== 'object') return false
   const { name, code, status } = /** @type {any} */ (error)
-  return status === 401 || code === 'PGRST301' || name === 'AuthSessionMissingError'
+  // La API de datos no pone el estado HTTP en su error: PGRST301 (token inválido) y PGRST303
+  // (vencido) son sus 401.
+  return (
+    status === 401 ||
+    code === 'PGRST301' ||
+    code === 'PGRST303' ||
+    name === 'AuthSessionMissingError'
+  )
 }
 
 /**

@@ -43,6 +43,47 @@ export async function llenarNovedad(page, { descripcion, prioridad, area }) {
 export const enviarNovedad = (page) => page.getByRole('button', { name: 'Enviar novedad' }).click()
 
 /**
+ * Después de ingresar, espera lo que la aplicación necesita para abrir sin red: ella misma en
+ * caché y el perfil guardado en el dispositivo (RNF-10). Sin el perfil, sin red pediría ingresar.
+ * Se sondea desde la prueba: `waitForFunction` no espera promesas (la promesa misma ya es un valor
+ * verdadero) y daba por listo lo que todavía no estaba.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export async function esperarQueFuncioneSinRed(page) {
+  // La caché aparece apenas empieza la instalación; sin red, las navegaciones las atiende solo un
+  // service worker activo. En el CI, más lento, la red se cortaba antes.
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+  })
+  await expect
+    .poll(() => page.evaluate(async () => (await caches.keys()).length), { timeout: 20_000 })
+    .toBeGreaterThan(0)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            new Promise((resolver) => {
+              const solicitud = indexedDB.open('novedades')
+              solicitud.onsuccess = () => {
+                const lectura = solicitud.result
+                  .transaction('meta')
+                  .objectStore('meta')
+                  .get('perfil')
+                lectura.onsuccess = () => {
+                  solicitud.result.close()
+                  resolver(Boolean(lectura.result))
+                }
+              }
+            }),
+        ),
+      { timeout: 20_000 },
+    )
+    .toBe(true)
+}
+
+/**
  * Espera la constancia y devuelve el código asignado (`NOV-0001`).
  *
  * @param {import('@playwright/test').Page} page

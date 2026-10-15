@@ -48,13 +48,13 @@ test('RF-21 / CU-21: sin red registra, ve 07 y la pendiente sobrevive a cerrar l
   ).toBeVisible()
   await expect(page.getByText(/^LOC-[0-9A-F]{4}$/)).toBeVisible()
   await expect(page.getByRole('link', { name: 'Ver pendientes (1)' })).toBeVisible()
-  await expect(indicador(page)).toHaveText('Sin conexión · 1 pendiente')
+  await expect(indicador(page)).toHaveText('Sin conexión · 1 pendiente: ver la lista')
 
   // RNF-07: se cierra la aplicación (otra página, sin red) y la pendiente sigue en el dispositivo.
   await page.close()
   const otra = await context.newPage()
   await otra.goto('/novedades')
-  await expect(indicador(otra)).toHaveText('Sin conexión · 1 pendiente')
+  await expect(indicador(otra)).toHaveText('Sin conexión · 1 pendiente: ver la lista')
   const guardada = await otra.evaluate(
     () =>
       new Promise((resolver, rechazar) => {

@@ -88,6 +88,26 @@ export async function guardarPendiente(pendiente) {
 }
 
 /**
+ * Pendientes del usuario, en el orden en que se registraron (RF-22).
+ *
+ * @param {string} reportanteId
+ */
+export async function listarPendientes(reportanteId) {
+  const todas = await (await abrir()).getAllFromIndex('pendientes', 'fecha_registro')
+  return todas.filter((p) => p.reportante_id === reportanteId)
+}
+
+/** @param {object} pendiente */
+export async function actualizarPendiente(pendiente) {
+  await (await abrir()).put('pendientes', pendiente)
+}
+
+/** @param {string} idLocal */
+export async function borrarPendiente(idLocal) {
+  await (await abrir()).delete('pendientes', idLocal)
+}
+
+/**
  * Cantidad de novedades pendientes de sincronizar del usuario (RF-23). Las de otra persona que
  * usó el dispositivo no se cuentan: solo se envían con su sesión (RNF-10).
  *

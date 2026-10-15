@@ -171,6 +171,20 @@ export async function revisarSesion() {
 }
 
 /**
+ * Confirma la sesión antes de enviar la cola (RF-22, 08-B): `getSession()` la renueva si el
+ * token venció. No se espera más de 4 s: sin red, supabase-js tarda medio minuto en rendirse.
+ *
+ * @returns {Promise<'vigente' | 'vencida' | 'red'>}
+ */
+export async function confirmarSesion() {
+  const respuesta = await conLimite(supabase.auth.getSession(), ESPERA_DE_SESION_MS)
+  if (!respuesta) return 'red'
+  const { data, error } = respuesta
+  if (data.session) return 'vigente'
+  return error && esErrorDeRed(error) ? 'red' : 'vencida'
+}
+
+/**
  * El perfil de la sesión guardada, o `null` si no hay sesión. Es `revisarSesion` sin el motivo.
  *
  * @returns {Promise<Perfil | null>}

@@ -631,3 +631,63 @@ persistente; Figma lo dibuja siempre.
 > almacenamiento persistente. La constancia de la pantalla 07 recomienda siempre no borrar los datos
 > del navegador hasta sincronizar. Si el almacenamiento está lleno, la escritura falla con
 > `QuotaExceededError` y el formulario lo informa (CU-21 2a).
+
+## 20 · Sincronización: disparadores, un solo ciclo y alcance (S4)
+
+**Sección:** SDD 6.1.5, «Sincronización de las pendientes» (párrafo, seudocódigo y Figura 18), y
+5.3.6 (Tabla 24, fila «Eventos de conexión»).
+
+**Qué pasa.** El algoritmo se dispara con el evento `online` del navegador, que también llega en
+una red sin internet (portal cautivo). El indicador de ejecución solo ve la pestaña donde corre: dos
+pestañas abiertas harían dos ciclos. No dice qué pasa con una pendiente que quedó «enviando» porque
+la aplicación se cerró a mitad del envío, ni con `SIN_PERMISO`, ni con las pendientes de otra
+persona del dispositivo. Tampoco cómo reconoce el cliente el error de sesión: la API de datos no
+pone el estado HTTP en el error que entrega `supabase-js`.
+
+**Qué se hizo (complemento; plan del Sprint 4, decisiones 5 a 10):**
+
+- **Disparadores:** abrir la aplicación con sesión y red, el monitor de conexión que pasa a «en
+  línea» (cambio 18), «Reintentar» y «Reintentar todo» (08) y el nuevo ingreso después de 08-B.
+- **Un solo ciclo:** la bandera en la pestaña y, entre pestañas,
+  `navigator.locks.request('novedades-sincronizacion', { ifAvailable: true })`: si otra pestaña
+  tiene el bloqueo, este ciclo no corre. Sin Web Locks queda la bandera; la idempotencia de
+  `registrar_novedad` por `id_local` es la red de seguridad (RNF-08).
+- **«Enviando» que sobró** de un envío interrumpido: el ciclo siguiente la vuelve a enviar.
+- **Solo las del usuario de la sesión** (RNF-10): las de otra persona del dispositivo no se
+  envían, no se cuentan y no se muestran.
+- **La sesión se confirma antes del primer envío** (`getSession()`, que la renueva si venció) con
+  4 s de espera máxima. Si no hay respuesta, el ciclo termina sin tocar la cola.
+- **`SIN_PERMISO`:** esa pendiente queda con su error, se relee el perfil (decisión 16 del Sprint 3) y el ciclo se detiene sin marcar las demás.
+- **Errores de negocio:** el ciclo automático no los repite; solo «Reintentar». Los de red sí.
+- **Error de sesión:** el 401 de Auth y los códigos `PGRST301` (token inválido) y `PGRST303`
+  (vencido) de la API de datos. La pendiente vuelve a la cola y aparece 08-B.
+- **«Última sincronización completa»** se guarda solo cuando la cola queda vacía.
+
+**Texto propuesto (6.1.5, primer párrafo de «Sincronización de las pendientes»):**
+
+> La sincronización se dispara al abrir la aplicación con conexión, cuando el monitor de conexión
+> pasa a «en línea», cuando el usuario pulsa «Reintentar» o «Reintentar todo» (pantalla 08) y al
+> volver a ingresar después de 08-B. No depende de la sincronización en segundo plano del
+> navegador, que no está disponible en todos los navegadores objetivo y que el SRS no exige (RF-22
+> requiere la aplicación abierta). Un indicador de ejecución en la pestaña y un bloqueo entre
+> pestañas (Web Locks) evitan que dos ciclos corran a la vez (Figura 18). Solo se envían las
+> pendientes del usuario de la sesión (RNF-10).
+
+**Texto propuesto (6.1.5, seudocódigo de `sincronizar`; cambian las líneas marcadas):**
+
+> SI ya hay una sincronización en curso O no hay conexión **O otra pestaña tiene el bloqueo**: FIN
+>
+> SI la sesión venció Y no se puede renovar: conservar la cola; solicitar el ingreso (08-B); FIN
+>
+> PARA CADA pendiente p **del usuario** EN «pendientes» ORDENADAS POR fecha_registro, **salvo las
+> que tienen un error de negocio**:
+>
+> …
+>
+> **SI SIN_PERMISO: marcar p con el error; releer el perfil; DETENER**
+>
+> **SI la cola quedó vacía:** actualizar la fecha de la última sincronización
+
+**Texto propuesto (5.3.6, Tabla 24, primera columna de la fila):**
+
+> Cambios del monitor de conexión (eventos online y offline y respuestas del servidor)

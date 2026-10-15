@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
 import { traducirError } from '../../core/errores/traducir.js'
+import { useSincronizacion } from '../../core/offline/estadoDeSincronizacion.js'
+import { usePendientes } from '../../core/offline/pendientes.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -11,6 +13,7 @@ import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoPorConfirmar from '../../core/ui/iconos/task_alt.svg'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
+import { SesionVencida } from '../e5-sin-conexion/SesionVencida.jsx'
 
 /*
  * Pantalla 04 · Mis novedades y 04-C · Finca sin novedades abiertas (RF-18). Figma 2:36 y
@@ -66,6 +69,8 @@ export default function MisNovedades() {
   const [lista, setLista] = useState({ consulta: '', novedades: [], total: 0, pagina: 0 })
   const [fallo, setFallo] = useState(null)
   const [cargandoMas, setCargandoMas] = useState(false)
+  const pendientes = usePendientes()
+  const { sesionVencida } = useSincronizacion()
 
   const consulta = `${pestana.id}:${intento}`
 
@@ -91,7 +96,8 @@ export default function MisNovedades() {
     return () => {
       vigente = false
     }
-  }, [pestana, consulta])
+    // Cuando la sincronización envía una pendiente, la lista se vuelve a pedir: ya tiene código.
+  }, [pestana, consulta, pendientes])
 
   async function verMas() {
     setCargandoMas(true)
@@ -137,6 +143,9 @@ export default function MisNovedades() {
           Registrar novedad
         </Link>
       </div>
+
+      {/* 08-B también aquí, en la pantalla de inicio del reportante (decisión 7 del plan). */}
+      {sesionVencida && pendientes > 0 ? <SesionVencida cantidad={pendientes} /> : null}
 
       {porConfirmar > 0 && pestana.id !== 'por_confirmar' ? (
         <div className="flex items-center gap-3 rounded-xl bg-exito-suave py-2.5 pr-2.5 pl-3.5">

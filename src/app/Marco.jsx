@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { vigilarPendientes } from '../core/offline/pendientes.js'
+import { useSincronizacionAutomatica } from '../core/offline/sincronizador.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil, iniciales, rutaDeOrigen } from '../core/sesion/roles.js'
 import { AnuncioDeConexion, Conexion } from '../core/ui/Conexion.jsx'
@@ -257,6 +258,8 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
       vigilarPendientes(null)
     }
   }, [perfil.id])
+  // Envía las pendientes al abrir y cada vez que vuelve la conexión (RF-22).
+  useSincronizacionAutomatica(perfil.id)
   const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
   const insignias = useInsignias(perfil.rol_id)

@@ -1065,5 +1065,38 @@ El orden de una foto es: registrar la novedad, subir el archivo y después inser
   (decisión 3).
 - **El foco** va al título de 07 al llegar: quien registró con el teclado o con lector de pantalla
   sigue desde ahí.
-- **`/pendientes`** es un marcador («Esta pantalla llega en el Sprint 4») hasta que llegue la 08
-  (RF-22).
+- **`/pendientes`** fue un marcador («Esta pantalla llega en el Sprint 4») hasta que llegó la 08
+  (RF-22, punto 36).
+
+## 36 · Pantallas 08 y 08-B (RF-22)
+
+- **Cómo se llega a 08 (cambia la decisión 32 del plan).** Al probarla, la persona solo encontraba
+  la lista desde «Ver pendientes (N)» de 07. Ahora, cuando hay pendientes, el indicador de
+  conexión es un enlace a 08 en todas las barras. El lector de pantalla lo anuncia como «Sin
+  conexión · 2 pendientes: ver la lista». Su área táctil crece a 48 px sin cambiar el dibujo de
+  Figma (28 px). Sin pendientes sigue siendo solo un indicador, y en 08 no enlaza a sí mismo. El
+  aviso de pendientes de «Cuenta» suma «Ver pendientes». Las tarjetas de 04-B llegan con RF-24
+  (PR 4).
+- **El título del bloque de avance**, que Figma solo dibuja con un envío en curso («Enviando 2 de
+  3») y en 08-B («Sincronización detenida»). La barra sale cuando el último ciclo tuvo pendientes
+  que enviar. Los títulos:
+  - «Cargando…» mientras se lee el dispositivo;
+  - «Todo está sincronizado» con la cola vacía;
+  - «En espera de conexión» sin red;
+  - «Sincronización detenida» con red y pendientes que quedaron con error.
+- **08-B con una sola pendiente:** «Ingresa de nuevo para enviar la novedad pendiente; sigue
+  guardada en este teléfono.» Figma escribe el plural, con 2.
+- **El indicador en 08-B.** Figma escribe «En línea» sin la cuenta. Se usa la del punto 34 («En
+  línea · 2 pendientes»): RF-23 pide mostrarla siempre.
+- **Textos para el lector de pantalla:** la flecha de la barra se anuncia como «Volver a mis
+  novedades». En el teléfono, el título visible de la barra no se anuncia: el `h1` de la página
+  dice lo mismo.
+- **«Reintentar» y «Reintentar todo» se deshabilitan** sin red y mientras corre un ciclo. Un
+  reintento a mitad del ciclo no entraría en él y la pendiente quedaría «En espera» hasta el
+  disparador siguiente.
+- **En el escritorio** (decisión 31 del plan): la columna centrada de 05 y 06 dentro del marco, con
+  el título «Pendientes de sincronizar» arriba.
+- **Las enviadas** se ven con su código hasta salir de 08 (decisión 35 del plan). Después están en
+  «Mis novedades», que se vuelve a leer cuando cambia la cola.
+- **08-B también sale arriba de «Mis novedades»** (decisión 7 del plan). «Ingresar» cierra la sesión
+  local, conserva las pendientes y lleva al ingreso; al volver a ingresar, se envían.

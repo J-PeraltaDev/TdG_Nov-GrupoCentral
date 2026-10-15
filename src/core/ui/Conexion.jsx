@@ -1,4 +1,6 @@
+import { Link } from 'react-router'
 import { useEnLinea } from '../conexion/useEnLinea.js'
+import { useSincronizacion } from '../offline/estadoDeSincronizacion.js'
 import { usePendientes } from '../offline/pendientes.js'
 import { Icono } from './Icono.jsx'
 import iconoSinConexion from './iconos/cloud_off.svg'
@@ -39,10 +41,20 @@ function textoDeConexion(estado, pendientes = 0) {
   return `${etiqueta} · ${pendientes} ${pendientes === 1 ? 'pendiente' : 'pendientes'}`
 }
 
+/** El estado vivo: sin conexión, sincronizando (mientras envía) o en línea. */
+function useEstadoDeConexion() {
+  const enLinea = useEnLinea()
+  const { enCurso, total } = useSincronizacion()
+  if (!enLinea) return 'sin_conexion'
+  return enCurso && total > 0 ? 'sincronizando' : 'en_linea'
+}
+
 /**
- * Indicador de conexión, siempre visible (RF-23 · Figma 1:116). Lee el monitor de conexión y el
- * contador de pendientes; `estado` y `pendientes` solo se pasan para mostrar una variante fija.
+ * Indicador de conexión, siempre visible (RF-23 · Figma 1:116). Lee el monitor de conexión, el
+ * contador de pendientes y la sincronización; `estado` y `pendientes` solo se pasan para mostrar
+ * una variante fija.
  *
+ * Con pendientes, es el enlace a la pantalla 08: así se llega a ellas desde cualquier pantalla.
  * No se anuncia por sí mismo: varias barras pintan uno a la vez, y el marco tiene una sola
  * región que avisa los cambios a los lectores de pantalla.
  *
@@ -52,24 +64,42 @@ function textoDeConexion(estado, pendientes = 0) {
  * @param {string} [props.className]
  */
 export function Conexion({ estado, pendientes, className = '' }) {
-  const enLinea = useEnLinea()
+  const vivo = useEstadoDeConexion()
   const enCola = usePendientes()
-  const actual = estado ?? (enLinea ? 'en_linea' : 'sin_conexion')
+  const actual = estado ?? vivo
   const variante = CONEXIONES[actual]
   if (!variante) return null
 
-  return (
-    <span
-      data-conexion={actual}
-      className={`inline-flex items-center gap-1.5 rounded-full py-[5px] pr-3 pl-2.5 text-auxiliar-fuerte whitespace-nowrap inset-ring ${variante.clases} ${className}`}
-    >
+  const contenido = (
+    <>
       {variante.icono ? (
         <Icono src={variante.icono} tamano={16} />
       ) : (
         <img src={punto} alt="" width={8} height={8} className="flex-none" />
       )}
       {textoDeConexion(actual, pendientes ?? enCola)}
-    </span>
+    </>
+  )
+  const clases = `inline-flex items-center gap-1.5 rounded-full py-[5px] pr-3 pl-2.5 text-auxiliar-fuerte whitespace-nowrap inset-ring ${variante.clases} ${className}`
+
+  // Una variante fija (la vitrina de componentes) nunca es enlace.
+  if (pendientes !== undefined || enCola < 1) {
+    return (
+      <span data-conexion={actual} className={clases}>
+        {contenido}
+      </span>
+    )
+  }
+  return (
+    // 28 px a la vista; el pseudoelemento lleva el área táctil a 48 px.
+    <Link
+      to="/pendientes"
+      data-conexion={actual}
+      className={`${clases} relative after:absolute after:-inset-x-1 after:-inset-y-2.5`}
+    >
+      {contenido}
+      <span className="sr-only">: ver la lista</span>
+    </Link>
   )
 }
 
@@ -80,11 +110,11 @@ export function Conexion({ estado, pendientes, className = '' }) {
  * pintar todo el marco.
  */
 export function AnuncioDeConexion() {
-  const enLinea = useEnLinea()
+  const estado = useEstadoDeConexion()
   const pendientes = usePendientes()
   return (
     <p aria-live="polite" className="sr-only">
-      {textoDeConexion(enLinea ? 'en_linea' : 'sin_conexion', pendientes)}
+      {textoDeConexion(estado, pendientes)}
     </p>
   )
 }
