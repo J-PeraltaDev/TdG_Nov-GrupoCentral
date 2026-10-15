@@ -36,6 +36,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 30  | Detalles de las pantallas 28, 28-B y 29     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 31  | Detalles de las pantallas 02, 03 y 32       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 32  | Nombres de ejemplo de Figma en las capturas | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
+| 33  | Evidencias: archivos huérfanos y «staging»  | Se aceptan los huérfanos; el bucket se vacía desde el panel          | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -380,6 +381,10 @@ mismos dieciséis. `private.solicitud_abierta` no genera aviso.
 avisos, todos _WARN_ y de los mismos tipos: trece por las funciones RPC, el de
 `solicitar_recuperacion` para `anon` y el de las contraseñas filtradas. No sale el del segundo
 factor.
+
+**Al 14 oct 2026 (bucket de evidencias, RF-08):** los mismos dieciséis en «staging». Las dos
+funciones nuevas viven en `private` y no generan avisos: `novedad_de_la_ruta` no es `security
+definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente.
 
 ## 17 · Pruebas que necesitan ingresar
 
@@ -982,3 +987,23 @@ visibles en ramas publicadas.
 **Decidido el 10 oct 2026:** algunos de esos nombres son reales y no importa. Se dejan como
 están, en las capturas y en las pruebas, y no hace falta repetir nada. Lo que sigue fuera del
 repositorio es la lista oficial (punto 1).
+
+## 33 · Evidencias: archivos huérfanos y el bucket de «staging»
+
+El orden de una foto es: registrar la novedad, subir el archivo y después insertar la fila de
+`evidencia` (SDD 6.1.7). Si la fila no llega (se cae la red entre los dos pasos), el archivo queda
+**huérfano** en el bucket.
+
+- **Se acepta y se documenta** (plan del Sprint 4, decisión 21). Nadie lo ve: la política de
+  lectura exige la fila. Pesa como máximo 1 MB. Borrarlo desde el cliente exigiría darle permiso de
+  borrado, que la Tabla 31 no da. Si un día ocupan espacio, se borran desde el panel de Supabase
+  (borrar por SQL no sirve: Storage lo rechaza y dejaría los archivos sin su fila).
+- **`staging:reset` no vacía el bucket** (el script del CLI no toca `storage.buckets` ni
+  `storage.objects`): las fotos de las pruebas se quedan después de un reset, aunque sus novedades
+  ya no existan. Son imágenes de pocos KB que generan las pruebas. Antes de la demo, una persona
+  vacía el bucket `evidencias` desde el panel de «staging».
+- **Comprobado el 14 oct 2026 contra «staging»** con la API real de Storage y la sesión del
+  reportante de prueba: tres subidas con sus filas (el tamaño se toma del archivo), la cuarta
+  rechazada, un archivo que no es JPEG y uno de más de 1 MB rechazados, URLs firmadas para el
+  reportante y el aprobador del área y no para el reportante de otra finca ni sin sesión, ningún
+  borrado y ninguna URL pública. Quedó la novedad NOV-2939 con tres fotos de 134 bytes.
