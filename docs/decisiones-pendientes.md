@@ -19,7 +19,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 12  | Borde del botón secundario                    | Se dejó el color de Figma                                            | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio            | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
-| 15  | WebKit no abre en los equipos                 | Las pruebas locales corren en Chromium; WebKit está sin verificar    | El equipo         |
+| 15  | WebKit no abre en los equipos                 | El CI corre Chromium y WebKit; sin red en WebKit, `fixme`            | El equipo         |
 | 16  | Avisos del asesor de Supabase                 | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
 | 17  | Pruebas que necesitan ingresar                | **Al día:** el 14 oct pasaron las 135 (más las 6 de preparación)     | El equipo         |
 | 18  | Primer administrador de producción            | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |

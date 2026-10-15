@@ -11,11 +11,10 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** el Sprint 4 está construido y espera la review (#29 a #38). El reportante registra y
-consulta sin conexión, las pendientes se envían solas al volver la señal, las acciones que cambian
-el estado se bloquean sin red y las novedades llevan fotos. `main` tiene los Sprints 1 a 3.
-Producción («PROYECTO») tiene las migraciones y las dos Edge Functions del Sprint 3, desde el 10
-oct 2026, y las de las fotos desde el 14 oct. El avance por sprint está en
+**Estado:** Sprint 4 (el reportante registra y consulta sin conexión, las pendientes se envían
+solas al volver la señal, las acciones que cambian el estado se bloquean sin red y las novedades
+llevan fotos), ya en `main` junto con los Sprints 1 a 3. Producción («PROYECTO») tiene sus
+migraciones desde el 14 oct 2026. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
