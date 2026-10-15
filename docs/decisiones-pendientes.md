@@ -1121,3 +1121,27 @@ El orden de una foto es: registrar la novedad, subir el archivo y después inser
   no trae el historial: no se descargan. La tabla y los conteos sí.
 - **La pantalla de registrar la solución (18)** se abre sin conexión con lo descargado, si lo hay.
   Enviar falla como en 14-C hasta que RF-25 (PR 5) la deshabilite.
+
+## 38 · Acciones sin conexión (14-B, 09-D, el director y las hojas)
+
+- **No disponible, no deshabilitado** (decisión 33 del plan). Sin conexión, cada acción se ve con
+  el aspecto deshabilitado de Figma y su candado, pero sigue en el orden del teclado: se anuncia
+  como no disponible (`aria-disabled`) y lleva su explicación (`aria-describedby`). Pulsarla no
+  hace nada. El `disabled` de siempre se queda para lo demás, como un formulario incompleto o
+  una acción en curso.
+- **Las explicaciones.** 14-B («Se habilitan al volver la conexión») y 09-D («Confirmar o
+  devolver la novedad necesita internet…») tienen los textos de Figma. Donde hay un solo botón
+  (el «Confirmar» de una hoja, «Sí, cerrar» de 09-C, «Confirmar decisión» de 20 y «Marcar como
+  resuelta» de 18), dice en singular «Se habilita al volver la conexión».
+- **El director** (20 y 20-C), sin dibujo sin conexión, lleva el aviso de 14-B arriba y su
+  decisión no disponible (decisión 17 del plan).
+- **Una hoja o un diálogo abiertos** se quedan con lo escrito; su botón para confirmar queda no
+  disponible y vuelve solo con la red (decisión 18 del plan). 14-C no cambia: una caída durante
+  el envío no se encola ni se reintenta sola.
+- **La vista previa de la bandeja en el escritorio** usa como explicación el aviso de 11-B («Las
+  acciones se habilitan al volver el internet.»).
+- **«Registrar solución»** es un enlace a la pantalla 18: sin conexión se cambia por un botón no
+  disponible, y en la 18 tampoco se puede guardar.
+- **Las acciones solo dependen del monitor de conexión.** Si el detalle llegó del dispositivo
+  pero el monitor ya ve red, las acciones se habilitan: cada una la verifica el servidor contra
+  el estado vigente (`TRANSICION_INVALIDA`).

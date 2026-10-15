@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import { OBSERVACION_MAX_CARACTERES } from '../../core/config/parametros.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { decidirEscalamiento } from '../../core/supabase/repositorios/novedades.js'
 import { AreaDeTexto } from '../../core/ui/AreaDeTexto.jsx'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
@@ -166,6 +167,9 @@ function Panel({ novedad, alDecidir, enCurso }) {
   const grupo = useId()
   const { eleccion, elegir, observacion, escribir, error, falta, bloqueado, confirmar } =
     useDecision({ alDecidir, enCurso })
+  // Sin conexión (RF-25; Figma no dibuja al director sin red: decisión 17 del plan).
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
 
   return (
     <section
@@ -206,10 +210,17 @@ function Panel({ novedad, alDecidir, enCurso }) {
           type="submit"
           icono={bloqueado && !enCurso ? iconoBloqueado : iconoConfirmar}
           disabled={bloqueado}
+          noDisponible={sinRed}
+          aria-describedby={sinRed ? idSinRed : undefined}
           className="w-full"
         >
           {enCurso ? 'Confirmando…' : 'Confirmar decisión'}
         </Boton>
+        {sinRed ? (
+          <p id={idSinRed} className="text-center text-auxiliar text-texto-secundario">
+            Se habilita al volver la conexión
+          </p>
+        ) : null}
 
         <p className="text-auxiliar text-texto-secundario">{nota(novedad)}</p>
       </form>
@@ -294,6 +305,9 @@ export default function DecisionDelDirector({ novedad, puedeDecidir, alCambiar, 
   // La hoja abierta en el teléfono, si hay alguna.
   const [hoja, setHoja] = useState(/** @type {Eleccion | null} */ (null))
   const cerrarHoja = () => setHoja(null)
+  // Sin conexión, la barra de 20-C no se puede usar y dice por qué (RF-25).
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
 
   /** @type {AlDecidir} */
   const decidir = (aprobar, observacion) =>
@@ -344,7 +358,7 @@ export default function DecisionDelDirector({ novedad, puedeDecidir, alCambiar, 
         data-barra-de-acciones={puedeDecidir ? '' : undefined}
         className={
           puedeDecidir
-            ? 'sticky bottom-0 z-10 mt-auto flex gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
+            ? 'sticky bottom-0 z-10 mt-auto flex flex-wrap gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
             : undefined
         }
       >
@@ -355,6 +369,8 @@ export default function DecisionDelDirector({ novedad, puedeDecidir, alCambiar, 
               tipo="secundario-peligro"
               icono={iconoRechazar}
               disabled={enCurso}
+              noDisponible={sinRed}
+              aria-describedby={sinRed ? idSinRed : undefined}
               onClick={() => setHoja('rechazar')}
               className="min-w-0 flex-1"
             >
@@ -363,11 +379,18 @@ export default function DecisionDelDirector({ novedad, puedeDecidir, alCambiar, 
             <Boton
               icono={iconoAprobar}
               disabled={enCurso}
+              noDisponible={sinRed}
+              aria-describedby={sinRed ? idSinRed : undefined}
               onClick={() => setHoja('aprobar')}
               className="min-w-0 flex-1"
             >
               Aprobar
             </Boton>
+            {sinRed ? (
+              <p id={idSinRed} className="w-full text-center text-auxiliar text-texto-secundario">
+                Se habilitan al volver la conexión
+              </p>
+            ) : null}
           </>
         ) : null}
       </div>

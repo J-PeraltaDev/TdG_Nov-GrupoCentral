@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { OBSERVACION_MAX_CARACTERES } from '../../core/config/parametros.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import {
@@ -101,6 +102,9 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
   const navegar = useNavigate()
   const hoy = hoyEnColombia()
   const idDeAyudaDeFecha = useId()
+  // Sin conexión se puede escribir, pero no guardar: el botón dice por qué (RF-25).
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
   const campoSolucion = useRef(/** @type {HTMLTextAreaElement | null} */ (null))
   const campoFecha = useRef(/** @type {HTMLInputElement | null} */ (null))
   const campoTipo = useRef(/** @type {HTMLElement | null} */ (null))
@@ -310,6 +314,8 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
             type="submit"
             icono={iconoResolver}
             disabled={enCurso}
+            noDisponible={sinRed}
+            aria-describedby={sinRed ? idSinRed : undefined}
             className="w-full lg:w-auto"
           >
             {enCurso ? 'Guardando…' : 'Marcar como resuelta'}
@@ -324,6 +330,11 @@ function Formulario({ novedad, aprobacion, detalle, estadoDeNavegacion, esEscrit
             </Link>
           ) : null}
         </div>
+        {sinRed ? (
+          <p id={idSinRed} className="text-center text-auxiliar text-texto-secundario lg:text-left">
+            Se habilita al volver la conexión
+          </p>
+        ) : null}
       </div>
     </form>
   )

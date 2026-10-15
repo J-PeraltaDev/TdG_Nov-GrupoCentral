@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
@@ -162,6 +162,12 @@ export default function Bandeja() {
 
   const areaId = perfil.area_id
   const enLinea = useEnLinea()
+  const idDelAvisoSinRed = useId()
+  // Sin conexión, la acción de la vista previa se ve pero no se puede usar (RF-25, 11-B).
+  const noDisponible = {
+    noDisponible: !enLinea,
+    'aria-describedby': enLinea ? undefined : idDelAvisoSinRed,
+  }
   const consulta = `${pestana.id}:${fincaId ?? ''}:${intento}`
 
   // La página y los conteos de las otras dos pestañas no dependen entre sí: van en paralelo.
@@ -296,7 +302,12 @@ export default function Bandeja() {
       </header>
 
       {!cargando && lista.descargadaEn ? (
-        <Aviso tipo="advertencia" icono={iconoSinConexion} titulo="Sin conexión">
+        <Aviso
+          id={idDelAvisoSinRed}
+          tipo="advertencia"
+          icono={iconoSinConexion}
+          titulo="Sin conexión"
+        >
           {/* La hora ya termina en punto («a. m.»), como en Figma. */}
           Bandeja descargada {formatearDescarga(lista.descargadaEn)} Las acciones se habilitan al
           volver el internet.
@@ -363,6 +374,7 @@ export default function Bandeja() {
                       tamano="escritorio"
                       icono={iconoTomar}
                       disabled={enCurso}
+                      {...noDisponible}
                       onClick={() =>
                         ejecutar(() => tomarNovedad(elegida.id), {
                           exito: 'Novedad tomada. Ya está En atención.',
@@ -370,6 +382,11 @@ export default function Bandeja() {
                       }
                     >
                       {enCurso ? 'Tomando…' : 'Tomar para atención'}
+                    </Boton>
+                  ) : (elegida.estado === 'en_atencion' || elegida.estado === 'aprobada') &&
+                    !enLinea ? (
+                    <Boton tamano="escritorio" icono={iconoResolver} {...noDisponible}>
+                      Registrar solución
                     </Boton>
                   ) : elegida.estado === 'en_atencion' || elegida.estado === 'aprobada' ? (
                     <Link

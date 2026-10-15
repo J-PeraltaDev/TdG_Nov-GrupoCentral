@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -988,34 +988,119 @@ describe('Pantallas 09, 09-B y 09-C · La finca responde a una novedad resuelta 
   })
 })
 
-describe('Detalle sin conexión (RF-24 / CU-24 6 y CU-18 3a)', () => {
+describe('Detalle sin conexión (RF-24 / CU-24 6 y CU-18 3a; RF-25 / CU-25)', () => {
   // Descargada a las 7:42 a. m. de Colombia.
   const DESCARGADA = { ...ASIGNADA, descargada_en: '2026-09-24T12:42:00Z' }
+  const AVISO_14B =
+    'Puedes consultar, pero tomar, rechazar, escalar, aprobar, resolver, cerrar y reasignar necesitan internet, porque dependen del estado actual en el servidor.'
+  /** @type {import('vitest').MockInstance | undefined} */
+  let enLineaDelNavegador
 
-  it('RF-24 / CU-24 6: muestra la versión descargada con su fecha y sin acciones', async () => {
+  beforeEach(() => {
+    enLineaDelNavegador = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+  })
+  afterEach(() => {
+    enLineaDelNavegador?.mockRestore()
+  })
+
+  it('RF-24 / CU-24 6 y RF-25 (14-B): lo descargado, con su fecha, y las acciones no disponibles', async () => {
     conNovedad(DESCARGADA)
     abrir()
 
     expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
     expect(screen.getByText(ASIGNADA.descripcion)).toBeVisible()
-    expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+    expect(screen.getByText(AVISO_14B)).toBeVisible()
+    const tomar = await screen.findByRole('button', { name: 'Tomar para atención' })
+    expect(tomar).toHaveAttribute('aria-disabled', 'true')
+    expect(tomar).toHaveAccessibleDescription('Se habilitan al volver la conexión')
+    await userEvent.click(tomar)
+    expect(tomarNovedad).not.toHaveBeenCalled()
   })
 
-  it('RF-24: en el escritorio también, bajo el encabezado', async () => {
+  it('RF-24 y RF-25: en el escritorio también, con el aviso arriba', async () => {
     simularPantalla('escritorio')
     conNovedad(DESCARGADA)
     abrir()
 
     expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
-    expect(screen.queryByRole('button', { name: 'Tomar para atención' })).not.toBeInTheDocument()
+    expect(screen.getByText(AVISO_14B)).toBeVisible()
+    expect(await screen.findByRole('button', { name: 'Tomar para atención' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
   })
 
-  it('RF-24: la finca no confirma ni devuelve lo descargado; eso necesita conexión', async () => {
+  it('RF-25 / CU-15 1a (09-D): la finca ve por qué no puede confirmar ni devolver sin conexión', async () => {
     conNovedad({ ...RESUELTA, descargada_en: '2026-09-24T12:42:00Z' }, HISTORIA_RESUELTA)
     abrir({ rol: 'reportante' })
 
     expect(await screen.findByText('Datos del 24 sep, 7:42 a. m.')).toBeVisible()
-    expect(screen.queryByRole('button', { name: 'Confirmar cierre' })).not.toBeInTheDocument()
+    const explicacion =
+      'Confirmar o devolver la novedad necesita internet, porque depende de su estado actual en el servidor.'
+    for (const nombre of ['La falla persiste', 'Confirmar cierre']) {
+      const boton = await screen.findByRole('button', { name: nombre })
+      expect(boton).toHaveAttribute('aria-disabled', 'true')
+      expect(boton).toHaveAccessibleDescription(explicacion)
+    }
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar cierre' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByText(AVISO_14B)).not.toBeInTheDocument()
+  })
+
+  it('RF-25 (decisión 17): el director ve el aviso de 14-B y la decisión no disponible', async () => {
+    conNovedad({ ...ASIGNADA, estado: 'escalada' }, [
+      paso(4, 'en_atencion', 'escalada', { usuario: APROBADOR, observacion: 'Hay que comprar.' }),
+      TOMADA,
+      ...REGISTRO,
+    ])
+    abrir({ rol: 'director' })
+
+    expect(await screen.findByText(AVISO_14B)).toBeVisible()
+    for (const nombre of ['Rechazar', 'Aprobar']) {
+      const boton = await screen.findByRole('button', { name: nombre })
+      expect(boton).toHaveAttribute('aria-disabled', 'true')
+      expect(boton).toHaveAccessibleDescription('Se habilitan al volver la conexión')
+    }
+  })
+
+  it('RF-25 / CU-25 4: cuando vuelve la conexión, las acciones se habilitan solas', async () => {
+    conNovedad()
+    abrir()
+    const tomar = await screen.findByRole('button', { name: 'Tomar para atención' })
+    expect(tomar).toHaveAttribute('aria-disabled', 'true')
+
+    enLineaDelNavegador.mockReturnValue(true)
+    act(() => window.dispatchEvent(new Event('online')))
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Tomar para atención' })).not.toHaveAttribute(
+        'aria-disabled',
+      ),
+    )
+    expect(screen.queryByText(AVISO_14B)).not.toBeInTheDocument()
+  })
+
+  it('RF-25 / CU-11 1a: si se corta la red con la hoja abierta, la hoja guarda lo escrito y no confirma hasta que vuelva', async () => {
+    enLineaDelNavegador.mockReturnValue(true)
+    conNovedad()
+    abrir()
+    await userEvent.click(await screen.findByRole('button', { name: 'Rechazar' }))
+    const hoja = await screen.findByRole('dialog')
+    await userEvent.type(within(hoja).getByRole('textbox'), 'No es de esta área')
+
+    enLineaDelNavegador.mockReturnValue(false)
+    act(() => window.dispatchEvent(new Event('offline')))
+
+    const confirmar = await within(hoja).findByRole('button', { name: 'Rechazar novedad' })
+    expect(confirmar).toHaveAttribute('aria-disabled', 'true')
+    expect(confirmar).toHaveAccessibleDescription('Se habilita al volver la conexión')
+    await userEvent.click(confirmar)
+    expect(rechazarNovedad).not.toHaveBeenCalled()
+    expect(within(hoja).getByRole('textbox')).toHaveValue('No es de esta área')
+
+    enLineaDelNavegador.mockReturnValue(true)
+    act(() => window.dispatchEvent(new Event('online')))
+    await waitFor(() => expect(confirmar).not.toHaveAttribute('aria-disabled'))
   })
 
   it('RF-24: si la novedad llegó solo en una lista, dice que la línea de tiempo se descarga al abrirla con conexión', async () => {

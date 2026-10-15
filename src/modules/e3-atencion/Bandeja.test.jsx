@@ -560,6 +560,26 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
     expect(listarBandeja).toHaveBeenCalledTimes(2)
   })
 
+  it('RF-25 (11-B): sin conexión, la acción de la vista previa se ve pero no se puede usar', async () => {
+    const enLinea = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    conBandeja()
+    vi.mocked(listarBandeja).mockImplementation(async () => ({
+      novedades: POR_ATENDER,
+      total: POR_ATENDER.length,
+      descargadaEn: haceMinutos(20),
+    }))
+    abrir()
+    await filas()
+    const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0153' }))
+
+    const tomar = vista.getByRole('button', { name: 'Tomar para atención' })
+    expect(tomar).toHaveAttribute('aria-disabled', 'true')
+    expect(tomar).toHaveAccessibleDescription(/Las acciones se habilitan al volver el internet\.$/)
+    await userEvent.click(tomar)
+    expect(tomarNovedad).not.toHaveBeenCalled()
+    enLinea.mockRestore()
+  })
+
   it('RF-14 / CU-14 1: la vista previa de una aprobada ofrece registrar la solución, no tomarla', async () => {
     conBandeja()
     abrir()

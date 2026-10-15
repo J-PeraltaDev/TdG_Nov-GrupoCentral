@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { OBSERVACION_MAX_CARACTERES } from '../../core/config/parametros.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { AreaDeTexto } from '../../core/ui/AreaDeTexto.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { Dialogo } from '../../core/ui/Dialogo.jsx'
@@ -20,6 +21,8 @@ import iconoResuelta from '../../core/ui/iconos/task_alt.svg'
  * @param {boolean} props.enCurso
  */
 function Formulario({ alCerrar, alConfirmar, enCurso }) {
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
   const [observacion, setObservacion] = useState('')
   const [error, setError] = useState(/** @type {string | null} */ (null))
 
@@ -48,13 +51,25 @@ function Formulario({ alCerrar, alConfirmar, enCurso }) {
         }}
       />
 
-      <div className="flex gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
         <Boton tipo="secundario" onClick={alCerrar} className="min-w-0 flex-1">
           Cancelar
         </Boton>
-        <Boton type="submit" disabled={enCurso} className="min-w-0 flex-1">
+        {/* Sin conexión el diálogo se queda abierto y no envía (RF-25; decisión 18 del plan). */}
+        <Boton
+          type="submit"
+          disabled={enCurso}
+          noDisponible={sinRed}
+          aria-describedby={sinRed ? idSinRed : undefined}
+          className="min-w-0 flex-1"
+        >
           {enCurso ? 'Cerrando…' : 'Sí, cerrar'}
         </Boton>
+        {sinRed ? (
+          <p id={idSinRed} className="w-full text-center text-auxiliar text-texto-secundario">
+            Se habilita al volver la conexión
+          </p>
+        ) : null}
       </div>
     </form>
   )

@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import {
   confirmarResolucion,
   reportarFallaPersiste,
 } from '../../core/supabase/repositorios/novedades.js'
 import { AvisoTemporal } from '../../core/ui/AvisoTemporal.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
+import { Icono } from '../../core/ui/Icono.jsx'
+import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import { DialogoConfirmarCierre } from './DialogoConfirmarCierre.jsx'
 import { HojaFallaPersiste } from './HojaFallaPersiste.jsx'
 import { AVISO_SUELTO } from '../../core/ui/posicionDelAviso.js'
@@ -38,6 +41,10 @@ export default function AccionesDelReportante({ novedad, acciones, alCambiar, es
   const cerrar = () => setAbierta(null)
   const puedeConfirmar = acciones.includes(ACCION.CONFIRMAR_CIERRE)
   const puedeDevolver = acciones.includes(ACCION.FALLA_PERSISTE)
+  // Sin conexión (RF-25, 09-D): se ven, pero no se pueden usar; dicen por qué.
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
+  const noDisponible = { noDisponible: sinRed, 'aria-describedby': sinRed ? idSinRed : undefined }
 
   /**
    * Con cualquier resultado lo abierto se cierra y el aviso va en el detalle (un aviso fuera
@@ -54,10 +61,23 @@ export default function AccionesDelReportante({ novedad, acciones, alCambiar, es
   const botones =
     puedeConfirmar || puedeDevolver ? (
       <>
+        {sinRed ? (
+          <p
+            id={idSinRed}
+            className="flex w-full items-start gap-1.5 text-auxiliar text-advertencia"
+          >
+            <Icono src={iconoSinConexion} tamano={18} />
+            <span className="min-w-0 flex-1">
+              Confirmar o devolver la novedad necesita internet, porque depende de su estado actual
+              en el servidor.
+            </span>
+          </p>
+        ) : null}
         {puedeDevolver ? (
           <Boton
             tipo="secundario"
             disabled={enCurso}
+            {...noDisponible}
             onClick={() => setAbierta(ACCION.FALLA_PERSISTE)}
             className="min-w-0 flex-1 lg:flex-none"
           >
@@ -67,6 +87,7 @@ export default function AccionesDelReportante({ novedad, acciones, alCambiar, es
         {puedeConfirmar ? (
           <Boton
             disabled={enCurso}
+            {...noDisponible}
             onClick={() => setAbierta(ACCION.CONFIRMAR_CIERRE)}
             className="min-w-0 flex-1 lg:flex-none"
           >
@@ -134,7 +155,7 @@ export default function AccionesDelReportante({ novedad, acciones, alCambiar, es
         data-barra-de-acciones={botones ? '' : undefined}
         className={
           botones
-            ? 'sticky bottom-0 z-10 mt-auto flex gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
+            ? 'sticky bottom-0 z-10 mt-auto flex flex-wrap gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
             : undefined
         }
       >

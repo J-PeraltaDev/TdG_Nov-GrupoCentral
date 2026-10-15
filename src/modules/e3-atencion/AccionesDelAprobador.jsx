@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { ACCION } from '../../core/acciones/accionesDisponibles.js'
+import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import {
   escalarNovedad,
   reasignarNovedad,
@@ -76,6 +77,10 @@ export default function AccionesDelAprobador({
   // La última acción que se lanzó: su botón es el que dice que está en curso.
   const [lanzada, setLanzada] = useState(/** @type {string | null} */ (null))
   const puede = (accion) => CONSTRUIDAS.includes(accion) && acciones.includes(accion)
+  // Sin conexión (RF-25, 14-B): se ven, pero no se pueden usar; dicen por qué.
+  const sinRed = !useEnLinea()
+  const idSinRed = useId()
+  const noDisponible = { noDisponible: sinRed, 'aria-describedby': sinRed ? idSinRed : undefined }
   const cerrarHoja = () => setHoja(null)
 
   /**
@@ -100,6 +105,7 @@ export default function AccionesDelAprobador({
     <Boton
       icono={iconoTomar}
       disabled={enCurso}
+      {...noDisponible}
       onClick={() => {
         setLanzada(ACCION.TOMAR)
         ejecutar(() => tomarNovedad(novedad.id), { exito: 'Novedad tomada. Ya está En atención.' })
@@ -107,6 +113,10 @@ export default function AccionesDelAprobador({
       className="w-full lg:w-auto"
     >
       {enCurso && lanzada === ACCION.TOMAR ? 'Tomando…' : 'Tomar para atención'}
+    </Boton>
+  ) : puede(ACCION.REGISTRAR_SOLUCION) && sinRed ? (
+    <Boton icono={iconoResolver} {...noDisponible} className="w-full lg:w-auto">
+      Registrar solución
     </Boton>
   ) : puede(ACCION.REGISTRAR_SOLUCION) ? (
     // La pantalla 18 vuelve a este detalle, que recuerda de qué lista se abrió.
@@ -125,6 +135,7 @@ export default function AccionesDelAprobador({
       tipo="secundario"
       icono={iconoEscalar}
       disabled={enCurso}
+      {...noDisponible}
       onClick={() => setHoja(ACCION.ESCALAR)}
       className="w-full lg:w-auto"
     >
@@ -137,6 +148,7 @@ export default function AccionesDelAprobador({
       tipo="secundario"
       icono={iconoReasignar}
       disabled={enCurso}
+      {...noDisponible}
       onClick={() => setHoja(ACCION.REASIGNAR)}
       className="min-w-0 flex-1 lg:flex-none"
     >
@@ -149,6 +161,7 @@ export default function AccionesDelAprobador({
       tipo="secundario-peligro"
       icono={iconoRechazar}
       disabled={enCurso}
+      {...noDisponible}
       onClick={() => setHoja(ACCION.RECHAZAR)}
       className="min-w-0 flex-1 lg:flex-none"
     >
@@ -166,6 +179,14 @@ export default function AccionesDelAprobador({
             {reasignar}
             {rechazar}
           </div>
+        ) : null}
+        {sinRed ? (
+          <p
+            id={idSinRed}
+            className="text-center text-auxiliar text-texto-secundario lg:w-full lg:text-left"
+          >
+            Se habilitan al volver la conexión
+          </p>
         ) : null}
       </>
     ) : null
