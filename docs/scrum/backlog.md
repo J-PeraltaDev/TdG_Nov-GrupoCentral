@@ -615,7 +615,7 @@ Pantallas de Figma (SDD, Tabla 36: 04, 09)
 - **CU-21** · Actores: Reportante (primario).
 - **Precondición:** El reportante ingresó antes con conexión en el dispositivo y en este momento no hay conexión.
 - **Postcondición:** La novedad queda guardada en el dispositivo, pendiente de sincronizar, aunque se cierre el navegador o se apague el dispositivo.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -642,7 +642,7 @@ Pantallas de Figma (SDD, Tabla 36: 05-B, 07)
 - **CU-22** · Actores: Reportante (primario; el sistema inicia el caso al detectar la conexión).
 - **Precondición:** La aplicación está abierta, hay novedades pendientes de sincronizar y la sesión del usuario sigue vigente.
 - **Postcondición:** Las novedades pendientes quedan en el servidor, con código definitivo y asignadas a su área.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -674,7 +674,7 @@ Pantallas de Figma (SDD, Tabla 36: 08, 08-B)
 - **CU-23** · Actores: Usuario (primario).
 - **Precondición:** El usuario tiene la aplicación abierta.
 - **Postcondición:** El usuario sabe si está en línea y cuántas novedades faltan por enviar.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -706,7 +706,7 @@ Pantallas de Figma (SDD, Tabla 36: 04, 07, 08, 11)
 - **CU-24** · Actores: Usuario (primario).
 - **Precondición:** El usuario abrió antes la aplicación con conexión y sus novedades quedaron descargadas en el dispositivo.
 - **Postcondición:** El usuario consulta la información disponible en el dispositivo.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -733,7 +733,7 @@ Pantallas de Figma (SDD, Tabla 36: 04-B, 11-B)
 - **CU-25** · Actores: Aprobador de área, Director de agricultura y Reportante (quienes intentan la acción).
 - **Precondición:** No hay conexión.
 - **Postcondición:** Ningún cambio de estado se realiza sin conexión.
-- **Puntos:** por estimar
+- **Puntos:** 3
 
 Criterios de aceptación · curso normal
 
@@ -759,7 +759,7 @@ Pantallas de Figma (SDD, Tabla 36: 09-D, 14-B, 14-C)
 - **CU-08** · Actores: Reportante (primario).
 - **Precondición:** El reportante está registrando una novedad de su finca o consultando una que no está cerrada ni rechazada.
 - **Postcondición:** La novedad tiene la fotografía asociada como evidencia.
-- **Puntos:** por estimar
+- **Puntos:** 13
 
 Criterios de aceptación · curso normal
 
