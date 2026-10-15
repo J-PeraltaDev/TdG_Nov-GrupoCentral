@@ -11,10 +11,11 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** Sprint 3 (el director aprueba o rechaza lo escalado, la finca confirma el cierre o
-dice que la falla persiste, y el administrador gestiona usuarios, fincas y la recuperación de
-contraseñas), ya en `main` junto con los Sprints 1 y 2. Producción («PROYECTO») tiene sus
-migraciones y sus dos Edge Functions desde el 10 oct 2026. El avance por sprint está en
+**Estado:** el Sprint 4 está construido y espera la review (#29 a #38). El reportante registra y
+consulta sin conexión, las pendientes se envían solas al volver la señal, las acciones que cambian
+el estado se bloquean sin red y las novedades llevan fotos. `main` tiene los Sprints 1 a 3.
+Producción («PROYECTO») tiene las migraciones y las dos Edge Functions del Sprint 3, desde el 10
+oct 2026; las de las fotos se aplican antes de fusionar #31. El avance por sprint está en
 [`docs/sprints/`](docs/sprints/).
 
 ## Tecnologías
@@ -146,7 +147,7 @@ razones están en [`docs/adr/0012`](docs/adr/0012-edge-functions-sin-docker.md).
 
 **Pruebas de extremo a extremo.** Corren contra el build real y contra «staging». Las que
 necesitan ingresar usan `CLAVE_USUARIOS_DE_PRUEBA` y se omiten si falta. Cada corrida deja
-novedades de prueba en «staging». Las que cambian una contraseña o desactivan algo lo hacen con
+novedades de prueba en «staging», y algunas fotos de pocos KB en su bucket. Las que cambian una contraseña o desactivan algo lo hacen con
 usuarios (`e2e-…@novedades.test`) y fincas («Finca e2e …») que crea la propia prueba, y los dejan
 desactivados; a los del seed no les cambian nada. Todo eso se va con un `staging:reset`.
 
@@ -159,8 +160,43 @@ al repositorio: son tokens de los usuarios de prueba, no hay que compartir esa c
 Playwright necesita sus navegadores una sola vez: `npx playwright install chromium webkit`. Si la
 descarga se queda colgada (pasa en redes con IPv6 defectuoso), define antes la variable de entorno
 `NODE_OPTIONS` con el valor `--dns-result-order=ipv4first`. En equipos con Control de aplicaciones
-de Windows, WebKit se instala pero no abre: usa `npm run test:e2e:chromium`. El CI todavía no
-corre las pruebas de extremo a extremo, así que WebKit está sin verificar.
+de Windows, WebKit se instala pero no abre: usa `npm run test:e2e:chromium`. El CI las corre en
+Chromium y WebKit (#30). En WebKit, las que navegan sin red quedan como `fixme`, porque Playwright
+WebKit no abre la aplicación sin red; se verifican en un iPhone.
+
+## Sin conexión
+
+Después de la primera carga, la aplicación abre sin red. El service worker guarda la aplicación,
+nunca los datos de Supabase. Los datos viven en IndexedDB (`src/core/offline/`), separados por
+usuario:
+
+- **La cola de pendientes.** Lo que se registra sin red queda en el dispositivo con su `id_local`
+  y su fecha real. Se envía solo al volver la conexión, también con la aplicación abierta.
+  `registrar_novedad` es idempotente por `id_local`: si un envío se repite, no hay duplicado.
+- **Lo descargado.** Las listas y los detalles que se abrieron con red, para consultarlos sin ella.
+  Se borra si cambian el usuario, su rol o su alcance.
+
+El monitor de conexión (`src/core/conexion/`) decide si hay red. Usa lo que dice el navegador, los
+fallos de red de cada solicitud y una verificación contra Auth cada 15 s. Sin red, las acciones que
+cambian el estado se ven con un candado y su explicación.
+
+Para probarlo hace falta el service worker, que `npm run dev` no tiene: usa
+`npm run build && npm run preview`. En Chrome, la red se corta en DevTools (Network → Offline) y
+los datos se ven en DevTools → Application → IndexedDB.
+
+## Fotos (Supabase Storage)
+
+- **Dónde quedan:** en el bucket privado `evidencias`, como `{novedad_id}/{uuid}.jpg`.
+- **Antes de subir,** el navegador reduce cada foto: lado mayor de 1600 px, JPEG al 70 %.
+- **Quién sube:** el reportante de la finca y, para la solución, el aprobador del área.
+- **Qué acepta:** el bucket, solo JPEG de hasta 1 MB. Un disparador de `evidencia` revisa el
+  estado de la novedad, que el archivo exista y el máximo de 3 fotos: 3 del reporte, y aparte 3
+  por cada solución.
+- **Cómo se ven:** con URLs firmadas de 5 minutos, que el service worker no guarda.
+- **Sin conexión** no se suben.
+
+`staging:reset` no borra los archivos del bucket. Antes de una demo, se vacía desde el panel de
+Supabase (Storage).
 
 ## Estructura
 
@@ -185,7 +221,8 @@ de datos, están en [`CLAUDE.md`](CLAUDE.md).
 2. Commits con Conventional Commits y el RF como alcance: `feat(RF-05): registrar novedad`.
 3. Pull request hacia `main` con la plantilla del repo: el CI corre lint, pruebas y build, y
    Cloudflare Pages publica una vista previa. El compañero revisa.
-4. Squash merge. Las migraciones van a producción solo al cierre del sprint.
+4. Squash merge. Las migraciones van a producción al cierre del sprint, justo antes de fusionar el
+   PR que las trae.
 
 La Definition of Ready y la Definition of Done están en
 [`docs/scrum/dor-dod.md`](docs/scrum/dor-dod.md); el backlog, en
@@ -196,9 +233,11 @@ La Definition of Ready y la Definition of Done están en
 - **Aplicación:** Cloudflare Pages publica `main` en producción y una vista previa por cada pull
   request. Comando de build `npm run build`, salida `dist`. Pasos y variables en
   [`docs/despliegue/cloudflare-pages.md`](docs/despliegue/cloudflare-pages.md).
-- **Base de datos:** las migraciones de cada PR se prueban en «staging»; a «PROYECTO» llegan con
-  `supabase db push`, solo al cierre del sprint, después de la review y con el visto bueno del
-  equipo. Configuración de Auth en
+- **Base de datos:** las migraciones de cada PR se prueban en «staging». A «PROYECTO» llegan con
+  `npx supabase db push --project-ref lyrdsmfalrchbdpmikmt`, primero con `--dry-run`. Se aplican
+  al cierre del sprint, después de la review, con el visto bueno del equipo y **antes de fusionar
+  el PR que las trae**, porque Pages publica `main` enseguida. Las aplica una persona.
+  Configuración de Auth en
   [`docs/despliegue/supabase-auth.md`](docs/despliegue/supabase-auth.md).
 - **Edge Functions:** a «PROYECTO» también llegan al cierre del sprint, después de las
   migraciones y con el visto bueno del equipo. Las despliega una persona; el comando está en la
