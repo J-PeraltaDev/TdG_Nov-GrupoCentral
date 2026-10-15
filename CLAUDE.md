@@ -50,8 +50,8 @@ Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
 (`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
 agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y
 `test:db` (Supabase local) quedan para el CI y para quien tenga Docker. El CI corre lint, formato,
-unitarias, build, pgTAP y `deno check` de las Edge Functions; todavía no corre las pruebas de
-extremo a extremo.
+unitarias, build, pgTAP y `deno check` de las Edge Functions, y las pruebas de extremo a extremo en
+Chromium y WebKit contra Supabase local (desde el Sprint 4; sin bloquear mientras se estabilizan).
 
 **Después de cada cambio en una Edge Function:** `npm run staging:functions` y una prueba contra
 «staging». Su lógica va en módulos `.js` puros, probados con Vitest (ADR 0012).

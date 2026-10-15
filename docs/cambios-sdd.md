@@ -4,25 +4,26 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                         | Qué cambia                                                                                                                                                      | Estado    |
-| --- | ------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA») | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                               | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)               | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                          | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)        | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                  | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                         | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                            | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)           | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                         | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                          | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)               | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                          | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)     | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                            | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                 | Propuesto |
-| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10               | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                        | Propuesto |
-| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3          | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                      | Propuesto |
-| 12  | S3     | SDD 6.1.3, Tabla 30                         | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                    | Propuesto |
-| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)       | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                | Propuesto |
-| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10     | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                             | Propuesto |
-| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3          | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                   | Propuesto |
-| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10   | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                 | Propuesto |
-| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6   | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio | Propuesto |
+| N.º | Sprint | Documento y sección                           | Qué cambia                                                                                                                                                        | Estado    |
+| --- | ------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)   | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                                 | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)                 | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                            | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)          | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                    | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                           | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                              | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)             | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                  | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                           | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                            | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)                 | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                            | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)       | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                              | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                  | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                   | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                 | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                          | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3            | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                        | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                           | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                      | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)         | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                  | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10       | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                               | Propuesto |
+| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3            | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                     | Propuesto |
+| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10     | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                   | Propuesto |
+| 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22 | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos | Propuesto |
+| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6     | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -521,6 +522,49 @@ dentro de «Cuenta». El equipo dejó esta decisión a la implementación (10 oc
 > Cuando «Cuenta» no es una de las cuatro opciones de la barra inferior (director de agricultura y
 > administrador), la barra superior del teléfono incluye el avatar del usuario, que la abre, igual
 > que en el escritorio.
+
+## 17 · Evidencias: disparador de `evidencia`, lectura por la fila y dos códigos (S4)
+
+**Sección:** SDD 6.1.4 (Tabla 31, filas `evidencia` y «Objetos del bucket evidencias»), 6.1.7,
+5.3.3 y 5.3.2 (Tabla 22).
+
+**Qué pasa.** La Tabla 31 dice quién sube y quién lee, pero RF-08 pone tres reglas más que una
+política no puede garantizar con seguridad: la novedad no puede estar cerrada ni rechazada, tiene
+como máximo 3 fotos (`FOTOS_MAXIMO_POR_NOVEDAD`) y la fila de `evidencia` tiene que corresponder a
+un archivo de esa novedad. Contar dentro de una política no es seguro con dos subidas a la vez, y
+el tamaño que manda el cliente no es de fiar. Además, repetir el alcance de la novedad a partir del
+nombre de la carpeta duplicaba las reglas de 6.1.4.
+
+**Qué se hizo** (migración `rf08_evidencias`, decisiones 19 a 21 del plan del Sprint 4):
+
+- **Bucket** privado de 1 MB y solo `image/jpeg`: el cliente recodifica toda foto a JPEG (6.1.7).
+- **Subida** (`storage.objects`, insert): reportante activo, nombre `{novedad_id}/{uuid}.jpg` de
+  una novedad de su finca que no esté cerrada ni rechazada y tenga menos de 3 evidencias.
+- **Lectura** (`storage.objects`, select): quien puede leer la fila de `evidencia` con esa ruta,
+  que ya filtra su política por el alcance de la novedad. Un archivo sin fila no lo ve nadie.
+- **Disparador** `before insert` en `evidencia` (`private.tg_evidencia_valida`, `security
+definer`): bloquea la novedad (`for update`), repite el alcance del reportante, exige el estado
+  no final y menos de 3 evidencias, comprueba que el archivo exista en la carpeta de su novedad y
+  toma `tamano_bytes` del archivo.
+- **Códigos nuevos:** `LIMITE_DE_FOTOS` (ya tiene 3) y `EVIDENCIA_INVALIDA` (la fila no corresponde
+  a un archivo de la novedad). El estado final responde `TRANSICION_INVALIDA`, como las
+  transiciones.
+
+**Texto propuesto (6.1.4, Tabla 31, fila «Objetos del bucket evidencias», columna Lectura):**
+
+> Si existe la fila de `evidencia` con esa ruta y quien consulta puede leerla.
+
+**Texto propuesto (6.1.7, después de «e inserta la fila de evidencia con la ruta y el tamaño»):**
+
+> Un disparador de `evidencia` bloquea la novedad mientras valida: que no esté cerrada ni
+> rechazada, que tenga menos fotos que el máximo configurado y que el archivo exista en la carpeta
+> de la novedad. El tamaño se toma del archivo guardado. El bucket acepta solo JPEG, porque el
+> cliente recodifica toda imagen antes de subirla.
+
+**Texto propuesto (Tabla 22, dos filas nuevas):**
+
+> | `LIMITE_DE_FOTOS` | La novedad ya tiene el máximo de fotos | «Esta novedad ya tiene 3 fotos.» |
+> | `EVIDENCIA_INVALIDA` | La fila no corresponde a un archivo de la novedad | «No pudimos guardar la foto. Intenta de nuevo.» |
 
 ## 18 · Monitor de conexión: fuentes, verificación y anuncio (S4)
 
