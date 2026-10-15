@@ -344,6 +344,24 @@ ninguno usa Playwright. Una versión anterior de este documento decía lo contra
 **Propuesta:** agregar al CI un trabajo que levante Supabase local, genere una contraseña al azar
 para los usuarios de prueba y corra Playwright en Chromium y WebKit.
 
+**Hecho en el Sprint 4** (decisión 27 del plan): el trabajo `e2e` del CI levanta Supabase local,
+le pone a los usuarios del seed una contraseña al azar que no sale del trabajo y corre
+`npm run test:e2e` en Chromium y WebKit, a 360 × 800 y 1280 × 800. La primera semana no bloquea
+(`continue-on-error`); no sube `test-results/`.
+
+**Primera corrida (14 oct 2026, #30):** 206 pasan, 4 intermitentes y 6 fallan, en 5,8 minutos.
+
+- **WebKit no abre la aplicación sin red en Playwright.** Las tres pruebas que recargan o navegan
+  con `setOffline(true)` (RNF-10 con el token vigente y vencido, y RNF-05) fallan en WebKit con
+  «WebKit encountered an internal error», antes de que la aplicación haga nada. No se encontró si es
+  de Playwright o de WebKit, y aquí no se puede abrir WebKit para aislarlo. Quedan como `fixme` en
+  WebKit (pendientes de verificar, no borradas) y se verifican en un iPhone real (plan del Sprint 4,
+  decisión 29). En Chromium pasan.
+- **Intermitentes o con datos del seed:** CU-15 3a y 3b en WebKit (un clic que no llega a tiempo),
+  CU-05 4a en el escritorio de WebKit (la misma navegación) y CU-04 3b en el teléfono de Chromium
+  (necesita una finca del seed con novedades abiertas, que la base local recién creada no tiene).
+  Quedan anotadas; el trabajo sigue sin bloquear.
+
 ## 16 · Avisos del asesor de Supabase
 
 El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:

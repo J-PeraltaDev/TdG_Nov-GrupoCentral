@@ -75,7 +75,12 @@ for (const caso of [
   test(`RNF-10 / CU-01 2b: sin red y con el ${caso.nombre}, abre con la sesión guardada`, async ({
     page,
     context,
+    browserName,
   }) => {
+    test.fixme(
+      browserName === 'webkit',
+      'Playwright WebKit no abre la aplicación sin red («WebKit encountered an internal error»): se verifica en un iPhone real (plan del Sprint 4, decisión 29)',
+    )
     // 1. Primera carga con red: instala el service worker y crea la base local.
     await page.goto('/ingresar')
     await page.evaluate(() => navigator.serviceWorker.ready)
