@@ -717,6 +717,7 @@ export type Database = {
           razon_social_id: string | null
           reportante: string | null
           reportante_id: string | null
+          resuelta_en: string | null
           solucion: string | null
           tipo_falla: string | null
           tipo_falla_id: string | null
@@ -808,6 +809,32 @@ export type Database = {
           usuario_id: string
         }[]
       }
+      corregir_tipo_falla: {
+        Args: { p_novedad_id: string; p_tipo_falla_id: string }
+        Returns: {
+          actualizado_en: string
+          area_id: string
+          codigo: number
+          descripcion: string
+          estado: Database["public"]["Enums"]["estado_novedad"]
+          fecha_ejecucion: string | null
+          fecha_registro: string
+          fecha_sincronizacion: string
+          finca_id: string
+          id: string
+          id_local: string
+          prioridad: Database["public"]["Enums"]["prioridad_novedad"]
+          reportante_id: string
+          solucion: string | null
+          tipo_falla_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "novedad"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       decidir_escalamiento: {
         Args: {
           p_aprobar: boolean
@@ -838,6 +865,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      desactivar_tipo_falla: {
+        Args: { p_tipo_id: string }
+        Returns: {
+          activo: boolean
+          creado_en: string
+          creado_por: string
+          id: string
+          nombre: string
+          nombre_normalizado: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tipo_falla"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       escalar_novedad: {
         Args: { p_justificacion: string; p_novedad_id: string }
         Returns: {
@@ -864,6 +908,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      fusionar_tipos_falla: {
+        Args: { p_destino_id: string; p_origen_id: string }
+        Returns: {
+          activo: boolean
+          creado_en: string
+          creado_por: string
+          id: string
+          nombre: string
+          nombre_normalizado: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tipo_falla"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       generar_codigo_recuperacion: {
         Args: { p_solicitud_id: string }
         Returns: {
@@ -885,6 +946,7 @@ export type Database = {
           ultimo_ingreso: string
         }[]
       }
+      marcar_avisos_leidos: { Args: { p_ids?: string[] }; Returns: number }
       reasignar_novedad: {
         Args: {
           p_area_destino_id: string
@@ -1005,6 +1067,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      renombrar_tipo_falla: {
+        Args: { p_nombre: string; p_tipo_id: string }
+        Returns: {
+          activo: boolean
+          creado_en: string
+          creado_por: string
+          id: string
+          nombre: string
+          nombre_normalizado: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tipo_falla"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reportar_falla_persiste: {
         Args: { p_novedad_id: string; p_observacion: string }
         Returns: {
@@ -1030,6 +1109,19 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      rpt_escalamiento: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: Json
+      }
+      rpt_novedades_abiertas: { Args: never; Returns: Json }
+      rpt_recurrencia: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: Json
+      }
+      rpt_tiempos_atencion: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: Json
       }
       solicitar_recuperacion: { Args: { p_correo: string }; Returns: undefined }
       sugerir_tipos_falla: {
