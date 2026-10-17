@@ -29,6 +29,8 @@ actualicen los documentos (lo exige la Definition of Done).
 | 21  | S4     | SDD 6.1.5 (Tabla 32 y «Consulta»)                         | Precisión: qué guarda el almacén `novedades`, qué retira, cómo arma las listas sin conexión y cuándo se borra; fecha y conteos de cada lista                         | Propuesto |
 | 22  | S4     | SDD 5.2, 6.1.11 y 7.3                                     | Complemento: «registrada sin conexión» se deriva de las dos fechas con un umbral configurable                                                                        | Propuesto |
 | 23  | S4     | SRS RF-08, CU-08 y CU-14; SDD Tablas 26, 31 y 35, y 6.1.7 | **Cambio:** el aprobador del área adjunta fotos de la solución; `evidencia.transicion_id` las ata a su intento                                                       | Propuesto |
+| 24  | S5     | SDD 5.3.2, Tabla 21                                       | Precisión: tipos de retorno de las nueve funciones del sprint, `p_desde` y `p_hasta` como `date` y la forma del `jsonb` de cada indicador                            | Propuesto |
+| 25  | S5     | SDD 6.1.1 («Vistas e índices»), Tablas 20 y 34            | Complemento: `v_novedad.resuelta_en`, una sola regla para «Tiempo hasta resolver»                                                                                    | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -861,3 +863,59 @@ bucket evidencias»):**
 **Texto propuesto (6.1.11, Tabla 35, fila «Resuelta», columna del aprobador):**
 
 > Adjuntar foto de la solución (en espera de la finca)
+
+## 24 · Firmas y resultados de las funciones del Sprint 5 (S5)
+
+**Sección:** SDD 5.3.2, Tabla 21 (funciones de IRPC).
+
+**Qué pasa.** La Tabla 21 nombra las funciones del sprint y sus parámetros, pero no fija los tipos
+de retorno ni el de `p_desde` y `p_hasta`. El contrato del Sprint 5 (`rf19_contratos_sprint_5`,
+plan del Sprint 5, decisiones 2 y 20) los fija:
+
+- `marcar_avisos_leidos(p_ids uuid[] default null)` devuelve `integer`: cuántos avisos marcó.
+  Nulo marca todos los del usuario; los ajenos se ignoran sin error.
+- Los cuatro indicadores devuelven un `jsonb` cada uno, con `datos_al` (la hora de la consulta)
+  y la forma que trae el comentario de cada función. Son `security invoker` y `stable`.
+- `p_desde` y `p_hasta` son `date`: días de Colombia, inclusivos.
+- `renombrar_tipo_falla`, `desactivar_tipo_falla` y `fusionar_tipos_falla` devuelven la fila del
+  tipo (la del destino, al fusionar); `corregir_tipo_falla` devuelve la novedad, como las demás
+  transiciones.
+
+**Texto propuesto (Tabla 21, columna «Parámetros»):**
+
+> marcar_avisos_leidos: p_ids uuid[] (opcional; nulo = todos). rpt_tiempos_atencion,
+> rpt_escalamiento y rpt_recurrencia: p_desde date, p_hasta date (días de Colombia, inclusivos).
+
+**Texto propuesto (Tabla 21, nota, al final):**
+
+> Los indicadores devuelven un objeto JSON cada uno, con la fecha de corte de la consulta y las
+> agrupaciones de la Tabla 34; marcar_avisos_leidos devuelve la cantidad de avisos marcados, y las
+> funciones del catálogo, el tipo de falla resultante.
+
+## 25 · `v_novedad.resuelta_en` (S5)
+
+**Sección:** SDD 6.1.1 («Vistas e índices»), Tabla 20 (fila `v_novedad`) y Tabla 34 (tiempos de
+atención).
+
+**Qué pasa.** «Tiempo hasta resolver» aparece en el historial (21), en el detalle (22), en el CSV
+(«horas hasta la resolución», 5.3.8) y en el panel (24), y la Tabla 34 lo define como la última
+transición hacia resuelta menos `fecha_registro`. `v_novedad` no lo traía: el detalle lo
+calculaba con su línea de tiempo y las listas no tenían de dónde sacarlo. Se agregó al final de la
+vista la columna `resuelta_en` (plan del Sprint 5, decisión 6):
+
+- Es la fecha de la última transición hacia resuelta, si la novedad está resuelta o cerrada, y
+  nula si no. La que volvió a «en atención» porque la falla persistió no tiene fecha hasta que se
+  resuelva otra vez; la corrección del tipo de una cerrada no la cambia.
+- La vista sigue con `security_invoker`. La subconsulta usa el índice
+  `historial_transicion_novedad_idx`, y Postgres no la calcula en las consultas que no piden la
+  columna.
+
+**Texto propuesto (6.1.1, «Vistas e índices», al final de la frase de v_novedad):**
+
+> …y el nombre del reportante, y la fecha de su última resolución, de la que se calcula el tiempo
+> hasta resolver en el historial, el detalle, la exportación y el indicador de tiempos de atención.
+
+**Texto propuesto (Tabla 20, fila v_novedad, columna «Uso»):**
+
+> Bandeja, Mis novedades, historial y detalle: novedad con finca, razón social, área, tipo de falla,
+> nombre del reportante y fecha de su última resolución.
