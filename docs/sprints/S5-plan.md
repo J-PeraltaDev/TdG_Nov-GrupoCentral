@@ -1,12 +1,13 @@
 # Sprint 5 · Plan de implementación
 
-- **Fechas propuestas:** 19–23 oct 2026 (cinco días hábiles; el próximo festivo es el 2 nov). El
-  calendario decía 9–13 nov; el Sprint 4 cerró el 14 oct y el equipo empieza al aprobar.
+- **Fechas:** 19–23 oct 2026 (cinco días hábiles; el próximo festivo es el 2 nov). El calendario
+  decía 9–13 nov; el Sprint 4 cerró el 14 oct y el equipo empieza al aprobar.
 - **Historias:** HU-19, HU-20, HU-26, HU-27, HU-28, HU-29, HU-30, HU-31 y HU-32 (RF-19 y RF-20 de
   la E4, RF-26 a RF-29 de la E6, RF-30 y RF-31 de la E7 y RF-32 de la E1)
-- **Estado:** **pendiente de aprobación.** No se escribe código del sprint hasta que el equipo
-  apruebe el plan, los puntos y las decisiones del final. Lo que cambie en la review se ajusta en
-  el PR que corresponda.
+- **Estado:** **aprobado el 17 oct 2026, con todas las recomendaciones**: las fechas, los 39
+  puntos comprometidos, los ocho íconos, sin dependencias nuevas y el trabajo `e2e` obligatorio.
+  Sigue vigente el permiso de las e2e que ingresan. Lo que cambie en la review se ajusta en el PR
+  que corresponda.
 
 **Meta:** el director y el administrador siguen el proceso de lejos (historial, panel y
 exportación), cada persona se entera de lo que cambia en sus novedades, y el administrador depura
@@ -80,23 +81,23 @@ Las cifras coinciden con el cierre del Sprint 4, salvo una. Datos nuevos:
 
 ## Antes de empezar
 
-| Necesidad                                                      | Para qué                                                                                                                                                         | Estado al 17 oct 2026                            |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Aprobar este plan, los puntos y las decisiones del final       | Sin eso no se escribe código del sprint                                                                                                                          | Pendiente                                        |
-| Fechas reales                                                  | Se proponen 19–23 oct (decisión 1)                                                                                                                               | Pendiente                                        |
-| Confirmar el permiso de correr las e2e que ingresan            | El del 13 oct era para el Sprint 4. Cargan `.env.local` solas; la contraseña no pasa por aquí                                                                    | Pendiente                                        |
-| Autorizar o no que el agente recorra una vista previa de Pages | Ingresar con un usuario de prueba en la vista previa de un PR (`built-in-browser`) y, si se autoriza, ver llegar un push real de «staging»                       | Sin respuesta desde el Sprint 4: no se hace      |
-| **Descargar ocho íconos** de Google                            | Los siete del encargo y `tune` (21-D): ver abajo                                                                                                                 | Pendiente                                        |
-| Dependencias nuevas                                            | **Ninguna** (decisión 3): gráficos con CSS y SVG, y cifrado de Web Push con Web Crypto. Si prefieren Recharts o `@negrel/webpush`, se dice ahora y va con su ADR | Con la recomendación                             |
-| **Correo de contacto para VAPID**                              | El _subject_ `mailto:` de la firma VAPID (RFC 8292). Va como secreto de la función, no en el repositorio                                                         | **Pendiente: ¿qué correo del equipo?**           |
-| Claves VAPID y secretos de «staging»                           | Una persona corre `npm run vapid:claves` y `npm run staging:secretos` con su `.env.local`, o autoriza al agente a correrlos (decisiones 40 y 41)                 | Pendiente; el día 1, para la prueba corta        |
-| Prueba corta de push (día 1)                                   | Una persona con Chrome (escritorio o Android) se suscribe en el build local; el agente envía desde «staging» (decisión 37)                                       | Pendiente                                        |
-| Variable de Pages `VITE_VAPID_PUBLIC_KEY`                      | Production (la clave de «PROYECTO») y Preview (la de «staging»). La pone una persona en Cloudflare                                                               | Pendiente; solo si entra RF-31                   |
-| Orden de producción                                            | Decisión 55: migraciones de cada PR justo antes de fusionarlo; después la función, sus secretos, Vault y la variable de Pages                                    | Con la recomendación; el OK se pide en cada paso |
-| Que el trabajo `e2e` del CI sea obligatorio                    | Decisión 8. Además, una persona lo marca como requerido en la protección de `main`                                                                               | Pendiente                                        |
-| Avisar antes de un `staging:reset`                             | No se prevé ninguno: todo entra con `staging:push`. Sigue el de antes de la demo                                                                                 | —                                                |
-| Lo que sigue abierto del Sprint 4                              | #19 (la empresa), las etiquetas `v0.1.0-s1` a `v0.4.0-s4`, los dispositivos reales, la vista previa, WebKit sin red y pasar a Figma las decisiones 34 a 40       | Pendiente del equipo                             |
-| El CI rojo de este PR                                          | Lo causa la prueba con fecha, no el plan. Conviene fusionar primero el PR 0 y traer `main` a esta rama                                                           | Se propone así                                   |
+| Necesidad                                                      | Para qué                                                                                                                                                         | Estado al 17 oct 2026                                       |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Aprobar este plan, los puntos y las decisiones del final       | Sin eso no se escribe código del sprint                                                                                                                          | **Hecho** (17 oct)                                          |
+| Fechas reales                                                  | Se proponen 19–23 oct (decisión 1)                                                                                                                               | **Hecho:** 19–23 oct                                        |
+| Confirmar el permiso de correr las e2e que ingresan            | El del 13 oct era para el Sprint 4. Cargan `.env.local` solas; la contraseña no pasa por aquí                                                                    | **Hecho** (17 oct): sigue vigente                           |
+| Autorizar o no que el agente recorra una vista previa de Pages | Ingresar con un usuario de prueba en la vista previa de un PR (`built-in-browser`) y, si se autoriza, ver llegar un push real de «staging»                       | Sin respuesta desde el Sprint 4: no se hace                 |
+| **Descargar ocho íconos** de Google                            | Los siete del encargo y `tune` (21-D): ver abajo                                                                                                                 | **Hecho** (17 oct)                                          |
+| Dependencias nuevas                                            | **Ninguna** (decisión 3): gráficos con CSS y SVG, y cifrado de Web Push con Web Crypto. Si prefieren Recharts o `@negrel/webpush`, se dice ahora y va con su ADR | **Hecho:** ninguna                                          |
+| **Correo de contacto para VAPID**                              | El _subject_ `mailto:` de la firma VAPID (RFC 8292). Va como secreto de la función, no en el repositorio                                                         | **Pendiente: ¿qué correo del equipo?**                      |
+| Claves VAPID y secretos de «staging»                           | Una persona corre `npm run vapid:claves` y `npm run staging:secretos` con su `.env.local`, o autoriza al agente a correrlos (decisiones 40 y 41)                 | Pendiente; el día 1, para la prueba corta                   |
+| Prueba corta de push (día 1)                                   | Una persona con Chrome (escritorio o Android) se suscribe en el build local; el agente envía desde «staging» (decisión 37)                                       | Pendiente                                                   |
+| Variable de Pages `VITE_VAPID_PUBLIC_KEY`                      | Production (la clave de «PROYECTO») y Preview (la de «staging»). La pone una persona en Cloudflare                                                               | Pendiente; solo si entra RF-31                              |
+| Orden de producción                                            | Decisión 55: migraciones de cada PR justo antes de fusionarlo; después la función, sus secretos, Vault y la variable de Pages                                    | **Hecho:** con la recomendación; el OK se pide en cada paso |
+| Que el trabajo `e2e` del CI sea obligatorio                    | Decisión 8. Además, una persona lo marca como requerido en la protección de `main`                                                                               | **Hecho** en el PR 0 (#40); falta marcarlo como requerido   |
+| Avisar antes de un `staging:reset`                             | No se prevé ninguno: todo entra con `staging:push`. Sigue el de antes de la demo                                                                                 | —                                                           |
+| Lo que sigue abierto del Sprint 4                              | #19 (la empresa), las etiquetas `v0.1.0-s1` a `v0.4.0-s4`, los dispositivos reales, la vista previa, WebKit sin red y pasar a Figma las decisiones 34 a 40       | Pendiente del equipo                                        |
+| El CI rojo de este PR                                          | Lo causa la prueba con fecha, no el plan. Conviene fusionar primero el PR 0 y traer `main` a esta rama                                                           | El PR 0 es #40                                              |
 
 **Los íconos.** `src/core/ui/iconos/LEEME.md` manda bajarlos de
 `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<nombre>/default/20px.svg`
@@ -229,7 +230,7 @@ de cualquier sprint anterior. Puntos de control:
 - **final del día 4:** si no está el PR 6, sale RF-20 y después RF-32.
 
 Nunca salen el historial, el panel, los avisos dentro de la aplicación ni las pruebas de lo que sí
-entra. Al aprobarse, los puntos se anotan en `docs/scrum/backlog.md` y `backlog.json`.
+entra. **Adoptados el 17 oct 2026** y anotados en `docs/scrum/backlog.md` y `backlog.json`.
 
 ---
 
