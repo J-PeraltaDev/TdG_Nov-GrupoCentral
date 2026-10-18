@@ -19,16 +19,38 @@ export async function obtenerNovedadesAbiertas() {
 }
 
 /**
- * Tiempos de atención por área y por mes, y las abiertas con más tiempo (RF-27, pantalla 24).
+ * Un indicador con período: `p_desde` y `p_hasta` son días de Colombia (`AAAA-MM-DD`), inclusivos.
+ * Lanza el error de Supabase si falla (`FECHA_INVALIDA`, por ejemplo).
  *
- * @param {{ desde: string, hasta: string }} periodo Días de Colombia (`AAAA-MM-DD`), inclusivos.
- * @returns {Promise<object>} Lanza el error de Supabase si falla (`FECHA_INVALIDA`, por ejemplo).
+ * @param {string} funcion
+ * @param {{ desde: string, hasta: string }} periodo
+ * @returns {Promise<object>}
  */
-export async function obtenerTiemposDeAtencion({ desde, hasta }) {
-  const { data, error } = await supabase.rpc('rpt_tiempos_atencion', {
-    p_desde: desde,
-    p_hasta: hasta,
-  })
+async function pedirConPeriodo(funcion, { desde, hasta }) {
+  const { data, error } = await supabase.rpc(funcion, { p_desde: desde, p_hasta: hasta })
   if (error) throw error
   return data
 }
+
+/**
+ * Tiempos de atención por área y por mes, y las abiertas con más tiempo (RF-27, pantalla 24).
+ *
+ * @param {{ desde: string, hasta: string }} periodo
+ */
+export const obtenerTiemposDeAtencion = (periodo) =>
+  pedirConPeriodo('rpt_tiempos_atencion', periodo)
+
+/**
+ * Escaladas al director entre las registradas en el período, por área, y sus decisiones (RF-28,
+ * pantalla 25).
+ *
+ * @param {{ desde: string, hasta: string }} periodo
+ */
+export const obtenerEscalamiento = (periodo) => pedirConPeriodo('rpt_escalamiento', periodo)
+
+/**
+ * Resueltas y cerradas del período por finca y tipo de falla (RF-29, pantallas 26 y 27).
+ *
+ * @param {{ desde: string, hasta: string }} periodo
+ */
+export const obtenerRecurrencia = (periodo) => pedirConPeriodo('rpt_recurrencia', periodo)

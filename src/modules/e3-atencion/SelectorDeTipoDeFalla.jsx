@@ -9,6 +9,7 @@ import iconoQuitar from '../../core/ui/iconos/close.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoInfo from '../../core/ui/iconos/info.svg'
 import iconoBuscar from '../../core/ui/iconos/search.svg'
+import { cuantasNovedades } from '../../core/utils/texto.js'
 
 /*
  * Tipo de falla con autocompletado (RF-14 / CU-14 3 a 5, Figma 3:1655 y 3:1796). Sigue el
@@ -32,7 +33,6 @@ const CAJA =
   'flex items-center gap-2 rounded-control bg-superficie px-[15px] py-[13px] text-cuerpo text-texto'
 const ETIQUETA = 'flex-none rounded-md px-2 py-0.5 text-auxiliar-fuerte whitespace-nowrap'
 
-const cuantas = (cantidad) => (cantidad === 1 ? '1 novedad' : `${cantidad} novedades`)
 const arreglar = (texto) => texto.trim().replace(/\s+/g, ' ')
 
 /**
@@ -89,7 +89,7 @@ export function SelectorDeTipoDeFalla({ valor, alCambiar, error = null, ref }) {
           <Icono src={iconoTipo} tamano={20} className="flex-none text-texto-secundario" />
           <span className="min-w-0 flex-1 break-words">{valor.nombre}</span>
           <span className={`${ETIQUETA} bg-gris-100 text-texto-secundario`}>
-            {valor.cantidad === null ? 'Tipo nuevo' : cuantas(valor.cantidad)}
+            {valor.cantidad === null ? 'Tipo nuevo' : cuantasNovedades(valor.cantidad)}
           </span>
           <button
             ref={ref}
@@ -281,7 +281,7 @@ export function SelectorDeTipoDeFalla({ valor, alCambiar, error = null, ref }) {
                   {sugerencia.nombre}
                 </span>
                 <span className={`${ETIQUETA} bg-gris-100 text-texto-secundario`}>
-                  {cuantas(sugerencia.cantidad_novedades)}
+                  {cuantasNovedades(sugerencia.cantidad_novedades)}
                 </span>
                 {coincide ? (
                   <span className={`${ETIQUETA} bg-superficie text-primario`}>Coincide</span>

@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { supabase } from '../cliente.js'
-import { obtenerNovedadesAbiertas, obtenerTiemposDeAtencion } from './reportes.js'
+import {
+  obtenerEscalamiento,
+  obtenerNovedadesAbiertas,
+  obtenerRecurrencia,
+  obtenerTiemposDeAtencion,
+} from './reportes.js'
 
 // Se simula el módulo del cliente, no la red: aquí importa qué función se llama.
 vi.mock('../cliente.js', () => ({ supabase: { rpc: vi.fn() } }))
@@ -35,5 +40,20 @@ describe('Indicadores del panel (RF-26 y RF-27, SDD 6.1.9)', () => {
     vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error })
 
     await expect(obtenerNovedadesAbiertas()).rejects.toBe(error)
+  })
+
+  it.each([
+    ['rpt_escalamiento', obtenerEscalamiento],
+    ['rpt_recurrencia', obtenerRecurrencia],
+  ])('RF-28 / RF-29: %s, con el período', async (funcion, obtener) => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: { total: 0 }, error: null })
+
+    await expect(obtener({ desde: '2026-04-01', hasta: '2026-09-24' })).resolves.toEqual({
+      total: 0,
+    })
+    expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith(funcion, {
+      p_desde: '2026-04-01',
+      p_hasta: '2026-09-24',
+    })
   })
 })

@@ -15,15 +15,16 @@
  *
  * @param {object} props
  * @param {FilaDeBarras[]} props.filas
- * @param {string} [props.anchoDeEtiqueta] Clase del ancho de la columna de nombres.
+ * @param {string} [props.anchoDeEtiqueta] Clases del ancho de la columna de nombres; sin
+ *   `truncate`, el nombre largo pasa a otra línea (Figma 27).
  */
-export function Barras({ filas, anchoDeEtiqueta = 'w-[110px]' }) {
+export function Barras({ filas, anchoDeEtiqueta = 'w-[110px] truncate' }) {
   const mayor = Math.max(1, ...filas.map((fila) => fila.total))
   return (
     <ul className="flex flex-col gap-3.5">
       {filas.map((fila) => (
         <li key={fila.id} className="flex items-center gap-3">
-          <span className={`flex-none truncate text-cuerpo-pequeno text-texto ${anchoDeEtiqueta}`}>
+          <span className={`flex-none text-cuerpo-pequeno text-texto ${anchoDeEtiqueta}`}>
             {fila.etiqueta}
           </span>
           <span className="flex min-w-0 flex-1 items-center gap-3 lg:max-w-[340px]">

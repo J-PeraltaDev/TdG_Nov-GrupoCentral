@@ -23,6 +23,7 @@ import { Prioridad } from '../../core/ui/Prioridad.jsx'
 import { TarjetaNovedad } from '../../core/ui/TarjetaNovedad.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { formatearCodigo } from '../../core/utils/codigo.js'
+import { cuantasNovedades } from '../../core/utils/texto.js'
 import { formatearDia, formatearDuracion, formatearFechaDeLista } from '../../core/utils/fechas.js'
 import { FiltrosDelHistorial } from './FiltrosDelHistorial.jsx'
 import { escribirFiltros, leerFiltros, SIN_FILTROS } from './filtrosDelHistorial.js'
@@ -37,9 +38,6 @@ const SIN_OPCIONES = { fincas: [], areas: [], tipos: [] }
 
 const ENCABEZADO = 'px-2 py-2.5 text-left align-bottom text-auxiliar-fuerte text-texto-secundario'
 const CELDA = 'px-2 py-2.5 align-middle text-cuerpo-pequeno text-texto tabular-nums'
-
-const cuantas = (total) =>
-  total === 1 ? '1 novedad' : `${total.toLocaleString('es-CO')} novedades`
 
 /** Una celda sin dato: «—» a la vista y, para el lector de pantalla, qué falta. */
 function SinDato({ texto }) {
@@ -297,7 +295,7 @@ export default function Historial() {
         alAplicar={aplicar}
         resumen={
           enLinea && vigente ? (
-            <p className="text-etiqueta-fuerte text-texto">{cuantas(vigente.total)}</p>
+            <p className="text-etiqueta-fuerte text-texto">{cuantasNovedades(vigente.total)}</p>
           ) : null
         }
       />
@@ -332,7 +330,9 @@ export default function Historial() {
           {esEscritorio ? (
             <>
               <p role="status" className="flex flex-wrap items-baseline gap-x-3">
-                <span className="text-etiqueta-fuerte text-texto">{cuantas(vigente.total)}</span>
+                <span className="text-etiqueta-fuerte text-texto">
+                  {cuantasNovedades(vigente.total)}
+                </span>
                 <span className="text-cuerpo-pequeno text-texto-secundario">
                   de la más reciente a la más antigua
                 </span>
