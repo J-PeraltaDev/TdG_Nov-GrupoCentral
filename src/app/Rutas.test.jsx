@@ -88,6 +88,15 @@ vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   ]),
   listarFincas: vi.fn().mockResolvedValue([]),
 }))
+vi.mock('../core/supabase/repositorios/reportes.js', () => ({
+  obtenerNovedadesAbiertas: vi.fn().mockResolvedValue({
+    datos_al: '2026-09-24T14:30:00Z',
+    areas: [],
+    fincas: [],
+    estados: [],
+  }),
+  obtenerTiemposDeAtencion: vi.fn(),
+}))
 vi.mock('../core/supabase/repositorios/historial.js', () => ({
   listarHistorial: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
   listarOpcionesDelHistorial: vi.fn().mockResolvedValue({ fincas: [], areas: [], tipos: [] }),
@@ -137,8 +146,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', 'Mis novedades'],
     ['aprobador', 'Bandeja · Mantenimiento'],
     ['director', 'Novedades escaladas'],
-    // Hasta que llegue el panel de reportes (Sprint 5), el administrador entra a Usuarios.
-    ['administrador', 'Usuarios'],
+    // Decisión 28 del plan del Sprint 5: el panel de reportes.
+    ['administrador', 'Panel de reportes'],
   ])('RF-01 / CU-01 4: el %s entra a su pantalla de inicio («%s»)', async (rol, titulo) => {
     abrir('/', rol)
 
@@ -191,7 +200,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', '/recuperacion', 'Mis novedades'],
     ['aprobador', '/recuperacion', 'Bandeja · Mantenimiento'],
     ['director', '/recuperacion', 'Novedades escaladas'],
-    ['administrador', '/registrar', 'Usuarios'],
+    ['administrador', '/registrar', 'Panel de reportes'],
   ])(
     'RF-18: el %s no entra a %s; el guardián lo devuelve a su inicio',
     async (rol, ruta, titulo) => {
@@ -262,7 +271,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it.each([
     ['reportante', 'Mis novedades'],
     ['director', 'Novedades escaladas'],
-    ['administrador', 'Usuarios'],
+    ['administrador', 'Panel de reportes'],
   ])(
     'RF-14: el %s no entra a registrar una solución; el guardián lo devuelve a su inicio',
     async (rol, titulo) => {

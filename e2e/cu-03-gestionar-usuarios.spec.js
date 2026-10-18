@@ -27,9 +27,10 @@ const DESACTIVADO =
 test.describe('CU-03 · Gestionar usuarios', () => {
   test.skip(!HAY_CLAVE, MOTIVO_SIN_CLAVE)
 
-  /** El administrador entra: su pantalla de inicio es la lista de usuarios. */
+  /** El administrador entra (a su panel) y abre la lista de usuarios. */
   async function abrirUsuarios(page) {
     await ingresarComo(page, 'administrador')
+    await page.goto('/usuarios')
     await expect(page).toHaveURL(/\/usuarios$/)
     await expect(page.getByRole('heading', { level: 1, name: 'Usuarios' })).toBeVisible()
     // La lista ya llegó cuando aparece el rango de la página.

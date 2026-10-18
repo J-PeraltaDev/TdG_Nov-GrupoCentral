@@ -79,6 +79,7 @@ function titulosDelTelefono(perfil, ruta) {
     return { titulo: `Bandeja · ${perfil.area.nombre}`, subtitulo: null }
   }
   if (ruta === '/avisos') return { titulo: 'Avisos', subtitulo: null }
+  if (ruta === '/panel') return { titulo: 'Panel de reportes', subtitulo: null }
   // 21-D: el historial del aprobador lleva su área debajo.
   if (ruta === '/historial') return { titulo: 'Historial', subtitulo: perfil.area?.nombre ?? null }
   // El reportante ve su finca y su razón social; los demás roles, su nombre y su rol.

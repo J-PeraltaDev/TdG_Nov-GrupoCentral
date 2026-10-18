@@ -1,4 +1,4 @@
-/** @typedef {'segmentada' | 'subrayada'} VarianteDePestanas */
+/** @typedef {'segmentada' | 'subrayada' | 'pastillas'} VarianteDePestanas */
 
 /** @type {Record<VarianteDePestanas, { lista: string, pestana: string, elegida: string, otra: string }>} */
 const VARIANTES = {
@@ -18,11 +18,20 @@ const VARIANTES = {
     elegida: 'border-primario text-etiqueta-fuerte text-primario',
     otra: 'border-transparent text-etiqueta text-texto-secundario',
   },
+  // Teléfono, cuando no caben a todo el ancho (Figma 27): pastillas que se desplazan de lado.
+  // Miden 36 px; el botón amplía el área táctil a 48 px.
+  pastillas: {
+    lista: 'flex gap-2 overflow-x-auto',
+    pestana: 'flex min-h-12 flex-none items-center',
+    elegida: 'bg-primario-contenedor text-etiqueta-fuerte text-primario inset-ring-primario',
+    otra: 'bg-superficie text-etiqueta text-texto inset-ring-borde',
+  },
 }
 
 const FORMA = {
   segmentada: 'flex-1 rounded-[9px] p-2 text-center',
   subrayada: 'border-b-[3px] pb-2.5',
+  pastillas: 'rounded-full px-3.5 py-2 inset-ring',
 }
 
 /**

@@ -20,15 +20,14 @@ const NOMBRES_COMPLETOS = {
 }
 
 /**
- * Pantalla de inicio de cada rol (SDD, Tabla 10). La del administrador es el panel de reportes,
- * que llega en el Sprint 5: mientras tanto entra a Usuarios, que es lo que más usa
- * (docs/decisiones-pendientes.md).
+ * Pantalla de inicio de cada rol (SDD, Tabla 10). La del administrador es el panel de reportes
+ * (plan del Sprint 5, decisión 28; cierra el temporal del cambio 14).
  */
 const INICIO = {
   [ROL.REPORTANTE]: '/novedades',
   [ROL.APROBADOR_AREA]: '/bandeja',
   [ROL.DIRECTOR_AGRICULTURA]: '/escaladas',
-  [ROL.ADMINISTRADOR]: '/usuarios',
+  [ROL.ADMINISTRADOR]: '/panel',
 }
 
 /** @param {number | null | undefined} rolId */

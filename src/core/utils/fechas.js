@@ -229,6 +229,21 @@ export function formatearDescarga(fecha, ahora = Date.now()) {
     : `el ${formatearFechaHora(fecha)}`
 }
 
+const DIA = /^(\d{4})-(\d{2})-(\d{2})$/
+
+/**
+ * Un día que existe en el calendario, como lo da `<input type="date">` (`AAAA-MM-DD`).
+ *
+ * @param {string | null | undefined} texto
+ */
+export function esDia(texto) {
+  const partes = DIA.exec(texto ?? '')
+  if (!partes) return false
+  const [anio, mes, dia] = partes.slice(1).map(Number)
+  const fecha = new Date(Date.UTC(anio, mes - 1, dia))
+  return fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia
+}
+
 /**
  * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
  * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
