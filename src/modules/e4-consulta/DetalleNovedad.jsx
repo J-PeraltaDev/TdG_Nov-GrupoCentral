@@ -70,6 +70,7 @@ const VOLVER = {
   '/historial': 'Volver al historial',
   '/panel': 'Volver al panel',
   '/usuarios': 'Volver a usuarios',
+  '/avisos': 'Volver a los avisos',
 }
 
 /** Mientras está en manos del área, el detalle dice hace cuánto se registró y quién la tomó. */
