@@ -84,6 +84,7 @@ describe('Pantalla 19 · Novedades escaladas (RF-13 / CU-13)', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    vi.useRealTimers()
   })
 
   it('RF-13 / CU-13 1: muestra el título y los tres contadores', async () => {
@@ -192,6 +193,8 @@ describe('Pantalla 19 · Novedades escaladas (RF-13 / CU-13)', () => {
   })
 
   it('RF-24 / CU-24: sin conexión muestra las escaladas descargadas, con el aviso de 04-B', async () => {
+    // 04-B dice «hoy» si la descarga es de hoy: el reloj va a media mañana, no a la medianoche.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-14T15:00:00Z') })
     vi.mocked(listarEscaladas).mockResolvedValue({
       novedades: NOVEDADES,
       total: 2,
