@@ -16,6 +16,8 @@ import iconoDesplegar from './iconos/expand_more.svg'
  * @param {boolean} [props.obligatorio] Agrega el asterisco y marca el campo como requerido.
  * @param {string} [props.icono] URL de un SVG de `iconos/`, a la izquierda.
  * @param {string | null} [props.error] Mensaje de error, bajo el campo.
+ * @param {boolean} [props.compacto] Los filtros de 21: etiqueta pequeña y 40 px en el escritorio
+ *   (48 en el teléfono). La opción sin valor es una elección («Todas»), no un texto de ayuda.
  * @param {import('react').Ref<HTMLSelectElement>} [props.ref]
  * @param {string} [props.className]
  * @param {import('react').SelectHTMLAttributes<HTMLSelectElement>} [props.resto]
@@ -28,6 +30,7 @@ export function CampoDeSeleccion({
   obligatorio = false,
   icono,
   error = null,
+  compacto = false,
   ref,
   className = '',
   ...resto
@@ -37,7 +40,12 @@ export function CampoDeSeleccion({
 
   return (
     <div className={`flex w-full flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-etiqueta text-texto">
+      <label
+        htmlFor={id}
+        className={
+          compacto ? 'text-auxiliar-fuerte text-texto-secundario' : 'text-etiqueta text-texto'
+        }
+      >
         {etiqueta}
         {obligatorio ? (
           <span aria-hidden="true" className="ml-1 text-error">
@@ -61,9 +69,11 @@ export function CampoDeSeleccion({
           required={obligatorio || undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? idDeError : undefined}
-          className={`h-[50px] w-full cursor-pointer appearance-none truncate rounded-control bg-superficie pr-11 text-cuerpo ${
+          className={`w-full cursor-pointer appearance-none truncate rounded-control bg-superficie pr-11 disabled:cursor-not-allowed disabled:text-deshabilitado ${
+            compacto ? 'h-12 text-cuerpo-pequeno lg:h-10' : 'h-[50px] text-cuerpo'
+          } ${
             icono ? 'pl-[46px]' : 'pl-3.5'
-          } ${value === '' ? 'text-texto-secundario' : 'text-texto'} ${
+          } ${value === '' && !compacto ? 'text-texto-secundario' : 'text-texto'} ${
             error
               ? 'inset-ring-2 inset-ring-error'
               : 'inset-ring inset-ring-borde focus-visible:inset-ring-2 focus-visible:inset-ring-primario focus-visible:outline-none'

@@ -37,8 +37,11 @@ const registradaEl = (fecha) =>
  *   atiende; el aprobador, la finca que reporta.
  * @param {string} [props.a] Ruta que abre la tarjeta. Sin ella, la tarjeta no es un enlace.
  * @param {string} [props.origen] Ruta de la lista, con sus filtros: el detalle vuelve a ella.
+ * @param {string} [props.texto] Lo que va en lugar de la descripción (21-D: el tipo de falla y
+ *   quién la reportó).
+ * @param {string} [props.cuando] Lo que va en lugar del tiempo transcurrido (21-D: el día).
  */
-export function TarjetaNovedad({ novedad, pie = 'area', a, origen }) {
+export function TarjetaNovedad({ novedad, pie = 'area', a, origen, texto, cuando }) {
   const pendiente = novedad.estado === 'pendiente'
   const codigo = pendiente ? 'Sin código' : formatearCodigo(novedad.codigo)
   const barra = pendiente
@@ -75,15 +78,16 @@ export function TarjetaNovedad({ novedad, pie = 'area', a, origen }) {
           <Prioridad prioridad={novedad.prioridad} />
         </div>
         <p className="line-clamp-2 text-cuerpo-pequeno break-words text-texto">
-          {novedad.descripcion}
+          {texto ?? novedad.descripcion}
         </p>
         <p className="flex items-center gap-1.5 text-auxiliar text-texto-secundario">
           <span className="min-w-0 flex-1 truncate">{novedad[pie]}</span>
           <Icono src={iconoTiempo} tamano={14} />
           <time dateTime={novedad.fecha_registro}>
-            {pendiente
-              ? registradaEl(novedad.fecha_registro)
-              : tiempoTranscurrido(novedad.fecha_registro)}
+            {cuando ??
+              (pendiente
+                ? registradaEl(novedad.fecha_registro)
+                : tiempoTranscurrido(novedad.fecha_registro))}
           </time>
           {/* Tiene fotos (RF-08; `evidencia(count)` de la lista). */}
           {novedad.evidencia?.[0]?.count > 0 ? (

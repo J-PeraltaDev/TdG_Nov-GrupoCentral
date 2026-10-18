@@ -88,6 +88,11 @@ vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   ]),
   listarFincas: vi.fn().mockResolvedValue([]),
 }))
+vi.mock('../core/supabase/repositorios/historial.js', () => ({
+  listarHistorial: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  listarOpcionesDelHistorial: vi.fn().mockResolvedValue({ fincas: [], areas: [], tipos: [] }),
+  buscarPorCodigo: vi.fn().mockResolvedValue(null),
+}))
 vi.mock('../core/supabase/repositorios/avisos.js', () => ({
   AVISOS_POR_PAGINA: 20,
   listarAvisos: vi.fn().mockResolvedValue({ avisos: [], total: 0 }),

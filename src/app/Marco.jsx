@@ -9,7 +9,7 @@ import { Icono } from '../core/ui/Icono.jsx'
 import iconoMarca from '../core/ui/iconos/eco.svg'
 import iconoSalir from '../core/ui/iconos/logout.svg'
 import iconoAvisos from '../core/ui/iconos/notifications.svg'
-import iconoBuscar from '../core/ui/iconos/search.svg'
+import { BuscadorPorCodigo } from './BuscadorPorCodigo.jsx'
 import { Insignia } from './Insignia.jsx'
 import { textoDeInsignia } from './insignias.js'
 import { MENU } from './menu.js'
@@ -79,6 +79,8 @@ function titulosDelTelefono(perfil, ruta) {
     return { titulo: `Bandeja · ${perfil.area.nombre}`, subtitulo: null }
   }
   if (ruta === '/avisos') return { titulo: 'Avisos', subtitulo: null }
+  // 21-D: el historial del aprobador lleva su área debajo.
+  if (ruta === '/historial') return { titulo: 'Historial', subtitulo: perfil.area?.nombre ?? null }
   // El reportante ve su finca y su razón social; los demás roles, su nombre y su rol.
   return {
     titulo: perfil.finca?.nombre ?? perfil.nombre,
@@ -135,22 +137,11 @@ function BarraSuperiorDelTelefono({ perfil, ruta, cuenta, sinLeer }) {
   )
 }
 
-function BarraSuperiorDelEscritorio({ perfil, sinLeer }) {
+function BarraSuperiorDelEscritorio({ perfil, ruta, sinLeer }) {
   return (
     <header className="sticky top-0 z-10 hidden items-center gap-3 border-b border-borde bg-superficie px-8 py-3 lg:flex">
-      {/* El buscador por código llega con el historial (RF-19, Sprint 5). */}
-      <label className="flex w-[22.5rem] items-center gap-2 rounded-control bg-fondo px-3.5 py-2.5 text-texto-secundario inset-ring inset-ring-borde">
-        <Icono src={iconoBuscar} tamano={20} />
-        <span className="sr-only">Buscar por código</span>
-        <input
-          type="search"
-          name="codigo"
-          disabled
-          placeholder="Buscar por código (NOV-…)"
-          autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent text-cuerpo-pequeno outline-none placeholder:text-texto-secundario"
-        />
-      </label>
+      {/* Otra pantalla, otro buscador: el mensaje de la búsqueda anterior no la sigue. */}
+      <BuscadorPorCodigo key={ruta} />
       <span className="flex-1" />
       <Conexion />
       <Campana sinLeer={sinLeer} />
@@ -344,7 +335,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
             }
           />
         )}
-        <BarraSuperiorDelEscritorio perfil={perfil} sinLeer={insignias['/avisos']} />
+        <BarraSuperiorDelEscritorio perfil={perfil} ruta={ruta} sinLeer={insignias['/avisos']} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
           {/* «Cuenta» pinta en el teléfono las pantallas que aquí solo caben en el
