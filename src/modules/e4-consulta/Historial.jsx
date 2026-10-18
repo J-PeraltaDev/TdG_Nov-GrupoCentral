@@ -273,7 +273,9 @@ export default function Historial() {
   return (
     <section className="flex flex-1 flex-col gap-4 px-4 pt-4 pb-24 lg:gap-6 lg:px-8 lg:py-8">
       <div className="flex flex-col gap-1">
-        <h1 className="sr-only text-titulo text-texto lg:not-sr-only">Historial de novedades</h1>
+        <h1 className="sr-only text-titulo text-texto lg:not-sr-only lg:text-display">
+          Historial de novedades
+        </h1>
         <p className="hidden text-cuerpo text-texto-secundario lg:block">
           Todas las novedades, filtradas según tu rol.
         </p>
