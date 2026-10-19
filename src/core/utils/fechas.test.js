@@ -14,6 +14,7 @@ import {
   formatearFechaYSemana,
   formatearHora,
   formatearUltimoIngreso,
+  formatearParaHojaDeCalculo,
   hoyEnColombia,
   inicioDelMesEnColombia,
   semanaDelAnio,
@@ -262,5 +263,12 @@ describe('Fechas del historial (RF-19; plan del Sprint 5, decisión 12)', () => 
   it('RF-19: el día de las tarjetas de 21-D, con el año solo si es otro', () => {
     expect(formatearDia('2026-09-24T13:15:00Z', ahora)).toBe('24 sep')
     expect(formatearDia('2025-08-12T15:00:00Z', ahora)).toBe('12 ago 2025')
+  })
+
+  it('RF-20: la fecha del CSV, en la hora de Colombia y con 24 horas', () => {
+    expect(formatearParaHojaDeCalculo('2026-09-24T13:15:00Z')).toBe('2026-09-24 08:15')
+    // 11:05 p. m. del 24 en Colombia; en UTC ya es el 25.
+    expect(formatearParaHojaDeCalculo('2026-09-25T04:05:00Z')).toBe('2026-09-24 23:05')
+    expect(formatearParaHojaDeCalculo('2026-09-24T05:00:00Z')).toBe('2026-09-24 00:00')
   })
 })

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   listarHistorial,
   listarOpcionesDelHistorial,
+  listarParaExportar,
 } from '../../core/supabase/repositorios/historial.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
@@ -13,6 +14,7 @@ import Historial from './Historial.jsx'
 vi.mock('../../core/supabase/repositorios/historial.js', () => ({
   listarHistorial: vi.fn(),
   listarOpcionesDelHistorial: vi.fn(),
+  listarParaExportar: vi.fn(),
 }))
 vi.mock('../../core/supabase/repositorios/novedades.js', () => ({ NOVEDADES_POR_PAGINA: 20 }))
 
@@ -353,6 +355,129 @@ describe('Pantalla 21 · Historial de novedades (RF-19, CU-19)', () => {
 
     await screen.findByRole('table')
     expect(screen.queryByText(/La exportación a CSV solo está disponible/)).toBeNull()
+  })
+})
+
+describe('Exportar CSV (RF-20 / CU-20)', () => {
+  /** Simula la descarga: devuelve el archivo y el nombre con que se descargó. */
+  function simularDescarga() {
+    const descarga = { archivo: null, nombre: null }
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: vi.fn((archivo) => {
+        descarga.archivo = archivo
+        return 'blob:historial'
+      }),
+      revokeObjectURL: vi.fn(),
+    })
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+      descarga.nombre = this.download
+    })
+    return descarga
+  }
+
+  it.each(['administrador', 'director'])(
+    'RF-20 / CU-20 1: el %s ve «Exportar CSV» junto al resultado',
+    async (rol) => {
+      abrir({ rol })
+
+      expect(await screen.findByRole('button', { name: 'Exportar CSV' })).toBeEnabled()
+    },
+  )
+
+  it('RF-20 / CU-20 1a: el aprobador no ve «Exportar CSV»', async () => {
+    abrir({ rol: 'aprobador' })
+
+    await screen.findByRole('table', { name: 'Historial de novedades' })
+    expect(screen.queryByRole('button', { name: 'Exportar CSV' })).toBeNull()
+  })
+
+  it('RF-20: sin resultados no hay nada que exportar', async () => {
+    vi.mocked(listarHistorial).mockResolvedValue({ novedades: [], total: 0 })
+    abrir()
+
+    await screen.findByText('Todavía no hay novedades.')
+    expect(screen.queryByRole('button', { name: 'Exportar CSV' })).toBeNull()
+  })
+
+  it('RF-20 / CU-20 2 y 3: descarga todo el resultado de los filtros puestos, con su nombre', async () => {
+    const descarga = simularDescarga()
+    vi.mocked(listarParaExportar).mockResolvedValue([
+      {
+        codigo: 149,
+        fecha_registro: '2026-09-24T13:15:00Z',
+        finca: 'La Mónica',
+        razon_social: 'Agropecuaria La Mónica S.A.S.',
+        area: 'Sistemas',
+        prioridad: 'alto',
+        estado: 'resuelta',
+        tipo_falla: 'Biométrico',
+        fecha_ejecucion: '2026-09-24',
+        reportante: 'Marisol Rentería',
+        resuelta_en: '2026-09-24T17:15:00Z',
+      },
+    ])
+    abrir({ ruta: `/historial?estado=resuelta,cerrada&tipo=${TIPO}&pagina=2` })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Exportar CSV' }))
+
+    // Los filtros, no la página.
+    expect(listarParaExportar).toHaveBeenCalledExactlyOnceWith({
+      ...SIN_FILTROS,
+      estados: ['resuelta', 'cerrada'],
+      tipo: TIPO,
+    })
+    await waitFor(() => expect(descarga.nombre).toBe('historial-novedades-2026-09-24.csv'))
+    const texto = await descarga.archivo.text()
+    expect(descarga.archivo.type).toBe('text/csv;charset=utf-8')
+    expect(texto.split('\r\n')[1]).toBe(
+      'NOV-0149;2026-09-24 08:15;La Mónica;Agropecuaria La Mónica S.A.S.;Sistemas;Alto;Resuelta;' +
+        'Biométrico;2026-09-24;Marisol Rentería;4,0',
+    )
+    expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeEnabled()
+  })
+
+  it('RF-20: mientras exporta, el botón conserva el foco y otro clic no pide de nuevo', async () => {
+    simularDescarga()
+    let terminar
+    vi.mocked(listarParaExportar).mockReturnValue(new Promise((listo) => (terminar = listo)))
+    abrir()
+
+    const boton = await screen.findByRole('button', { name: 'Exportar CSV' })
+    await userEvent.click(boton)
+    const ocupado = screen.getByRole('button', { name: 'Exportando…' })
+    expect(ocupado).toHaveFocus()
+    expect(ocupado).toHaveAttribute('aria-busy', 'true')
+    await userEvent.click(ocupado)
+    expect(listarParaExportar).toHaveBeenCalledTimes(1)
+
+    terminar([])
+    expect(await screen.findByRole('button', { name: 'Exportar CSV' })).toHaveFocus()
+  })
+
+  it('RF-20: si algo falla a mitad, no descarga nada y lo dice', async () => {
+    const descarga = simularDescarga()
+    vi.mocked(listarParaExportar).mockRejectedValue(new TypeError('Failed to fetch'))
+    abrir()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Exportar CSV' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se descargó el archivo. No hay conexión. Revisa tu internet e intenta de nuevo.',
+    )
+    expect(descarga.archivo).toBeNull()
+    expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeEnabled()
+  })
+
+  it('RF-20: en el teléfono, «Exportar CSV» va al final de la lista', async () => {
+    simularPantalla('telefono')
+    abrir({ rol: 'director' })
+
+    const boton = await screen.findByRole('button', { name: 'Exportar CSV' })
+    const ultimaTarjeta = screen.getAllByRole('link').at(-1)
+    expect(
+      ultimaTarjeta.compareDocumentPosition(boton) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 })
 

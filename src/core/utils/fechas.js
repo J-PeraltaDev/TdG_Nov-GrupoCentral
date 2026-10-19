@@ -257,6 +257,17 @@ export function hoyEnColombia(ahora = Date.now()) {
 }
 
 /**
+ * «2026-09-24 08:15»: la fecha y la hora de Colombia en la forma que una hoja de cálculo reconoce
+ * como fecha (el CSV del historial, decisión 17).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearParaHojaDeCalculo(fecha) {
+  const { hora, minuto } = enColombia(fecha)
+  return `${hoyEnColombia(fecha)} ${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`
+}
+
+/**
  * El comienzo del mes en curso en Colombia, como instante (`2026-10-01T00:00:00-05:00`), para
  * filtrar «este mes» en el servidor. Colombia no cambia de hora: siempre es UTC−5.
  *

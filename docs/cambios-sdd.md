@@ -37,6 +37,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 29  | S5     | SDD 6.1.9 (Tabla 34), 5.2.6 y Tabla 22                    | Precisión: período en días de Colombia, «por mes», «Datos al», quién agrupa, «abiertas con más tiempo», opciones del período; `FECHA_INVALIDA` también en las `rpt_*` | Propuesto |
 | 30  | S5     | SDD 6.1.8 y Tabla 22                                      | **Cambio:** `TIPO_FALLA_DUPLICADO`; bloqueos de la fusión, destino inactivo, `for share` al resolver, sin reactivar y la lista sin los fusionados                     | Propuesto |
 | 31  | S5     | SDD 6.1.3 (Tabla 30) y 5.2.5                              | Precisión: la observación de la corrección del tipo de falla y cómo la muestra la línea de tiempo                                                                     | Propuesto |
+| 32  | S5     | SDD 5.3.8 y 7.3 (Tabla 39)                                | **Cambio, por validar:** separador `;`; columnas, fechas, horas y nombre del archivo; fórmulas neutralizadas                                                          | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1132,6 +1133,44 @@ queda en el historial, pero no qué se escribe ni cómo se ve (plan del Sprint 5
 
 > Una transición de «cerrada» a «cerrada» es la corrección del tipo de falla: se muestra como
 > «Tipo de falla corregido», no como un cambio de estado.
+
+## 32 · El archivo CSV del historial (S5)
+
+**Sección:** SDD 5.3.8 («Archivo CSV de exportación») y 7.3 (Tabla 39, fila «Separador del archivo
+CSV»).
+
+**Qué pasa.** 5.3.8 adopta la coma y deja el punto y coma como punto por validar. El PR 7 del
+Sprint 5 usa **punto y coma** (plan del Sprint 5, decisiones 16 a 18), y queda por validar con el
+director de agricultura y los administradores:
+
+- **Separador:** Excel con la configuración regional de Colombia usa la coma como separador
+  decimal: abre directo un archivo con `;`, con las columnas separadas; con `,` lo pega en una
+  sola columna. La línea `sep=,` lo arreglaría, pero hace que Excel ignore el BOM y se rompen las
+  tildes. Google Sheets y LibreOffice detectan el `;`.
+- **Contenido:** las columnas de 5.3.8, en su orden: «Código;Registrada en finca;Finca;Razón
+  social;Área;Prioridad;Estado;Tipo de falla;Fecha de ejecución;Reportada por;Horas hasta la
+  resolución». Fechas en la hora de Colombia, como las reconoce una hoja de cálculo
+  («2026-09-24 08:15» y «2026-09-23»); las horas con un decimal y coma («52,3»), desde el registro
+  hasta la última resolución (`v_novedad.resuelta_en`, cambio 25), y vacías si no se ha resuelto.
+  UTF-8 con BOM, filas terminadas en CRLF y comillas cuando el campo trae `;`, comillas o saltos
+  de línea.
+- **Todo el resultado filtrado**, no solo la página: en bloques de 1000 (lo más que entrega la API
+  por solicitud) hasta que llega uno incompleto. Si un bloque falla, no se descarga nada.
+- **Fórmulas:** un texto que escribió una persona (finca, razón social, área, tipo de falla,
+  reportante) y empieza por `=`, `+`, `-`, `@`, tabulador o retorno de carro sale con un
+  apóstrofo adelante (OWASP, «CSV Injection»). Las columnas que arma la aplicación no se tocan.
+- **Nombre:** `historial-novedades-2026-10-17.csv`, con el día de Colombia.
+
+**Texto propuesto (5.3.8, en lugar de la última frase):**
+
+> El separador es el punto y coma, que las hojas de cálculo con la configuración regional de
+> Colombia abren sin pasos adicionales. Las fechas van en la hora de Colombia y las horas hasta la
+> resolución con un decimal. Un texto que empieza como una fórmula se antepone con un apóstrofo,
+> para que la hoja de cálculo no lo ejecute.
+
+**Texto propuesto (Tabla 39, fila «Separador del archivo CSV», «Decisión adoptada»):**
+
+> Punto y coma, con BOM; por validar con el director de agricultura y los administradores
 
 ## 35 · El administrador entra al panel de reportes (S5)
 
