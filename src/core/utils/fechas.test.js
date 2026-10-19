@@ -1,16 +1,20 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
 import {
+  cuandoLlegoElAviso,
   esMismoDiaEnColombia,
   formatearDescarga,
+  formatearDia,
   formatearDuracion,
   formatearFechaConSemana,
   formatearFechaCorta,
+  formatearFechaDeLista,
   formatearFechaHora,
   formatearFechaSinHora,
   formatearFechaYSemana,
   formatearHora,
   formatearUltimoIngreso,
+  formatearParaHojaDeCalculo,
   hoyEnColombia,
   inicioDelMesEnColombia,
   semanaDelAnio,
@@ -200,5 +204,71 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+  it('RF-30 / Figma 10: agrupa los avisos en hoy, ayer, esta semana y anteriores, en la hora de Colombia', () => {
+    // Jueves 24 sep 2026, 9:30 a. m. en Colombia.
+    const ahora = '2026-09-24T14:30:00Z'
+    expect(cuandoLlegoElAviso('2026-09-24T12:40:00Z', ahora)).toEqual({
+      grupo: 'Hoy',
+      cuando: '7:40 a. m.',
+    })
+    // 11:30 p. m. del 23 en Colombia es el 24 en UTC: va en «Ayer».
+    expect(cuandoLlegoElAviso('2026-09-24T04:30:00Z', ahora)).toEqual({
+      grupo: 'Ayer',
+      cuando: '11:30 p. m.',
+    })
+    expect(cuandoLlegoElAviso('2026-09-22T15:00:00Z', ahora)).toEqual({
+      grupo: 'Esta semana',
+      cuando: 'mar 22 sep',
+    })
+    expect(cuandoLlegoElAviso('2026-09-21T05:00:00Z', ahora)).toEqual({
+      grupo: 'Esta semana',
+      cuando: 'lun 21 sep',
+    })
+    // El domingo anterior ya es otra semana.
+    expect(cuandoLlegoElAviso('2026-09-20T15:00:00Z', ahora)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '20 sep',
+    })
+    expect(cuandoLlegoElAviso('2025-12-30T15:00:00Z', ahora)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '30 dic 2025',
+    })
+  })
+
+  it('RF-30: un lunes, el domingo es «Ayer» y lo anterior ya es otra semana', () => {
+    const lunes = '2026-09-28T14:00:00Z'
+    expect(cuandoLlegoElAviso('2026-09-27T15:00:00Z', lunes).grupo).toBe('Ayer')
+    expect(cuandoLlegoElAviso('2026-09-26T15:00:00Z', lunes)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '26 sep',
+    })
+    // Un domingo, toda la semana desde el lunes.
+    expect(cuandoLlegoElAviso('2026-09-21T15:00:00Z', '2026-09-27T14:00:00Z').grupo).toBe(
+      'Esta semana',
+    )
+  })
+})
+
+describe('Fechas del historial (RF-19; plan del Sprint 5, decisión 12)', () => {
+  const ahora = '2026-09-24T14:30:00Z'
+
+  it('RF-19: «Registrada en finca» sin el año si es el actual, y con él si no', () => {
+    expect(formatearFechaDeLista('2026-09-24T13:15:00Z', ahora)).toBe('24 sep, 8:15 a. m.')
+    expect(formatearFechaDeLista('2025-12-30T13:15:00Z', ahora)).toBe('30 dic 2025, 8:15 a. m.')
+    // El 1 de enero a las 3 a. m. UTC todavía es 31 de diciembre en Colombia.
+    expect(formatearFechaDeLista('2026-01-01T03:00:00Z', ahora)).toBe('31 dic 2025, 10:00 p. m.')
+  })
+
+  it('RF-19: el día de las tarjetas de 21-D, con el año solo si es otro', () => {
+    expect(formatearDia('2026-09-24T13:15:00Z', ahora)).toBe('24 sep')
+    expect(formatearDia('2025-08-12T15:00:00Z', ahora)).toBe('12 ago 2025')
+  })
+
+  it('RF-20: la fecha del CSV, en la hora de Colombia y con 24 horas', () => {
+    expect(formatearParaHojaDeCalculo('2026-09-24T13:15:00Z')).toBe('2026-09-24 08:15')
+    // 11:05 p. m. del 24 en Colombia; en UTC ya es el 25.
+    expect(formatearParaHojaDeCalculo('2026-09-25T04:05:00Z')).toBe('2026-09-24 23:05')
+    expect(formatearParaHojaDeCalculo('2026-09-24T05:00:00Z')).toBe('2026-09-24 00:00')
   })
 })

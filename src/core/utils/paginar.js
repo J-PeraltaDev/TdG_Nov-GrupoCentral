@@ -18,3 +18,22 @@ export function paginar(lista, pagina, porPagina) {
   const desde = vigente * porPagina
   return { pagina: vigente, ultima, desde, visibles: lista.slice(desde, desde + porPagina) }
 }
+
+/**
+ * Las páginas con número (Figma 21): la primera, la última y las vecinas de la actual; `null`
+ * es un «…». Si entre dos queda una sola, va su número en lugar del «…».
+ *
+ * @param {number} pagina Empieza en 0.
+ * @param {number} ultima
+ * @returns {(number | null)[]}
+ */
+export function paginasVisibles(pagina, ultima) {
+  const numeros = [...new Set([0, pagina - 1, pagina, pagina + 1, ultima])]
+    .filter((numero) => numero >= 0 && numero <= ultima)
+    .sort((a, b) => a - b)
+  return numeros.flatMap((numero, i) => {
+    const salto = i === 0 ? 1 : numero - numeros[i - 1]
+    if (salto === 2) return [numero - 1, numero]
+    return salto > 2 ? [null, numero] : [numero]
+  })
+}

@@ -1,3 +1,4 @@
+import { NOMBRE_DE_PRIORIDAD } from '../utils/estados.js'
 import { Icono } from './Icono.jsx'
 import iconoAlto from './iconos/keyboard_double_arrow_up.svg'
 import iconoBajo from './iconos/keyboard_arrow_down.svg'
@@ -14,10 +15,18 @@ import iconoNormal from './iconos/drag_handle.svg'
  * @type {Record<PrioridadNovedad, { etiqueta: string, icono: string, clases: string }>}
  */
 const PRIORIDADES = {
-  critico: { etiqueta: 'Crítico', icono: iconoCritico, clases: 'bg-prioridad-critico' },
-  alto: { etiqueta: 'Alto', icono: iconoAlto, clases: 'bg-prioridad-alto' },
-  normal: { etiqueta: 'Normal', icono: iconoNormal, clases: 'bg-prioridad-normal' },
-  bajo: { etiqueta: 'Bajo', icono: iconoBajo, clases: 'bg-prioridad-bajo' },
+  critico: {
+    etiqueta: NOMBRE_DE_PRIORIDAD.critico,
+    icono: iconoCritico,
+    clases: 'bg-prioridad-critico',
+  },
+  alto: { etiqueta: NOMBRE_DE_PRIORIDAD.alto, icono: iconoAlto, clases: 'bg-prioridad-alto' },
+  normal: {
+    etiqueta: NOMBRE_DE_PRIORIDAD.normal,
+    icono: iconoNormal,
+    clases: 'bg-prioridad-normal',
+  },
+  bajo: { etiqueta: NOMBRE_DE_PRIORIDAD.bajo, icono: iconoBajo, clases: 'bg-prioridad-bajo' },
 }
 
 /**

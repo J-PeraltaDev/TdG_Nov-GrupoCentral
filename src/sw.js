@@ -6,11 +6,17 @@
  *   1. precachea los archivos de la aplicación (self.__WB_MANIFEST);
  *   2. responde las navegaciones con index.html, para que la app abra sin red (RNF-05);
  *   3. se actualiza únicamente cuando la persona acepta el aviso de nueva versión;
- *   4. deja listos los manejadores de push para el Sprint 5 (RF-31).
+ *   4. muestra las notificaciones push y abre la novedad al tocarlas (RF-31).
  *
  * NO cachea nada de Supabase ni de ningún otro origen: los datos sin conexión viven en
  * IndexedDB (core/offline), no en Cache Storage. No agregues reglas para *.supabase.co.
  */
+
+import {
+  abrirLaNovedad,
+  avisarALasPestanas,
+  notificacionDelPush,
+} from './core/push/notificaciones.js'
 
 /**
  * Archivos de la versión publicada, sin repetidos (el plugin puede listar dos veces los
@@ -108,6 +114,22 @@ async function desdeCache(ruta, request) {
   return (await cache.match(ruta)) ?? fetch(request)
 }
 
-// Sprint 5 (RF-31): notificaciones push. Vacíos a propósito.
-self.addEventListener('push', () => {})
-self.addEventListener('notificationclick', () => {})
+// RF-31: el aviso que manda enviar-push. Se muestra siempre (`userVisibleOnly`) y las pestañas
+// abiertas vuelven a contar los avisos sin leer.
+self.addEventListener('push', (evento) => {
+  const { titulo, opciones } = notificacionDelPush(evento.data)
+  evento.waitUntil(
+    Promise.all([
+      self.registration.showNotification(titulo, opciones),
+      avisarALasPestanas(self.clients),
+    ]),
+  )
+})
+
+// Tocar la notificación abre la novedad, en una pestaña abierta de la aplicación o en una nueva.
+self.addEventListener('notificationclick', (evento) => {
+  evento.notification.close()
+  evento.waitUntil(
+    abrirLaNovedad(self.clients, self.location.origin, evento.notification.data?.url),
+  )
+})

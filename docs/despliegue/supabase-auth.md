@@ -51,8 +51,8 @@ Panel de Supabase → **Project Settings** → **API Keys**.
 
 ## Edge Functions
 
-Son dos (SDD 5.3.4, Tabla 23): `gestionar-usuario` y `restablecer-contrasena`. Cómo están hechas y
-por qué: `docs/adr/0012`.
+Son tres (SDD 5.3.4, Tabla 23): `gestionar-usuario`, `restablecer-contrasena` y `enviar-push`.
+Cómo están hechas y por qué: `docs/adr/0012`.
 
 En «staging» se despliegan con el script del repositorio, sin Docker:
 
@@ -62,8 +62,10 @@ npm run staging:functions
 
 Sin argumentos despliega todas; con un nombre, solo esa (`npm run staging:functions --
 gestionar-usuario`). Qué función exige sesión (`verify_jwt`) se define en `supabase/config.toml`.
-No hay secretos que crear a mano: `SUPABASE_URL` y `SUPABASE_SECRET_KEYS` los pone la plataforma.
-Para confirmarlo, **Edge Functions → Secrets** en el panel debe listar las dos.
+`SUPABASE_URL` y `SUPABASE_SECRET_KEYS` los pone la plataforma. `enviar-push` necesita además
+`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` y `ENVIAR_PUSH_SECRETO`, y el
+webhook necesita en Vault `enviar_push_url` y `enviar_push_secreto`. En «staging» los pone
+`npm run staging:secretos`, que los lee de `.env.local` y no imprime ninguno.
 
 **En «PROYECTO» las despliega una persona, al cierre del sprint y con el OK del equipo**, después
 de aplicar las migraciones:
@@ -73,7 +75,25 @@ npx supabase functions deploy --use-api --project-ref lyrdsmfalrchbdpmikmt
 ```
 
 Después conviene comprobar, sin sesión, que `restablecer-contrasena` responde (400 con un cuerpo
-vacío) y que `gestionar-usuario` rechaza (401).
+vacío) y que `gestionar-usuario` y `enviar-push` rechazan (401).
+
+### Notificaciones push en «PROYECTO»
+
+Una persona del equipo, una sola vez y antes de desplegar `enviar-push`:
+
+1. **Claves propias de «PROYECTO»** (no las de «staging»), en un archivo aparte que Git ignora:
+   `npm run vapid:claves -- --archivo .env.proyecto.local`. Agrega a mano
+   `VAPID_SUBJECT=mailto:…` (el del equipo) y guarda el archivo en el gestor de contraseñas.
+2. **Secretos de la función:**
+   `npx supabase secrets set --project-ref lyrdsmfalrchbdpmikmt --env-file .env.proyecto.local`.
+3. **Vault:** en el panel, **Integrations → Vault → Add new secret**, dos secretos:
+   `enviar_push_url` con `https://lyrdsmfalrchbdpmikmt.supabase.co/functions/v1/enviar-push` y
+   `enviar_push_secreto` con el `ENVIAR_PUSH_SECRETO` del archivo. Por el panel, y no por el
+   editor SQL, para que el valor no quede en el historial de consultas.
+4. **Cloudflare Pages:** `VITE_VAPID_PUBLIC_KEY` de producción con la `VAPID_PUBLIC_KEY` de
+   «PROYECTO» (la de las vistas previas es la de «staging»).
+
+Hasta que estén los dos secretos de Vault, el webhook no envía nada y los avisos se crean igual.
 
 ## Vincular el repositorio (`supabase link`)
 

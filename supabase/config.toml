@@ -404,6 +404,11 @@ verify_jwt = true
 [functions.restablecer-contrasena]
 verify_jwt = false
 
+# La llama el webhook de la base de datos, no una persona: no hay sesión. La verifica el
+# secreto del encabezado x-webhook-secreto (RF-31; plan del Sprint 5, decisión 38).
+[functions.enviar-push]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

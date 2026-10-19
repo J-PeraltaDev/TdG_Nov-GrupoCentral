@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { vigilarPendientes } from '../core/offline/pendientes.js'
 import { useSincronizacionAutomatica } from '../core/offline/sincronizador.js'
@@ -9,8 +9,9 @@ import { Icono } from '../core/ui/Icono.jsx'
 import iconoMarca from '../core/ui/iconos/eco.svg'
 import iconoSalir from '../core/ui/iconos/logout.svg'
 import iconoAvisos from '../core/ui/iconos/notifications.svg'
-import iconoBuscar from '../core/ui/iconos/search.svg'
+import { BuscadorPorCodigo } from './BuscadorPorCodigo.jsx'
 import { Insignia } from './Insignia.jsx'
+import { textoDeInsignia } from './insignias.js'
 import { MENU } from './menu.js'
 import { useInsignias } from './useInsignias.js'
 
@@ -34,15 +35,40 @@ function Avatar({ nombre }) {
   )
 }
 
-function Campana() {
+/** La campana de la barra superior, con los avisos sin leer (Figma 21 y 23). */
+function Campana({ sinLeer }) {
   return (
     <Link
       to="/avisos"
-      aria-label="Avisos"
-      className="flex size-12 flex-none items-center justify-center rounded-control text-texto lg:size-10"
+      className="relative flex size-12 flex-none items-center justify-center rounded-control text-texto lg:size-10"
     >
       <Icono src={iconoAvisos} tamano={24} />
+      <span className="sr-only">Avisos</span>
+      <span className="absolute top-1 right-0.5 lg:top-0 lg:-right-1">
+        <Insignia cantidad={sinLeer} ruta="/avisos" />
+      </span>
     </Link>
+  )
+}
+
+/**
+ * Anuncia una sola vez, al lector de pantalla, que llegaron avisos nuevos con la aplicación
+ * abierta. No habla al entrar: solo cuando el número sube.
+ */
+function AnuncioDeAvisos({ sinLeer }) {
+  const [anuncio, setAnuncio] = useState('')
+  const anterior = useRef(null)
+  useEffect(() => {
+    if (sinLeer === undefined) return
+    if (anterior.current !== null && sinLeer > anterior.current) {
+      setAnuncio(sinLeer === 1 ? 'Tienes 1 aviso sin leer' : `Tienes ${sinLeer} avisos sin leer`)
+    }
+    anterior.current = sinLeer
+  }, [sinLeer])
+  return (
+    <p aria-live="polite" className="sr-only">
+      {anuncio}
+    </p>
   )
 }
 
@@ -52,6 +78,10 @@ function titulosDelTelefono(perfil, ruta) {
   if (ruta === '/bandeja' && perfil.area) {
     return { titulo: `Bandeja · ${perfil.area.nombre}`, subtitulo: null }
   }
+  if (ruta === '/avisos') return { titulo: 'Avisos', subtitulo: null }
+  if (ruta === '/panel') return { titulo: 'Panel de reportes', subtitulo: null }
+  // 21-D: el historial del aprobador lleva su área debajo.
+  if (ruta === '/historial') return { titulo: 'Historial', subtitulo: perfil.area?.nombre ?? null }
   // El reportante ve su finca y su razón social; los demás roles, su nombre y su rol.
   return {
     titulo: perfil.finca?.nombre ?? perfil.nombre,
@@ -81,7 +111,7 @@ function CuentaDelTelefono({ perfil, pendientes }) {
   )
 }
 
-function BarraSuperiorDelTelefono({ perfil, ruta, cuenta }) {
+function BarraSuperiorDelTelefono({ perfil, ruta, cuenta, sinLeer }) {
   const { titulo, subtitulo } = titulosDelTelefono(perfil, ruta)
 
   return (
@@ -101,31 +131,21 @@ function BarraSuperiorDelTelefono({ perfil, ruta, cuenta }) {
         ) : null}
       </div>
       <Conexion className="flex-none" />
-      <Campana />
+      {/* En los avisos (Figma 10) la campana sobra. */}
+      {ruta === '/avisos' ? null : <Campana sinLeer={sinLeer} />}
       {cuenta}
     </header>
   )
 }
 
-function BarraSuperiorDelEscritorio({ perfil }) {
+function BarraSuperiorDelEscritorio({ perfil, ruta, sinLeer }) {
   return (
     <header className="sticky top-0 z-10 hidden items-center gap-3 border-b border-borde bg-superficie px-8 py-3 lg:flex">
-      {/* El buscador por código llega con el historial (RF-19, Sprint 5). */}
-      <label className="flex w-[22.5rem] items-center gap-2 rounded-control bg-fondo px-3.5 py-2.5 text-texto-secundario inset-ring inset-ring-borde">
-        <Icono src={iconoBuscar} tamano={20} />
-        <span className="sr-only">Buscar por código</span>
-        <input
-          type="search"
-          name="codigo"
-          disabled
-          placeholder="Buscar por código (NOV-…)"
-          autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent text-cuerpo-pequeno outline-none placeholder:text-texto-secundario"
-        />
-      </label>
+      {/* Otra pantalla, otro buscador: el mensaje de la búsqueda anterior no la sigue. */}
+      <BuscadorPorCodigo key={ruta} />
       <span className="flex-1" />
       <Conexion />
-      <Campana />
+      <Campana sinLeer={sinLeer} />
       <Link to="/cuenta" aria-label={`Cuenta de ${perfil.nombre}`} className="rounded-full">
         <Avatar nombre={perfil.nombre} />
       </Link>
@@ -169,7 +189,7 @@ function BarraLateral({ perfil, items, insignias, origen, alSalir }) {
                   }
                 />
                 <span className="min-w-0 flex-1">{etiqueta}</span>
-                <Insignia cantidad={insignias[ruta]} />
+                <Insignia cantidad={insignias[ruta]} ruta={ruta} />
               </>
             )}
           </NavLink>
@@ -199,7 +219,7 @@ function BarraLateral({ perfil, items, insignias, origen, alSalir }) {
   )
 }
 
-function NavegacionInferior({ items, origen }) {
+function NavegacionInferior({ items, origen, insignias }) {
   return (
     <nav
       aria-label="Principal"
@@ -214,13 +234,15 @@ function NavegacionInferior({ items, origen }) {
           {({ isActive }) => (
             <>
               <span
-                className={`flex items-center rounded-2xl px-4 py-1 ${
+                className={`flex items-center gap-0.5 rounded-2xl px-4 py-1 ${
                   isActive || ruta === origen
                     ? 'bg-primario-contenedor text-primario'
                     : 'text-texto-secundario'
                 }`}
               >
                 <Icono src={icono} tamano={24} />
+                {/* Figma 10 y 21-D: la insignia va junto al ícono, dentro de la pastilla. */}
+                <Insignia cantidad={insignias[ruta]} ruta={ruta} soloVisual />
               </span>
               <span
                 className={
@@ -230,6 +252,9 @@ function NavegacionInferior({ items, origen }) {
                 }
               >
                 {corta ?? etiqueta}
+                {insignias[ruta] > 0 ? (
+                  <span className="sr-only">{textoDeInsignia(insignias[ruta], ruta)}</span>
+                ) : null}
               </span>
             </>
           )}
@@ -262,7 +287,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   useSincronizacionAutomatica(perfil.id)
   const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
-  const insignias = useInsignias(perfil.rol_id)
+  const insignias = useInsignias(perfil)
   const enLaBarraInferior = items.filter((item) => !item.soloEscritorio)
   // Figma no le da «Cuenta» a la barra inferior del director ni a la del administrador.
   const cuentaEnLaBarraSuperior = !enLaBarraInferior.some((item) => item.ruta === '/cuenta')
@@ -280,6 +305,8 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
     // el lugar de la navegación inferior del teléfono.
     <div className="group/marco flex min-h-dvh flex-col lg:flex-row">
       <AnuncioDeConexion />
+      {/* Por persona: lo que contaba quien salió no cuenta como «nuevo». */}
+      <AnuncioDeAvisos key={perfil.id} sinLeer={insignias['/avisos']} />
 
       <a
         href="#contenido"
@@ -301,6 +328,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
           <BarraSuperiorDelTelefono
             perfil={perfil}
             ruta={ruta}
+            sinLeer={insignias['/avisos']}
             cuenta={
               cuentaEnLaBarraSuperior ? (
                 <CuentaDelTelefono perfil={perfil} pendientes={pendientesEnCuenta} />
@@ -308,7 +336,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
             }
           />
         )}
-        <BarraSuperiorDelEscritorio perfil={perfil} />
+        <BarraSuperiorDelEscritorio perfil={perfil} ruta={ruta} sinLeer={insignias['/avisos']} />
 
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col outline-none">
           {/* «Cuenta» pinta en el teléfono las pantallas que aquí solo caben en el
@@ -316,7 +344,9 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
           <Outlet context={{ insignias }} />
         </main>
 
-        {enfocado ? null : <NavegacionInferior items={enLaBarraInferior} origen={origen} />}
+        {enfocado ? null : (
+          <NavegacionInferior items={enLaBarraInferior} origen={origen} insignias={insignias} />
+        )}
       </div>
     </div>
   )

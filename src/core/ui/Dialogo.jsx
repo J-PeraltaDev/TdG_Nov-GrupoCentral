@@ -18,6 +18,7 @@ import { useEffect, useId, useRef } from 'react'
  * @param {import('react').ReactNode} [props.icono] Va sobre el título (un `IconoDeHoja`).
  * @param {boolean} [props.cierraConElFondo] `false` cuando cerrarlo sin querer cuesta algo que
  *   no se recupera (el código temporal de 32): queda Escape y el botón del contenido.
+ * @param {string} [props.ancho] El ancho máximo en el escritorio: los de 31 miden 520 px.
  * @param {import('react').ReactNode} props.children Los campos, si los hay, y los botones.
  */
 export function Dialogo({
@@ -27,6 +28,7 @@ export function Dialogo({
   descripcion,
   icono,
   cierraConElFondo = true,
+  ancho = 'lg:max-w-md',
   children,
 }) {
   const dialogo = useRef(null)
@@ -52,7 +54,7 @@ export function Dialogo({
         // El fondo (::backdrop) es el propio diálogo; el contenido va en un hijo.
         if (cierraConElFondo && evento.target === evento.currentTarget) alCerrar()
       }}
-      className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-superficie p-0 text-texto backdrop:bg-overlay/50 lg:max-w-md"
+      className={`m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-superficie p-0 text-texto backdrop:bg-overlay/50 ${ancho}`}
     >
       {abierto ? (
         <div className="flex flex-col gap-4 p-6">

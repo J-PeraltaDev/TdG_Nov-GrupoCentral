@@ -70,6 +70,13 @@ vi.mock('../core/supabase/repositorios/recuperacion.js', () => ({
 }))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
+  listarCatalogo: vi.fn().mockResolvedValue([]),
+  listarCambios: vi.fn().mockResolvedValue([]),
+  listarTiposActivos: vi.fn().mockResolvedValue([]),
+  renombrarTipoFalla: vi.fn(),
+  fusionarTiposFalla: vi.fn(),
+  desactivarTipoFalla: vi.fn(),
+  corregirTipoFalla: vi.fn(),
 }))
 // El marco envía las pendientes al abrir; la sincronización tiene sus propias pruebas.
 vi.mock('../core/offline/sincronizador.js', () => ({
@@ -87,6 +94,32 @@ vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
     { id: 'area-s', nombre: 'Sistemas' },
   ]),
   listarFincas: vi.fn().mockResolvedValue([]),
+}))
+vi.mock('../core/supabase/repositorios/reportes.js', () => ({
+  obtenerNovedadesAbiertas: vi.fn().mockResolvedValue({
+    datos_al: '2026-09-24T14:30:00Z',
+    areas: [],
+    fincas: [],
+    estados: [],
+  }),
+  obtenerTiemposDeAtencion: vi.fn(),
+  obtenerEscalamiento: vi.fn(),
+  obtenerRecurrencia: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/historial.js', () => ({
+  listarHistorial: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),
+  listarOpcionesDelHistorial: vi.fn().mockResolvedValue({ fincas: [], areas: [], tipos: [] }),
+  buscarPorCodigo: vi.fn().mockResolvedValue(null),
+}))
+vi.mock('../core/supabase/repositorios/avisos.js', () => ({
+  AVISOS_POR_PAGINA: 20,
+  listarAvisos: vi.fn().mockResolvedValue({ avisos: [], total: 0 }),
+  contarAvisosSinLeer: vi.fn().mockResolvedValue(0),
+  marcarAvisosLeidos: vi.fn(),
+}))
+vi.mock('../core/supabase/repositorios/suscripciones.js', () => ({
+  guardarSuscripcion: vi.fn(),
+  borrarSuscripcion: vi.fn(),
 }))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
@@ -126,8 +159,8 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', 'Mis novedades'],
     ['aprobador', 'Bandeja · Mantenimiento'],
     ['director', 'Novedades escaladas'],
-    // Hasta que llegue el panel de reportes (Sprint 5), el administrador entra a Usuarios.
-    ['administrador', 'Usuarios'],
+    // Decisión 28 del plan del Sprint 5: el panel de reportes.
+    ['administrador', 'Panel de reportes'],
   ])('RF-01 / CU-01 4: el %s entra a su pantalla de inicio («%s»)', async (rol, titulo) => {
     abrir('/', rol)
 
@@ -180,7 +213,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', '/recuperacion', 'Mis novedades'],
     ['aprobador', '/recuperacion', 'Bandeja · Mantenimiento'],
     ['director', '/recuperacion', 'Novedades escaladas'],
-    ['administrador', '/registrar', 'Usuarios'],
+    ['administrador', '/registrar', 'Panel de reportes'],
   ])(
     'RF-18: el %s no entra a %s; el guardián lo devuelve a su inicio',
     async (rol, ruta, titulo) => {
@@ -251,7 +284,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
   it.each([
     ['reportante', 'Mis novedades'],
     ['director', 'Novedades escaladas'],
-    ['administrador', 'Usuarios'],
+    ['administrador', 'Panel de reportes'],
   ])(
     'RF-14: el %s no entra a registrar una solución; el guardián lo devuelve a su inicio',
     async (rol, titulo) => {
@@ -467,6 +500,12 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     await userEvent.click(administracion.getByRole('link', { name: 'Fincas' }))
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Fincas' })).toBeVisible()
+  })
+
+  it('RF-32: el administrador abre el catálogo de tipos de falla (31)', async () => {
+    abrir('/tipos-de-falla', 'administrador')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Tipos de falla' })).toBeVisible()
   })
 
   it.each(['reportante', 'aprobador', 'director'])(
