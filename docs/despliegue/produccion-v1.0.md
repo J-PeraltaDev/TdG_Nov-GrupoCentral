@@ -20,7 +20,12 @@ los PR: así sus fechas quedan en orden y no hace falta `--include-all`.
 - **Fusiones:** con _squash_, una por una. Antes de cada una se trae a la rama la del PR anterior
   y después `main`, y se comprueba que la diferencia frente a `main` sea solo la propia (como en el
   Sprint 4). El agente lo hace si se lo piden; nunca con `rebase` ni con un `push` forzado.
+- **El simulacro y el `db push` se corren desde la rama del PR**, con la del anterior y `main` ya
+  traídas: así listan solo su migración. Desde otra rama listarían otras.
 - **No hace falta `supabase link`** ni leer datos de «PROYECTO».
+- **Punto de partida, comprobado el 19 oct:** el simulacro desde la rama del informe lista las
+  seis migraciones del sprint, sin semillas ni roles, y el asesor de «PROYECTO» da 15 avisos
+  _WARN_, los mismos del Sprint 4.
 
 Las comprobaciones de solo lectura que repite el agente:
 
@@ -33,8 +38,8 @@ npx supabase db advisors --linked --project-ref lyrdsmfalrchbdpmikmt   # sin avi
 
 | N.º | PR             | Qué hace la persona                                                                                                                                                                                                                                                                  | Comprobación (agente, solo lectura)                                                                         |
 | --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| 1   | #39            | Fusiona el plan                                                                                                                                                                                                                                                                      | `main` igual a la rama                                                                                      |
-| 2   | #40            | Fusiona las pruebas sin fecha y el e2e obligatorio                                                                                                                                                                                                                                   | El CI de `main`                                                                                             |
+| 1   | #40            | Fusiona las pruebas sin fecha y el e2e obligatorio. Va antes que #39: tiene el CI en verde, y con él `main` no queda en rojo por la unitaria de 08                                                                                                                                   | `main` igual a la rama; el CI de `main`                                                                     |
+| 2   | #39            | Fusiona el plan, después de traerle `main` (con #40) y de ver su CI en verde                                                                                                                                                                                                         | `main` igual a la rama                                                                                      |
 | 3   | #41            | Simulacro y `db push`: debe listar solo `20261017191806_rf19_contratos_sprint_5`. Después fusiona                                                                                                                                                                                    | Simulacro «up to date». Asesor: **20** (15 de antes y 5 previstos, los de las cinco funciones que escriben) |
 | 4   | #42            | Simulacro y `db push`: solo `20261017235729_rf30_marcar_avisos_leidos`. Fusiona                                                                                                                                                                                                      | Simulacro «up to date»; asesor en 20                                                                        |
 | 5   | #43            | Fusiona el historial (sin migración)                                                                                                                                                                                                                                                 | —                                                                                                           |
