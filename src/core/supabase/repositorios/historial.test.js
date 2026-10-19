@@ -1,7 +1,13 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { supabase } from '../cliente.js'
-import { buscarPorCodigo, listarHistorial, listarOpcionesDelHistorial } from './historial.js'
+import {
+  buscarPorCodigo,
+  FILAS_POR_BLOQUE,
+  listarHistorial,
+  listarOpcionesDelHistorial,
+  listarParaExportar,
+} from './historial.js'
 
 // Se simula el módulo del cliente, no la red: aquí importa qué consulta se arma.
 vi.mock('../cliente.js', () => ({ supabase: { from: vi.fn() } }))
@@ -196,5 +202,86 @@ describe('Opciones de los filtros (RF-19; plan del Sprint 5, decisión 9)', () =
       ])
     }
     expect(pasos.tipo_falla[0]).toEqual(['select', 'id, nombre, activo, novedad(count)'])
+  })
+})
+
+describe('Todo el resultado para el CSV (RF-20; decisión 17)', () => {
+  /** Cada solicitud entrega la siguiente respuesta de la lista y anota su rango. */
+  function simularBloques(respuestas) {
+    const rangos = []
+    const pasos = []
+    vi.mocked(supabase.from).mockImplementation(() => {
+      const respuesta = respuestas.shift()
+      const consulta = new Proxy(
+        {},
+        {
+          get(_, metodo) {
+            if (metodo === 'then') {
+              return (resolver, rechazar) => Promise.resolve(respuesta).then(resolver, rechazar)
+            }
+            return (...argumentos) => {
+              if (metodo === 'range') rangos.push(argumentos)
+              else pasos.push([metodo, ...argumentos])
+              return consulta
+            }
+          },
+        },
+      )
+      return consulta
+    })
+    return { rangos, pasos }
+  }
+
+  const bloque = (desde, cuantas) =>
+    Array.from({ length: cuantas }, (_, i) => ({ codigo: desde + i }))
+
+  beforeEach(() => {
+    vi.mocked(supabase.from).mockReset()
+  })
+
+  it('RF-20 / CU-20 2: pide bloques de 1000 hasta que llega uno incompleto, en el orden del historial', async () => {
+    const { rangos, pasos } = simularBloques([
+      { data: bloque(0, FILAS_POR_BLOQUE), error: null },
+      { data: bloque(1000, FILAS_POR_BLOQUE), error: null },
+      { data: bloque(2000, 3), error: null },
+    ])
+
+    const novedades = await listarParaExportar({ ...SIN_FILTROS, estados: ['cerrada'] })
+
+    expect(novedades).toHaveLength(2003)
+    expect(novedades.map(({ codigo }) => codigo)).toEqual(
+      bloque(0, 2003).map(({ codigo }) => codigo),
+    )
+    expect(rangos).toEqual([
+      [0, 999],
+      [1000, 1999],
+      [2000, 2999],
+    ])
+    // Los mismos filtros y el mismo orden que la página, en cada bloque.
+    expect(pasos.slice(0, 4)).toEqual([
+      ['select', expect.stringContaining('razon_social')],
+      ['in', 'estado', ['cerrada']],
+      ...ORDEN,
+    ])
+  })
+
+  it('RF-20: con exactamente 1000, pide uno más, que llega vacío', async () => {
+    const { rangos } = simularBloques([
+      { data: bloque(0, FILAS_POR_BLOQUE), error: null },
+      { data: [], error: null },
+    ])
+
+    await expect(listarParaExportar(SIN_FILTROS)).resolves.toHaveLength(FILAS_POR_BLOQUE)
+    expect(rangos).toHaveLength(2)
+  })
+
+  it('RF-20: si un bloque falla a mitad, lanza el error y no entrega nada', async () => {
+    const error = { message: 'Failed to fetch' }
+    simularBloques([
+      { data: bloque(0, FILAS_POR_BLOQUE), error: null },
+      { data: null, error },
+    ])
+
+    await expect(listarParaExportar(SIN_FILTROS)).rejects.toBe(error)
   })
 })

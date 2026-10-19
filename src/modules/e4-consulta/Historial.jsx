@@ -6,6 +6,7 @@ import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { ROL } from '../../core/sesion/roles.js'
 import {
   listarHistorial,
+  listarParaExportar,
   listarOpcionesDelHistorial,
 } from '../../core/supabase/repositorios/historial.js'
 import { NOVEDADES_POR_PAGINA } from '../../core/supabase/repositorios/novedades.js'
@@ -15,6 +16,7 @@ import { Estado } from '../../core/ui/Estado.jsx'
 import { EtiquetaDeArea } from '../../core/ui/EtiquetasDeNovedad.jsx'
 import { Icono } from '../../core/ui/Icono.jsx'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
+import iconoExportar from '../../core/ui/iconos/download.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoInformacion from '../../core/ui/iconos/info.svg'
 import iconoSinResultados from '../../core/ui/iconos/search_off.svg'
@@ -25,6 +27,7 @@ import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { formatearCodigo } from '../../core/utils/codigo.js'
 import { cuantasNovedades } from '../../core/utils/texto.js'
 import { formatearDia, formatearDuracion, formatearFechaDeLista } from '../../core/utils/fechas.js'
+import { armarCsv, nombreDelArchivo } from './csv.js'
 import { FiltrosDelHistorial } from './FiltrosDelHistorial.jsx'
 import { escribirFiltros, leerFiltros, SIN_FILTROS } from './filtrosDelHistorial.js'
 
@@ -189,6 +192,72 @@ function SinResultados({ conFiltros, alLimpiar }) {
   )
 }
 
+/**
+ * Descarga el texto como archivo, sin pasar por el servidor (RF-20).
+ *
+ * @param {string} texto
+ * @param {string} nombre
+ */
+function descargar(texto, nombre) {
+  const url = URL.createObjectURL(new Blob([texto], { type: 'text/csv;charset=utf-8' }))
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = nombre
+  enlace.click()
+  // Safari y Firefox leen el archivo después del clic: revocarlo enseguida puede cancelar la
+  // descarga. 40 s, como FileSaver.js.
+  setTimeout(() => URL.revokeObjectURL(url), 40_000)
+}
+
+/**
+ * «Exportar CSV» (21; RF-20 / CU-20): todo el resultado con los filtros puestos, no solo la
+ * página. Si algo falla a mitad, no descarga nada y lo dice.
+ *
+ * @param {object} props
+ * @param {import('./filtrosDelHistorial.js').FiltroDelHistorial} props.filtro
+ */
+function ExportarCsv({ filtro }) {
+  const [exportando, setExportando] = useState(false)
+  const [fallo, setFallo] = useState(null)
+
+  async function exportar() {
+    // Sin deshabilitar el botón: quien lo activó con el teclado no pierde el foco.
+    if (exportando) return
+    setExportando(true)
+    setFallo(null)
+    try {
+      descargar(armarCsv(await listarParaExportar(filtro)), nombreDelArchivo())
+    } catch (error) {
+      setFallo(traducirError(error))
+    } finally {
+      setExportando(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 lg:max-w-sm lg:items-end">
+      <Boton
+        tipo="secundario"
+        icono={iconoExportar}
+        aria-busy={exportando || undefined}
+        onClick={exportar}
+        className="w-full lg:w-auto"
+      >
+        {exportando ? 'Exportando…' : 'Exportar CSV'}
+      </Boton>
+      {fallo ? (
+        <Aviso
+          tipo={fallo.tipo === 'red' ? 'advertencia' : 'error'}
+          icono={fallo.tipo === 'red' ? iconoSinConexion : iconoError}
+          role="alert"
+        >
+          No se descargó el archivo. {fallo.mensaje}
+        </Aviso>
+      ) : null}
+    </div>
+  )
+}
+
 export default function Historial() {
   const { perfil } = useSesion()
   const enLinea = useEnLinea()
@@ -267,6 +336,8 @@ export default function Historial() {
   const falloVigente = fallo?.consulta === consulta ? fallo : null
   const novedades = vigente?.novedades ?? []
   const ultima = Math.max(0, Math.ceil((vigente?.total ?? 0) / NOVEDADES_POR_PAGINA) - 1)
+  // CU-20 1a: solo el director y el administrador, y solo con resultados.
+  const exportar = esAprobador ? null : <ExportarCsv key={consulta} filtro={filtro} />
 
   return (
     <section className="flex flex-1 flex-col gap-4 px-4 pt-4 pb-24 lg:gap-6 lg:px-8 lg:py-8">
@@ -329,14 +400,17 @@ export default function Historial() {
         <div ref={inicioDeLaLista} className="flex scroll-mt-20 flex-col gap-4">
           {esEscritorio ? (
             <>
-              <p role="status" className="flex flex-wrap items-baseline gap-x-3">
-                <span className="text-etiqueta-fuerte text-texto">
-                  {cuantasNovedades(vigente.total)}
-                </span>
-                <span className="text-cuerpo-pequeno text-texto-secundario">
-                  de la más reciente a la más antigua
-                </span>
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <p role="status" className="flex flex-wrap items-baseline gap-x-3 pt-2.5">
+                  <span className="text-etiqueta-fuerte text-texto">
+                    {cuantasNovedades(vigente.total)}
+                  </span>
+                  <span className="text-cuerpo-pequeno text-texto-secundario">
+                    de la más reciente a la más antigua
+                  </span>
+                </p>
+                {exportar}
+              </div>
               <TablaDelHistorial novedades={novedades} origen={origen} />
             </>
           ) : (
@@ -353,6 +427,8 @@ export default function Historial() {
               alCambiar={cambiarDePagina}
             />
           ) : null}
+          {/* En el teléfono, al final: donde 21-D pone la nota del aprobador. */}
+          {esEscritorio ? null : exportar}
         </div>
       ) : null}
 

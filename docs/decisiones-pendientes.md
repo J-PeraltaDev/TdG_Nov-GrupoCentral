@@ -1376,3 +1376,20 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 48 a 54 y 64)
   500, paginar.
 - **Sin conexión,** «Corregir tipo» no aparece: necesita el servidor (RF-25). Si la lista de tipos
   no llega, el diálogo lo dice y ofrece «Reintentar».
+
+## 46 · Exportar CSV (RF-20)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 16 a 18):
+
+- **Por validar con el director y los administradores:** el punto y coma como separador (cambio
+  32). Si prefieren la coma, es una constante en `csv.js`; las horas («52,3») tendrían que ir
+  entre comillas o con punto.
+- **En el teléfono,** «Exportar CSV» va al final de la lista, a todo el ancho: donde 21-D pone la
+  nota del aprobador. Figma solo lo dibuja en el escritorio, a la derecha del resumen.
+- **Mientras exporta,** el botón dice «Exportando…» y queda deshabilitado. Si algo falla: «No se
+  descargó el archivo.» con el motivo (por ejemplo, la falta de conexión), y no se descarga nada a
+  medias.
+- **Prioridad y estado** salen con sus nombres («Crítico», «En atención»), no con los valores de la
+  base.
+- **Atajo:** los bloques se piden con un desplazamiento (`atajo:` en el repositorio); con decenas
+  de miles de filas, paginar por cursor.
