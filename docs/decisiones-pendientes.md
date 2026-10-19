@@ -15,13 +15,13 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 8   | Versión de Node y de jsdom                         | jsdom 29, compatible con Node 24.14                                                              | El equipo         |
 | 9   | Estados de interacción que Figma no dibuja         | Solo el `hover` del botón primario                                                               | El equipo (Figma) |
 | 10  | Textos que no están en Figma                       | Redactados con tuteo; listados abajo                                                             | El equipo         |
-| 11  | Peso de la ruta de ingreso                         | Medido: 187,8 KB de 200 KB; Lighthouse: 97 y 100                                                 | El equipo         |
+| 11  | Peso de la ruta de ingreso                         | Medido: 189,2 KB de 200 KB; Lighthouse: 96 y 100                                                 | El equipo         |
 | 12  | Borde del botón secundario                         | Se dejó el color de Figma                                                                        | El equipo (Figma) |
 | 13  | Detalles de las pantallas 04, 05 y 06              | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
 | 14  | Pantallas 05 y 06 en el escritorio                 | Dentro del marco del escritorio, en una columna centrada                                         | El equipo (Figma) |
 | 15  | WebKit no abre en los equipos                      | El CI corre Chromium y WebKit; sin red en WebKit, `fixme`                                        | El equipo         |
 | 16  | Avisos del asesor de Supabase                      | Tres tipos de aviso conocidos; el de las funciones sale una por RPC                              | El equipo         |
-| 17  | Pruebas que necesitan ingresar                     | **Al día:** el 14 oct pasaron las 135 (más las 6 de preparación)                                 | El equipo         |
+| 17  | Pruebas que necesitan ingresar                     | **Al día:** el 19 oct pasaron 160 de 166; las 4 que fallaron eran de las pruebas                 | El equipo         |
 | 18  | Primer administrador de producción                 | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo                               | El equipo         |
 | 19  | Detalles de la bandeja del área (11 y 12)          | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
 | 20  | Detalles del detalle (13, 14, 22 y 22-B)           | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
@@ -48,6 +48,11 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 42  | Historial (21 a 21-D) y buscador por código        | Textos y controles sin Figma, la nota del CSV en los dos tamaños                                 | El equipo (Figma) |
 | 43  | Panel: abiertas y tiempos (23, 24 y 24-B)          | Textos sin Figma, «Personalizado», el gráfico con un solo mes y el panel en el teléfono          | El equipo (Figma) |
 | 44  | Panel: escalamiento y fallas recurrentes (25 a 27) | Textos sin Figma, el orden en un empate, el contraste de la matriz y las combinaciones a 1280 px | El equipo (Figma) |
+| 45  | Tipos de falla (31 a 31-C) y «Corregir tipo»       | 31-B al escribir, los diálogos sin dibujo, la tabla a 1280 px y 31 en el teléfono                | El equipo (Figma) |
+| 46  | Exportar CSV (RF-20)                               | **Por validar:** el punto y coma; el botón en el teléfono y el error                             | El director       |
+| 47  | Notificaciones push en el servidor (RF-31)         | El `mailto:` de VAPID y los pasos de «PROYECTO», por hacer                                       | El equipo         |
+| 48  | Notificaciones push en el cliente (10-B y Cuenta)  | Cuenta sin dibujo, 10-B para los demás roles; la prueba en un teléfono, por hacer                | El equipo (Figma) |
+| 49  | Cierre del Sprint 5 y v1.0                         | El trabajo e2e del CI, obligatorio y requerido después de #51; las pruebas que fallaron          | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -316,6 +321,24 @@ unos 12,2 KB.
 Lo único con efecto medible: 93 KB del JavaScript inicial no se usan en el ingreso. Lighthouse
 estima 450 ms menos de LCP en el teléfono si salen de la carga inicial.
 
+**Sprint 5, medido el 19 oct 2026 al cierre (con el push en el cliente):** ≈ 189,2 KB
+(JavaScript 152,2 KB con el registro del service worker, CSS 10,1 KB y fuente 26,8 KB). Quedan
+unos 10,8 KB.
+
+- Desde el PR 9 se mide todo lo que `index.html` carga o precarga, más la fuente: el build separó
+  React Router en su propio paquete (8,0 KB), que antes iba dentro de `index` y la medida anterior
+  no habría contado.
+- Al paquete inicial entraron las insignias y el anuncio de los avisos. El CSS sube 1,3 KB.
+- Lo demás va bajo demanda: el historial (6,5 KB), el panel con sus cuatro pestañas (10,6 KB),
+  los tipos de falla (5,1 KB), la exportación y la suscripción push, que el cierre de sesión
+  importa aparte.
+
+**Lighthouse 13.5.0, el 19 oct 2026,** sobre `/ingresar` con el build local: rendimiento 96 en
+el teléfono emulado (FCP 2,2 s, LCP 2,3 s, bloqueo 0 ms, CLS 0) y 100 en el escritorio;
+accesibilidad y buenas prácticas, 100 en los dos. Siguen los 90 KB sin usar en el ingreso. La
+categoría nueva de Lighthouse 13.5, «navegación por agentes» (50), pide `llms.txt` y datos
+estructurados, que no aplican a una aplicación con ingreso.
+
 **Riesgo:** el CSS es un solo archivo y crece con cada pantalla (4,2 KB en el Sprint 0; 6,2 KB
 ahora), y los componentes compartidos que usa el ingreso también suman. Hay que seguir midiéndolo
 en cada PR; si el margen se agota, habrá que decidir qué sale de la carga inicial.
@@ -445,6 +468,11 @@ cuatro del catálogo de tipos de falla (`renombrar_tipo_falla`, `fusionar_tipos_
 `desactivar_tipo_falla` y `corregir_tipo_falla`). Los cuatro indicadores (`rpt_*`) no generan
 aviso: son `security invoker`, y la regla solo mira las `security definer`.
 
+**Al 19 oct 2026 (cierre del Sprint 5):** los mismos 21 en «staging». Los cuatro indicadores
+ya tienen cuerpo y siguen sin aviso (`security invoker`). `private.tg_notificacion_push` es
+`security definer`, pero vive en `private` y es un disparador: tampoco genera aviso. En
+«PROYECTO» se esperan 20 después de #41 (los 15 de antes y las cinco funciones que escriben).
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
@@ -539,6 +567,16 @@ preparación (141)**.
   `sesiones.setup.js`, y las que no necesitan el servidor usan una sesión fabricada.
 - Las de CU-08 dejan fotos de pocos KB en el bucket de «staging», que `staging:reset` no borra
   (punto 33).
+
+**Sprint 5 (19 oct 2026):** con las 30 nuevas del sprint (CU-19, CU-20, CU-26 a CU-32), de 166
+**pasaron 160**, se omitieron 2 (solo aplican a un tamaño) y pasaron las 6 de preparación.
+Fallaron 4, todas por la prueba (el detalle en el punto 49 y en `docs/sprints/S5.md`): CU-23
+en los dos tamaños (#51), CU-31 en el escritorio (`a461dce`) y CU-13 en el teléfono
+(intermitente).
+
+- Las de CU-32 crean sus propios tipos («Tipo e2e …») y los dejan desactivados; las de CU-31
+  dejan, si fallan a medias, suscripciones con un punto de entrega de prueba que `enviar-push` no
+  manda.
 
 Las capturas de error de Playwright (`test-results/`) guardan lo que había escrito en los campos,
 incluida la contraseña de prueba. La carpeta no se sube al repositorio; tampoco hay que
@@ -1404,8 +1442,9 @@ Lo que queda por decidir o por hacer a mano (plan del Sprint 5, decisiones 38 a 
   de Vault, y despliega `enviar-push` (pasos en `docs/despliegue/supabase-auth.md`). Hasta
   entonces, el webhook no envía nada y los avisos se crean igual.
 - **En «staging»** el disparador ya llama a `enviar-push`: cada corrida de las e2e le manda
-  pushes a las suscripciones que haya. Hoy hay una, la del administrador de prueba en el Chrome de
-  la prueba corta; si molesta, se desactiva desde Cuenta cuando llegue el PR 9.
+  pushes a las suscripciones que haya. Hay una real, la del administrador de prueba en el Chrome de
+  la prueba corta; si molesta, se desactiva desde Cuenta. Las de las pruebas de CU-31 usan
+  `https://push.e2e.invalid/…`: la función no las manda y las registra como fallidas.
 - **Una suscripción que falla con otro código** (por ejemplo, 413 o 429) se registra y se
   conserva; solo 404 y 410 la borran.
 
@@ -1429,3 +1468,33 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
   un iPhone con la aplicación instalada. Activar desde 10-B, cerrar la aplicación, tomar una
   novedad suya desde otra cuenta, ver que llega, tocarla, ver el aviso leído, cerrar sesión y ver
   que ya no llega.
+
+## 49 · Cierre del Sprint 5 y v1.0
+
+- **El trabajo de extremo a extremo del CI** (punto 48 del encargo).
+  - Corre sin bloquear desde el 14 oct; #40 quita `continue-on-error` (decisión 8 del plan).
+  - En `main` nunca falló. En el sprint falló por pruebas, no por la aplicación:
+    - CU-04 3b dependía de las novedades que dejaban otras pruebas;
+    - la foto de la solución dependía de un tipo creado por CU-14;
+    - CU-23 se rompió con #42, que agregó una segunda región `aria-live`.
+  - Las tres tienen su arreglo en #40 y #51.
+  - **Recomendación:** obligatorio, como dice #40, y requerido en la protección de `main` cuando
+    #51 esté adentro y una corrida de `main` salga en verde. Lo marca una persona.
+- **CU-31 fallaba a veces con todo el conjunto.** Un aviso de otra prueba llegaba a `enviar-push`.
+  FCM respondía 404 al punto de entrega falso y la función borraba la fila, como pide CU-31 2a.
+  Ahora el punto de entrega de prueba no es de un servicio push (`a461dce`).
+- **CU-13 en el teléfono es intermitente en «staging».** Carga todas las escaladas con «Ver más»
+  mientras otras corridas deciden escaladas, y con la paginación por desplazamiento una página
+  puede repetir la anterior. Pasa al repetirla, no aparece en el CI y se va con un
+  `staging:reset`. No se cambió: es una prueba del Sprint 2 y el caso real (un solo director) no lo
+  produce.
+- **`cloudflare:web-perf`** no se corrió sobre Pages: recorrer la vista previa no está autorizado.
+  Lighthouse se corrió sobre el build local (punto 11).
+- **El WebKit del CI se congelaba con #50** en Cuenta, Avisos y el cierre de sesión. Con el
+  permiso sin decidir (así empieza en WebKit; en Chromium, negado), la app le preguntaba al
+  servicio push por la suscripción, y esa llamada deja la página sin responder en el WebKit de
+  Playwright. Sin el permiso concedido no hay suscripción posible: ya no se pregunta
+  (`4b2e472`). CU-30 cierra 10-B, que en WebKit aparece. **Safari real no se ha probado:** la
+  lista de chequeo del punto 48 en un iPhone lo diría.
+- **El atajo de `rf28_rf29_reportes.sql:117`** dice `shortcut:` en vez de `atajo:`. Se deja: la
+  migración ya está aplicada en «staging».
