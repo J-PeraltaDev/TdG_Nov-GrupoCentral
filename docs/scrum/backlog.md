@@ -793,7 +793,7 @@ Pantallas de Figma (SDD, Tabla 36: 05, 09)
 - **CU-19** · Actores: Usuario (primario).
 - **Precondición:** El usuario inició sesión y hay conexión.
 - **Postcondición:** El usuario obtiene el listado de novedades filtrado.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -826,7 +826,7 @@ Pantallas de Figma (SDD, Tabla 36: 21, 23, 26)
 - **CU-20** · Actores: Director de agricultura y Administrador (primarios).
 - **Precondición:** Se realizó CU-19 con al menos un resultado.
 - **Postcondición:** El usuario tiene un archivo CSV con el resultado de la consulta.
-- **Puntos:** por estimar
+- **Puntos:** 3
 
 Criterios de aceptación · curso normal
 
@@ -852,7 +852,7 @@ Pantallas de Figma (SDD, Tabla 36: 21)
 - **CU-26** · Actores: Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.
 - **Precondición:** El usuario tiene acceso al panel de reportes y hay conexión.
 - **Postcondición:** El usuario conoce la carga de novedades abiertas por finca y por área.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -878,7 +878,7 @@ Pantallas de Figma (SDD, Tabla 36: 23)
 - **CU-27** · Actores: Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.
 - **Precondición:** El usuario tiene acceso al panel de reportes y hay conexión.
 - **Postcondición:** El usuario conoce los tiempos de atención de mantenimiento y de sistemas.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -903,7 +903,7 @@ Pantallas de Figma (SDD, Tabla 36: 24)
 - **CU-28** · Actores: Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.
 - **Precondición:** El usuario tiene acceso al panel de reportes y hay conexión.
 - **Postcondición:** El usuario conoce qué parte de las novedades requiere la segunda instancia de aprobación.
-- **Puntos:** por estimar
+- **Puntos:** 5
 
 Criterios de aceptación · curso normal
 
@@ -927,7 +927,7 @@ Pantallas de Figma (SDD, Tabla 36: 25)
 - **CU-29** · Actores: Usuario con acceso al panel de reportes (primario): director de agricultura o administrador.
 - **Precondición:** El usuario tiene acceso al panel de reportes y hay conexión.
 - **Postcondición:** El usuario identifica qué fincas repiten el mismo tipo de falla.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -954,7 +954,7 @@ Pantallas de Figma (SDD, Tabla 36: 26, 27)
 - **CU-30** · Actores: Usuario (destinatario): reportante, aprobador de área, director de agricultura o administrador.
 - **Precondición:** Una novedad cambió de estado o de área.
 - **Postcondición:** Los involucrados quedan enterados del cambio.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -989,7 +989,7 @@ Pantallas de Figma (SDD, Tabla 36: 10 y avisos de 06, 15–17, 20)
 - **CU-32** · Actores: Administrador (primario).
 - **Precondición:** El administrador inició sesión y hay conexión.
 - **Postcondición:** La lista de tipos de falla o la clasificación de la novedad quedan corregidas, y los indicadores del panel reflejan la agrupación corregida.
-- **Puntos:** por estimar
+- **Puntos:** 8
 
 Criterios de aceptación · curso normal
 
@@ -1023,7 +1023,7 @@ Pantallas de Figma (SDD, Tabla 36: 18, 22, 31)
 - **CU-31** · Actores: Servicio de notificaciones push (secundario); Usuario (destinatario).
 - **Precondición:** El destinatario autorizó las notificaciones push.
 - **Postcondición:** El destinatario se entera del cambio aunque no tenga la aplicación abierta.
-- **Puntos:** por estimar
+- **Puntos:** 13
 
 Criterios de aceptación · curso normal
 
