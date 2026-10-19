@@ -148,6 +148,39 @@ export function formatearUltimoIngreso(fecha, ahora = Date.now()) {
   return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
 }
 
+const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
+
+/**
+ * En qué grupo de la pantalla 10 va un aviso y qué hora o fecha muestra (Figma 10; plan del
+ * Sprint 5, decisión 32): hoy y ayer, la hora («7:40 a. m.»); en lo que va de la semana, que
+ * empieza el lunes, el día («mar 22 sep»); antes, la fecha («15 sep», o «12 ago 2025» si fue
+ * otro año).
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ * @returns {{ grupo: 'Hoy' | 'Ayer' | 'Esta semana' | 'Anteriores', cuando: string }}
+ */
+export function cuandoLlegoElAviso(fecha, ahora = Date.now()) {
+  if (esMismoDiaEnColombia(fecha, ahora)) return { grupo: 'Hoy', cuando: formatearHora(fecha) }
+  if (esMismoDiaEnColombia(fecha, new Date(ahora).getTime() - 24 * 3_600_000)) {
+    return { grupo: 'Ayer', cuando: formatearHora(fecha) }
+  }
+  const aviso = enColombia(fecha)
+  const hoy = enColombia(ahora)
+  const diaDelAviso = new Date(Date.UTC(aviso.anio, aviso.mes - 1, aviso.dia))
+  const diaDeHoy = new Date(Date.UTC(hoy.anio, hoy.mes - 1, hoy.dia))
+  const diasAtras = (diaDeHoy.getTime() - diaDelAviso.getTime()) / 86_400_000
+  // De lunes (1) a domingo (7): los días que van corridos de la semana.
+  if (diasAtras < (diaDeHoy.getUTCDay() || 7)) {
+    return {
+      grupo: 'Esta semana',
+      cuando: `${DIAS[diaDelAviso.getUTCDay()]} ${aviso.dia} ${MESES[aviso.mes - 1]}`,
+    }
+  }
+  const corta = `${aviso.dia} ${MESES[aviso.mes - 1]}`
+  return { grupo: 'Anteriores', cuando: aviso.anio === hoy.anio ? corta : `${corta} ${aviso.anio}` }
+}
+
 /**
  * Cuándo se descargó lo que se ve sin conexión, como lo escriben 04-B y 11-B: «hoy 7:42 a. m.»
  * o, si fue otro día, «el 24 sep 2026, 7:42 a. m.».

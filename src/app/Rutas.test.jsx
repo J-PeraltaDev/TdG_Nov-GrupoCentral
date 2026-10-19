@@ -88,6 +88,12 @@ vi.mock('../core/supabase/repositorios/catalogos.js', () => ({
   ]),
   listarFincas: vi.fn().mockResolvedValue([]),
 }))
+vi.mock('../core/supabase/repositorios/avisos.js', () => ({
+  AVISOS_POR_PAGINA: 20,
+  listarAvisos: vi.fn().mockResolvedValue({ avisos: [], total: 0 }),
+  contarAvisosSinLeer: vi.fn().mockResolvedValue(0),
+  marcarAvisosLeidos: vi.fn(),
+}))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
 

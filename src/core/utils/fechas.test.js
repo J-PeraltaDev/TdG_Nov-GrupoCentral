@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
 import {
+  cuandoLlegoElAviso,
   esMismoDiaEnColombia,
   formatearDescarga,
   formatearDuracion,
@@ -200,5 +201,48 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+  it('RF-30 / Figma 10: agrupa los avisos en hoy, ayer, esta semana y anteriores, en la hora de Colombia', () => {
+    // Jueves 24 sep 2026, 9:30 a. m. en Colombia.
+    const ahora = '2026-09-24T14:30:00Z'
+    expect(cuandoLlegoElAviso('2026-09-24T12:40:00Z', ahora)).toEqual({
+      grupo: 'Hoy',
+      cuando: '7:40 a. m.',
+    })
+    // 11:30 p. m. del 23 en Colombia es el 24 en UTC: va en «Ayer».
+    expect(cuandoLlegoElAviso('2026-09-24T04:30:00Z', ahora)).toEqual({
+      grupo: 'Ayer',
+      cuando: '11:30 p. m.',
+    })
+    expect(cuandoLlegoElAviso('2026-09-22T15:00:00Z', ahora)).toEqual({
+      grupo: 'Esta semana',
+      cuando: 'mar 22 sep',
+    })
+    expect(cuandoLlegoElAviso('2026-09-21T05:00:00Z', ahora)).toEqual({
+      grupo: 'Esta semana',
+      cuando: 'lun 21 sep',
+    })
+    // El domingo anterior ya es otra semana.
+    expect(cuandoLlegoElAviso('2026-09-20T15:00:00Z', ahora)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '20 sep',
+    })
+    expect(cuandoLlegoElAviso('2025-12-30T15:00:00Z', ahora)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '30 dic 2025',
+    })
+  })
+
+  it('RF-30: un lunes, el domingo es «Ayer» y lo anterior ya es otra semana', () => {
+    const lunes = '2026-09-28T14:00:00Z'
+    expect(cuandoLlegoElAviso('2026-09-27T15:00:00Z', lunes).grupo).toBe('Ayer')
+    expect(cuandoLlegoElAviso('2026-09-26T15:00:00Z', lunes)).toEqual({
+      grupo: 'Anteriores',
+      cuando: '26 sep',
+    })
+    // Un domingo, toda la semana desde el lunes.
+    expect(cuandoLlegoElAviso('2026-09-21T15:00:00Z', '2026-09-27T14:00:00Z').grupo).toBe(
+      'Esta semana',
+    )
   })
 })

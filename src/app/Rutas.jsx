@@ -29,6 +29,7 @@ const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNove
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 const NovedadGuardada = lazy(() => import('../modules/e2-registro/NovedadGuardada.jsx'))
 const Pendientes = lazy(() => import('../modules/e5-sin-conexion/Pendientes.jsx'))
+const Avisos = lazy(() => import('../modules/e7-avisos/Avisos.jsx'))
 
 // Página de componentes: solo existe en desarrollo. En el build de producción esta
 // condición es falsa y el módulo ni siquiera se empaqueta.
@@ -106,7 +107,7 @@ export function Rutas() {
               <Route path="/recuperacion" element={<Recuperaciones />} />
             </Route>
 
-            <Route path="/avisos" element={<Pendiente titulo="Avisos" sprint="Sprint 5" />} />
+            <Route path="/avisos" element={<Avisos />} />
             <Route path="/cuenta" element={<Cuenta />} />
           </Route>
 

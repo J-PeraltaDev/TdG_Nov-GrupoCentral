@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { pedirConteoDeInsignias } from '../../app/insignias.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { pedirRevisionDelPerfil } from '../../core/sesion/perfilVigente.js'
 import { NOMBRE_DE_ESTADO } from '../../core/utils/estados.js'
@@ -50,6 +51,8 @@ export function useAccion({ estado, alCambiar }) {
       try {
         const resultado = await accion()
         if (exito) setAviso({ tipo: 'exito', mensaje: exito, reintentar: null })
+        // La acción pudo cambiar lo que cuentan las insignias, como la bandeja (SDD 6.1.6).
+        pedirConteoDeInsignias()
         ;(alTerminar ?? alCambiar)(resultado)
         return { ok: true, resultado }
       } catch (error) {

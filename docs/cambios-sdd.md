@@ -31,6 +31,8 @@ actualicen los documentos (lo exige la Definition of Done).
 | 23  | S4     | SRS RF-08, CU-08 y CU-14; SDD Tablas 26, 31 y 35, y 6.1.7 | **Cambio:** el aprobador del área adjunta fotos de la solución; `evidencia.transicion_id` las ata a su intento                                                       | Propuesto |
 | 24  | S5     | SDD 5.3.2, Tabla 21                                       | Precisión: tipos de retorno de las nueve funciones del sprint, `p_desde` y `p_hasta` como `date` y la forma del `jsonb` de cada indicador                            | Propuesto |
 | 25  | S5     | SDD 6.1.1 («Vistas e índices»), Tablas 20 y 34            | Complemento: `v_novedad.resuelta_en`, una sola regla para «Tiempo hasta resolver»                                                                                    | Propuesto |
+| 26  | S5     | SDD 5.3.2 (Tabla 20) y 6.1.4 (Tabla 31)                   | **Cambio:** el cliente ya no actualiza `notificacion`; `marcar_avisos_leidos` es la única forma de marcar un aviso                                                   | Propuesto |
+| 27  | S5     | SDD 6.1.6 (Tabla 33)                                      | Precisión: el texto sale del estado nuevo y del rol del destinatario; sin el código, que va aparte; «reasignada» manda sobre Figma 10                                | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -919,3 +921,62 @@ vista la columna `resuelta_en` (plan del Sprint 5, decisión 6):
 
 > Bandeja, Mis novedades, historial y detalle: novedad con finca, razón social, área, tipo de falla,
 > nombre del reportante y fecha de su última resolución.
+
+## 26 · Marcar los avisos solo con `marcar_avisos_leidos` (S5)
+
+**Sección:** SDD 5.3.2, Tabla 20 (fila `notificacion`), y 6.1.4, Tabla 31 (fila `notificacion`).
+
+**Qué pasa.** Las Tablas 20 y 31 le dan al destinatario un `PATCH` de `leida` y `leida_en` sobre
+`notificacion`, con su política. La Tabla 21 trae además `marcar_avisos_leidos`, y la regla 1 del
+proyecto dice que el cliente nunca escribe en `notificacion`. Se dejó una sola forma (plan del
+Sprint 5, decisión 29; migración `rf30_marcar_avisos_leidos`):
+
+- `marcar_avisos_leidos(p_ids)` es `security definer`: exige un usuario activo, marca solo los
+  avisos propios sin leer (nulo = todos), pone `leida_en` con la hora del servidor, ignora los
+  ajenos sin decir si existen y devuelve cuántos marcó.
+- Se revocó el `update (leida, leida_en)` de `authenticated` y se quitó la política
+  `notificacion_marcar_leida`. La lectura no cambia.
+- Suma un aviso del asesor del tipo conocido (`authenticated_security_definer_function_executable`).
+
+**Texto propuesto (Tabla 20, fila notificacion, columna «Operaciones del cliente»):**
+
+> GET propias (los marca como leídos marcar_avisos_leidos)
+
+**Texto propuesto (Tabla 31, fila notificacion, columna «Actualización»):**
+
+> Solo funciones (marcar_avisos_leidos, sobre los avisos del destinatario)
+
+## 27 · Textos de los avisos (S5)
+
+**Sección:** SDD 6.1.6, Tabla 33 y su nota.
+
+**Qué pasa.** `notificacion` solo guarda el estado nuevo, y la Tabla 33 tiene textos distintos
+para el mismo estado según quién lo recibe. Leídas las funciones de transición, el contexto sale
+del rol del destinatario (plan del Sprint 5, decisión 30): el reportante solo recibe «asignada»
+por una reasignación (`registrar_novedad` avisa solo a los aprobadores), los aprobadores solo
+reciben «en atención» cuando la finca dice que la falla persiste, y los administradores solo
+reciben «resuelta» por un tipo de falla nuevo. No hace falta guardar más en `notificacion`.
+
+Los textos son los de la Tabla 33 **sin el código**, que la pantalla 10 pone arriba de cada aviso
+y el push lleva en el título (decisiones 31 y 47). Figma 10 ya escribe así «El director de
+agricultura aprobó la novedad; vuelve a Mantenimiento para ejecutarla.». Una sola función
+(`supabase/functions/_shared/plantillas.js`) sirve a la pantalla 10 y a `enviar-push`.
+
+**Figma 10 frente a la Tabla 33.** 10 le escribe al reportante «Tu novedad fue asignada a
+Sistemas.» a la hora del registro: es el aviso del enrutamiento, que la Tabla 30 decidió no
+enviar (su constancia es 06). Manda la Tabla 33: el único «asignada» del reportante es por una
+reasignación, «Tu novedad fue reasignada a {área}.».
+
+**Texto propuesto (Tabla 33, columna «Texto del aviso»):** los mismos, sin «NOV-####»:
+
+> Nueva novedad de {finca} · {prioridad}. · Tu novedad fue reasignada a {área}. · {Área} tomó tu
+> novedad para atención. · La finca {finca} indica que la falla persiste. · Escalada por {área}:
+> requiere tu decisión. · Tu novedad fue escalada al director de agricultura. · El director de
+> agricultura aprobó la novedad; vuelve a {área} para ejecutarla. · La novedad fue rechazada.
+> Ábrela para ver el motivo. · {Área} registró la solución. Confirma si quedó resuelta. · Se creó
+> el tipo de falla «{tipo}»; revísalo en el catálogo. · La finca {finca} confirmó el cierre.
+
+**Texto propuesto (nota de la Tabla 33, al final):**
+
+> El texto depende del estado nuevo y del rol del destinatario; el código de la novedad se
+> muestra aparte. Los datos (finca, área, prioridad y tipo) son los vigentes de la novedad.
