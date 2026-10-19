@@ -90,9 +90,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     # Los equipos no abren WebKit (decisiones-pendientes, punto 15): aquí se prueba Safari
-    # (RNF-04). Primera semana sin bloquear (plan del Sprint 4, decisión 27); si es estable, se
-    # quita esta línea.
-    continue-on-error: true
+    # (RNF-04). Bloquea desde el Sprint 5 (plan, decisión 8): la primera semana corrió sin
+    # bloquear y nunca falló en main.
     steps:
       - uses: actions/checkout@v7
 
