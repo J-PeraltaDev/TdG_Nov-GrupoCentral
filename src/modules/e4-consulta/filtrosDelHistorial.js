@@ -1,6 +1,6 @@
 import { esUuid } from '../../../supabase/functions/_shared/validaciones.js'
 import { NOMBRE_DE_ESTADO } from '../../core/utils/estados.js'
-import { hoyEnColombia, MESES } from '../../core/utils/fechas.js'
+import { esDia, hoyEnColombia, MESES } from '../../core/utils/fechas.js'
 
 /*
  * Filtros del historial (RF-19; plan del Sprint 5, decisión 10). Viven en la dirección, como los
@@ -39,17 +39,6 @@ const ESTADOS = /** @type {EstadoNovedad[]} */ (Object.keys(NOMBRE_DE_ESTADO))
 
 /** Los seis estados que no son finales (SDD, Tabla 34): el grupo «abiertas», que usa el panel. */
 export const ABIERTAS = ESTADOS.filter((estado) => estado !== 'rechazada' && estado !== 'cerrada')
-
-const FECHA = /^(\d{4})-(\d{2})-(\d{2})$/
-
-/** Un día que existe en el calendario, como lo da `<input type="date">`. */
-function esDia(texto) {
-  const partes = FECHA.exec(texto ?? '')
-  if (!partes) return false
-  const [anio, mes, dia] = partes.slice(1).map(Number)
-  const fecha = new Date(Date.UTC(anio, mes - 1, dia))
-  return fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia
-}
 
 const sonLasAbiertas = (estados) => estados.join() === ABIERTAS.join()
 

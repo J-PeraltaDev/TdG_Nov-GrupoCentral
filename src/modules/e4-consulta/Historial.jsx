@@ -57,7 +57,7 @@ function TablaDelHistorial({ novedades, origen }) {
   const abrir = (novedad) => navegar(`/novedades/${novedad.id}`, { state: { origen } })
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-borde bg-superficie">
+    <div className="relative overflow-x-auto rounded-xl border border-borde bg-superficie">
       <table className="w-full border-collapse">
         <caption className="sr-only">Historial de novedades</caption>
         <thead className="bg-gris-100">

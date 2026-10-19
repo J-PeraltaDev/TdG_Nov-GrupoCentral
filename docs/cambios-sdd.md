@@ -4,36 +4,38 @@ El SDD y el SRS son documentos vivos. Cada vez que la implementación se aparta 
 aquí, en el mismo PR, con la sección afectada y el texto propuesto, para que Mateo y Juan
 actualicen los documentos (lo exige la Definition of Done).
 
-| N.º | Sprint | Documento y sección                                       | Qué cambia                                                                                                                                                           | Estado    |
-| --- | ------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)               | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                                    | Propuesto |
-| 2   | S0     | SDD 5.2 («Sistema de diseño»)                             | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                               | Propuesto |
-| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)                      | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                       | Propuesto |
-| 4   | S1     | SDD 6.1.1, Tabla 27                                       | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                                 | Propuesto |
-| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)                         | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                     | Propuesto |
-| 6   | S2     | SDD 5.3.2, Tabla 21                                       | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                               | Propuesto |
-| 7   | S2     | SDD 6.1.3 (algoritmo general)                             | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                               | Propuesto |
-| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)                   | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                                 | Propuesto |
-| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                              | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                      | Propuesto |
-| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                             | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                             | Propuesto |
-| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3                        | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                           | Propuesto |
-| 12  | S3     | SDD 6.1.3, Tabla 30                                       | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                         | Propuesto |
-| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)                     | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                     | Propuesto |
-| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10                   | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                                  | Propuesto |
-| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3                        | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                        | Propuesto |
-| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10                 | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                      | Propuesto |
-| 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22             | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos    | Propuesto |
-| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6                 | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio      | Propuesto |
-| 19  | S4     | SDD 6.1.5 («Registro de la novedad» y «Persistencia»)     | Precisión: un error de sesión al enviar también encola; el aviso de 07 siempre; sin `estimate()`; `persist()` también al encolar                                     | Propuesto |
-| 20  | S4     | SDD 6.1.5 («Sincronización de las pendientes») y 5.3.6    | Complemento: disparadores (el monitor, no el evento `online`), Web Locks entre pestañas, solo las del usuario, `SIN_PERMISO` y el error de sesión de la API de datos | Propuesto |
-| 21  | S4     | SDD 6.1.5 (Tabla 32 y «Consulta»)                         | Precisión: qué guarda el almacén `novedades`, qué retira, cómo arma las listas sin conexión y cuándo se borra; fecha y conteos de cada lista                         | Propuesto |
-| 22  | S4     | SDD 5.2, 6.1.11 y 7.3                                     | Complemento: «registrada sin conexión» se deriva de las dos fechas con un umbral configurable                                                                        | Propuesto |
-| 23  | S4     | SRS RF-08, CU-08 y CU-14; SDD Tablas 26, 31 y 35, y 6.1.7 | **Cambio:** el aprobador del área adjunta fotos de la solución; `evidencia.transicion_id` las ata a su intento                                                       | Propuesto |
-| 24  | S5     | SDD 5.3.2, Tabla 21                                       | Precisión: tipos de retorno de las nueve funciones del sprint, `p_desde` y `p_hasta` como `date` y la forma del `jsonb` de cada indicador                            | Propuesto |
-| 25  | S5     | SDD 6.1.1 («Vistas e índices»), Tablas 20 y 34            | Complemento: `v_novedad.resuelta_en`, una sola regla para «Tiempo hasta resolver»                                                                                    | Propuesto |
-| 26  | S5     | SDD 5.3.2 (Tabla 20) y 6.1.4 (Tabla 31)                   | **Cambio:** el cliente ya no actualiza `notificacion`; `marcar_avisos_leidos` es la única forma de marcar un aviso                                                   | Propuesto |
-| 27  | S5     | SDD 6.1.6 (Tabla 33)                                      | Precisión: el texto sale del estado nuevo y del rol del destinatario; sin el código, que va aparte; «reasignada» manda sobre Figma 10                                | Propuesto |
-| 28  | S5     | SDD 5.2.5 y Tabla 20 (fila `v_novedad`)                   | Complemento: filtros del historial en la dirección, el grupo «abiertas», las opciones de cada filtro, sin conexión y el buscador por código                          | Propuesto |
+| N.º | Sprint | Documento y sección                                       | Qué cambia                                                                                                                                                            | Estado    |
+| --- | ------ | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1   | S0     | SDD 4.2.4 (C-04) y plan de arranque («PWA»)               | Precisión, no cambio: el service worker precachea con código propio, sin las librerías de Workbox                                                                     | Propuesto |
+| 2   | S0     | SDD 5.2 («Sistema de diseño»)                             | Precisión: los íconos de Figma son la fuente Material Symbols Rounded; en el código son SVG locales del mismo conjunto                                                | Propuesto |
+| 3   | S1     | SDD 6.1.4, Tabla 31 (fila `usuario`)                      | **Cambio:** la lectura de `usuario` es para todo usuario activo, limitada por columnas; el correo no se expone                                                        | Propuesto |
+| 4   | S1     | SDD 6.1.1, Tabla 27                                       | Complemento: índices en las claves foráneas que la Tabla 27 no cubre                                                                                                  | Propuesto |
+| 5   | S1     | SDD 3.3.3 («Sesión sin conexión»)                         | Precisión: sin red la aplicación abre con el perfil guardado, sin esperar al cliente de Supabase                                                                      | Propuesto |
+| 6   | S2     | SDD 5.3.2, Tabla 21                                       | Precisión: parámetros opcionales de `registrar_solucion` y columnas de salida de `sugerir_tipos_falla`                                                                | Propuesto |
+| 7   | S2     | SDD 6.1.3 (algoritmo general)                             | Precisión: el rol que no corresponde a la acción recibe `SIN_PERMISO`, como en la Tabla 22, y no `TRANSICION_INVALIDA`                                                | Propuesto |
+| 8   | S2     | SDD 6.1.3 (Tabla 30) y 7.3 (parámetros)                   | Complemento: el motivo, la justificación y la solución admiten máximo 500 caracteres                                                                                  | Propuesto |
+| 9   | S2     | SDD 6.1.8 y 6.1.3 (Tabla 30)                              | Precisión: cadena de fusiones, «hoy» en la hora de Colombia y permisos de `sugerir_tipos_falla`                                                                       | Propuesto |
+| 10  | S3     | SDD 5.3.4 (Tabla 23) y 4.2.10                             | Precisión: cuerpo de los errores, `activo` opcional, CORS y `verify_jwt` de las Edge Functions; se despliegan sin Docker                                              | Propuesto |
+| 11  | S3     | SDD 5.3.2 (Tablas 21 y 22) y 6.1.3                        | Precisión de las firmas del sprint. **Cambio:** dos funciones nuevas, tres códigos de error nuevos y una función que `anon` puede ejecutar                            | Propuesto |
+| 12  | S3     | SDD 6.1.3, Tabla 30                                       | **Cambio:** `registrar_solucion` deja la solución también en el historial y `reportar_falla_persiste` la quita de la novedad                                          | Propuesto |
+| 13  | S3     | SDD 5.3.2 (Tabla 20) y 6.1.1 (vistas)                     | Complemento: vista `v_finca`, con las novedades abiertas y los reportantes activos de cada finca                                                                      | Propuesto |
+| 14  | S3     | SDD 5.3.1 (Tabla 19), 6.1.10 y Tabla 10                   | Complemento: el perfil se relee con la sesión viva. Precisión de `gestionar-usuario`. Temporal: el administrador entra a «Usuarios»                                   | Propuesto |
+| 15  | S3     | SDD 6.1.1 (Tabla 26), 6.1.10 y 7.3                        | **Cambio:** `intentos_fallidos` y un índice único en `solicitud_recuperacion`. Precisión del código temporal y de los estados de la solicitud                         | Propuesto |
+| 16  | S3     | SDD 5.2 («Navegación por rol») y Tabla 10                 | Complemento: en el teléfono, el director y el administrador abren «Cuenta» desde un avatar en la barra superior                                                       | Propuesto |
+| 17  | S4     | SDD 6.1.4 (Tabla 31), 6.1.7, 5.3.3 y Tabla 22             | **Cambio:** disparador de `evidencia` (estado, máximo de 3, ruta y tamaño real); los archivos se leen a través de su fila; solo JPEG; dos códigos de error nuevos     | Propuesto |
+| 18  | S4     | SDD 6.1.5 («Monitor de conexión») y 5.3.6                 | Complemento: de dónde saca el estado el monitor (navegador, fallos de red de cada solicitud y verificación contra Auth), cada cuánto verifica y un solo anuncio       | Propuesto |
+| 19  | S4     | SDD 6.1.5 («Registro de la novedad» y «Persistencia»)     | Precisión: un error de sesión al enviar también encola; el aviso de 07 siempre; sin `estimate()`; `persist()` también al encolar                                      | Propuesto |
+| 20  | S4     | SDD 6.1.5 («Sincronización de las pendientes») y 5.3.6    | Complemento: disparadores (el monitor, no el evento `online`), Web Locks entre pestañas, solo las del usuario, `SIN_PERMISO` y el error de sesión de la API de datos  | Propuesto |
+| 21  | S4     | SDD 6.1.5 (Tabla 32 y «Consulta»)                         | Precisión: qué guarda el almacén `novedades`, qué retira, cómo arma las listas sin conexión y cuándo se borra; fecha y conteos de cada lista                          | Propuesto |
+| 22  | S4     | SDD 5.2, 6.1.11 y 7.3                                     | Complemento: «registrada sin conexión» se deriva de las dos fechas con un umbral configurable                                                                         | Propuesto |
+| 23  | S4     | SRS RF-08, CU-08 y CU-14; SDD Tablas 26, 31 y 35, y 6.1.7 | **Cambio:** el aprobador del área adjunta fotos de la solución; `evidencia.transicion_id` las ata a su intento                                                        | Propuesto |
+| 24  | S5     | SDD 5.3.2, Tabla 21                                       | Precisión: tipos de retorno de las nueve funciones del sprint, `p_desde` y `p_hasta` como `date` y la forma del `jsonb` de cada indicador                             | Propuesto |
+| 25  | S5     | SDD 6.1.1 («Vistas e índices»), Tablas 20 y 34            | Complemento: `v_novedad.resuelta_en`, una sola regla para «Tiempo hasta resolver»                                                                                     | Propuesto |
+| 26  | S5     | SDD 5.3.2 (Tabla 20) y 6.1.4 (Tabla 31)                   | **Cambio:** el cliente ya no actualiza `notificacion`; `marcar_avisos_leidos` es la única forma de marcar un aviso                                                    | Propuesto |
+| 27  | S5     | SDD 6.1.6 (Tabla 33)                                      | Precisión: el texto sale del estado nuevo y del rol del destinatario; sin el código, que va aparte; «reasignada» manda sobre Figma 10                                 | Propuesto |
+| 28  | S5     | SDD 5.2.5 y Tabla 20 (fila `v_novedad`)                   | Complemento: filtros del historial en la dirección, el grupo «abiertas», las opciones de cada filtro, sin conexión y el buscador por código                           | Propuesto |
+| 29  | S5     | SDD 6.1.9 (Tabla 34), 5.2.6 y Tabla 22                    | Precisión: período en días de Colombia, «por mes», «Datos al», quién agrupa, «abiertas con más tiempo», opciones del período; `FECHA_INVALIDA` también en las `rpt_*` | Propuesto |
+| 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1020,3 +1022,48 @@ dibuja Figma. Se resolvió así (plan del Sprint 5, decisiones 9 a 15):
 > Bandeja, Mis novedades, historial (con sus filtros en la dirección), buscador por código y
 > detalle: novedad con finca, razón social, área, tipo de falla, nombre del reportante y
 > `resuelta_en`.
+
+## 29 · Panel de reportes: períodos, cifras y quién agrupa (S5)
+
+**Sección:** SDD 6.1.9 (Tabla 34), 5.2.6 («Interfaz F: Panel de reportes») y Tabla 22.
+
+**Qué pasa.** La Tabla 34 define cada indicador, pero no fija en qué hora se cortan los períodos,
+qué es «por mes», qué devuelve cada función ni quién recorta y ordena lo que muestra Figma (plan
+del Sprint 5, decisiones 5 y 19 a 27). En el PR 4 quedaron las dos primeras; el PR 5 agrega las
+otras dos a esta misma entrada.
+
+- **Seguridad:** las `rpt_*` son `security invoker` (como dice 6.1.9) y verifican el rol al
+  comenzar: quien no es director ni administrador activo recibe `SIN_PERMISO`, en lugar de un
+  panel recortado por su RLS. No suman avisos del asesor.
+- **Período:** `p_desde` y `p_hasta` son días de Colombia, inclusivos: desde las 12:00 a. m. de
+  `p_desde` hasta antes de las 12:00 a. m. del día siguiente a `p_hasta`. Uno invertido o nulo
+  responde `FECHA_INVALIDA` (Tabla 22). Las opciones son las de Figma: «Mes actual» y «Últimos 3,
+  6 y 12 meses» (meses de calendario hasta hoy) y, además, «Personalizado».
+- **«Datos al»:** la hora de la consulta, que devuelve cada función.
+- **Abiertas (RF-26):** los seis estados no finales, por área, por finca y por estado. Salen todas
+  las fincas activas, en cero si no tienen abiertas, y las inactivas que aún tengan alguna.
+- **Tiempos (RF-27):** desde `fecha_registro` hasta la última resolución (`v_novedad.resuelta_en`,
+  cambio 25), de las resueltas o cerradas cuya última resolución cae en el período. «Por mes» es el
+  mes de Colombia de la resolución. «Abiertas con más tiempo» son las cinco abiertas más antiguas
+  hoy, sin depender del período.
+- **Quién agrupa:** las funciones devuelven agregados simples; la pantalla ordena, recorta y
+  dibuja.
+
+**Texto propuesto (Tabla 34, nota):**
+
+> Los períodos se cortan en días de Colombia, inclusivos; «por mes» es el mes de Colombia de la
+> fecha que mide el indicador. Cada indicador informa la hora de la consulta («Datos al»). Las
+> funciones verifican que quien consulta sea el director de agricultura o el administrador.
+
+**Texto propuesto (Tabla 22, fila `FECHA_INVALIDA`, «Condición»):**
+
+> Fecha de ejecución posterior a la actual, o un período de reporte con la fecha inicial
+> posterior a la final o sin alguna de las dos
+
+## 35 · El administrador entra al panel de reportes (S5)
+
+**Sección:** SDD 5.2, Tabla 10. Cierra el temporal del cambio 14.
+
+**Qué pasa.** Mientras no existía el panel, el administrador entraba a «Usuarios». Desde el PR 4
+del Sprint 5 entra a `/panel`, como dice la Tabla 10 (plan del Sprint 5, decisión 28). No hay
+texto que proponer: la Tabla 10 ya dice «23 Panel de reportes».

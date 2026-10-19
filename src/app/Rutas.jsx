@@ -31,6 +31,8 @@ const NovedadGuardada = lazy(() => import('../modules/e2-registro/NovedadGuardad
 const Pendientes = lazy(() => import('../modules/e5-sin-conexion/Pendientes.jsx'))
 const Avisos = lazy(() => import('../modules/e7-avisos/Avisos.jsx'))
 const Historial = lazy(() => import('../modules/e4-consulta/Historial.jsx'))
+// El panel solo lo descargan el director y el administrador: su ruta tiene guardián.
+const Panel = lazy(() => import('../modules/e6-reportes/Panel.jsx'))
 
 // Página de componentes: solo existe en desarrollo. En el build de producción esta
 // condición es falsa y el módulo ni siquiera se empaqueta.
@@ -79,10 +81,7 @@ export function Rutas() {
             <Route
               element={<GuardianDeRol roles={[ROL.DIRECTOR_AGRICULTURA, ROL.ADMINISTRADOR]} />}
             >
-              <Route
-                path="/panel"
-                element={<Pendiente titulo="Panel de reportes" sprint="Sprint 5" />}
-              />
+              <Route path="/panel" element={<Panel />} />
             </Route>
 
             <Route
