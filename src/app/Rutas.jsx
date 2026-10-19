@@ -19,6 +19,7 @@ const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
 const Fincas = lazy(() => import('../modules/e1-acceso-admin/Fincas.jsx'))
 const Usuarios = lazy(() => import('../modules/e1-acceso-admin/Usuarios.jsx'))
 const Recuperaciones = lazy(() => import('../modules/e1-acceso-admin/Recuperaciones.jsx'))
+const TiposDeFalla = lazy(() => import('../modules/e1-acceso-admin/TiposDeFalla.jsx'))
 // La recuperación no tiene sesión, pero tampoco va en el paquete del ingreso: la abre quien
 // olvidó su contraseña, no todo el que entra.
 const RecuperarContrasena = lazy(() => import('../modules/e1-acceso-admin/RecuperarContrasena.jsx'))
@@ -97,10 +98,7 @@ export function Rutas() {
             <Route element={<GuardianDeRol roles={[ROL.ADMINISTRADOR]} />}>
               <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/fincas" element={<Fincas />} />
-              <Route
-                path="/tipos-de-falla"
-                element={<Pendiente titulo="Tipos de falla" sprint="Sprint 5" />}
-              />
+              <Route path="/tipos-de-falla" element={<TiposDeFalla />} />
               <Route path="/recuperacion" element={<Recuperaciones />} />
             </Route>
 

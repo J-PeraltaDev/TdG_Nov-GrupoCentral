@@ -35,6 +35,8 @@ actualicen los documentos (lo exige la Definition of Done).
 | 27  | S5     | SDD 6.1.6 (Tabla 33)                                      | Precisión: el texto sale del estado nuevo y del rol del destinatario; sin el código, que va aparte; «reasignada» manda sobre Figma 10                                 | Propuesto |
 | 28  | S5     | SDD 5.2.5 y Tabla 20 (fila `v_novedad`)                   | Complemento: filtros del historial en la dirección, el grupo «abiertas», las opciones de cada filtro, sin conexión y el buscador por código                           | Propuesto |
 | 29  | S5     | SDD 6.1.9 (Tabla 34), 5.2.6 y Tabla 22                    | Precisión: período en días de Colombia, «por mes», «Datos al», quién agrupa, «abiertas con más tiempo», opciones del período; `FECHA_INVALIDA` también en las `rpt_*` | Propuesto |
+| 30  | S5     | SDD 6.1.8 y Tabla 22                                      | **Cambio:** `TIPO_FALLA_DUPLICADO`; bloqueos de la fusión, destino inactivo, `for share` al resolver, sin reactivar y la lista sin los fusionados                     | Propuesto |
+| 31  | S5     | SDD 6.1.3 (Tabla 30) y 5.2.5                              | Precisión: la observación de la corrección del tipo de falla y cómo la muestra la línea de tiempo                                                                     | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1066,6 +1068,70 @@ el PR 5.
 
 > Fecha de ejecución posterior a la actual, o un período de reporte con la fecha inicial
 > posterior a la final o sin alguna de las dos
+
+## 30 · Catálogo de tipos de falla: el nombre repetido, la fusión y los bloqueos (S5)
+
+**Sección:** SDD 6.1.8 («Catálogo de tipos de falla») y Tabla 22.
+
+**Qué pasa.** 6.1.8 dice qué hacen renombrar, fusionar y desactivar, pero no qué responde cada
+una cuando el nombre ya existe, qué pasa con las novedades cerradas ni cómo se cuidan de dos
+cambios a la vez (plan del Sprint 5, decisiones 48 a 52). Llegaron en el PR 6.
+
+- **Quién:** las cuatro funciones son `security definer` y verifican que quien llama sea un
+  administrador activo (`SIN_PERMISO` si no). No avisan a nadie.
+- **Renombrar:** guarda el nombre como lo escribió el administrador, con los espacios arreglados,
+  y lo normaliza como al resolver. El mismo tipo con otras mayúsculas o tildes sí se puede
+  («biometrico» → «Biométrico»). **Si el nombre normalizado ya es de otro tipo, activo o no:
+  `TIPO_FALLA_DUPLICADO`, un código nuevo.** Con `TIPO_FALLA_INVALIDO` la pantalla no sabría
+  cuándo proponer la fusión (31-B). Un tipo inactivo no se renombra (`TIPO_FALLA_INVALIDO`).
+  Queda auditado con el nombre anterior; repetir el mismo nombre no cambia nada.
+- **Fusionar:** bloquea los dos tipos en orden de id, para que dos fusiones cruzadas esperen en vez
+  de trabarse. Origen igual al destino, o alguno inactivo: `TIPO_FALLA_INVALIDO`. Pasan al
+  destino **todas** las novedades del origen, también las cerradas (el indicador de recurrencia
+  agrupa por el tipo vigente). El origen queda inactivo y auditado con el destino y su nombre.
+  Devuelve el destino. Una cadena A → B y después B → C deja todo en C.
+- **Al resolver:** `private.resolver_tipo_falla` lee el tipo `for share`: una solución que llega
+  durante una fusión espera y queda con el destino, no con un origen ya inactivo.
+- **Desactivar:** queda auditado con el nombre del tipo; uno inactivo no se vuelve a desactivar.
+  **No hay reactivación:** `accion_auditoria` no la tiene y 31 dibuja el tipo inactivo con sus
+  acciones deshabilitadas (decisión 51).
+- **La lista de 31:** los activos y los desactivados; los fusionados no («retira el origen de la
+  lista», RF-32), que se reconocen por su auditoría.
+
+**Texto propuesto (6.1.8, al final):**
+
+> Renombrar, fusionar y desactivar son del administrador y quedan en `auditoria_tipo_falla`. Un
+> nombre normalizado que ya es de otro tipo, activo o inactivo, no se acepta. La fusión pasa al
+> destino todas las novedades del origen, también las cerradas, y desactiva el origen; bloquea
+> los dos tipos en orden de identificador. Un tipo inactivo no se renombra, no se fusiona ni se
+> reactiva.
+
+**Texto propuesto (Tabla 22, fila nueva):**
+
+> | `TIPO_FALLA_DUPLICADO` | El nombre nuevo de un tipo de falla ya es de otro tipo | Pantalla 31-B si el otro está activo; si no, «Ya existe «{tipo}», pero está inactivo. Elige otro nombre.» |
+
+## 31 · La corrección del tipo de falla en el historial (S5)
+
+**Sección:** SDD 6.1.3 (Tabla 30) y 5.2.5 («Línea de tiempo»).
+
+**Qué pasa.** La Tabla 30 dice que corregir el tipo de una novedad cerrada no cambia su estado y
+queda en el historial, pero no qué se escribe ni cómo se ve (plan del Sprint 5, decisión 53).
+
+- `corregir_tipo_falla` acepta solo una novedad `cerrada` (si no, `TRANSICION_INVALIDA`) y un
+  tipo activo y distinto del actual (si no, `TIPO_FALLA_INVALIDO`).
+- Deja una transición **`cerrada → cerrada`** a nombre del administrador, con la observación
+  `"Puentes" → "Puentes y pasos"` (el tipo anterior y el nuevo). No avisa a nadie.
+- La línea de tiempo no la pinta como un cambio de estado: dice **«Tipo de falla corregido»**, con
+  quién, cuándo y la observación.
+
+**Texto propuesto (Tabla 30, fila nueva):**
+
+> | Corregir el tipo de falla | Administrador | `cerrada → cerrada`, con el tipo anterior y el nuevo en la observación | Nadie |
+
+**Texto propuesto (5.2.5, «Línea de tiempo»):**
+
+> Una transición de «cerrada» a «cerrada» es la corrección del tipo de falla: se muestra como
+> «Tipo de falla corregido», no como un cambio de estado.
 
 ## 35 · El administrador entra al panel de reportes (S5)
 

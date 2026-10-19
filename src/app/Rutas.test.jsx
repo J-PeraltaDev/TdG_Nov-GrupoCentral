@@ -70,6 +70,13 @@ vi.mock('../core/supabase/repositorios/recuperacion.js', () => ({
 }))
 vi.mock('../core/supabase/repositorios/tiposFalla.js', () => ({
   sugerirTiposFalla: vi.fn().mockResolvedValue([]),
+  listarCatalogo: vi.fn().mockResolvedValue([]),
+  listarCambios: vi.fn().mockResolvedValue([]),
+  listarTiposActivos: vi.fn().mockResolvedValue([]),
+  renombrarTipoFalla: vi.fn(),
+  fusionarTiposFalla: vi.fn(),
+  desactivarTipoFalla: vi.fn(),
+  corregirTipoFalla: vi.fn(),
 }))
 // El marco envía las pendientes al abrir; la sincronización tiene sus propias pruebas.
 vi.mock('../core/offline/sincronizador.js', () => ({
@@ -489,6 +496,12 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     await userEvent.click(administracion.getByRole('link', { name: 'Fincas' }))
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Fincas' })).toBeVisible()
+  })
+
+  it('RF-32: el administrador abre el catálogo de tipos de falla (31)', async () => {
+    abrir('/tipos-de-falla', 'administrador')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Tipos de falla' })).toBeVisible()
   })
 
   it.each(['reportante', 'aprobador', 'director'])(

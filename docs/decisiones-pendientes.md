@@ -1350,3 +1350,39 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 22 a 26, 61 y
   historial» de una finca abre sus resueltas y cerradas del período, de todos los tipos. La nota de
   las que quedaron por fuera va en corto: «12 novedades sin tipo de falla quedaron por fuera.».
 - **«Personalizado» en el teléfono:** «Desde» y «Hasta» van uno sobre otro.
+
+## 45 · Tipos de falla (31, 31-B y 31-C) y «Corregir tipo» (RF-32)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 48 a 54 y 64):
+
+- **31-B mientras se escribe.** El aviso «Ya existe «Biométrico». ¿Quieres fusionar los dos
+  tipos?» aparece en cuanto el nombre coincide con otro tipo activo, y el botón pasa a «Fusionar en
+  su lugar», que abre 31 con los dos ya elegidos. Con el nombre de un tipo inactivo (también uno
+  fusionado), bajo el campo: «Ya existe «{tipo}», pero está inactivo. Elige otro nombre.». Si el
+  servidor responde `TIPO_FALLA_DUPLICADO` (otro tipo apareció después de cargar la lista), la
+  lista se recarga y se ve 31-B. Sin dibujo, el botón normal dice «Renombrar».
+- **Desactivar** (sin dibujo, decisión 52): «Desactivar tipo de falla», ««Radio» saldrá de las
+  sugerencias. Sus 3 novedades lo conservan.», «Cancelar» y «Desactivar». Las comillas son
+  angulares, como 31-B y 31-C; con una novedad, «Su novedad lo conserva.»; sin novedades, solo la
+  primera frase.
+- **El aviso de 31 en singular y en cero.** «La novedad de «X» pasará…» y ««X» no tiene
+  novedades. «X» saldrá de la lista.».
+- **«Corregir tipo de falla»** (sin dibujo, decisión 53): «Tipo actual: {tipo}», el campo «Tipo
+  correcto» con los tipos activos menos el actual, «Cancelar» y «Corregir». La observación del
+  historial usa comillas rectas, como dice la decisión 53. En el teléfono, «Corregir tipo» va en
+  su propia línea bajo el tipo.
+- **Avisos al terminar:** «Tipo de falla renombrado.», «Tipos de falla fusionados.», «Tipo de falla
+  desactivado.» y «Tipo de falla corregido.».
+- **La tabla a 1280 px.** Figma la dibuja a 1440 con anchos fijos; aquí las columnas miden lo que
+  su texto y el nombre toma lo que sobra y se corta (completo en el globo del navegador). La fila
+  del diálogo abierto lleva el fondo gris de 31.
+- **Los diálogos de 31 miden 520 px,** como Figma. Los demás siguen en 448 (Figma 30-B mide 480:
+  diferencia anterior a este PR, no se toca aquí).
+- **31 en el teléfono** (decisión 64): se llega desde «Cuenta»; cada tipo es una tarjeta con sus
+  acciones de 48 px y el registro de cambios va en tarjetas.
+- **Sin datos:** «Todavía no hay tipos de falla. Los crean las áreas al registrar soluciones.» y
+  «Todavía no hay cambios en el catálogo.».
+- **Atajo:** se cargan todo el catálogo y todo el registro (`atajo:` en el repositorio); con más de
+  500, paginar.
+- **Sin conexión,** «Corregir tipo» no aparece: necesita el servidor (RF-25). Si la lista de tipos
+  no llega, el diálogo lo dice y ofrece «Reintentar».
