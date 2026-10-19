@@ -116,11 +116,13 @@ test.describe('CU-08 y CU-14 · Fotos de la solución (cambio 23)', () => {
     const { page } = aprobador
     await page.goto(`/novedades/${novedad.id}/solucion`)
     await page.getByRole('textbox', { name: '¿Qué se hizo?' }).fill('Se cambió el capacitor.')
-    // Un tipo que ya existe en «staging», para no crear uno por corrida.
-    await page.getByRole('combobox', { name: 'Tipo de falla' }).fill('Tipo e2e')
-    // Por su nombre: mientras busca, la lista solo trae «Buscando…», que no se puede elegir.
+    // Cualquier tipo que ya exista, para no crear uno por corrida: la base local del CI tiene los
+    // del seed y «staging» no (decisiones-pendientes, punto 25), pero sí los «Tipo e2e…» de
+    // corridas anteriores. Los dos casos tienen alguno con «e».
+    await page.getByRole('combobox', { name: 'Tipo de falla' }).fill('e')
+    // Un tipo existente dice cuántas novedades tiene; «Buscando…» y «Crear tipo nuevo» no.
     await page
-      .getByRole('option', { name: /^Tipo e2e/ })
+      .getByRole('option', { name: /novedad(es)?$/ })
       .first()
       .click()
     await page
