@@ -1473,13 +1473,18 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
 
 - **El trabajo de extremo a extremo del CI** (punto 48 del encargo).
   - Corre sin bloquear desde el 14 oct; #40 quita `continue-on-error` (decisión 8 del plan).
-  - En `main` nunca falló. En el sprint falló por pruebas, no por la aplicación:
+  - En `main` nunca falló. En el sprint falló sobre todo por pruebas:
     - CU-04 3b dependía de las novedades que dejaban otras pruebas;
     - la foto de la solución dependía de un tipo creado por CU-14;
     - CU-23 se rompió con #42, que agregó una segunda región `aria-live`.
-  - Las tres tienen su arreglo en #40 y #51.
+  - Las tres tienen su arreglo en #40 y #51. Y una vez por la aplicación: WebKit en #50
+    (`4b2e472`, abajo).
+  - El 19 oct, en #39, «WebKit encountered an internal error» se repitió en el único reintento
+    del CI (CU-15), y hubo que volver a correr el trabajo.
   - **Recomendación:** obligatorio, como dice #40, y requerido en la protección de `main` cuando
-    #51 esté adentro y una corrida de `main` salga en verde. Lo marca una persona.
+    #51 esté adentro y una corrida de `main` salga en verde. Antes, subir a 2 los reintentos del
+    CI (`retries` en `playwright.config.js`), para que esa falla de WebKit no frene una fusión
+    ajena. Lo marca una persona.
 - **CU-31 fallaba a veces con todo el conjunto.** Un aviso de otra prueba llegaba a `enviar-push`.
   FCM respondía 404 al punto de entrega falso y la función borraba la fila, como pide CU-31 2a.
   Ahora el punto de entrega de prueba no es de un servicio push (`a461dce`).
