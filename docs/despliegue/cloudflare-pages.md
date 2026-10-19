@@ -35,13 +35,18 @@ No actives Pages Functions ni agregues un `wrangler.jsonc`: el sitio es estátic
 
 ## 2 · Variables de entorno
 
-En **Settings** → **Environment variables**. Son dos variables, con valores distintos por
+En **Settings** → **Environment variables**. Son tres variables, con valores distintos por
 entorno (las razones están en `docs/adr/0011`):
 
 | Entorno        | `VITE_SUPABASE_URL`                        | `VITE_SUPABASE_PUBLISHABLE_KEY`           |
 | -------------- | ------------------------------------------ | ----------------------------------------- |
 | **Production** | `https://lyrdsmfalrchbdpmikmt.supabase.co` | la clave `sb_publishable_…` de «PROYECTO» |
 | **Preview**    | `https://qxjnnanjidytbyihanet.supabase.co` | la clave `sb_publishable_…` de «staging»  |
+
+La tercera, `VITE_VAPID_PUBLIC_KEY`, es la clave pública de las notificaciones push: en
+**Production**, la `VAPID_PUBLIC_KEY` de «PROYECTO»; en **Preview**, la de «staging». Las dos
+salen de `npm run vapid:claves` (ver `docs/despliegue/supabase-auth.md`). Es pública, como la
+clave publicable; la privada nunca va aquí. Sin ella, la aplicación no ofrece las notificaciones.
 
 Cada clave está en el panel de Supabase del proyecto correspondiente: **Project Settings** →
 **API Keys** → _Publishable key_. **Nunca** copies la _Secret key_: el repositorio y el sitio son

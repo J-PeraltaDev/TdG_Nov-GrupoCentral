@@ -19,6 +19,7 @@ const supabase = vi.hoisted(() => ({
   from: vi.fn(),
 }))
 vi.mock('../supabase/cliente.js', () => ({ supabase }))
+vi.mock('../push/suscripcion.js', () => ({ desactivarPush: vi.fn(async () => 'desactivadas') }))
 
 const AREAS = [
   { id: 'area-m', nombre: 'Mantenimiento' },
@@ -435,6 +436,25 @@ describe('Sesión y perfil (RF-01 / CU-01, SDD 6.1.10)', () => {
       expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
       expect(await leerMeta('perfil')).toBeUndefined()
       expect(await contarPendientes(REPORTANTE.id)).toBe(1)
+    })
+
+    it('RF-31 (decisión 45): desactiva el push del dispositivo antes de cerrar la sesión', async () => {
+      const { desactivarPush } = await import('../push/suscripcion.js')
+      const orden = []
+      vi.mocked(desactivarPush).mockImplementationOnce(async () => orden.push('push'))
+      supabase.auth.signOut.mockImplementationOnce(async () => orden.push('sesion'))
+
+      await cerrarSesion()
+
+      expect(orden).toEqual(['push', 'sesion'])
+    })
+
+    it('RF-31: si desactivar el push falla, la sesión se cierra igual', async () => {
+      const { desactivarPush } = await import('../push/suscripcion.js')
+      vi.mocked(desactivarPush).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+      await expect(cerrarSesion()).resolves.toBeUndefined()
+      expect(supabase.auth.signOut).toHaveBeenCalled()
     })
 
     it('RF-01: cierra la sesión local aunque Auth no responda', async () => {

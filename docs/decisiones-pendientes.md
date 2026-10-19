@@ -1408,3 +1408,24 @@ Lo que queda por decidir o por hacer a mano (plan del Sprint 5, decisiones 38 a 
   la prueba corta; si molesta, se desactiva desde Cuenta cuando llegue el PR 9.
 - **Una suscripción que falla con otro código** (por ejemplo, 413 o 429) se registra y se
   conserva; solo 404 y 410 la borran.
+
+## 48 · Notificaciones push en el cliente (10-B y Cuenta, RF-31)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
+
+- **Cuenta** (sin dibujo): una tarjeta «Notificaciones en este dispositivo» con «Activadas» o
+  «Desactivadas» y el botón «Activar» o «Desactivar». Si el navegador no las admite: «Este
+  navegador no permite notificaciones. En iPhone, primero agrega la aplicación a la pantalla de
+  inicio.»; si se bloquearon: «Bloqueaste las notificaciones en el navegador. Para activarlas,
+  cámbialo en su configuración.».
+- **10-B para los demás roles:** «Te avisaremos en este dispositivo cuando cambie una novedad que
+  atiendes, aunque la app esté cerrada.» (Figma solo trae el texto del reportante).
+- **10-B en el escritorio:** la misma hoja, centrada, como las demás hojas.
+- **«Ahora no» y cerrar sesión:** que ya se ofreció se guarda en el almacén `meta`, que se vacía
+  al cerrar sesión. Quien ingrese después en el mismo navegador verá 10-B otra vez.
+- **10-C** muestra la descripción y la prioridad en el cuerpo; el push no lleva la descripción
+  (RNF-18, decisión 47). Queda para ajustar en Figma.
+- **Por hacer a mano** (decisión 47): la lista de chequeo en un Android con Chrome y, si hay, en
+  un iPhone con la aplicación instalada. Activar desde 10-B, cerrar la aplicación, tomar una
+  novedad suya desde otra cuenta, ver que llega, tocarla, ver el aviso leído, cerrar sesión y ver
+  que ya no llega.

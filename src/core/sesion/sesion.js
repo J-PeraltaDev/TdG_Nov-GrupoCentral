@@ -215,6 +215,12 @@ export async function restaurarSesion() {
  * descargados, y conserva las novedades pendientes de sincronizar (CU-01 5a, RNF-07).
  */
 export async function cerrarSesion() {
+  // Primero, con la sesión todavía viva, el push de este dispositivo deja de ser de esta persona
+  // (decisión 45 del Sprint 5). Se carga aparte para no pesar en la ruta de ingreso; si falla,
+  // la sesión se cierra igual.
+  await import('../push/suscripcion.js')
+    .then(({ desactivarPush }) => desactivarPush())
+    .catch(() => {})
   // Aunque no haya red y Auth no responda, la sesión local se cierra igual.
   await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
   await borrarDatosDeSesion()

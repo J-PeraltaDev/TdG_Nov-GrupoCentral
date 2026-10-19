@@ -14,6 +14,7 @@ import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import { formatearCodigo } from '../../core/utils/codigo.js'
 import { cuandoLlegoElAviso } from '../../core/utils/fechas.js'
+import { HojaActivarNotificaciones } from './HojaActivarNotificaciones.jsx'
 
 /*
  * Pantalla 10 · Avisos (RF-30, CU-30; Figma 2:1612). Los avisos del usuario por día, del más
@@ -151,6 +152,7 @@ export default function Avisos() {
   return (
     <section className="mx-auto flex w-full max-w-xl flex-1 flex-col pt-2 pb-24 lg:px-8 lg:py-8">
       <h1 className="sr-only text-titulo text-texto lg:not-sr-only lg:pb-4">Avisos</h1>
+      <HojaActivarNotificaciones perfil={perfil} />
 
       {!enLinea ? (
         <div className="px-4 pt-2 lg:px-0">

@@ -120,6 +120,9 @@ jobs:
           {
             echo "VITE_SUPABASE_URL=$API_URL"
             echo "VITE_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY:-$ANON_KEY}"
+            # La clave pública del ejemplo del RFC 8291: sin ella la app no ofrece 10-B. La e2e
+            # de CU-31 simula el servicio push; no se envía nada.
+            echo "VITE_VAPID_PUBLIC_KEY=BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8"
             echo "CLAVE_USUARIOS_DE_PRUEBA=$clave"
           } >> "$GITHUB_ENV"
           psql "$DB_URL" -v ON_ERROR_STOP=1 -v clave="$clave" <<'SQL'

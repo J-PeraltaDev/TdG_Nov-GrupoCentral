@@ -66,12 +66,16 @@ export function useInsignias({ id, rol_id: rolId, area_id: areaId = null }) {
     const dejarDeEscuchar = suscribir(contar)
     const reloj = setInterval(contar, INTERVALO_MS)
     document.addEventListener('visibilitychange', contar)
+    // RF-31: el service worker avisa cuando llega un push.
+    const alMensaje = (evento) => evento.data?.type === 'AVISO_NUEVO' && contar()
+    navigator.serviceWorker?.addEventListener('message', alMensaje)
     return () => {
       vigente = false
       dejarDePedir()
       dejarDeEscuchar()
       clearInterval(reloj)
       document.removeEventListener('visibilitychange', contar)
+      navigator.serviceWorker?.removeEventListener('message', alMensaje)
     }
   }, [clave, rolId, areaId])
 

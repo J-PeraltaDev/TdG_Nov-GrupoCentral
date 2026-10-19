@@ -14,6 +14,11 @@ vi.mock('../../core/supabase/repositorios/avisos.js', () => ({
   marcarAvisosLeidos: vi.fn(),
 }))
 vi.mock('../../app/insignias.js', () => ({ pedirConteoDeInsignias: vi.fn() }))
+// 10-B tiene sus propias pruebas: aquí el navegador no admite push.
+vi.mock('../../core/push/suscripcion.js', () => ({
+  estadoDelPush: vi.fn().mockResolvedValue('no-disponible'),
+  activarPush: vi.fn(),
+}))
 
 const novedad = (codigo, area = 'Sistemas') => ({
   codigo,
