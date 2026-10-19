@@ -440,6 +440,12 @@ definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente
   (`multiple_permissive_policies`). Se unieron en una con `rf08_una_politica_de_insercion`.
 - `private.solucion_vigente` no genera aviso: no es `security definer`.
 
+**Al 17 oct 2026 (contratos del Sprint 5):** 21 avisos en «staging», todos _WARN_ y de los tipos
+conocidos. Son cinco más del primero, uno por función que escribe: `marcar_avisos_leidos` y las
+cuatro del catálogo de tipos de falla (`renombrar_tipo_falla`, `fusionar_tipos_falla`,
+`desactivar_tipo_falla` y `corregir_tipo_falla`). Los cuatro indicadores (`rpt_*`) no generan
+aviso: son `security invoker`, y la regla solo mira las `security definer`.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
