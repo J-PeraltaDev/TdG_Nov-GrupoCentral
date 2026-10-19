@@ -133,11 +133,14 @@ prueba y nunca llegan a producción.
 | `npm run staging:advisors`               | Asesor de seguridad y rendimiento de Supabase                   |
 | `npm run staging:usuarios`               | Pone tu contraseña a los usuarios de prueba                     |
 | `npm run staging:functions`              | Despliega las Edge Functions en «staging», sin Docker           |
+| `npm run staging:secretos`               | Pone en «staging» los secretos de las notificaciones push       |
+| `npm run vapid:claves`                   | Genera las claves push en `.env.local`, sin imprimirlas         |
 | `npm run db:*` · `test:db`               | Lo mismo con Supabase local; necesitan Docker (los usa el CI)   |
 
-**Edge Functions.** Hay dos, en `supabase/functions/`: `gestionar-usuario` (crea, actualiza,
-desactiva y reactiva cuentas; exige la sesión de un administrador) y `restablecer-contrasena`
-(valida el código temporal y fija la contraseña nueva; no exige sesión). Son lo único que usa la
+**Edge Functions.** Hay tres, en `supabase/functions/`: `gestionar-usuario` (crea, actualiza,
+desactiva y reactiva cuentas; exige la sesión de un administrador), `restablecer-contrasena`
+(valida el código temporal y fija la contraseña nueva; no exige sesión) y `enviar-push` (la llama
+el webhook de cada aviso nuevo; la verifica un secreto, no una sesión). Son lo único que usa la
 clave de servicio, que la plataforma les inyecta: no está en el repositorio ni en el cliente. Su
 lógica va en módulos `.js` puros, que se prueban con `npm run test` como el resto; `index.ts` solo
 arma las dependencias reales, y el CI lo revisa con `deno check`. Después de cambiar una:
@@ -196,6 +199,22 @@ los datos se ven en DevTools → Application → IndexedDB.
 
 `staging:reset` no borra los archivos del bucket. Antes de una demo, se vacía desde el panel de
 Supabase (Storage).
+
+## Notificaciones push
+
+- **Cómo llegan:** cada aviso nuevo en `notificacion` dispara un POST, con `pg_net`, a la Edge
+  Function `enviar-push`. Ella cifra el mensaje (RFC 8291) y lo firma (VAPID, RFC 8292) con Web
+  Crypto, sin dependencias, y lo envía a cada suscripción del destinatario.
+- **Qué dice:** el código y el estado en el título y el texto del aviso en el cuerpo. Nunca la
+  descripción, que se vería en la pantalla bloqueada.
+- **Claves y secretos:** `npm run vapid:claves` las agrega a `.env.local` (escribe a mano
+  `VAPID_SUBJECT=mailto:…`) y `npm run staging:secretos` las pone en «staging»: los secretos de
+  la función y, en Vault, la URL y el secreto que usa el webhook. Ninguno se imprime ni va al
+  repositorio. Las de «staging» las genera una sola persona, una vez.
+- **Sin los secretos de Vault** (el Supabase local, el CI) no se envía nada y los avisos se crean
+  igual. `staging:reset` no borra Vault.
+- **Para probarlas** hace falta Chrome o Edge con el build (`npm run build && npm run preview`):
+  el Chromium de Playwright no trae el servicio push.
 
 ## Estructura
 

@@ -29,7 +29,9 @@
     "staging:types": "node scripts/staging.mjs types",
     "staging:advisors": "node scripts/staging.mjs advisors",
     "staging:usuarios": "node scripts/staging.mjs usuarios",
-    "staging:functions": "node scripts/staging.mjs functions"
+    "staging:functions": "node scripts/staging.mjs functions",
+    "staging:secretos": "node scripts/staging.mjs secretos",
+    "vapid:claves": "node scripts/vapid.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.0",

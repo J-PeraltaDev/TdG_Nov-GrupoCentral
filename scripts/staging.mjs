@@ -9,6 +9,7 @@
  *   npm run staging:advisors   asesor de seguridad y rendimiento
  *   npm run staging:usuarios   pone la contraseña de los usuarios de prueba (.env.local)
  *   npm run staging:functions  despliega en staging las Edge Functions de supabase/functions
+ *   npm run staging:secretos   pone los secretos de enviar-push y los de Vault (.env.local)
  *
  * Usa la sesión de `npx supabase login`; no necesita la contraseña de la base.
  * El proyecto está fijo en este archivo a propósito: estos comandos nunca apuntan a
@@ -255,6 +256,77 @@ function ponerClaveALosUsuariosDePrueba() {
   return 0
 }
 
+// --- Secretos de las notificaciones push ------------------------------------------------------
+
+const SECRETOS_DE_PUSH = [
+  'VAPID_PUBLIC_KEY',
+  'VAPID_PRIVATE_KEY',
+  'VAPID_SUBJECT',
+  'ENVIAR_PUSH_SECRETO',
+]
+
+/**
+ * Pone en staging los secretos de enviar-push y los dos de Vault que usa el disparador del
+ * webhook (RF-31; plan del Sprint 5, decisión 40). Los lee de .env.local (los genera
+ * `npm run vapid:claves`) y no imprime ninguno. `db reset --linked` no borra Vault.
+ */
+function ponerSecretosDePush() {
+  if (existsSync('.env.local')) process.loadEnvFile('.env.local')
+  const faltan = SECRETOS_DE_PUSH.filter((nombre) => !process.env[nombre])
+  if (faltan.length) {
+    console.error(
+      `Faltan en .env.local: ${faltan.join(', ')}. Corre npm run vapid:claves y escribe VAPID_SUBJECT=mailto:…`,
+    )
+    return 1
+  }
+  if (!process.env.VAPID_SUBJECT.startsWith('mailto:')) {
+    console.error('VAPID_SUBJECT tiene que empezar por mailto:')
+    return 1
+  }
+
+  // Secretos de la función, por un archivo temporal que se borra enseguida.
+  const carpeta = mkdtempSync(join(tmpdir(), 'novedades-secretos-'))
+  try {
+    const archivo = join(carpeta, 'secretos.env')
+    const lineas = SECRETOS_DE_PUSH.map((nombre) => `${nombre}=${process.env[nombre]}`)
+    writeFileSync(archivo, `${lineas.join('\n')}\n`, 'utf8')
+    const { estado } = supabase([
+      'secrets',
+      'set',
+      '--project-ref',
+      STAGING,
+      '--env-file',
+      `"${archivo}"`,
+    ])
+    if (estado !== 0) {
+      console.error('No se pudieron poner los secretos de la función.')
+      return 1
+    }
+  } finally {
+    rmSync(carpeta, { recursive: true, force: true })
+  }
+
+  // Vault: a dónde llama el disparador y con qué secreto.
+  const literal = (valor) => `'${valor.replaceAll("'", "''")}'`
+  const poner = (nombre, valor) => `
+    perform vault.update_secret(s.id, ${literal(valor)}) from vault.secrets s where s.name = '${nombre}';
+    if not found then perform vault.create_secret(${literal(valor)}, '${nombre}'); end if;`
+  const { fallo } = consultar(`do $$
+    begin
+      ${poner('enviar_push_url', `https://${STAGING}.supabase.co/functions/v1/enviar-push`)}
+      ${poner('enviar_push_secreto', process.env.ENVIAR_PUSH_SECRETO)}
+    end
+  $$;`)
+  if (fallo) {
+    console.error('No se pudo escribir en Vault.')
+    return 1
+  }
+  console.log(
+    `Secretos de enviar-push y de Vault puestos en staging (${SECRETOS_DE_PUSH.length + 2}).`,
+  )
+  return 0
+}
+
 // --- Comandos -------------------------------------------------------------------------------
 
 const [comando, ...resto] = process.argv.slice(2)
@@ -272,6 +344,7 @@ const comandos = {
     supabase(['migration', 'list', '--project-ref', STAGING], { mostrar: true }).estado,
   test: () => probar(resto),
   usuarios: ponerClaveALosUsuariosDePrueba,
+  secretos: ponerSecretosDePush,
   // `--use-api` empaqueta las funciones en el servidor: sin él, el CLI necesita Docker
   // (docs/adr/0012). Sin nombres despliega todas; `verify_jwt` sale de supabase/config.toml.
   functions: () =>

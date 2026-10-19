@@ -38,6 +38,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 30  | S5     | SDD 6.1.8 y Tabla 22                                      | **Cambio:** `TIPO_FALLA_DUPLICADO`; bloqueos de la fusión, destino inactivo, `for share` al resolver, sin reactivar y la lista sin los fusionados                     | Propuesto |
 | 31  | S5     | SDD 6.1.3 (Tabla 30) y 5.2.5                              | Precisión: la observación de la corrección del tipo de falla y cómo la muestra la línea de tiempo                                                                     | Propuesto |
 | 32  | S5     | SDD 5.3.8 y 7.3 (Tabla 39)                                | **Cambio, por validar:** separador `;`; columnas, fechas, horas y nombre del archivo; fórmulas neutralizadas                                                          | Propuesto |
+| 33  | S5     | SDD 6.1.6, 5.3.4, 5.3.5 y 4.2.10                          | Precisión: webhook propio con `pg_net` y Vault, el contenido que envía, el encabezado secreto, `verify_jwt = false`, cifrado con Web Crypto y `TTL`                   | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1171,6 +1172,45 @@ director de agricultura y los administradores:
 **Texto propuesto (Tabla 39, fila «Separador del archivo CSV», «Decisión adoptada»):**
 
 > Punto y coma, con BOM; por validar con el director de agricultura y los administradores
+
+## 33 · El webhook y `enviar-push` (S5)
+
+**Sección:** SDD 6.1.6 (Figura 17), 5.3.4 (Tabla 23), 5.3.5 y 4.2.10.
+
+**Qué pasa.** El SDD dice que un webhook de la base de datos llama a `enviar-push` por cada aviso
+y que la función envía el push. El PR 8 del Sprint 5 fija cómo (plan del Sprint 5, decisiones 38 a
+43, comprobadas en la prueba corta del 17 de octubre):
+
+- **Webhook propio:** un disparador `after insert` en `notificacion`
+  (`private.tg_notificacion_push`, `security definer`) encola con `pg_net` un POST a
+  `enviar-push` con el aviso como `record`. No es el «Database Webhook» del panel, que guarda el
+  encabezado en la definición del disparador, es decir, en la migración de un repositorio público.
+- **Vault:** la URL de la función y el secreto viven en Vault (`enviar_push_url` y
+  `enviar_push_secreto`). Sin ellos (el Supabase local, el CI) el disparador no hace nada y el
+  aviso se crea igual.
+- **En la misma transacción:** `pg_net` encola dentro de la transacción de la transición: si
+  falla, la solicitud se revierte con ella. La entrega ocurre después del commit y no frena la
+  transición.
+- **Quién llama:** el webhook, no una persona. `enviar-push` tiene `verify_jwt = false` y
+  comprueba el encabezado `x-webhook-secreto` en tiempo constante (401 si no coincide).
+- **Qué hace:** lee la novedad y el rol del destinatario con la clave de servicio, arma el mensaje
+  con los textos de la Tabla 33 (sin la descripción) y lo envía a cada suscripción con `TTL` de un
+  día. 404 o 410: borra esa suscripción; otro error: al log, y sigue. Siempre responde 200.
+- **Cifrado y firma:** propios, con Web Crypto: `aes128gcm` (RFC 8291) y VAPID (RFC 8292), sin
+  dependencias, probados con el ejemplo del apéndice A del RFC 8291.
+
+**Texto propuesto (6.1.6, en lugar de la descripción del webhook):**
+
+> Un disparador posterior a la inserción en `notificacion` encola, con `pg_net` y en la misma
+> transacción, una solicitud a la Edge Function `enviar-push` con el aviso y un encabezado
+> secreto; la dirección y el secreto se guardan en Vault. La función verifica el encabezado, arma
+> el mensaje con el texto del aviso y lo envía cifrado a cada suscripción del destinatario; borra
+> las suscripciones que el servicio push ya no reconoce. Una falla en el envío no afecta el aviso
+> dentro de la aplicación.
+
+**Texto propuesto (Tabla 23, fila `enviar-push`, «Autenticación»):**
+
+> Encabezado secreto del webhook (`verify_jwt = false`)
 
 ## 35 · El administrador entra al panel de reportes (S5)
 
