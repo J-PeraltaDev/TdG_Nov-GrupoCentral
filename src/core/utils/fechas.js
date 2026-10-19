@@ -8,7 +8,20 @@ import { ZONA_HORARIA } from '../config/parametros.js'
  * especiales), así que el texto se arma con las partes numéricas y una tabla propia de meses.
  */
 
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+export const MESES = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+]
 
 const PARTES = new Intl.DateTimeFormat('en-US', {
   timeZone: ZONA_HORARIA,
@@ -62,6 +75,31 @@ export function formatearFechaHora(fecha) {
 export function formatearFechaCorta(fecha) {
   const { mes, dia, hora, minuto } = enColombia(fecha)
   return `${dia} ${MESES[mes - 1]}, ${horaDeDoce(hora, minuto)}`
+}
+
+/**
+ * «24 sep, 8:15 a. m.» si es de este año y «30 dic 2025, 8:15 a. m.» si no («Registrada en
+ * finca» del historial, decisión 12 del plan del Sprint 5).
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearFechaDeLista(fecha, ahora = Date.now()) {
+  return enColombia(fecha).anio === enColombia(ahora).anio
+    ? formatearFechaCorta(fecha)
+    : formatearFechaHora(fecha)
+}
+
+/**
+ * El día, en corto: «22 sep», o «12 ago 2025» si fue otro año.
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearDia(fecha, ahora = Date.now()) {
+  const { anio, mes, dia } = enColombia(fecha)
+  const corta = `${dia} ${MESES[mes - 1]}`
+  return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
 }
 
 /**
@@ -143,9 +181,7 @@ export function formatearUltimoIngreso(fecha, ahora = Date.now()) {
   if (esMismoDiaEnColombia(fecha, ahora)) return `hoy ${formatearHora(fecha)}`
   // Colombia no cambia de hora: ayer es siempre 24 horas antes.
   if (esMismoDiaEnColombia(fecha, new Date(ahora).getTime() - 24 * 3_600_000)) return 'ayer'
-  const { anio, mes, dia } = enColombia(fecha)
-  const corta = `${dia} ${MESES[mes - 1]}`
-  return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
+  return formatearDia(fecha, ahora)
 }
 
 const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
@@ -177,8 +213,7 @@ export function cuandoLlegoElAviso(fecha, ahora = Date.now()) {
       cuando: `${DIAS[diaDelAviso.getUTCDay()]} ${aviso.dia} ${MESES[aviso.mes - 1]}`,
     }
   }
-  const corta = `${aviso.dia} ${MESES[aviso.mes - 1]}`
-  return { grupo: 'Anteriores', cuando: aviso.anio === hoy.anio ? corta : `${corta} ${aviso.anio}` }
+  return { grupo: 'Anteriores', cuando: formatearDia(fecha, ahora) }
 }
 
 /**

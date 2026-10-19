@@ -4,9 +4,11 @@ import {
   cuandoLlegoElAviso,
   esMismoDiaEnColombia,
   formatearDescarga,
+  formatearDia,
   formatearDuracion,
   formatearFechaConSemana,
   formatearFechaCorta,
+  formatearFechaDeLista,
   formatearFechaHora,
   formatearFechaSinHora,
   formatearFechaYSemana,
@@ -244,5 +246,21 @@ describe('Fechas de la interfaz (SDD 6.1.11)', () => {
     expect(cuandoLlegoElAviso('2026-09-21T15:00:00Z', '2026-09-27T14:00:00Z').grupo).toBe(
       'Esta semana',
     )
+  })
+})
+
+describe('Fechas del historial (RF-19; plan del Sprint 5, decisión 12)', () => {
+  const ahora = '2026-09-24T14:30:00Z'
+
+  it('RF-19: «Registrada en finca» sin el año si es el actual, y con él si no', () => {
+    expect(formatearFechaDeLista('2026-09-24T13:15:00Z', ahora)).toBe('24 sep, 8:15 a. m.')
+    expect(formatearFechaDeLista('2025-12-30T13:15:00Z', ahora)).toBe('30 dic 2025, 8:15 a. m.')
+    // El 1 de enero a las 3 a. m. UTC todavía es 31 de diciembre en Colombia.
+    expect(formatearFechaDeLista('2026-01-01T03:00:00Z', ahora)).toBe('31 dic 2025, 10:00 p. m.')
+  })
+
+  it('RF-19: el día de las tarjetas de 21-D, con el año solo si es otro', () => {
+    expect(formatearDia('2026-09-24T13:15:00Z', ahora)).toBe('24 sep')
+    expect(formatearDia('2025-08-12T15:00:00Z', ahora)).toBe('12 ago 2025')
   })
 })

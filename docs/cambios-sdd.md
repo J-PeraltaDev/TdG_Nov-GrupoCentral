@@ -33,6 +33,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 25  | S5     | SDD 6.1.1 («Vistas e índices»), Tablas 20 y 34            | Complemento: `v_novedad.resuelta_en`, una sola regla para «Tiempo hasta resolver»                                                                                    | Propuesto |
 | 26  | S5     | SDD 5.3.2 (Tabla 20) y 6.1.4 (Tabla 31)                   | **Cambio:** el cliente ya no actualiza `notificacion`; `marcar_avisos_leidos` es la única forma de marcar un aviso                                                   | Propuesto |
 | 27  | S5     | SDD 6.1.6 (Tabla 33)                                      | Precisión: el texto sale del estado nuevo y del rol del destinatario; sin el código, que va aparte; «reasignada» manda sobre Figma 10                                | Propuesto |
+| 28  | S5     | SDD 5.2.5 y Tabla 20 (fila `v_novedad`)                   | Complemento: filtros del historial en la dirección, el grupo «abiertas», las opciones de cada filtro, sin conexión y el buscador por código                          | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -980,3 +981,42 @@ reasignación, «Tu novedad fue reasignada a {área}.».
 
 > El texto depende del estado nuevo y del rol del destinatario; el código de la novedad se
 > muestra aparte. Los datos (finca, área, prioridad y tipo) son los vigentes de la novedad.
+
+## 28 · Historial: filtros, opciones y buscador por código (S5)
+
+**Sección:** SDD 5.2.5 («Interfaz E: Consulta e historial») y Tabla 20 (fila `v_novedad`).
+
+**Qué pasa.** 5.2.5 dice qué filtra el historial (finca, área, estado, rango de fechas y tipo de
+falla) y que el panel abre el historial filtrado (5.2.6), pero no cómo viajan los filtros, qué
+opciones ofrece cada uno, qué pasa sin conexión ni qué hace el buscador de la barra superior que
+dibuja Figma. Se resolvió así (plan del Sprint 5, decisiones 9 a 15):
+
+- **Los filtros van en la dirección:** `/historial?finca=<id>&area=<id>&estado=resuelta,cerrada&desde=2026-04-01&hasta=2026-09-24&tipo=<id>&pagina=2`.
+  `estado=abiertas` es el grupo de los seis estados que no son finales (Tabla 34); lo usa el
+  panel. Lo que llega mal formado se ignora. `desde` y `hasta` son días de Colombia, inclusivos.
+- **Opciones:** fincas y áreas activas e inactivas (las inactivas al final, con «(inactiva)»), y
+  tipos de falla activos y desactivados. Un tipo fusionado no se ofrece: queda inactivo y sin
+  novedades, que pasaron al destino.
+- **El aprobador** no tiene el filtro de área: las políticas ya le dan solo la suya (21-D).
+- **Orden y páginas:** de la más reciente a la más antigua por `fecha_registro` (y por `id` en un
+  empate), de 20 en 20, con los números de página.
+- **Sin conexión:** RF-19 requiere conexión y RF-24 no cubre el historial: nada se guarda en el
+  dispositivo, los filtros quedan deshabilitados y se explica.
+- **Buscador por código** (barra superior del escritorio, los cuatro roles): acepta «NOV-0153»,
+  «nov 153», «NOV0153», «0153» y «153»; busca en `v_novedad`, de modo que la RLS pone el alcance,
+  y abre el detalle. Si no la encuentra, el mismo mensaje exista o no, como 22-B.
+
+**Texto propuesto (5.2.5, después del primer párrafo):**
+
+> Los filtros del historial viajan en la dirección de la pantalla, de modo que el detalle vuelve
+> al mismo resultado y el panel abre el historial ya filtrado; el grupo «abiertas» reúne los
+> estados no finales. Las listas de fincas y áreas incluyen las inactivas, y la de tipos de falla,
+> los desactivados que tienen novedades. El historial requiere conexión. La barra superior del
+> escritorio ofrece, a todos los roles, un buscador por código que abre el detalle de la novedad
+> si está dentro del alcance de quien busca.
+
+**Texto propuesto (Tabla 20, fila `v_novedad`, «Uso»):**
+
+> Bandeja, Mis novedades, historial (con sus filtros en la dirección), buscador por código y
+> detalle: novedad con finca, razón social, área, tipo de falla, nombre del reportante y
+> `resuelta_en`.

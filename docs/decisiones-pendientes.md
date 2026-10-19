@@ -45,6 +45,7 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 39  | Evidencias fotográficas en el cliente         | 3 fotos en 05; avisos de 06 y 07; bloque del detalle                              | El equipo (Figma) |
 | 40  | Fotos de la solución (aprobador)              | **Nuevo, a pedido del equipo:** campo en 18 y fotos en la solución                | El equipo (Figma) |
 | 41  | Avisos (pantalla 10, insignias y campana)     | Textos sin Figma, grupo «Anteriores», 10 en el escritorio, insignia de la bandeja | El equipo (Figma) |
+| 42  | Historial (21 a 21-D) y buscador por código   | Textos y controles sin Figma, la nota del CSV en los dos tamaños                  | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -1270,3 +1271,32 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 30 a 35):
   avisos sin leer». **La de «Bandeja»** cuenta las novedades por atender (asignadas y aprobadas
   del área; decisión 34). Cuando llegan avisos nuevos con la aplicación abierta, se anuncia una
   vez: «Tienes 3 avisos sin leer».
+
+## 42 · Historial (21, 21-B, 21-C y 21-D) y buscador por código (RF-19)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 9 a 15):
+
+- **Controles.** «Estado» y «Rango de fechas» tienen el aspecto de los desplegables de 21. Estado
+  abre una lista de casillas, sin `<select multiple>`; el rango abre dos campos de fecha del
+  navegador, «Desde» y «Hasta». Sin nada elegido dicen «Todos» (estado y tipo), «Todas» (finca y
+  área) y «Todas las fechas» (rango). A 1280 px, «Tipo de falla» pasa a la segunda fila, junto a
+  «Aplicar filtros», que Figma dibuja a 1440 px.
+- **21-B.** «La fecha inicial debe ser anterior a la final» cuando la inicial es posterior; el
+  mismo día en las dos es un rango válido. «Aplicar filtros» queda con su candado.
+- **Chips.** Reflejan la dirección: «Finca: …», «Área: …», «Estado: …» («Estado: Abiertas» para el
+  grupo del panel), «Desde 01 abr hasta 24 sep 2026» (el año una vez si es el mismo; «Desde …» o
+  «Hasta …» con una sola fecha) y «Tipo de falla: …». En el teléfono, los textos cortos de 21-D
+  («01 abr – 24 sep», con el año si no es el actual). «Filtros (3)» cuenta los chips; sin filtros,
+  «Filtros».
+- **Columnas.** Una novedad sin tipo de falla todavía dice «—»; sin resolver, «Tiempo hasta
+  resolver» dice «—» y el lector oye «Sin resolver». «Registrada en finca» lleva el año si no es
+  el actual. En 21-D, una sin tipo dice solo «Reportada por …».
+- **21-C sin filtros:** «Todavía no hay novedades.», sin botón.
+- **Sin conexión:** «El historial necesita conexión. Ábrelo cuando tengas internet.», con los
+  filtros deshabilitados.
+- **Barra superior del teléfono.** «Historial» y, para el aprobador, su área debajo (21-D).
+- **La nota del CSV** de 21-D se le muestra al aprobador también en el escritorio.
+- **Buscador por código.** Sin dígitos: «Escribe un código como NOV-0153.». No está o no se puede
+  ver: «No encontramos NOV-0153 entre las novedades que puedes ver.». Sin conexión: «Buscar por
+  código necesita conexión.». El mensaje aparece bajo el campo y se va al escribir. El detalle
+  vuelve a la pantalla donde se buscó.
