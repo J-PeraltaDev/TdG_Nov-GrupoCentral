@@ -54,7 +54,7 @@ function esServicioPush(endpoint) {
  * @param {string} dep.secreto ENVIAR_PUSH_SECRETO de la función.
  * @param {string | null} dep.secretoRecibido El encabezado `x-webhook-secreto`.
  * @param {{ sujeto: string, publica: string, privada: string }} dep.vapid
- * @param {(aviso: object) => Promise<{ novedad: object, rol_id: number, suscripciones: object[] }>} dep.leerDestino
+ * @param {(aviso: { novedad_id: string, destinatario_id: string }) => Promise<{ novedad: object, rol_id: number, suscripciones: object[] }>} dep.leerDestino
  * @param {(url: string, opciones: RequestInit) => Promise<number>} dep.enviar Devuelve el estado HTTP.
  * @param {(id: string) => Promise<void>} dep.borrarSuscripcion
  * @param {(mensaje: string) => void} dep.registrar
