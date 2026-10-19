@@ -388,6 +388,11 @@ le pone a los usuarios del seed una contraseña al azar que no sale del trabajo 
   (necesita una finca del seed con novedades abiertas, que la base local recién creada no tiene).
   Quedan anotadas; el trabajo sigue sin bloquear.
 
+**Obligatorio desde el Sprint 5** (plan del Sprint 5, decisión 8, aprobada el 17 oct 2026): en 16
+corridas falló 3 veces, todas en los PR que lo estrenaban o lo arreglaban, y nunca en `main`; la
+última de `main` dio 240 pasan, 4 intermitentes que pasan al reintentar y ninguna falla. Se quitó
+`continue-on-error`. Falta que una persona lo marque como requerido en la protección de `main`.
+
 ## 16 · Avisos del asesor de Supabase
 
 El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
@@ -783,6 +788,11 @@ npm run staging:usuarios
 Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
 …») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
 `staging:reset`.
+
+**Consecuencia para las pruebas (17 oct 2026):** la base local del CI tiene los cuatro tipos del
+seed y «staging» no; «staging» tiene los «Tipo e2e…» y la base local, solo después de que corre
+CU-14. Una prueba que necesite un tipo existente no puede nombrar ninguno de los dos: la de las
+fotos de la solución (CU-08) escribe «e» y elige la primera sugerencia que ya existe.
 
 ## 27 · Detalles de las pantallas 19, 20, 20-B y 20-C (el director decide)
 
