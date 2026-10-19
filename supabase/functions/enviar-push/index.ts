@@ -39,6 +39,7 @@ async function leerDestino(aviso: Aviso) {
   ])
   const error = novedad.error ?? usuario.error ?? suscripciones.error
   if (error) throw error
+  if (!usuario.data) throw new Error('DESTINATARIO_INEXISTENTE')
   const n = novedad.data as Record<string, any>
   return {
     novedad: {
@@ -49,7 +50,7 @@ async function leerDestino(aviso: Aviso) {
       tipo_falla: n.tipo_falla?.nombre ?? null,
     },
     rol_id: usuario.data.rol_id,
-    suscripciones: suscripciones.data,
+    suscripciones: suscripciones.data ?? [],
   }
 }
 
