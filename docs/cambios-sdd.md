@@ -39,6 +39,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 31  | S5     | SDD 6.1.3 (Tabla 30) y 5.2.5                              | Precisión: la observación de la corrección del tipo de falla y cómo la muestra la línea de tiempo                                                                     | Propuesto |
 | 32  | S5     | SDD 5.3.8 y 7.3 (Tabla 39)                                | **Cambio, por validar:** separador `;`; columnas, fechas, horas y nombre del archivo; fórmulas neutralizadas                                                          | Propuesto |
 | 33  | S5     | SDD 6.1.6, 5.3.4, 5.3.5 y 4.2.10                          | Precisión: webhook propio con `pg_net` y Vault, el contenido que envía, el encabezado secreto, `verify_jwt = false`, cifrado con Web Crypto y `TTL`                   | Propuesto |
+| 34  | S5     | SDD 5.3.5 y 6.1.6                                         | Precisión: dónde se ofrece 10-B, el control de Cuenta, el cierre de sesión y el contenido del push sin la descripción (RNF-18)                                        | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1211,6 +1212,34 @@ y que la función envía el push. El PR 8 del Sprint 5 fija cómo (plan del Spri
 **Texto propuesto (Tabla 23, fila `enviar-push`, «Autenticación»):**
 
 > Encabezado secreto del webhook (`verify_jwt = false`)
+
+## 34 · Las notificaciones push en el dispositivo (S5)
+
+**Sección:** SDD 5.3.5 («Notificaciones push») y 6.1.6.
+
+**Qué pasa.** El SDD dice que la persona activa las notificaciones y que el service worker las
+muestra. El PR 9 del Sprint 5 fija dónde se ofrecen, cómo se apagan y qué muestran (plan del
+Sprint 5, decisiones 44 a 47):
+
+- **Dónde se ofrecen:** 10-B sale la primera vez que se abren los avisos en el dispositivo, solo
+  si el navegador lo admite (en iPhone, con la aplicación instalada) y si el permiso no está
+  decidido. El permiso se pide después del toque en «Activar notificaciones». «Ahora no» no
+  vuelve a preguntar.
+- **Cuenta:** la fila «Notificaciones en este dispositivo» las activa y las desactiva, y explica
+  si el navegador no las admite o si se bloquearon.
+- **Dispositivo compartido:** cerrar sesión cancela la suscripción del navegador y borra su fila
+  antes de salir. Sin red, la fila queda y `enviar-push` la borra con el 410 del servicio push.
+  Si el punto de entrega es de otra persona del dispositivo, se cancela y se crea otro.
+- **Qué muestran:** el código y el estado en el título y el texto del aviso en el cuerpo, **sin la
+  descripción**, que se vería en la pantalla bloqueada (RNF-18). Las de una misma novedad se
+  reemplazan y vuelven a sonar. Tocarla abre la novedad y deja leído su aviso.
+
+**Texto propuesto (5.3.5, al final):**
+
+> La aplicación ofrece activar las notificaciones la primera vez que se abren los avisos en el
+> dispositivo, y permite activarlas o desactivarlas desde Cuenta. Al cerrar la sesión, la
+> suscripción del dispositivo se cancela. La notificación muestra el código, el estado y el texto
+> del aviso, sin la descripción de la novedad.
 
 ## 35 · El administrador entra al panel de reportes (S5)
 

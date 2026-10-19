@@ -1,11 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
+import { pedirConteoDeInsignias } from '../../app/insignias.js'
 import { ACCION, accionesDisponibles } from '../../core/acciones/accionesDisponibles.js'
 import { REGISTRO_SIN_CONEXION_MINUTOS } from '../../core/config/parametros.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { firmaDe, ROL, rutaDeOrigen } from '../../core/sesion/roles.js'
+import { marcarAvisosLeidos } from '../../core/supabase/repositorios/avisos.js'
 import { listarLineaDeTiempo, obtenerNovedad } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -476,6 +478,14 @@ export default function DetalleNovedad() {
   }, [id, idValido, consulta, enLinea])
 
   const recargar = useCallback(() => setIntento((n) => n + 1), [])
+
+  // RF-31: abierta desde un push (`?aviso=`), ese aviso queda leído, como al tocarlo en 10.
+  const [parametros] = useSearchParams()
+  const avisoId = parametros.get('aviso')
+  useEffect(() => {
+    if (!enLinea || !UUID.test(avisoId ?? '')) return
+    marcarAvisosLeidos([avisoId]).then(pedirConteoDeInsignias, () => {})
+  }, [avisoId, enLinea])
 
   const cargando = idValido && resultado.id !== id
   const { novedad, transiciones, fallo } = cargando

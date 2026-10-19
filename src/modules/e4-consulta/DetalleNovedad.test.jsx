@@ -15,6 +15,7 @@ import {
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { listarEvidencias } from '../../core/supabase/repositorios/evidencias.js'
+import { marcarAvisosLeidos } from '../../core/supabase/repositorios/avisos.js'
 import {
   corregirTipoFalla,
   listarTiposActivos,
@@ -42,6 +43,10 @@ vi.mock('../../core/supabase/repositorios/evidencias.js', () => ({
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
 }))
+vi.mock('../../core/supabase/repositorios/avisos.js', () => ({
+  marcarAvisosLeidos: vi.fn().mockResolvedValue(1),
+}))
+vi.mock('../../app/insignias.js', () => ({ pedirConteoDeInsignias: vi.fn() }))
 vi.mock('../../core/supabase/repositorios/tiposFalla.js', () => ({
   listarTiposActivos: vi.fn(),
   corregirTipoFalla: vi.fn(),
@@ -129,7 +134,7 @@ function conNovedad(novedad = ASIGNADA, transiciones = REGISTRO) {
   vi.mocked(listarLineaDeTiempo).mockResolvedValue(transiciones)
 }
 
-function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
+function abrir({ rol = 'aprobador', id = ID, origen, ancla = '', busqueda = '' } = {}) {
   return pintarConSesion(
     <Routes>
       <Route
@@ -148,6 +153,7 @@ function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
     {
       ruta: {
         pathname: `/novedades/${id}`,
+        search: busqueda,
         hash: ancla,
         state: origen ? { origen } : undefined,
       },
@@ -1326,5 +1332,26 @@ describe('Corregir el tipo de falla de una cerrada (RF-32 / CU-32 1a)', () => {
     expect(await screen.findByText('Tipo de falla corregido.')).toBeVisible()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     await waitFor(() => expect(obtenerNovedad).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe('Abierta desde una notificación push (RF-31; decisión 46)', () => {
+  const AVISO = '00000000-0000-4000-a000-0000000000a1'
+
+  it('RF-31: el aviso del push queda leído al abrir la novedad', async () => {
+    vi.mocked(marcarAvisosLeidos).mockClear()
+    conNovedad()
+    abrir({ rol: 'reportante', busqueda: `?aviso=${AVISO}` })
+
+    await waitFor(() => expect(marcarAvisosLeidos).toHaveBeenCalledExactlyOnceWith([AVISO]))
+  })
+
+  it('RF-31: sin aviso, o con uno que no es un uuid, no marca nada', async () => {
+    vi.mocked(marcarAvisosLeidos).mockClear()
+    conNovedad()
+    abrir({ rol: 'reportante', busqueda: '?aviso=no-es-un-uuid' })
+
+    await screen.findByText(ASIGNADA.descripcion)
+    expect(marcarAvisosLeidos).not.toHaveBeenCalled()
   })
 })

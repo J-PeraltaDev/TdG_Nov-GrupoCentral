@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router'
 import { usePendientes } from '../../core/offline/pendientes.js'
+import { activarPush, desactivarPush, estadoDelPush } from '../../core/push/suscripcion.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil } from '../../core/sesion/roles.js'
 import { Icono } from '../../core/ui/Icono.jsx'
@@ -11,6 +12,65 @@ import iconoPendientes from '../../core/ui/iconos/cloud_off.svg'
 import iconoSalir from '../../core/ui/iconos/logout.svg'
 import { Insignia } from '../Insignia.jsx'
 import { MENU } from '../menu.js'
+
+/** Lo que dice la fila de las notificaciones según el estado (sin dibujo en Figma; decisión 44). */
+const ESTADO_DEL_PUSH = {
+  activadas: 'Activadas',
+  desactivadas: 'Desactivadas',
+  bloqueadas:
+    'Bloqueaste las notificaciones en el navegador. Para activarlas, cámbialo en su configuración.',
+  'no-disponible':
+    'Este navegador no permite notificaciones. En iPhone, primero agrega la aplicación a la pantalla de inicio.',
+}
+
+/** «Puedes cambiarlo después en Cuenta» (10-B): activar o desactivar el push del dispositivo. */
+function NotificacionesDelDispositivo({ usuarioId }) {
+  const [estado, setEstado] = useState(null)
+  const [ocupado, setOcupado] = useState(false)
+  const [fallo, setFallo] = useState(false)
+
+  useEffect(() => {
+    estadoDelPush().then(setEstado, () => setEstado('no-disponible'))
+  }, [])
+
+  // Hasta saber el estado no se pinta: en desarrollo no hay service worker y nunca se sabe.
+  if (!estado) return null
+
+  async function cambiar() {
+    setOcupado(true)
+    setFallo(false)
+    try {
+      setEstado(estado === 'activadas' ? await desactivarPush() : await activarPush(usuarioId))
+    } catch {
+      setFallo(true)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl bg-superficie p-5 inset-ring inset-ring-borde">
+      <div className="flex items-center gap-3">
+        <p className="flex min-w-0 flex-1 flex-col">
+          <span className="text-cuerpo-fuerte text-texto">Notificaciones en este dispositivo</span>
+          <span className="text-cuerpo-pequeno text-texto-secundario">
+            {ESTADO_DEL_PUSH[estado]}
+          </span>
+        </p>
+        {estado === 'activadas' || estado === 'desactivadas' ? (
+          <Boton tipo="secundario" onClick={cambiar} disabled={ocupado} className="flex-none">
+            {estado === 'activadas' ? 'Desactivar' : 'Activar'}
+          </Boton>
+        ) : null}
+      </div>
+      {fallo ? (
+        <p role="alert" className="text-cuerpo-pequeno text-error">
+          No se pudo cambiar. Revisa la conexión e intenta de nuevo.
+        </p>
+      ) : null}
+    </div>
+  )
+}
 
 /**
  * Cuenta: quién ingresó y el cierre de sesión (RF-01, CU-01 pasos 5 y 6). Si hay novedades
@@ -51,6 +111,8 @@ export function Cuenta() {
           </p>
         ) : null}
       </div>
+
+      <NotificacionesDelDispositivo usuarioId={perfil.id} />
 
       {pendientes > 0 ? (
         <Aviso

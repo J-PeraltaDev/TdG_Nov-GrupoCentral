@@ -34,9 +34,10 @@ export function IconoDeHoja({ src, className }) {
  *   botón «Cancelar» del contenido).
  * @param {import('react').ReactNode} props.titulo
  * @param {import('react').ReactNode} [props.icono] Va antes del título.
+ * @param {boolean} [props.centrada] El ícono sobre el título y todo centrado (10-B).
  * @param {import('react').ReactNode} props.children
  */
-export function Hoja({ abierta, alCerrar, titulo, icono, children }) {
+export function Hoja({ abierta, alCerrar, titulo, icono, centrada = false, children }) {
   const dialogo = useRef(null)
   const idDelTitulo = useId()
 
@@ -66,7 +67,10 @@ export function Hoja({ abierta, alCerrar, titulo, icono, children }) {
             aria-hidden="true"
             className="h-1 w-10 self-center rounded-full bg-gris-300 lg:hidden"
           />
-          <h2 id={idDelTitulo} className="flex items-center gap-3 text-subtitulo text-texto">
+          <h2
+            id={idDelTitulo}
+            className={`flex text-subtitulo text-texto ${centrada ? 'flex-col items-center gap-4 text-center' : 'items-center gap-3'}`}
+          >
             {icono}
             {titulo}
           </h2>

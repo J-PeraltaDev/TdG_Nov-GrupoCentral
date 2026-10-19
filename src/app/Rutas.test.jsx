@@ -117,6 +117,10 @@ vi.mock('../core/supabase/repositorios/avisos.js', () => ({
   contarAvisosSinLeer: vi.fn().mockResolvedValue(0),
   marcarAvisosLeidos: vi.fn(),
 }))
+vi.mock('../core/supabase/repositorios/suscripciones.js', () => ({
+  guardarSuscripcion: vi.fn(),
+  borrarSuscripcion: vi.fn(),
+}))
 
 const abrir = (ruta, rol) => pintarConSesion(<Rutas />, { ruta, rol })
 

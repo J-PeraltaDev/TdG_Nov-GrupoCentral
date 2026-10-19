@@ -40,6 +40,11 @@ test.describe('CU-30 · Avisos dentro de la aplicación', () => {
     await llamarALaApi(aprobador, 'tomar_novedad', { p_novedad_id: novedad.id })
     await contexto.close()
 
+    // En WebKit el permiso de notificaciones empieza sin decidir y 10-B se abre en «Avisos»: aquí
+    // no se prueba el push (CU-31), así que se cierra con «Ahora no».
+    const hoja = page.getByRole('dialog', { name: 'Activa las notificaciones' })
+    await page.addLocatorHandler(hoja, () => hoja.getByRole('button', { name: 'Ahora no' }).click())
+
     // CU-30 3: la insignia de «Avisos» (menú y campana) cuenta los sin leer.
     await page.reload()
     const avisos = page.getByRole('link', { name: /^Avisos ?, \d+ avisos? sin leer$/ })
