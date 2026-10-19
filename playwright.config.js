@@ -67,7 +67,11 @@ export default defineConfig({
   webServer: {
     command: `npm run build && npm run preview -- --port ${PUERTO} --strictPort`,
     url: URL_BASE,
-    reuseExistingServer: !process.env.CI,
+    // Nunca reutiliza lo que ya escuche en el puerto: puede ser el build de otra rama o de otro
+    // worktree, y la corrida daría verde sin probar este código. Si el puerto está ocupado,
+    // Playwright se detiene. No se cambia de puerto porque las Edge Functions solo aceptan
+    // 5173 y 4173 (supabase/functions/_shared/cors.js).
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 })

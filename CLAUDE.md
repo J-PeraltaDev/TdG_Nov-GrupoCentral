@@ -46,6 +46,10 @@ npm run staging:usuarios    # pone CLAVE_USUARIOS_DE_PRUEBA (.env.local) a los u
 npm run staging:functions   # despliega en «staging» las Edge Functions (sin Docker, ADR 0012)
 ```
 
+Las e2e levantan su propio build en el 4173 y no reutilizan un servidor que ya esté ahí: si otra
+sesión lo ocupa, Playwright se detiene con «is already used». Espera a que termine o cierra ese
+servidor. No cambies el puerto: las Edge Functions solo aceptan 5173 y 4173.
+
 Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
 (`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
 agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y

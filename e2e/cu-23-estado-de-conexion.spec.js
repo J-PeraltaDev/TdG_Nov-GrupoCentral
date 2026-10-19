@@ -45,7 +45,10 @@ test('RF-23 / CU-23: el indicador sigue la conexión real y cuenta las pendiente
   await page.reload()
   await expect(page).toHaveURL(/\/novedades$/)
   await expect(indicador(page)).toHaveText('Sin conexión · 1 pendiente: ver la lista')
-  await expect(page.locator('[aria-live="polite"]')).toHaveText('Sin conexión · 1 pendiente')
+  // El marco tiene otra región viva, la de los avisos (RF-30): se busca la de la conexión.
+  await expect(page.locator('[aria-live="polite"]', { hasText: 'conexión' })).toHaveText(
+    'Sin conexión · 1 pendiente',
+  )
 
   // El navegador dice que volvió la red, pero Supabase no responde (portal cautivo): el
   // monitor no se deja engañar por el evento `online`.

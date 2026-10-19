@@ -145,6 +145,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () => {
@@ -343,6 +344,8 @@ describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () 
   })
 
   it('RF-24 / CU-24 (11-B): sin conexión muestra la bandeja descargada, con su fecha y el texto de Figma', async () => {
+    // 11-B dice «hoy» si la descarga es de hoy: el reloj va a media mañana, no a la medianoche.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-14T15:00:00Z') })
     conBandeja()
     vi.mocked(listarBandeja).mockImplementation(async () => ({
       novedades: POR_ATENDER,

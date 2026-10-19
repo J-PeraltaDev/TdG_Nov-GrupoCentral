@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { listarPendientes } from '../../core/offline/bd.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
@@ -239,7 +239,13 @@ describe('Pantalla 04-B · Consulta sin conexión (RF-24 / CU-24)', () => {
     vi.mocked(listarPendientes).mockResolvedValue([])
   })
 
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('RF-24 / CU-24 3 y 4: muestra lo descargado y cuándo se descargó', async () => {
+    // 04-B dice «hoy» si la descarga es de hoy: el reloj va a media mañana, no a la medianoche.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-14T15:00:00Z') })
     vi.mocked(listarNovedades).mockResolvedValue({
       novedades: NOVEDADES,
       total: 2,
