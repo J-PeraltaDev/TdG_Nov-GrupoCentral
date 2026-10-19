@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { enTelefono } from './apoyo/novedades.js'
+import { enTelefono, registrarPorLaApi } from './apoyo/novedades.js'
+import { descripcionUnica } from './apoyo/registro.js'
 import {
   abrirCuentaDesdeElAvatar,
   HAY_CLAVE,
@@ -137,7 +138,22 @@ test.describe('CU-04 · Gestionar fincas', () => {
 
   test('RF-04 / CU-04 3b: al desactivar una finca con novedades abiertas, advierte cuántas son; al cancelar, la finca sigue activa', async ({
     page,
-  }) => {
+    browser,
+  }, testInfo) => {
+    // La base local del CI nace sin novedades: el reportante del seed deja dos abiertas en su
+    // finca, sin esperar a que otra prueba lo haga.
+    const contexto = await browser.newContext()
+    const reportante = await contexto.newPage()
+    await ingresarComo(reportante, 'reportante')
+    for (const texto of ['La cerca del lote 2 está caída', 'El portón del lote 4 no cierra']) {
+      await registrarPorLaApi(reportante, {
+        descripcion: descripcionUnica(testInfo, texto),
+        prioridad: 'bajo',
+        area: 'Mantenimiento',
+      })
+    }
+    await contexto.close()
+
     await abrirFincas(page)
     await buscar(page, FINCA_DEL_SEED)
     await expect(filaDe(page, FINCA_DEL_SEED)).toHaveCount(1)
@@ -146,7 +162,7 @@ test.describe('CU-04 · Gestionar fincas', () => {
     const confirmacion = page.getByRole('dialog', {
       name: `¿Desactivar la finca ${FINCA_DEL_SEED}?`,
     })
-    // Las pruebas de los demás casos de uso dejan novedades abiertas en esta finca.
+    // Son al menos las dos de arriba: las demás pruebas dejan otras en esta finca.
     await expect(
       confirmacion.getByText(
         /^Tiene \d+ novedades abiertas\. Seguirán su curso, pero no se podrán registrar novedades nuevas para esta finca\.$/,
