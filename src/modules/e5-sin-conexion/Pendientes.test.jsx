@@ -78,9 +78,12 @@ describe('Pantalla 08 · Pendientes de sincronizar (RF-22, RF-23 / CU-22, CU-23)
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   it('RF-22 / CU-23 3a: muestra cada una en el orden en que se registró, con su identificador, su hora y cómo va', async () => {
+    // 08 muestra solo la hora cuando el registro es de hoy: el reloj va el día de las pendientes.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-14T15:00:00Z') })
     await sembrar(P3, P2)
     cambiarSincronizacion({ enviadas: [{ ...P1, codigo: 155 }] })
     abrir()
