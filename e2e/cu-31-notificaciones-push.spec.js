@@ -49,7 +49,9 @@ async function simularPush(contexto) {
     window.PushManager.prototype.getSubscription = async () =>
       leer('endpoint') ? suscripcion(leer('endpoint')) : null
     window.PushManager.prototype.subscribe = async () => {
-      guardar('endpoint', `https://fcm.googleapis.com/fcm/send/e2e-${crypto.randomUUID()}`)
+      // Fuera de los servicios push: si a otra prueba le llega un aviso para este reportante,
+      // enviar-push no lo manda y no borra la fila (con FCM respondía 404 y la borraba, CU-31 2a).
+      guardar('endpoint', `https://push.e2e.invalid/e2e-${crypto.randomUUID()}`)
       return suscripcion(leer('endpoint'))
     }
   })
@@ -88,7 +90,7 @@ test.describe('CU-31 · Notificaciones push', () => {
 
     // La fila queda a nombre del reportante: la API la ve con su sesión.
     const endpoint = await endpointDePrueba(page)
-    expect(endpoint).toMatch(/^https:\/\/fcm\.googleapis\.com\/fcm\/send\/e2e-/)
+    expect(endpoint).toMatch(/^https:\/\/push\.e2e\.invalid\/e2e-/)
     await expect.poll(() => suscripcionesConEse(page, endpoint)).toHaveLength(1)
 
     // Cuenta dice que están activadas.

@@ -28,11 +28,15 @@ const pushManager = async () => (await navigator.serviceWorker.ready).pushManage
 /**
  * La suscripción actual, sin esperar al service worker: `ready` nunca se resuelve si no hay uno
  * (`npm run dev`, o la primera visita mientras se instala), y cerrar sesión no puede quedarse
- * esperando.
+ * esperando. Sin el permiso concedido no puede haber una, y no se le pregunta al servicio push: en
+ * el CI, el WebKit de Playwright deja la página sin responder con esa llamada.
+ *
+ * @returns {Promise<PushSubscription | null | undefined>} `undefined` sin service worker.
  */
 async function suscripcionActual() {
   const registro = await navigator.serviceWorker.getRegistration()
-  return registro ? registro.pushManager.getSubscription() : undefined
+  if (!registro) return undefined
+  return Notification.permission === 'granted' ? registro.pushManager.getSubscription() : null
 }
 
 /** @returns {Promise<EstadoDelPush>} */

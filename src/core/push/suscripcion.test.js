@@ -149,6 +149,17 @@ describe('Notificaciones push en el dispositivo (RF-31; decisiones 44 y 45)', ()
     expect(borrarSuscripcion).not.toHaveBeenCalled()
   })
 
+  it('RF-31: sin el permiso concedido no hay suscripción, y no se le pregunta al servicio push', async () => {
+    for (const permiso of ['default', 'denied']) {
+      const { pushManager } = simularNavegador({ permiso })
+
+      expect(await estadoDelPush()).toBe(permiso === 'denied' ? 'bloqueadas' : 'desactivadas')
+      expect(await desactivarPush()).toBe('desactivadas')
+      expect(pushManager.getSubscription).not.toHaveBeenCalled()
+    }
+    expect(borrarSuscripcion).not.toHaveBeenCalled()
+  })
+
   it('RF-31: desactivar sin suscripción no hace nada', async () => {
     simularNavegador({ permiso: 'granted' })
 
