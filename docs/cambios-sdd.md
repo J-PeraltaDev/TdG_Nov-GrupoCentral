@@ -1029,8 +1029,8 @@ dibuja Figma. Se resolvió así (plan del Sprint 5, decisiones 9 a 15):
 
 **Qué pasa.** La Tabla 34 define cada indicador, pero no fija en qué hora se cortan los períodos,
 qué es «por mes», qué devuelve cada función ni quién recorta y ordena lo que muestra Figma (plan
-del Sprint 5, decisiones 5 y 19 a 27). En el PR 4 quedaron las dos primeras; el PR 5 agrega las
-otras dos a esta misma entrada.
+del Sprint 5, decisiones 5 y 19 a 27). Las dos primeras llegaron en el PR 4 y las otras dos en
+el PR 5.
 
 - **Seguridad:** las `rpt_*` son `security invoker` (como dice 6.1.9) y verifican el rol al
   comenzar: quien no es director ni administrador activo recibe `SIN_PERMISO`, en lugar de un
@@ -1046,6 +1046,13 @@ otras dos a esta misma entrada.
   cambio 25), de las resueltas o cerradas cuya última resolución cae en el período. «Por mes» es el
   mes de Colombia de la resolución. «Abiertas con más tiempo» son las cinco abiertas más antiguas
   hoy, sin depender del período.
+- **Escalamiento (RF-28):** de las novedades registradas en el período, las que tuvieron al menos
+  una transición a «escalada» (una escalada dos veces cuenta una), por el área actual. La
+  justificación y la decisión del director son las de la **última** escalada: la siguiente
+  transición desde «escalada», o ninguna si todavía espera. Se listan todas las del período.
+- **Fallas recurrentes (RF-29):** las resueltas y cerradas registradas en el período, por finca y
+  tipo de falla vigente (tras una fusión, el destino), solo las combinaciones que no son cero.
+  Aparte, cuántas del período quedaron por fuera por no estar resueltas ni cerradas.
 - **Quién agrupa:** las funciones devuelven agregados simples; la pantalla ordena, recorta y
   dibuja.
 

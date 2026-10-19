@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  obtenerEscalamiento,
   obtenerNovedadesAbiertas,
+  obtenerRecurrencia,
   obtenerTiemposDeAtencion,
 } from '../../core/supabase/repositorios/reportes.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
@@ -13,6 +15,8 @@ import Panel from './Panel.jsx'
 vi.mock('../../core/supabase/repositorios/reportes.js', () => ({
   obtenerNovedadesAbiertas: vi.fn(),
   obtenerTiemposDeAtencion: vi.fn(),
+  obtenerEscalamiento: vi.fn(),
+  obtenerRecurrencia: vi.fn(),
 }))
 
 const MANTENIMIENTO = { id: 'a-m', nombre: 'Mantenimiento' }
@@ -109,6 +113,73 @@ const TIEMPOS = {
   ],
 }
 
+// Figma 25.
+const ESCALAMIENTO = {
+  datos_al: '2026-09-24T14:30:00Z',
+  desde: '2026-07-01',
+  hasta: '2026-09-24',
+  registradas: 38,
+  escaladas: 7,
+  areas: [
+    { ...MANTENIMIENTO, registradas: 19, escaladas: 5 },
+    { ...SISTEMAS, registradas: 19, escaladas: 2 },
+  ],
+  decisiones: { aprobadas: 3, rechazadas: 1, en_espera: 3 },
+  novedades: [
+    {
+      id: 'n-147',
+      codigo: 147,
+      finca: 'Juanca',
+      area_id: 'a-m',
+      area: 'Mantenimiento',
+      justificacion: 'Se requiere comprar 8 tablones de 3 m; no hay madera en bodega.',
+      escalada_en: '2026-09-20T13:00:00Z',
+      decision: 'aprobada',
+      decidida_en: '2026-09-21T06:40:00Z',
+    },
+    {
+      id: 'n-143',
+      codigo: 143,
+      finca: 'Tumaradó',
+      area_id: 'a-s',
+      area: 'Sistemas',
+      justificacion: 'Hay que reemplazar el disco duro del grabador.',
+      escalada_en: '2026-09-19T13:00:00Z',
+      decision: null,
+      decidida_en: null,
+    },
+  ],
+}
+
+const celda = (finca, tipo, cantidad) => ({
+  finca_id: `f-${finca}`,
+  finca,
+  tipo_falla_id: `t-${tipo}`,
+  tipo_falla: tipo,
+  cantidad,
+})
+// Figma 26, con nueve fincas: siete a la vista y «Otras 2 fincas».
+const RECURRENCIA = {
+  datos_al: '2026-09-24T14:30:00Z',
+  desde: '2026-04-01',
+  hasta: '2026-09-24',
+  total: 30,
+  excluidas: 12,
+  celdas: [
+    celda('La Mónica', 'Biométrico', 5),
+    celda('La Mónica', 'Internet', 1),
+    celda('Juanca', 'Internet', 2),
+    celda('Juanca', 'Biométrico', 1),
+    celda('Pavarandó', 'Internet', 4),
+    celda('Tumaradó', 'Torniquete', 3),
+    celda('Truandó', 'Bombas', 3),
+    celda('El Gran Cedro', 'Bombas', 2),
+    celda('Tikal', 'Internet', 2),
+    celda('Zungo', 'Bombas', 1),
+    celda('Coquitos', 'Internet', 6),
+  ],
+}
+
 function Detalle() {
   const { pathname, state } = useLocation()
   return (
@@ -139,6 +210,8 @@ beforeEach(() => {
   simularPantalla('escritorio')
   vi.mocked(obtenerNovedadesAbiertas).mockReset().mockResolvedValue(ABIERTAS)
   vi.mocked(obtenerTiemposDeAtencion).mockReset().mockResolvedValue(TIEMPOS)
+  vi.mocked(obtenerEscalamiento).mockReset().mockResolvedValue(ESCALAMIENTO)
+  vi.mocked(obtenerRecurrencia).mockReset().mockResolvedValue(RECURRENCIA)
 })
 
 afterEach(() => {
@@ -207,6 +280,32 @@ describe('Panel de reportes (RF-26 a RF-29)', () => {
       expect(obtenerTiemposDeAtencion).toHaveBeenLastCalledWith({
         desde: '2026-04-01',
         hasta: '2026-09-01',
+      }),
+    )
+  })
+
+  it('RF-27 (decisión 23): aplicar «Desde» no borra lo que se escribe después en «Hasta»', async () => {
+    abrir('/panel?indicador=tiempos')
+    await userEvent.selectOptions(
+      await screen.findByRole('combobox', { name: 'Período' }),
+      'Personalizado',
+    )
+
+    fireEvent.change(screen.getByLabelText('Desde'), { target: { value: '2001-01-01' } })
+    fireEvent.blur(screen.getByLabelText('Desde'))
+    fireEvent.change(screen.getByLabelText('Hasta'), { target: { value: '2001-12-31' } })
+    await waitFor(() =>
+      expect(obtenerTiemposDeAtencion).toHaveBeenLastCalledWith({
+        desde: '2001-01-01',
+        hasta: '2026-09-24',
+      }),
+    )
+    fireEvent.blur(screen.getByLabelText('Hasta'))
+
+    await waitFor(() =>
+      expect(obtenerTiemposDeAtencion).toHaveBeenLastCalledWith({
+        desde: '2001-01-01',
+        hasta: '2001-12-31',
       }),
     )
   })
@@ -391,5 +490,169 @@ describe('Panel en el teléfono (decisión 26)', () => {
     )
     expect(screen.queryByText(/Datos al/)).toBeNull()
     expect(screen.queryByRole('button', { name: 'Actualizar' })).toBeNull()
+  })
+})
+
+describe('Pantallas 25 y 25-B · Escalamiento (RF-28, CU-28)', () => {
+  it('RF-28 / CU-28 2: la proporción escalada, por área, con «Últimos 3 meses» por omisión', async () => {
+    abrir('/panel?indicador=escalamiento')
+
+    // Testing Library normaliza el espacio que no se parte: se busca con \s.
+    expect(await screen.findByText(/^18,4\s%$/)).toBeVisible()
+    expect(obtenerEscalamiento).toHaveBeenCalledExactlyOnceWith({
+      desde: '2026-07-01',
+      hasta: '2026-09-24',
+    })
+    expect(screen.getByText('7 de 38 registradas en el período')).toBeVisible()
+    const porArea = screen
+      .getByRole('heading', { name: 'Proporción escalada por área' })
+      .closest('section')
+    expect(
+      within(porArea)
+        .getAllByRole('listitem')
+        .map((fila) => fila.textContent),
+    ).toEqual(['Mantenimiento26,3\u00a0%5 de 19', 'Sistemas10,5\u00a0%2 de 19'])
+  })
+
+  it('RF-28 / CU-28 3: las decisiones del director, con su nombre y su cantidad', async () => {
+    abrir('/panel?indicador=escalamiento')
+
+    expect(await screen.findByText('Aprobadas · 3')).toBeVisible()
+    expect(screen.getByText('Rechazadas · 1')).toBeVisible()
+    expect(screen.getByText('En espera · 3')).toBeVisible()
+  })
+
+  it('RF-28: cada escalada con su decisión y el tiempo hasta ella; abre su detalle', async () => {
+    abrir('/panel?indicador=escalamiento')
+    const tabla = await screen.findByRole('table', { name: /Novedades escaladas en el período/ })
+
+    const [, aprobada, enEspera] = within(tabla).getAllByRole('row')
+    expect(within(aprobada).getByText('Aprobada')).toBeVisible()
+    expect(within(aprobada).getByText('17 h 40 min')).toBeVisible()
+    expect(within(enEspera).getByText('En espera')).toBeVisible()
+    expect(within(enEspera).getByText('Sin decisión')).toBeInTheDocument()
+
+    await userEvent.click(within(tabla).getByRole('link', { name: 'NOV-0147' }))
+    expect(
+      await screen.findByText('Detalle /novedades/n-147 desde /panel?indicador=escalamiento'),
+    ).toBeVisible()
+  })
+
+  it('RF-28 / CU-28 2a (25-B): un período sin novedades lo dice', async () => {
+    vi.mocked(obtenerEscalamiento).mockResolvedValue({
+      ...ESCALAMIENTO,
+      registradas: 0,
+      escaladas: 0,
+      decisiones: { aprobadas: 0, rechazadas: 0, en_espera: 0 },
+      novedades: [],
+    })
+    abrir('/panel?indicador=escalamiento')
+
+    expect(await screen.findByText('No hay novedades registradas en este período')).toBeVisible()
+    expect(screen.getByText('Elige otro período.')).toBeVisible()
+    expect(screen.queryByText('Decisiones del director')).toBeNull()
+  })
+})
+
+describe('Pantalla 26 · Fallas recurrentes (RF-29, CU-29)', () => {
+  it('RF-29 / CU-29 2 y 2b: el total, las que quedaron por fuera y «Últimos 6 meses» por omisión', async () => {
+    abrir('/panel?indicador=recurrencia')
+
+    expect(await screen.findByText('30 novedades resueltas y cerradas en el período')).toBeVisible()
+    expect(obtenerRecurrencia).toHaveBeenCalledExactlyOnceWith({
+      desde: '2026-04-01',
+      hasta: '2026-09-24',
+    })
+    expect(
+      screen.getByText(
+        '12 novedades quedaron por fuera porque todavía no tienen tipo de falla (abiertas o rechazadas).',
+      ),
+    ).toBeVisible()
+  })
+
+  it('RF-29 / CU-29 3–5: cada celda es un enlace con su nombre que abre el historial filtrado', async () => {
+    abrir('/panel?indicador=recurrencia')
+
+    const celda = await screen.findByRole('link', { name: 'La Mónica · Biométrico: 5 novedades' })
+    expect(celda).toHaveAttribute(
+      'href',
+      '/historial?finca=f-La Mónica&estado=resuelta,cerrada&desde=2026-04-01&hasta=2026-09-24&tipo=t-Biométrico'
+        .replaceAll(' ', '+')
+        .replace('Mónica', 'M%C3%B3nica')
+        .replace('Biométrico', 'Biom%C3%A9trico'),
+    )
+    // Una celda vacía se oye en cero.
+    const matriz = screen.getByRole('table', { name: /por finca y tipo de falla/ })
+    const monica = within(matriz).getByRole('row', { name: /^La Mónica/ })
+    expect(within(monica).getAllByText('0 novedades').length).toBeGreaterThan(0)
+  })
+
+  it('RF-29 (decisión 22): siete fincas y «Otras 2 fincas», que se despliega', async () => {
+    abrir('/panel?indicador=recurrencia')
+    const otras = await screen.findByRole('button', { name: 'Otras 2 fincas' })
+    const matriz = screen.getByRole('table', { name: /por finca y tipo de falla/ })
+
+    expect(within(matriz).queryByRole('rowheader', { name: 'Zungo' })).toBeNull()
+    expect(otras).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(otras)
+    expect(otras).toHaveAttribute('aria-expanded', 'true')
+    expect(within(matriz).getByRole('rowheader', { name: 'Zungo' })).toBeVisible()
+  })
+
+  it('RF-29: las cinco combinaciones más repetidas, cada una con su historial', async () => {
+    abrir('/panel?indicador=recurrencia')
+    const combinaciones = (
+      await screen.findByRole('heading', { name: 'Combinaciones más repetidas' })
+    ).closest('section')
+
+    expect(within(combinaciones).getAllByRole('listitem')).toHaveLength(5)
+    expect(
+      within(combinaciones).getByRole('link', { name: 'Ver novedades de Coquitos · Internet' }),
+    ).toBeVisible()
+  })
+
+  it('RF-29 / CU-29 2a: sin resueltas en el período, el aviso de 25-B', async () => {
+    vi.mocked(obtenerRecurrencia).mockResolvedValue({
+      ...RECURRENCIA,
+      total: 0,
+      excluidas: 0,
+      celdas: [],
+    })
+    abrir('/panel?indicador=recurrencia')
+
+    expect(await screen.findByText('No hay novedades registradas en este período')).toBeVisible()
+  })
+})
+
+describe('Pantalla 27 · Fallas recurrentes en el teléfono (RF-29)', () => {
+  beforeEach(() => {
+    simularPantalla('telefono')
+  })
+
+  it('RF-29: «Más repetidas» con tres y cada finca desplegable, la primera abierta', async () => {
+    abrir('/panel?indicador=recurrencia')
+
+    expect(
+      await screen.findByText('12 novedades sin tipo de falla quedaron por fuera.'),
+    ).toBeVisible()
+    const masRepetidas = screen.getByRole('heading', { name: 'Más repetidas' }).closest('section')
+    expect(within(masRepetidas).getAllByRole('listitem')).toHaveLength(3)
+
+    const coquitos = screen.getByRole('button', { name: 'Coquitos 6 novedades' })
+    const monica = screen.getByRole('button', { name: 'La Mónica 6 novedades' })
+    expect(coquitos).toHaveAttribute('aria-expanded', 'true')
+    expect(monica).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('link', { name: 'Ver en historial de Coquitos' })).toBeVisible()
+
+    await userEvent.click(monica)
+    expect(monica).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('link', { name: 'Ver en historial de La Mónica' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('estado=resuelta,cerrada&desde=2026-04-01&hasta=2026-09-24'),
+    )
+    expect(screen.getByRole('tab', { name: 'Recurrencia' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
   })
 })

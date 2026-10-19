@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { formatearDias, nombreDelMes } from './cifras.js'
+import { formatearDias, formatearPorcentaje, nombreDelMes } from './cifras.js'
 
 describe('Cifras del panel (plan del Sprint 5, decisión 5)', () => {
   it.each([
@@ -22,5 +22,14 @@ describe('Cifras del panel (plan del Sprint 5, decisión 5)', () => {
     expect(nombreDelMes('2026-09-01', { corto: true })).toBe('Sep')
     expect(nombreDelMes('2025-12-01', { conAnio: true })).toBe('Diciembre 2025')
     expect(nombreDelMes('2026-01-01', { corto: true, conAnio: true })).toBe('Ene 2026')
+  })
+
+  it.each([
+    [7, 38, '18,4\u00a0%'],
+    [5, 19, '26,3\u00a0%'],
+    [0, 19, '0,0\u00a0%'],
+    [3, 3, '100,0\u00a0%'],
+  ])('RF-28: %s de %s son «%s», con un espacio que no se parte', (parte, total, texto) => {
+    expect(formatearPorcentaje(parte, total)).toBe(texto)
   })
 })

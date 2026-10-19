@@ -96,6 +96,8 @@ vi.mock('../core/supabase/repositorios/reportes.js', () => ({
     estados: [],
   }),
   obtenerTiemposDeAtencion: vi.fn(),
+  obtenerEscalamiento: vi.fn(),
+  obtenerRecurrencia: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/historial.js', () => ({
   listarHistorial: vi.fn().mockResolvedValue({ novedades: [], total: 0 }),

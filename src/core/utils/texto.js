@@ -16,3 +16,11 @@ export function sinTildes(texto) {
       .trim()
   )
 }
+
+/**
+ * «1 novedad», «9 novedades», «1.082 novedades»: con la concordancia y el separador de miles.
+ *
+ * @param {number} cantidad
+ */
+export const cuantasNovedades = (cantidad) =>
+  cantidad === 1 ? '1 novedad' : `${cantidad.toLocaleString('es-CO')} novedades`

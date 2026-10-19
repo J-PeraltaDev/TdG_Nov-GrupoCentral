@@ -1,9 +1,11 @@
-import { useEffect, useId, useState } from 'react'
+import { startTransition, useEffect, useId, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import {
+  obtenerEscalamiento,
   obtenerNovedadesAbiertas,
+  obtenerRecurrencia,
   obtenerTiemposDeAtencion,
 } from '../../core/supabase/repositorios/reportes.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
@@ -18,6 +20,8 @@ import iconoActualizar from '../../core/ui/iconos/refresh.svg'
 import { Pestanas } from '../../core/ui/Pestanas.jsx'
 import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 import { formatearFechaHora } from '../../core/utils/fechas.js'
+import { Escalamiento } from './Escalamiento.jsx'
+import { FallasRecurrentes } from './FallasRecurrentes.jsx'
 import { NovedadesAbiertas } from './NovedadesAbiertas.jsx'
 import { escribirPeriodo, leerPeriodo, PERIODOS } from './periodos.js'
 import { TiemposDeAtencion } from './TiemposDeAtencion.jsx'
@@ -28,26 +32,60 @@ import { TiemposDeAtencion } from './TiemposDeAtencion.jsx'
  * que se ve. Solo lo ven el director de agricultura y el administrador, y requiere conexión.
  */
 
-/** Las pestañas (decisión 24). Escalamiento y fallas recurrentes llegan en el PR 5. */
+/**
+ * Las pestañas (decisión 24): qué pide cada una al servidor, cómo se ve y su período por omisión
+ * (decisión 23: tres meses en 24 y 25, seis en 26, como Figma).
+ */
 const INDICADORES = [
-  { id: 'abiertas', nombre: 'Novedades abiertas', corta: 'Abiertas' },
-  { id: 'tiempos', nombre: 'Tiempos de atención', corta: 'Tiempos', periodo: '3m' },
+  {
+    id: 'abiertas',
+    nombre: 'Novedades abiertas',
+    corta: 'Abiertas',
+    pedir: obtenerNovedadesAbiertas,
+    Vista: NovedadesAbiertas,
+  },
+  {
+    id: 'tiempos',
+    nombre: 'Tiempos de atención',
+    corta: 'Tiempos',
+    periodo: '3m',
+    pedir: obtenerTiemposDeAtencion,
+    Vista: TiemposDeAtencion,
+  },
+  {
+    id: 'escalamiento',
+    nombre: 'Escalamiento',
+    corta: 'Escalamiento',
+    periodo: '3m',
+    pedir: obtenerEscalamiento,
+    Vista: Escalamiento,
+  },
+  {
+    id: 'recurrencia',
+    nombre: 'Fallas recurrentes',
+    corta: 'Recurrencia',
+    periodo: '6m',
+    pedir: obtenerRecurrencia,
+    Vista: FallasRecurrentes,
+  },
 ]
 
 const ID_DEL_PANEL = 'panel-de-reportes'
 
 /**
  * El selector del período (decisión 23): las opciones de Figma y «Personalizado», que abre dos
- * fechas y solo se aplica cuando las dos están y no se invierten.
+ * fechas y se aplica al salir de una, cuando las dos están y no se invierten. Las fechas son las
+ * de la dirección; mientras se escriben, un borrador, que se descarta al aplicarlo. Así «Atrás» y
+ * otra pestaña muestran siempre las fechas de lo que se ve.
  */
 function SelectorDePeriodo({ periodo, corto, alCambiar }) {
-  const [personalizado, setPersonalizado] = useState(
-    periodo.clave === 'personalizado' ? { desde: periodo.desde, hasta: periodo.hasta } : null,
-  )
+  // Eligió «Personalizado» y todavía no aplicó fechas.
+  const [eligioPersonalizado, setEligioPersonalizado] = useState(false)
+  const [borrador, setBorrador] = useState(null)
   const idDelError = useId()
-  const invertido = Boolean(
-    personalizado?.desde && personalizado?.hasta && personalizado.desde > personalizado.hasta,
-  )
+  const personalizado = eligioPersonalizado || periodo.clave === 'personalizado'
+  const fechas = borrador ?? { desde: periodo.desde, hasta: periodo.hasta }
+  const invertido = Boolean(fechas.desde && fechas.hasta && fechas.desde > fechas.hasta)
   const opciones = [
     ...PERIODOS.map(({ clave }) => {
       const opcion = leerPeriodo(new URLSearchParams({ periodo: clave }), clave)
@@ -60,13 +98,20 @@ function SelectorDePeriodo({ periodo, corto, alCambiar }) {
     },
   ]
 
-  const cambiarFecha = (cambio) => setPersonalizado((actual) => ({ ...actual, ...cambio }))
+  const cambiarFecha = (cambio) => setBorrador({ ...fechas, ...cambio })
   // Al salir de la fecha: mientras se escribe el año, el campo pasa por 0002, 0020, 0202…
   function aplicar() {
-    const { desde, hasta } = personalizado
-    if (desde && hasta && desde <= hasta && (desde !== periodo.desde || hasta !== periodo.hasta)) {
+    const { desde, hasta } = fechas
+    const igual =
+      periodo.clave === 'personalizado' && desde === periodo.desde && hasta === periodo.hasta
+    if (!desde || !hasta || desde > hasta || igual) return
+    // En la misma transición en que React Router cambia la dirección: si el borrador se borrara
+    // antes, los campos desaparecerían un instante y se perdería lo que se escribe en el otro.
+    startTransition(() => {
       alCambiar({ clave: 'personalizado', desde, hasta })
-    }
+      setEligioPersonalizado(false)
+      setBorrador(null)
+    })
   }
 
   return (
@@ -76,23 +121,22 @@ function SelectorDePeriodo({ periodo, corto, alCambiar }) {
         icono={iconoFecha}
         opciones={opciones}
         value={personalizado ? 'personalizado' : periodo.clave}
-        alCambiar={(valor) => {
-          if (valor === 'personalizado') {
-            setPersonalizado({ desde: periodo.desde, hasta: periodo.hasta })
-            return
-          }
-          setPersonalizado(null)
-          alCambiar({ clave: valor })
-        }}
+        alCambiar={(valor) =>
+          startTransition(() => {
+            setBorrador(null)
+            setEligioPersonalizado(valor === 'personalizado')
+            if (valor !== 'personalizado') alCambiar({ clave: valor })
+          })
+        }
         className="self-start"
       />
       {personalizado ? (
         <div className="flex flex-col gap-1.5">
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <CampoTexto
               etiqueta="Desde"
               type="date"
-              value={personalizado.desde ?? ''}
+              value={fechas.desde ?? ''}
               conError={invertido}
               descritoPor={invertido ? idDelError : undefined}
               onChange={(evento) => cambiarFecha({ desde: evento.target.value || null })}
@@ -101,7 +145,7 @@ function SelectorDePeriodo({ periodo, corto, alCambiar }) {
             <CampoTexto
               etiqueta="Hasta"
               type="date"
-              value={personalizado.hasta ?? ''}
+              value={fechas.hasta ?? ''}
               conError={invertido}
               descritoPor={invertido ? idDelError : undefined}
               onChange={(evento) => cambiarFecha({ hasta: evento.target.value || null })}
@@ -138,9 +182,8 @@ export default function Panel() {
     if (!enLinea) return undefined
     let vigente = true
     const [id, desde, hasta] = consulta.split('|')
-    const pedido =
-      id === 'tiempos' ? obtenerTiemposDeAtencion({ desde, hasta }) : obtenerNovedadesAbiertas()
-    pedido.then(
+    const { pedir } = INDICADORES.find((uno) => uno.id === id)
+    pedir({ desde, hasta }).then(
       (datos) => vigente && setResultado({ consulta, intento, datos }),
       (error) => vigente && setResultado({ consulta, intento, fallo: traducirError(error) }),
     )
@@ -176,7 +219,6 @@ export default function Panel() {
           </div>
           {periodo ? (
             <SelectorDePeriodo
-              key={periodo.clave}
               periodo={periodo}
               alCambiar={(nuevo) => setParametros(escribirPeriodo(parametros, nuevo))}
             />
@@ -211,7 +253,6 @@ export default function Panel() {
       {/* 27: en el teléfono, el período va bajo las pestañas, sin el rango. */}
       {periodo && !esEscritorio ? (
         <SelectorDePeriodo
-          key={periodo.clave}
           periodo={periodo}
           corto
           alCambiar={(nuevo) => setParametros(escribirPeriodo(parametros, nuevo))}
@@ -246,10 +287,8 @@ export default function Panel() {
           <p role="status" className="py-6 text-center text-cuerpo-pequeno text-texto-secundario">
             Cargando…
           </p>
-        ) : indicador.id === 'tiempos' ? (
-          <TiemposDeAtencion datos={datos} origen={origen} />
         ) : (
-          <NovedadesAbiertas datos={datos} />
+          <indicador.Vista datos={datos} origen={origen} />
         )}
       </div>
     </section>

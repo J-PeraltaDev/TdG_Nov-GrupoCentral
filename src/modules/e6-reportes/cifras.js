@@ -43,3 +43,11 @@ export function nombreDelMes(mes, { corto = false, conAnio = false } = {}) {
     : NOMBRES_DE_LOS_MESES[numero]
   return conAnio ? `${nombre} ${mes.slice(0, 4)}` : nombre
 }
+
+/**
+ * «18,4 %»: una parte de un total, con un decimal y el espacio de Figma, que no se parte.
+ *
+ * @param {number} parte
+ * @param {number} total Mayor que cero.
+ */
+export const formatearPorcentaje = (parte, total) => `${DIAS.format((parte / total) * 100)}\u00a0%`
