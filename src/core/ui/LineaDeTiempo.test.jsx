@@ -151,4 +151,26 @@ describe('Línea de tiempo (RF-18 / CU-18 4, Figma 3:817 y 4:2212)', () => {
     expect(pasos()).toHaveLength(1)
     expect(within(pasos()[0]).getByText('21 sep, 6:48 a. m.')).toBeVisible()
   })
+
+  it('RF-32 / CU-32 1a: la corrección del tipo de una cerrada se anota, no se pinta como un cambio de estado', () => {
+    const ADMINISTRADORA = { nombre: 'Paula Giraldo', rol_id: 4, area: null }
+    render(
+      <LineaDeTiempo
+        transiciones={[
+          transicion(7, 'cerrada', 'cerrada', {
+            usuario: ADMINISTRADORA,
+            observacion: '"Puentes" → "Puentes y pasos"',
+          }),
+          transicion(6, 'resuelta', 'cerrada'),
+        ]}
+      />,
+    )
+
+    const correccion = within(pasos()[0])
+    expect(correccion.getByText('Tipo de falla corregido')).toBeVisible()
+    expect(correccion.queryByText('Cerrada')).not.toBeInTheDocument()
+    expect(correccion.queryByText('pasa a')).not.toBeInTheDocument()
+    expect(correccion.getByText('"Puentes" → "Puentes y pasos"')).toBeVisible()
+    expect(within(pasos()[1]).getByText('Cerrada')).toBeVisible()
+  })
 })

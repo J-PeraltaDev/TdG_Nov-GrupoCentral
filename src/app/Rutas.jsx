@@ -19,6 +19,7 @@ const Escaladas = lazy(() => import('../modules/e3-atencion/Escaladas.jsx'))
 const Fincas = lazy(() => import('../modules/e1-acceso-admin/Fincas.jsx'))
 const Usuarios = lazy(() => import('../modules/e1-acceso-admin/Usuarios.jsx'))
 const Recuperaciones = lazy(() => import('../modules/e1-acceso-admin/Recuperaciones.jsx'))
+const TiposDeFalla = lazy(() => import('../modules/e1-acceso-admin/TiposDeFalla.jsx'))
 // La recuperación no tiene sesión, pero tampoco va en el paquete del ingreso: la abre quien
 // olvidó su contraseña, no todo el que entra.
 const RecuperarContrasena = lazy(() => import('../modules/e1-acceso-admin/RecuperarContrasena.jsx'))
@@ -29,6 +30,10 @@ const RegistrarNovedad = lazy(() => import('../modules/e2-registro/RegistrarNove
 const NovedadRecibida = lazy(() => import('../modules/e2-registro/NovedadRecibida.jsx'))
 const NovedadGuardada = lazy(() => import('../modules/e2-registro/NovedadGuardada.jsx'))
 const Pendientes = lazy(() => import('../modules/e5-sin-conexion/Pendientes.jsx'))
+const Avisos = lazy(() => import('../modules/e7-avisos/Avisos.jsx'))
+const Historial = lazy(() => import('../modules/e4-consulta/Historial.jsx'))
+// El panel solo lo descargan el director y el administrador: su ruta tiene guardián.
+const Panel = lazy(() => import('../modules/e6-reportes/Panel.jsx'))
 
 // Página de componentes: solo existe en desarrollo. En el build de producción esta
 // condición es falsa y el módulo ni siquiera se empaqueta.
@@ -77,10 +82,7 @@ export function Rutas() {
             <Route
               element={<GuardianDeRol roles={[ROL.DIRECTOR_AGRICULTURA, ROL.ADMINISTRADOR]} />}
             >
-              <Route
-                path="/panel"
-                element={<Pendiente titulo="Panel de reportes" sprint="Sprint 5" />}
-              />
+              <Route path="/panel" element={<Panel />} />
             </Route>
 
             <Route
@@ -90,23 +92,17 @@ export function Rutas() {
                 />
               }
             >
-              <Route
-                path="/historial"
-                element={<Pendiente titulo="Historial" sprint="Sprint 5" />}
-              />
+              <Route path="/historial" element={<Historial />} />
             </Route>
 
             <Route element={<GuardianDeRol roles={[ROL.ADMINISTRADOR]} />}>
               <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/fincas" element={<Fincas />} />
-              <Route
-                path="/tipos-de-falla"
-                element={<Pendiente titulo="Tipos de falla" sprint="Sprint 5" />}
-              />
+              <Route path="/tipos-de-falla" element={<TiposDeFalla />} />
               <Route path="/recuperacion" element={<Recuperaciones />} />
             </Route>
 
-            <Route path="/avisos" element={<Pendiente titulo="Avisos" sprint="Sprint 5" />} />
+            <Route path="/avisos" element={<Avisos />} />
             <Route path="/cuenta" element={<Cuenta />} />
           </Route>
 

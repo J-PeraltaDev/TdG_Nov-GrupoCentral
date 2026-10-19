@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { paginar } from './paginar.js'
+import { paginar, paginasVisibles } from './paginar.js'
 
 const LISTA = Array.from({ length: 45 }, (_, i) => i + 1)
 
@@ -34,5 +34,19 @@ describe('Páginas de una lista (pantallas 28, 30 y 32)', () => {
   it('una lista que llena justo la página no abre otra', () => {
     expect(paginar(LISTA.slice(0, 20), 0, 20).ultima).toBe(0)
     expect(paginar(LISTA.slice(0, 21), 0, 20).ultima).toBe(1)
+  })
+})
+
+describe('Páginas con número (Figma 21; plan del Sprint 5, decisión 12)', () => {
+  it.each([
+    [0, 0, [0]],
+    [0, 1, [0, 1]],
+    [0, 4, [0, 1, null, 4]],
+    [2, 4, [0, 1, 2, 3, 4]],
+    [5, 9, [0, null, 4, 5, 6, null, 9]],
+    [9, 9, [0, null, 8, 9]],
+    [3, 9, [0, 1, 2, 3, 4, null, 9]],
+  ])('RF-19: en la página %s de 0 a %s se ven %j', (pagina, ultima, esperadas) => {
+    expect(paginasVisibles(pagina, ultima)).toEqual(esperadas)
   })
 })

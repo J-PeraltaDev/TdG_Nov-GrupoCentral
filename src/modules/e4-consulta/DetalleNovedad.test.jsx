@@ -15,6 +15,11 @@ import {
   tomarNovedad,
 } from '../../core/supabase/repositorios/novedades.js'
 import { listarEvidencias } from '../../core/supabase/repositorios/evidencias.js'
+import { marcarAvisosLeidos } from '../../core/supabase/repositorios/avisos.js'
+import {
+  corregirTipoFalla,
+  listarTiposActivos,
+} from '../../core/supabase/repositorios/tiposFalla.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import DetalleNovedad from './DetalleNovedad.jsx'
@@ -37,6 +42,14 @@ vi.mock('../../core/supabase/repositorios/evidencias.js', () => ({
 }))
 vi.mock('../../core/supabase/repositorios/catalogos.js', () => ({
   listarAreas: vi.fn(),
+}))
+vi.mock('../../core/supabase/repositorios/avisos.js', () => ({
+  marcarAvisosLeidos: vi.fn().mockResolvedValue(1),
+}))
+vi.mock('../../app/insignias.js', () => ({ pedirConteoDeInsignias: vi.fn() }))
+vi.mock('../../core/supabase/repositorios/tiposFalla.js', () => ({
+  listarTiposActivos: vi.fn(),
+  corregirTipoFalla: vi.fn(),
 }))
 
 /** La bandeja, reducida a lo que el detalle le entrega al volver: la dirección y el aviso. */
@@ -121,7 +134,7 @@ function conNovedad(novedad = ASIGNADA, transiciones = REGISTRO) {
   vi.mocked(listarLineaDeTiempo).mockResolvedValue(transiciones)
 }
 
-function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
+function abrir({ rol = 'aprobador', id = ID, origen, ancla = '', busqueda = '' } = {}) {
   return pintarConSesion(
     <Routes>
       <Route
@@ -140,6 +153,7 @@ function abrir({ rol = 'aprobador', id = ID, origen, ancla = '' } = {}) {
     {
       ruta: {
         pathname: `/novedades/${id}`,
+        search: busqueda,
         hash: ancla,
         state: origen ? { origen } : undefined,
       },
@@ -1224,5 +1238,120 @@ describe('Fotos del reporte y de la solución (RF-08; cambio 23)', () => {
       await solucion.findByRole('img', { name: 'Foto 1 de la solución de NOV-0153' }),
     ).toBeVisible()
     expect(screen.queryByRole('button', { name: 'Adjuntar foto' })).not.toBeInTheDocument()
+  })
+})
+
+describe('Corregir el tipo de falla de una cerrada (RF-32 / CU-32 1a)', () => {
+  const CERRADA = { ...RESUELTA, estado: 'cerrada' }
+  const HISTORIA_CERRADA = [
+    paso(5, 'resuelta', 'cerrada', { fecha_hora: '2026-09-24T12:20:00Z' }),
+    ...HISTORIA_RESUELTA,
+  ]
+
+  it.each([
+    ['administrador', 'cerrada', true],
+    ['administrador', 'resuelta', false],
+    ['director', 'cerrada', false],
+    ['aprobador', 'cerrada', false],
+  ])('el %s ve «Corregir tipo» en una %s: %s (Tabla 35)', async (rol, estado, ve) => {
+    simularPantalla('escritorio')
+    conNovedad({ ...RESUELTA, estado }, HISTORIA_CERRADA)
+    abrir({ rol })
+
+    expect(await screen.findByText('Se cambió el motor del torniquete.')).toBeVisible()
+    if (ve) {
+      expect(
+        await within(dato('Tipo de falla')).findByRole('button', { name: 'Corregir tipo' }),
+      ).toBeVisible()
+    } else {
+      expect(screen.queryByRole('button', { name: 'Corregir tipo' })).not.toBeInTheDocument()
+    }
+  })
+
+  it('RF-25: sin conexión, «Corregir tipo» no se ofrece', async () => {
+    const enLinea = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    simularPantalla('escritorio')
+    conNovedad(CERRADA, HISTORIA_CERRADA)
+    abrir({ rol: 'administrador' })
+
+    expect(await screen.findByText('Se cambió el motor del torniquete.')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Corregir tipo' })).not.toBeInTheDocument()
+    enLinea.mockRestore()
+  })
+
+  it('si la lista de tipos no llega, el diálogo lo dice y deja reintentar', async () => {
+    simularPantalla('escritorio')
+    vi.mocked(listarTiposActivos)
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce([{ id: 'tipo-puertas', nombre: 'Puertas' }])
+    conNovedad(CERRADA, HISTORIA_CERRADA)
+    abrir({ rol: 'administrador' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Corregir tipo' }))
+    const dialogo = within(screen.getByRole('dialog', { name: 'Corregir tipo de falla' }))
+    expect(await dialogo.findByRole('alert')).toHaveTextContent('No hay conexión')
+    await userEvent.click(dialogo.getByRole('button', { name: 'Reintentar' }))
+
+    const campo = dialogo.getByRole('combobox', { name: 'Tipo correcto' })
+    await waitFor(() => expect(campo).toBeEnabled())
+    expect(within(campo).getByRole('option', { name: 'Puertas' })).toBeInTheDocument()
+    expect(dialogo.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('el administrador elige el tipo correcto entre los activos y el detalle se recarga', async () => {
+    simularPantalla('escritorio')
+    vi.mocked(listarTiposActivos).mockResolvedValue([
+      { id: 'tipo-puertas', nombre: 'Puertas' },
+      { id: 'tipo-torniquetes', nombre: 'Torniquetes' },
+    ])
+    vi.mocked(corregirTipoFalla).mockResolvedValue({ ...CERRADA, tipo_falla: 'Puertas' })
+    conNovedad(CERRADA, HISTORIA_CERRADA)
+    abrir({ rol: 'administrador' })
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Corregir tipo' }))
+    const dialogo = screen.getByRole('dialog', { name: 'Corregir tipo de falla' })
+    expect(dialogo).toHaveAccessibleDescription('Tipo actual: Torniquetes')
+    const campo = within(dialogo).getByRole('combobox', { name: 'Tipo correcto' })
+    // El tipo actual no se ofrece.
+    await waitFor(() =>
+      expect(
+        within(campo)
+          .getAllByRole('option')
+          .map((opcion) => opcion.textContent),
+      ).toEqual(['Elige el tipo correcto', 'Puertas']),
+    )
+
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Corregir' }))
+    expect(campo).toHaveAccessibleDescription('Elige el tipo correcto.')
+    expect(corregirTipoFalla).not.toHaveBeenCalled()
+
+    await userEvent.selectOptions(campo, 'Puertas')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Corregir' }))
+
+    expect(corregirTipoFalla).toHaveBeenCalledExactlyOnceWith(ID, 'tipo-puertas')
+    expect(await screen.findByText('Tipo de falla corregido.')).toBeVisible()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => expect(obtenerNovedad).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe('Abierta desde una notificación push (RF-31; decisión 46)', () => {
+  const AVISO = '00000000-0000-4000-a000-0000000000a1'
+
+  it('RF-31: el aviso del push queda leído al abrir la novedad', async () => {
+    vi.mocked(marcarAvisosLeidos).mockClear()
+    conNovedad()
+    abrir({ rol: 'reportante', busqueda: `?aviso=${AVISO}` })
+
+    await waitFor(() => expect(marcarAvisosLeidos).toHaveBeenCalledExactlyOnceWith([AVISO]))
+  })
+
+  it('RF-31: sin aviso, o con uno que no es un uuid, no marca nada', async () => {
+    vi.mocked(marcarAvisosLeidos).mockClear()
+    conNovedad()
+    abrir({ rol: 'reportante', busqueda: '?aviso=no-es-un-uuid' })
+
+    await screen.findByText(ASIGNADA.descripcion)
+    expect(marcarAvisosLeidos).not.toHaveBeenCalled()
   })
 })

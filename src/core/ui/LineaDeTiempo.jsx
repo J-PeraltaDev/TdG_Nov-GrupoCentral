@@ -26,6 +26,15 @@ import iconoInmutable from './iconos/lock.svg'
 const esDelSistema = (transicion) =>
   transicion.estado_anterior === 'registrada' && transicion.estado_nuevo === 'asignada'
 
+/**
+ * La corrección del tipo de falla de una cerrada no cambia el estado (RF-32; decisión 53): se
+ * anota, no se pinta como una transición.
+ *
+ * @param {Transicion} transicion
+ */
+const esCorreccionDelTipo = (transicion) =>
+  transicion.estado_anterior === 'cerrada' && transicion.estado_nuevo === 'cerrada'
+
 /** «Carlos Mario Restrepo · Aprobador · Mantenimiento» (SDD 5.2.5: usuario y rol). */
 function autor(transicion) {
   return esDelSistema(transicion) ? 'Sistema' : firmaDe(transicion.usuario)
@@ -69,16 +78,20 @@ export function LineaDeTiempo({ transiciones, conPie = false, registradaSinConex
               </span>
 
               <div className="flex min-w-0 flex-1 flex-col gap-1 pb-4">
-                <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                  {transicion.estado_anterior ? (
-                    <>
-                      <Estado estado={transicion.estado_anterior} />
-                      <Icono src={iconoPasaA} tamano={14} className="text-texto-secundario" />
-                      <span className="sr-only">pasa a</span>
-                    </>
-                  ) : null}
-                  <Estado estado={transicion.estado_nuevo} />
-                </p>
+                {esCorreccionDelTipo(transicion) ? (
+                  <p className="text-etiqueta-fuerte text-texto">Tipo de falla corregido</p>
+                ) : (
+                  <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    {transicion.estado_anterior ? (
+                      <>
+                        <Estado estado={transicion.estado_anterior} />
+                        <Icono src={iconoPasaA} tamano={14} className="text-texto-secundario" />
+                        <span className="sr-only">pasa a</span>
+                      </>
+                    ) : null}
+                    <Estado estado={transicion.estado_nuevo} />
+                  </p>
+                )}
                 <p className="text-etiqueta-fuerte break-words text-texto">{autor(transicion)}</p>
                 <p className="text-auxiliar text-texto-secundario">
                   <time dateTime={transicion.fecha_hora}>

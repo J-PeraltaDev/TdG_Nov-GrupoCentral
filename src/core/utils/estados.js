@@ -14,3 +14,15 @@ export const NOMBRE_DE_ESTADO = Object.freeze({
   resuelta: 'Resuelta',
   cerrada: 'Cerrada',
 })
+
+/**
+ * Nombre de cada prioridad, como la pastilla de Figma (1:106) y el CSV del historial.
+ *
+ * @type {Record<import('../supabase/database.types').Database['public']['Enums']['prioridad_novedad'], string>}
+ */
+export const NOMBRE_DE_PRIORIDAD = Object.freeze({
+  critico: 'Crítico',
+  alto: 'Alto',
+  normal: 'Normal',
+  bajo: 'Bajo',
+})

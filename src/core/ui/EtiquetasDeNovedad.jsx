@@ -24,6 +24,16 @@ export function Etiqueta({ children, className = 'text-texto-secundario' }) {
 }
 
 /**
+ * El área, con su color (Figma: «Sistemas» en azul y «Mantenimiento» en ocre).
+ *
+ * @param {object} props
+ * @param {string} props.area
+ */
+export function EtiquetaDeArea({ area }) {
+  return <Etiqueta className={COLOR_DEL_AREA[area] ?? 'text-texto-secundario'}>{area}</Etiqueta>
+}
+
+/**
  * Estado, prioridad, área y finca: lo que identifica a la novedad de un vistazo. Lo usan el
  * detalle (13, 14, 20 y 22) y la lista de escaladas (19).
  *
@@ -35,9 +45,7 @@ export function EtiquetasDeNovedad({ novedad }) {
     <>
       <Estado estado={novedad.estado} />
       <Prioridad prioridad={novedad.prioridad} />
-      <Etiqueta className={COLOR_DEL_AREA[novedad.area] ?? 'text-texto-secundario'}>
-        {novedad.area}
-      </Etiqueta>
+      <EtiquetaDeArea area={novedad.area} />
       {/* Figma escribe «Finca Juanca»; si el nombre ya empieza por «Finca», no se repite. */}
       <Etiqueta>
         {/^finca\b/i.test(novedad.finca) ? novedad.finca : `Finca ${novedad.finca}`}

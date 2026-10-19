@@ -4,7 +4,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(53);
+select plan(54);
 
 -- Datos de la prueba (como propietario) ------------------------------------------------
 
@@ -266,15 +266,21 @@ select throws_ok(
   'RNF-18: el aprobador no puede leer usuario.correo'
 );
 
--- El destinatario solo puede marcar su aviso como leído.
+-- El destinatario solo puede marcar su aviso como leído, y solo con marcar_avisos_leidos: desde
+-- el Sprint 5 no escribe directamente en notificacion (regla 1; cambio 26).
 select is(
   (select count(*)::int from public.notificacion where id = '10000000-0000-4000-8000-0000000000c2'),
   1,
   'RF-30: el destinatario ve su aviso'
 );
-select lives_ok(
+select throws_ok(
   $$ update public.notificacion set leida = true, leida_en = now() where id = '10000000-0000-4000-8000-0000000000c2' $$,
-  'RF-30: el destinatario marca su aviso como leído'
+  '42501', null,
+  'Regla 1: el destinatario no actualiza su aviso directamente'
+);
+select lives_ok(
+  $$ select public.marcar_avisos_leidos(array['10000000-0000-4000-8000-0000000000c2']::uuid[]) $$,
+  'RF-30: el destinatario marca su aviso como leído con marcar_avisos_leidos'
 );
 select is(
   (select leida from public.notificacion where id = '10000000-0000-4000-8000-0000000000c2'),
@@ -291,8 +297,9 @@ select throws_ok(
   '42501', null,
   'RF-30: el destinatario no puede reasignar el aviso'
 );
-select is_empty(
-  $$ update public.notificacion set leida = true where id = '10000000-0000-4000-8000-0000000000c1' returning id $$,
+select is(
+  public.marcar_avisos_leidos(array['10000000-0000-4000-8000-0000000000c1']::uuid[]),
+  0,
   'RF-30: nadie marca como leído el aviso de otro usuario'
 );
 

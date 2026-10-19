@@ -3,47 +3,51 @@
 Dudas de diseño o de negocio que los documentos no resuelven. Ninguna bloquea: en cada una se
 tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la confirmen o la cambien.
 
-| N.º | Tema                                          | Qué se hizo mientras tanto                                           | La decide         |
-| --- | --------------------------------------------- | -------------------------------------------------------------------- | ----------------- |
-| 1   | Lista oficial de fincas y razones sociales    | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar | El equipo         |
-| 2   | Base de datos de las vistas previas           | **Resuelta:** «staging» creado y variables de Pages comprobadas      | El equipo         |
-| 3   | Dominio de los correos de la plataforma       | `@novedades.test` para los usuarios de prueba                        | El equipo         |
-| 4   | Valores de los parámetros configurables       | Los que propone el plan, en `parametros.js`                          | La empresa        |
-| 5   | Íconos de la app y conjunto de íconos         | Marcadores para la app; Material Symbols para la interfaz            | El equipo         |
-| 6   | Contraste del estado «escalada»               | Se dejó el color de Figma; prueba marcada como falla conocida        | El equipo (Figma) |
-| 7   | Service worker propio o con Workbox           | Propio, sin dependencias nuevas                                      | El equipo         |
-| 8   | Versión de Node y de jsdom                    | jsdom 29, compatible con Node 24.14                                  | El equipo         |
-| 9   | Estados de interacción que Figma no dibuja    | Solo el `hover` del botón primario                                   | El equipo (Figma) |
-| 10  | Textos que no están en Figma                  | Redactados con tuteo; listados abajo                                 | El equipo         |
-| 11  | Peso de la ruta de ingreso                    | Medido: 187,8 KB de 200 KB; Lighthouse: 97 y 100                     | El equipo         |
-| 12  | Borde del botón secundario                    | Se dejó el color de Figma                                            | El equipo (Figma) |
-| 13  | Detalles de las pantallas 04, 05 y 06         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 14  | Pantallas 05 y 06 en el escritorio            | Dentro del marco del escritorio, en una columna centrada             | El equipo (Figma) |
-| 15  | WebKit no abre en los equipos                 | El CI corre Chromium y WebKit; sin red en WebKit, `fixme`            | El equipo         |
-| 16  | Avisos del asesor de Supabase                 | Tres tipos de aviso conocidos; el de las funciones sale una por RPC  | El equipo         |
-| 17  | Pruebas que necesitan ingresar                | **Al día:** el 14 oct pasaron las 135 (más las 6 de preparación)     | El equipo         |
-| 18  | Primer administrador de producción            | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo   | El equipo         |
-| 19  | Detalles de la bandeja del área (11 y 12)     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 20  | Detalles del detalle (13, 14, 22 y 22-B)      | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 21  | Acciones del aprobador (13-B y 14-C)          | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 22  | Hojas de las acciones (15, 16 y 17)           | Resueltas con el criterio más cercano a Figma; listadas abajo        | El equipo (Figma) |
-| 23  | Contraste del «Área actual» de la hoja 17     | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma      | El equipo (Figma) |
-| 24  | Detalles de la pantalla 18 (solución)         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 25  | Tipos de falla de prueba en «staging»         | **Decidido:** se cargan con un `staging:reset` antes de la demo      | El equipo         |
-| 27  | Detalles de las pantallas 19, 20 y 20-C       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 28  | Detalles de las pantallas 09, 09-B y 09-C     | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 29  | Detalles de las pantallas 30 y 30-B           | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 30  | Detalles de las pantallas 28, 28-B y 29       | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 31  | Detalles de las pantallas 02, 03 y 32         | Resueltos con el criterio más cercano a Figma; listados abajo        | El equipo (Figma) |
-| 32  | Nombres de ejemplo de Figma en las capturas   | **Decidido:** se dejan, aunque algunos sean reales                   | El equipo         |
-| 33  | Evidencias: archivos huérfanos y «staging»    | Se aceptan los huérfanos; el bucket se vacía desde el panel          | El equipo         |
-| 34  | Detalles del indicador de conexión (RF-23)    | «En línea · N pendientes»; un solo anuncio; reintentos de la API     | El equipo (Figma) |
-| 35  | Registro sin conexión (05-B y 07)             | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»      | El equipo (Figma) |
-| 36  | Pantallas 08 y 08-B (RF-22)                   | El indicador lleva a 08; títulos del avance; reintentos sin red      | El equipo (Figma) |
-| 37  | Consulta sin conexión (04-B, 11-B y detalle)  | Pendientes en «Abiertas»; fecha de la descarga; conteos              | El equipo (Figma) |
-| 38  | Acciones sin conexión (14-B, 09-D y director) | No disponibles, con su explicación; textos en singular               | El equipo (Figma) |
-| 39  | Evidencias fotográficas en el cliente         | 3 fotos en 05; avisos de 06 y 07; bloque del detalle                 | El equipo (Figma) |
-| 40  | Fotos de la solución (aprobador)              | **Nuevo, a pedido del equipo:** campo en 18 y fotos en la solución   | El equipo (Figma) |
+| N.º | Tema                                               | Qué se hizo mientras tanto                                                                       | La decide         |
+| --- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------- |
+| 1   | Lista oficial de fincas y razones sociales         | **Recibida y confirmada** (7 oct). Fuera del repo; falta cómo cargar                             | El equipo         |
+| 2   | Base de datos de las vistas previas                | **Resuelta:** «staging» creado y variables de Pages comprobadas                                  | El equipo         |
+| 3   | Dominio de los correos de la plataforma            | `@novedades.test` para los usuarios de prueba                                                    | El equipo         |
+| 4   | Valores de los parámetros configurables            | Los que propone el plan, en `parametros.js`                                                      | La empresa        |
+| 5   | Íconos de la app y conjunto de íconos              | Marcadores para la app; Material Symbols para la interfaz                                        | El equipo         |
+| 6   | Contraste del estado «escalada»                    | Se dejó el color de Figma; prueba marcada como falla conocida                                    | El equipo (Figma) |
+| 7   | Service worker propio o con Workbox                | Propio, sin dependencias nuevas                                                                  | El equipo         |
+| 8   | Versión de Node y de jsdom                         | jsdom 29, compatible con Node 24.14                                                              | El equipo         |
+| 9   | Estados de interacción que Figma no dibuja         | Solo el `hover` del botón primario                                                               | El equipo (Figma) |
+| 10  | Textos que no están en Figma                       | Redactados con tuteo; listados abajo                                                             | El equipo         |
+| 11  | Peso de la ruta de ingreso                         | Medido: 187,8 KB de 200 KB; Lighthouse: 97 y 100                                                 | El equipo         |
+| 12  | Borde del botón secundario                         | Se dejó el color de Figma                                                                        | El equipo (Figma) |
+| 13  | Detalles de las pantallas 04, 05 y 06              | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 14  | Pantallas 05 y 06 en el escritorio                 | Dentro del marco del escritorio, en una columna centrada                                         | El equipo (Figma) |
+| 15  | WebKit no abre en los equipos                      | El CI corre Chromium y WebKit; sin red en WebKit, `fixme`                                        | El equipo         |
+| 16  | Avisos del asesor de Supabase                      | Tres tipos de aviso conocidos; el de las funciones sale una por RPC                              | El equipo         |
+| 17  | Pruebas que necesitan ingresar                     | **Al día:** el 14 oct pasaron las 135 (más las 6 de preparación)                                 | El equipo         |
+| 18  | Primer administrador de producción                 | **Resuelto:** una sola cuenta, compartida, ya creada por el equipo                               | El equipo         |
+| 19  | Detalles de la bandeja del área (11 y 12)          | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 20  | Detalles del detalle (13, 14, 22 y 22-B)           | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 21  | Acciones del aprobador (13-B y 14-C)               | Resueltas con el criterio más cercano a Figma; listadas abajo                                    | El equipo (Figma) |
+| 22  | Hojas de las acciones (15, 16 y 17)                | Resueltas con el criterio más cercano a Figma; listadas abajo                                    | El equipo (Figma) |
+| 23  | Contraste del «Área actual» de la hoja 17          | **Resuelto:** el texto va con su color (5,73:1). Falta en Figma                                  | El equipo (Figma) |
+| 24  | Detalles de la pantalla 18 (solución)              | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 25  | Tipos de falla de prueba en «staging»              | **Decidido:** se cargan con un `staging:reset` antes de la demo                                  | El equipo         |
+| 27  | Detalles de las pantallas 19, 20 y 20-C            | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 28  | Detalles de las pantallas 09, 09-B y 09-C          | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 29  | Detalles de las pantallas 30 y 30-B                | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 30  | Detalles de las pantallas 28, 28-B y 29            | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 31  | Detalles de las pantallas 02, 03 y 32              | Resueltos con el criterio más cercano a Figma; listados abajo                                    | El equipo (Figma) |
+| 32  | Nombres de ejemplo de Figma en las capturas        | **Decidido:** se dejan, aunque algunos sean reales                                               | El equipo         |
+| 33  | Evidencias: archivos huérfanos y «staging»         | Se aceptan los huérfanos; el bucket se vacía desde el panel                                      | El equipo         |
+| 34  | Detalles del indicador de conexión (RF-23)         | «En línea · N pendientes»; un solo anuncio; reintentos de la API                                 | El equipo (Figma) |
+| 35  | Registro sin conexión (05-B y 07)                  | Textos de 2a y 2b; la sesión vencida también encola; «teléfono»                                  | El equipo (Figma) |
+| 36  | Pantallas 08 y 08-B (RF-22)                        | El indicador lleva a 08; títulos del avance; reintentos sin red                                  | El equipo (Figma) |
+| 37  | Consulta sin conexión (04-B, 11-B y detalle)       | Pendientes en «Abiertas»; fecha de la descarga; conteos                                          | El equipo (Figma) |
+| 38  | Acciones sin conexión (14-B, 09-D y director)      | No disponibles, con su explicación; textos en singular                                           | El equipo (Figma) |
+| 39  | Evidencias fotográficas en el cliente              | 3 fotos en 05; avisos de 06 y 07; bloque del detalle                                             | El equipo (Figma) |
+| 40  | Fotos de la solución (aprobador)                   | **Nuevo, a pedido del equipo:** campo en 18 y fotos en la solución                               | El equipo (Figma) |
+| 41  | Avisos (pantalla 10, insignias y campana)          | Textos sin Figma, grupo «Anteriores», 10 en el escritorio, insignia de la bandeja                | El equipo (Figma) |
+| 42  | Historial (21 a 21-D) y buscador por código        | Textos y controles sin Figma, la nota del CSV en los dos tamaños                                 | El equipo (Figma) |
+| 43  | Panel: abiertas y tiempos (23, 24 y 24-B)          | Textos sin Figma, «Personalizado», el gráfico con un solo mes y el panel en el teléfono          | El equipo (Figma) |
+| 44  | Panel: escalamiento y fallas recurrentes (25 a 27) | Textos sin Figma, el orden en un empate, el contraste de la matriz y las combinaciones a 1280 px | El equipo (Figma) |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -387,6 +391,11 @@ le pone a los usuarios del seed una contraseña al azar que no sale del trabajo 
   (necesita una finca del seed con novedades abiertas, que la base local recién creada no tiene).
   Quedan anotadas; el trabajo sigue sin bloquear.
 
+**Obligatorio desde el Sprint 5** (plan del Sprint 5, decisión 8, aprobada el 17 oct 2026): en 16
+corridas falló 3 veces, todas en los PR que lo estrenaban o lo arreglaban, y nunca en `main`; la
+última de `main` dio 240 pasan, 4 intermitentes que pasan al reintentar y ninguna falla. Se quitó
+`continue-on-error`. Falta que una persona lo marque como requerido en la protección de `main`.
+
 ## 16 · Avisos del asesor de Supabase
 
 El asesor sobre «staging» deja tres tipos de aviso (nivel _WARN_), los mismos desde el Sprint 1:
@@ -434,6 +443,12 @@ definer` y `tg_evidencia_valida` es un disparador que nadie ejecuta directamente
 - La primera versión dejó dos políticas de inserción permisivas en `evidencia`
   (`multiple_permissive_policies`). Se unieron en una con `rf08_una_politica_de_insercion`.
 - `private.solucion_vigente` no genera aviso: no es `security definer`.
+
+**Al 17 oct 2026 (contratos del Sprint 5):** 21 avisos en «staging», todos _WARN_ y de los tipos
+conocidos. Son cinco más del primero, uno por función que escribe: `marcar_avisos_leidos` y las
+cuatro del catálogo de tipos de falla (`renombrar_tipo_falla`, `fusionar_tipos_falla`,
+`desactivar_tipo_falla` y `corregir_tipo_falla`). Los cuatro indicadores (`rpt_*`) no generan
+aviso: son `security invoker`, y la regla solo mira las `security definer`.
 
 ## 17 · Pruebas que necesitan ingresar
 
@@ -776,6 +791,11 @@ npm run staging:usuarios
 Las pruebas de extremo a extremo de CU-14 crean en cada corrida un tipo con nombre único («Tipo e2e
 …») y generan un aviso para los administradores; se acumulan en «staging» hasta el siguiente
 `staging:reset`.
+
+**Consecuencia para las pruebas (17 oct 2026):** la base local del CI tiene los cuatro tipos del
+seed y «staging» no; «staging» tiene los «Tipo e2e…» y la base local, solo después de que corre
+CU-14. Una prueba que necesite un tipo existente no puede nombrar ninguno de los dos: la de las
+fotos de la solución (CU-08) escribe «e» y elige la primera sugerencia que ya existe.
 
 ## 27 · Detalles de las pantallas 19, 20, 20-B y 20-C (el director decide)
 
@@ -1227,3 +1247,195 @@ Figma (18, 09 y 22).
   la solución».
 - **Soluciones anteriores:** si la falla persistió, el detalle muestra solo las fotos de la
   solución vigente. Las anteriores siguen guardadas, atadas a su solución (cambio 23).
+
+## 41 · Avisos: pantalla 10, insignias y campana (RF-30)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 30 a 35):
+
+- **Textos de los avisos.** Los de la Tabla 33 sin el código (cambio 27). «Rechazada» queda en
+  «La novedad fue rechazada. Ábrela para ver el motivo.». Si la novedad pasó a otra área y quien
+  recibió el aviso ya no la ve: «La novedad pasó a otra área.», con «Novedad» en lugar del código.
+  Una combinación que la Tabla 33 no tiene: «La novedad pasó a «{estado}».».
+- **Grupos.** «Hoy», «Ayer» y «Esta semana» (de lunes a domingo, en la hora de Colombia), como
+  Figma, y lo anterior en «Anteriores», sin dibujo. La hora: «7:40 a. m.» hoy y ayer; «mar 22
+  sep» en la semana; «15 sep» antes, con el año si es otro.
+- **Cuántos se ven.** Los 20 más recientes y «Ver más», como las listas.
+- **Vacía:** «No tienes avisos.». **Sin conexión:** «Los avisos necesitan conexión. Ábrelos cuando
+  tengas internet.»; no se guardan en el dispositivo.
+- **Sin leer.** El fondo y el punto de Figma y, para el lector de pantalla, «Sin leer». Tocar un
+  aviso lo marca leído y abre la novedad aunque la marca falle; el detalle ofrece «Volver a los
+  avisos».
+- **10 en el escritorio.** Figma solo la dibuja en el teléfono: una columna centrada, con cada
+  grupo en una tarjeta.
+- **Barra superior del teléfono.** En 10 dice «Avisos» y no lleva la campana, como Figma.
+- **Insignias.** En «Avisos» de la barra lateral y de la inferior (junto al ícono, dentro de la
+  pastilla, como 10 y 21-D) y en la campana de las dos barras superiores. El lector oye «Avisos, 2
+  avisos sin leer». **La de «Bandeja»** cuenta las novedades por atender (asignadas y aprobadas
+  del área; decisión 34). Cuando llegan avisos nuevos con la aplicación abierta, se anuncia una
+  vez: «Tienes 3 avisos sin leer».
+
+## 42 · Historial (21, 21-B, 21-C y 21-D) y buscador por código (RF-19)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 9 a 15):
+
+- **Controles.** «Estado» y «Rango de fechas» tienen el aspecto de los desplegables de 21. Estado
+  abre una lista de casillas, sin `<select multiple>`; el rango abre dos campos de fecha del
+  navegador, «Desde» y «Hasta». Sin nada elegido dicen «Todos» (estado y tipo), «Todas» (finca y
+  área) y «Todas las fechas» (rango). A 1280 px, «Tipo de falla» pasa a la segunda fila, junto a
+  «Aplicar filtros», que Figma dibuja a 1440 px.
+- **21-B.** «La fecha inicial debe ser anterior a la final» cuando la inicial es posterior; el
+  mismo día en las dos es un rango válido. «Aplicar filtros» queda con su candado.
+- **Chips.** Reflejan la dirección: «Finca: …», «Área: …», «Estado: …» («Estado: Abiertas» para el
+  grupo del panel), «Desde 01 abr hasta 24 sep 2026» (el año una vez si es el mismo; «Desde …» o
+  «Hasta …» con una sola fecha) y «Tipo de falla: …». En el teléfono, los textos cortos de 21-D
+  («01 abr – 24 sep», con el año si no es el actual). «Filtros (3)» cuenta los chips; sin filtros,
+  «Filtros».
+- **Columnas.** Una novedad sin tipo de falla todavía dice «—»; sin resolver, «Tiempo hasta
+  resolver» dice «—» y el lector oye «Sin resolver». «Registrada en finca» lleva el año si no es
+  el actual. En 21-D, una sin tipo dice solo «Reportada por …».
+- **21-C sin filtros:** «Todavía no hay novedades.», sin botón.
+- **Sin conexión:** «El historial necesita conexión. Ábrelo cuando tengas internet.», con los
+  filtros deshabilitados.
+- **Barra superior del teléfono.** «Historial» y, para el aprobador, su área debajo (21-D).
+- **La nota del CSV** de 21-D se le muestra al aprobador también en el escritorio.
+- **Buscador por código.** Sin dígitos: «Escribe un código como NOV-0153.». No está o no se puede
+  ver: «No encontramos NOV-0153 entre las novedades que puedes ver.». Sin conexión: «Buscar por
+  código necesita conexión.». El mensaje aparece bajo el campo y se va al escribir. El detalle
+  vuelve a la pantalla donde se buscó.
+
+## 43 · Panel: novedades abiertas y tiempos de atención (RF-26 y RF-27)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 22 a 26):
+
+- **Pestañas.** En el PR 4 están «Novedades abiertas» y «Tiempos de atención»; «Escalamiento» y
+  «Fallas recurrentes» llegan en el PR 5. En el teléfono son las pastillas de 27: «Abiertas» y
+  «Tiempos».
+- **Período.** Las opciones de Figma y «Personalizado», que abre «Desde» y «Hasta» y se aplica
+  cuando las dos fechas están; si se invierten, «La fecha inicial debe ser anterior a la final»,
+  como 21-B. En el escritorio, «Últimos 3 meses (jul–sep 2026)»; en el teléfono, sin el rango.
+- **«Actualizar»** dice «Actualizando…» mientras llega lo nuevo, sin borrar lo que se ve.
+- **23.** Una finca inactiva que aún tiene abiertas se nombra «Juanca (inactiva)». «1 finca sin
+  novedades abiertas» en singular. En «Abiertas por estado» no salen los estados en cero. Las
+  tarjetas de área se oyen «Mantenimiento: 6 abiertas. Verlas en el historial».
+- **24.** «1 resuelta en el período» en singular. Sin abiertas: «No hay novedades abiertas.».
+  **El gráfico mensual** sale solo si el período tiene más de un mes y hay resueltas: Figma 24-B
+  («Mes actual») no lo dibuja. En el teléfono, el rótulo al final de cada línea no cabe y se
+  quita; la tarjeta de cada área ya dice el promedio.
+- **Sin conexión:** «El panel necesita conexión. Ábrelo cuando tengas internet.».
+- **Teléfono** (Figma solo dibuja 27): las mismas piezas en una columna, las tablas con
+  desplazamiento lateral dentro de su tarjeta, «Panel de reportes» en la barra superior y sin
+  «Datos al» ni «Actualizar».
+
+## 44 · Panel: escalamiento y fallas recurrentes (RF-28 y RF-29)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 22 a 26, 61 y 62):
+
+- **25.** Un área sin novedades registradas dice «Sin novedades registradas» en lugar del
+  porcentaje. Si ninguna se escaló, «Decisiones del director» dice «Ninguna novedad se escaló en el
+  período.». La justificación va en una línea; completa, en el globo del navegador y en el
+  detalle. Sin decisión, «—», y el lector oye «Sin decisión». «En espera» es un chip con el color
+  de «escalada», sin ícono (decisión 61).
+- **26 sin resueltas.** Si hay novedades registradas pero ninguna resuelta o cerrada: «No hay
+  novedades resueltas ni cerradas en este período», con «Elige otro período.».
+- **El orden de la matriz.** Filas y columnas por total y, en un empate, por nombre. Figma 26 pone
+  «La Mónica» antes que «Juanca» con 9 cada una; por nombre va primero «Juanca».
+- **El color de la matriz.** Las cinco intensidades del verde de Figma. El número va oscuro hasta
+  la cuarta y blanco en la quinta: el blanco de Figma sobre la cuarta no llega al contraste AA
+  (3,3 a 1).
+- **«Otras N fincas».** Sus sumas no son enlaces (son de varias fincas); se despliega con su botón
+  y muestra cada finca, con sus enlaces.
+- **«Combinaciones más repetidas»** van al lado de la matriz desde 1440 px, como Figma; en
+  pantallas más angostas, debajo, porque juntas no caben.
+- **27.** Todas las fincas, no solo siete, cada una desplegable; la primera, abierta. «Ver en
+  historial» de una finca abre sus resueltas y cerradas del período, de todos los tipos. La nota de
+  las que quedaron por fuera va en corto: «12 novedades sin tipo de falla quedaron por fuera.».
+- **«Personalizado» en el teléfono:** «Desde» y «Hasta» van uno sobre otro.
+
+## 45 · Tipos de falla (31, 31-B y 31-C) y «Corregir tipo» (RF-32)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 48 a 54 y 64):
+
+- **31-B mientras se escribe.** El aviso «Ya existe «Biométrico». ¿Quieres fusionar los dos
+  tipos?» aparece en cuanto el nombre coincide con otro tipo activo, y el botón pasa a «Fusionar en
+  su lugar», que abre 31 con los dos ya elegidos. Con el nombre de un tipo inactivo (también uno
+  fusionado), bajo el campo: «Ya existe «{tipo}», pero está inactivo. Elige otro nombre.». Si el
+  servidor responde `TIPO_FALLA_DUPLICADO` (otro tipo apareció después de cargar la lista), la
+  lista se recarga y se ve 31-B. Sin dibujo, el botón normal dice «Renombrar».
+- **Desactivar** (sin dibujo, decisión 52): «Desactivar tipo de falla», ««Radio» saldrá de las
+  sugerencias. Sus 3 novedades lo conservan.», «Cancelar» y «Desactivar». Las comillas son
+  angulares, como 31-B y 31-C; con una novedad, «Su novedad lo conserva.»; sin novedades, solo la
+  primera frase.
+- **El aviso de 31 en singular y en cero.** «La novedad de «X» pasará…» y ««X» no tiene
+  novedades. «X» saldrá de la lista.».
+- **«Corregir tipo de falla»** (sin dibujo, decisión 53): «Tipo actual: {tipo}», el campo «Tipo
+  correcto» con los tipos activos menos el actual, «Cancelar» y «Corregir». La observación del
+  historial usa comillas rectas, como dice la decisión 53. En el teléfono, «Corregir tipo» va en
+  su propia línea bajo el tipo.
+- **Avisos al terminar:** «Tipo de falla renombrado.», «Tipos de falla fusionados.», «Tipo de falla
+  desactivado.» y «Tipo de falla corregido.».
+- **La tabla a 1280 px.** Figma la dibuja a 1440 con anchos fijos; aquí las columnas miden lo que
+  su texto y el nombre toma lo que sobra y se corta (completo en el globo del navegador). La fila
+  del diálogo abierto lleva el fondo gris de 31.
+- **Los diálogos de 31 miden 520 px,** como Figma. Los demás siguen en 448 (Figma 30-B mide 480:
+  diferencia anterior a este PR, no se toca aquí).
+- **31 en el teléfono** (decisión 64): se llega desde «Cuenta»; cada tipo es una tarjeta con sus
+  acciones de 48 px y el registro de cambios va en tarjetas.
+- **Sin datos:** «Todavía no hay tipos de falla. Los crean las áreas al registrar soluciones.» y
+  «Todavía no hay cambios en el catálogo.».
+- **Atajo:** se cargan todo el catálogo y todo el registro (`atajo:` en el repositorio); con más de
+  500, paginar.
+- **Sin conexión,** «Corregir tipo» no aparece: necesita el servidor (RF-25). Si la lista de tipos
+  no llega, el diálogo lo dice y ofrece «Reintentar».
+
+## 46 · Exportar CSV (RF-20)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 16 a 18):
+
+- **Por validar con el director y los administradores:** el punto y coma como separador (cambio
+  32). Si prefieren la coma, es una constante en `csv.js`; las horas («52,3») tendrían que ir
+  entre comillas o con punto.
+- **En el teléfono,** «Exportar CSV» va al final de la lista, a todo el ancho: donde 21-D pone la
+  nota del aprobador. Figma solo lo dibuja en el escritorio, a la derecha del resumen.
+- **Mientras exporta,** el botón dice «Exportando…» y queda deshabilitado. Si algo falla: «No se
+  descargó el archivo.» con el motivo (por ejemplo, la falta de conexión), y no se descarga nada a
+  medias.
+- **Prioridad y estado** salen con sus nombres («Crítico», «En atención»), no con los valores de la
+  base.
+- **Atajo:** los bloques se piden con un desplazamiento (`atajo:` en el repositorio); con decenas
+  de miles de filas, paginar por cursor.
+
+## 47 · Notificaciones push en el servidor (RF-31)
+
+Lo que queda por decidir o por hacer a mano (plan del Sprint 5, decisiones 38 a 43):
+
+- **El _subject_ de VAPID** (`mailto:`) lo define el equipo. En «staging» va el de quien hizo la
+  prueba corta; para «PROYECTO» hace falta el del equipo.
+- **«PROYECTO»:** una persona genera sus propias claves, pone los secretos de la función y los dos
+  de Vault, y despliega `enviar-push` (pasos en `docs/despliegue/supabase-auth.md`). Hasta
+  entonces, el webhook no envía nada y los avisos se crean igual.
+- **En «staging»** el disparador ya llama a `enviar-push`: cada corrida de las e2e le manda
+  pushes a las suscripciones que haya. Hoy hay una, la del administrador de prueba en el Chrome de
+  la prueba corta; si molesta, se desactiva desde Cuenta cuando llegue el PR 9.
+- **Una suscripción que falla con otro código** (por ejemplo, 413 o 429) se registra y se
+  conserva; solo 404 y 410 la borran.
+
+## 48 · Notificaciones push en el cliente (10-B y Cuenta, RF-31)
+
+Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
+
+- **Cuenta** (sin dibujo): una tarjeta «Notificaciones en este dispositivo» con «Activadas» o
+  «Desactivadas» y el botón «Activar» o «Desactivar». Si el navegador no las admite: «Este
+  navegador no permite notificaciones. En iPhone, primero agrega la aplicación a la pantalla de
+  inicio.»; si se bloquearon: «Bloqueaste las notificaciones en el navegador. Para activarlas,
+  cámbialo en su configuración.».
+- **10-B para los demás roles:** «Te avisaremos en este dispositivo cuando cambie una novedad que
+  atiendes, aunque la app esté cerrada.» (Figma solo trae el texto del reportante).
+- **10-B en el escritorio:** la misma hoja, centrada, como las demás hojas.
+- **«Ahora no» y cerrar sesión:** que ya se ofreció se guarda en el almacén `meta`, que se vacía
+  al cerrar sesión. Quien ingrese después en el mismo navegador verá 10-B otra vez.
+- **10-C** muestra la descripción y la prioridad en el cuerpo; el push no lleva la descripción
+  (RNF-18, decisión 47). Queda para ajustar en Figma.
+- **Por hacer a mano** (decisión 47): la lista de chequeo en un Android con Chrome y, si hay, en
+  un iPhone con la aplicación instalada. Activar desde 10-B, cerrar la aplicación, tomar una
+  novedad suya desde otra cuenta, ver que llega, tocarla, ver el aviso leído, cerrar sesión y ver
+  que ya no llega.

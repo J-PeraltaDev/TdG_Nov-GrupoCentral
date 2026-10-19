@@ -8,7 +8,20 @@ import { ZONA_HORARIA } from '../config/parametros.js'
  * especiales), así que el texto se arma con las partes numéricas y una tabla propia de meses.
  */
 
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+export const MESES = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+]
 
 const PARTES = new Intl.DateTimeFormat('en-US', {
   timeZone: ZONA_HORARIA,
@@ -62,6 +75,31 @@ export function formatearFechaHora(fecha) {
 export function formatearFechaCorta(fecha) {
   const { mes, dia, hora, minuto } = enColombia(fecha)
   return `${dia} ${MESES[mes - 1]}, ${horaDeDoce(hora, minuto)}`
+}
+
+/**
+ * «24 sep, 8:15 a. m.» si es de este año y «30 dic 2025, 8:15 a. m.» si no («Registrada en
+ * finca» del historial, decisión 12 del plan del Sprint 5).
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearFechaDeLista(fecha, ahora = Date.now()) {
+  return enColombia(fecha).anio === enColombia(ahora).anio
+    ? formatearFechaCorta(fecha)
+    : formatearFechaHora(fecha)
+}
+
+/**
+ * El día, en corto: «22 sep», o «12 ago 2025» si fue otro año.
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ */
+export function formatearDia(fecha, ahora = Date.now()) {
+  const { anio, mes, dia } = enColombia(fecha)
+  const corta = `${dia} ${MESES[mes - 1]}`
+  return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
 }
 
 /**
@@ -143,9 +181,39 @@ export function formatearUltimoIngreso(fecha, ahora = Date.now()) {
   if (esMismoDiaEnColombia(fecha, ahora)) return `hoy ${formatearHora(fecha)}`
   // Colombia no cambia de hora: ayer es siempre 24 horas antes.
   if (esMismoDiaEnColombia(fecha, new Date(ahora).getTime() - 24 * 3_600_000)) return 'ayer'
-  const { anio, mes, dia } = enColombia(fecha)
-  const corta = `${dia} ${MESES[mes - 1]}`
-  return anio === enColombia(ahora).anio ? corta : `${corta} ${anio}`
+  return formatearDia(fecha, ahora)
+}
+
+const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
+
+/**
+ * En qué grupo de la pantalla 10 va un aviso y qué hora o fecha muestra (Figma 10; plan del
+ * Sprint 5, decisión 32): hoy y ayer, la hora («7:40 a. m.»); en lo que va de la semana, que
+ * empieza el lunes, el día («mar 22 sep»); antes, la fecha («15 sep», o «12 ago 2025» si fue
+ * otro año).
+ *
+ * @param {Date | string | number} fecha
+ * @param {Date | string | number} [ahora]
+ * @returns {{ grupo: 'Hoy' | 'Ayer' | 'Esta semana' | 'Anteriores', cuando: string }}
+ */
+export function cuandoLlegoElAviso(fecha, ahora = Date.now()) {
+  if (esMismoDiaEnColombia(fecha, ahora)) return { grupo: 'Hoy', cuando: formatearHora(fecha) }
+  if (esMismoDiaEnColombia(fecha, new Date(ahora).getTime() - 24 * 3_600_000)) {
+    return { grupo: 'Ayer', cuando: formatearHora(fecha) }
+  }
+  const aviso = enColombia(fecha)
+  const hoy = enColombia(ahora)
+  const diaDelAviso = new Date(Date.UTC(aviso.anio, aviso.mes - 1, aviso.dia))
+  const diaDeHoy = new Date(Date.UTC(hoy.anio, hoy.mes - 1, hoy.dia))
+  const diasAtras = (diaDeHoy.getTime() - diaDelAviso.getTime()) / 86_400_000
+  // De lunes (1) a domingo (7): los días que van corridos de la semana.
+  if (diasAtras < (diaDeHoy.getUTCDay() || 7)) {
+    return {
+      grupo: 'Esta semana',
+      cuando: `${DIAS[diaDelAviso.getUTCDay()]} ${aviso.dia} ${MESES[aviso.mes - 1]}`,
+    }
+  }
+  return { grupo: 'Anteriores', cuando: formatearDia(fecha, ahora) }
 }
 
 /**
@@ -161,6 +229,21 @@ export function formatearDescarga(fecha, ahora = Date.now()) {
     : `el ${formatearFechaHora(fecha)}`
 }
 
+const DIA = /^(\d{4})-(\d{2})-(\d{2})$/
+
+/**
+ * Un día que existe en el calendario, como lo da `<input type="date">` (`AAAA-MM-DD`).
+ *
+ * @param {string | null | undefined} texto
+ */
+export function esDia(texto) {
+  const partes = DIA.exec(texto ?? '')
+  if (!partes) return false
+  const [anio, mes, dia] = partes.slice(1).map(Number)
+  const fecha = new Date(Date.UTC(anio, mes - 1, dia))
+  return fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia
+}
+
 /**
  * El día de hoy en Colombia, como `AAAA-MM-DD`: el formato de un campo de fecha y de
  * `fecha_ejecucion`. No es el día del dispositivo ni el de UTC: a las 11 p. m. en Colombia ya es
@@ -171,6 +254,17 @@ export function formatearDescarga(fecha, ahora = Date.now()) {
 export function hoyEnColombia(ahora = Date.now()) {
   const { anio, mes, dia } = enColombia(ahora)
   return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+}
+
+/**
+ * «2026-09-24 08:15»: la fecha y la hora de Colombia en la forma que una hoja de cálculo reconoce
+ * como fecha (el CSV del historial, decisión 17).
+ *
+ * @param {Date | string | number} fecha
+ */
+export function formatearParaHojaDeCalculo(fecha) {
+  const { hora, minuto } = enColombia(fecha)
+  return `${hoyEnColombia(fecha)} ${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`
 }
 
 /**
