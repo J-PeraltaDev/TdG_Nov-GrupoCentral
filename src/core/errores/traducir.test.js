@@ -19,6 +19,7 @@ describe('Traductor de errores (SDD, Tabla 22)', () => {
     'DATO_OBLIGATORIO',
     'FECHA_INVALIDA',
     'TIPO_FALLA_INVALIDO',
+    'TIPO_FALLA_DUPLICADO',
     'CODIGO_INVALIDO',
     'CODIGO_VENCIDO',
   ])('%s es un error de negocio con mensaje en español', (codigo) => {

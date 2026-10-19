@@ -37,6 +37,9 @@ const MENSAJES = {
   // Sprint 4, RF-08: el disparador de `evidencia` (cambio 17 del SDD; plan, decisión 20).
   LIMITE_DE_FOTOS: 'Esta novedad ya tiene 3 fotos.',
   EVIDENCIA_INVALIDA: 'No pudimos guardar la foto. Intenta de nuevo.',
+  // Sprint 5, RF-32: el nombre ya es de otro tipo (cambio 30). La pantalla 31 lo convierte en
+  // 31-B cuando el otro tipo está activo.
+  TIPO_FALLA_DUPLICADO: 'Ya existe un tipo de falla con ese nombre. Elige otro nombre.',
 }
 
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'

@@ -38,6 +38,7 @@ import { SinPermiso } from './SinPermiso.jsx'
 const AccionesDelAprobador = lazy(() => import('../e3-atencion/AccionesDelAprobador.jsx'))
 const AccionesDelReportante = lazy(() => import('../e3-atencion/AccionesDelReportante.jsx'))
 const DecisionDelDirector = lazy(() => import('../e3-atencion/DecisionDelDirector.jsx'))
+const CorregirTipo = lazy(() => import('./DialogoCorregirTipo.jsx'))
 
 /*
  * Detalle y línea de tiempo de una novedad (RF-18 / CU-18), para los cuatro roles. Figma:
@@ -216,6 +217,7 @@ function Justificacion({ escalamiento }) {
  * @param {import('react').ReactNode} [props.avisoSinRed] El de 14-B, arriba.
  * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
  * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
+ * @param {import('react').ReactNode} props.corregirTipo «Corregir tipo», junto al tipo de falla.
  */
 function Telefono({
   novedad,
@@ -225,6 +227,7 @@ function Telefono({
   avisoSinRed,
   evidencias,
   fotosDeLaSolucion,
+  corregirTipo,
 }) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
@@ -259,6 +262,7 @@ function Telefono({
           <dl className="flex flex-col gap-2.5">
             <DatoEnFila nombre="Tipo de falla" fuerte>
               {novedad.tipo_falla}
+              {corregirTipo}
             </DatoEnFila>
             <DatoEnFila nombre="Fecha de ejecución" fuerte>
               {formatearFechaSinHora(novedad.fecha_ejecucion)}
@@ -315,6 +319,7 @@ function Telefono({
  * @param {import('../../core/ui/LineaDeTiempo.jsx').Transicion | null} props.escalamiento
  * @param {import('react').ReactNode} props.evidencias El bloque de las fotos (RF-08).
  * @param {import('react').ReactNode} props.fotosDeLaSolucion Dentro de la solución (cambio 23).
+ * @param {import('react').ReactNode} props.corregirTipo «Corregir tipo», junto al tipo de falla.
  */
 function Escritorio({
   novedad,
@@ -325,6 +330,7 @@ function Escritorio({
   escalamiento,
   evidencias,
   fotosDeLaSolucion,
+  corregirTipo,
 }) {
   const resuelta = novedad.solucion ? resolucion(transiciones ?? []) : null
   const linea = seguimiento(novedad, transiciones ?? [])
@@ -377,7 +383,10 @@ function Escritorio({
                   {formatearDuracion(novedad.fecha_registro, resuelta.fecha_hora)}
                 </DatoEnCelda>
               ) : null}
-              <DatoEnCelda nombre="Tipo de falla">{novedad.tipo_falla}</DatoEnCelda>
+              <DatoEnCelda nombre="Tipo de falla">
+                {novedad.tipo_falla}
+                {corregirTipo}
+              </DatoEnCelda>
               <DatoEnCelda nombre="Fecha de ejecución">
                 {formatearFechaSinHora(novedad.fecha_ejecucion)}
               </DatoEnCelda>
@@ -594,6 +603,14 @@ export default function DetalleNovedad() {
         alAdjuntar={recargarFotos}
       />
     ) : null
+  // El administrador corrige el tipo de una cerrada (Tabla 35; CU-32 1a). Necesita el servidor:
+  // sin conexión no se ofrece (RF-25).
+  const corregirTipo =
+    enLinea && disponibles.includes(ACCION.CORREGIR_TIPO_FALLA) ? (
+      <Suspense fallback={null}>
+        <CorregirTipo key={novedad.id} novedad={novedad} alCorregir={recargar} />
+      </Suspense>
+    ) : null
   // 14-B: sin conexión, quien atiende o decide sabe de entrada por qué sus acciones no están
   // disponibles (RF-25). Al director se le dice lo mismo (decisión 17 del plan).
   const avisoSinRed =
@@ -676,6 +693,7 @@ export default function DetalleNovedad() {
               escalamiento={escalamiento}
               evidencias={evidencias}
               fotosDeLaSolucion={fotosDeLaSolucion}
+              corregirTipo={corregirTipo}
             />
           </div>
         ) : (
@@ -688,6 +706,7 @@ export default function DetalleNovedad() {
               avisoSinRed={avisoSinRed}
               evidencias={evidencias}
               fotosDeLaSolucion={fotosDeLaSolucion}
+              corregirTipo={corregirTipo}
             />
             {acciones}
             {decision}
