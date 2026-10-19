@@ -1393,3 +1393,18 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 16 a 18):
   base.
 - **Atajo:** los bloques se piden con un desplazamiento (`atajo:` en el repositorio); con decenas
   de miles de filas, paginar por cursor.
+
+## 47 · Notificaciones push en el servidor (RF-31)
+
+Lo que queda por decidir o por hacer a mano (plan del Sprint 5, decisiones 38 a 43):
+
+- **El _subject_ de VAPID** (`mailto:`) lo define el equipo. En «staging» va el de quien hizo la
+  prueba corta; para «PROYECTO» hace falta el del equipo.
+- **«PROYECTO»:** una persona genera sus propias claves, pone los secretos de la función y los dos
+  de Vault, y despliega `enviar-push` (pasos en `docs/despliegue/supabase-auth.md`). Hasta
+  entonces, el webhook no envía nada y los avisos se crean igual.
+- **En «staging»** el disparador ya llama a `enviar-push`: cada corrida de las e2e le manda
+  pushes a las suscripciones que haya. Hoy hay una, la del administrador de prueba en el Chrome de
+  la prueba corta; si molesta, se desactiva desde Cuenta cuando llegue el PR 9.
+- **Una suscripción que falla con otro código** (por ejemplo, 413 o 429) se registra y se
+  conserva; solo 404 y 410 la borran.
