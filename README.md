@@ -11,11 +11,18 @@ registro y la consulta funcionan sin conexión.
 Trabajo de grado de Mateo Vanegas y Juan Manuel Peralta · Ingeniería Informática · Politécnico
 Colombiano Jaime Isaza Cadavid.
 
-**Estado:** Sprint 4 (el reportante registra y consulta sin conexión, las pendientes se envían
-solas al volver la señal, las acciones que cambian el estado se bloquean sin red y las novedades
-llevan fotos), ya en `main` junto con los Sprints 1 a 3. Producción («PROYECTO») tiene sus
-migraciones desde el 14 oct 2026. El avance por sprint está en
-[`docs/sprints/`](docs/sprints/).
+**Estado: versión 1.0** (Sprint 5, 19 oct 2026). Están construidos los 32 requerimientos
+funcionales del SRS. Lo que trae el Sprint 5:
+
+- el historial con filtros y su exportación a CSV;
+- el panel de reportes del director;
+- los avisos dentro de la aplicación y las notificaciones push;
+- la gestión del catálogo de tipos de falla.
+
+Está en `main` y en producción («PROYECTO» y la aplicación publicada) desde el 19 oct 2026, con
+[`docs/despliegue/produccion-v1.0.md`](docs/despliegue/produccion-v1.0.md). El avance por sprint está en
+[`docs/sprints/`](docs/sprints/), y la documentación técnica (RNF-17) en
+[`docs/tecnica/`](docs/tecnica/).
 
 ## Tecnologías
 
@@ -71,6 +78,22 @@ CLAVE_USUARIOS_DE_PRUEBA=…                        # la inventas tú; mínimo 8
 
 En el cliente solo va la clave publicable. La clave secreta nunca va en `.env.local` ni en el
 repositorio, que es público. `.env.local` no se sube.
+
+Para las notificaciones push hace falta, además, `VITE_VAPID_PUBLIC_KEY`. Sin ella, la aplicación
+funciona igual pero no ofrece activarlas. La de «staging» es pública: se le pide a quien generó
+sus claves y se copia en `.env.local`. Para eso no se corre `npm run vapid:claves`, que generaría
+otras (ver «Notificaciones push»).
+
+| Variable o secreto                                       | Dónde vive                                                   | ¿Secreto?  |
+| -------------------------------------------------------- | ------------------------------------------------------------ | ---------- |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`     | `.env.local` y Cloudflare Pages                              | No         |
+| `VITE_VAPID_PUBLIC_KEY`                                  | `.env.local` y Cloudflare Pages                              | No         |
+| `CLAVE_USUARIOS_DE_PRUEBA`                               | Solo `.env.local`                                            | Sí         |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | `.env.local` de quien las generó y secretos de `enviar-push` | La privada |
+| `ENVIAR_PUSH_SECRETO`                                    | Ídem, y en Vault como `enviar_push_secreto`                  | Sí         |
+| `enviar_push_url`                                        | Vault de cada proyecto                                       | No         |
+
+El detalle por entorno está en [`docs/tecnica/despliegue.md`](docs/tecnica/despliegue.md).
 
 **3. Usuarios de prueba.** El seed los crea con una contraseña aleatoria que nadie conoce. Para
 poder ingresar, ponles la tuya:
@@ -213,8 +236,12 @@ Supabase (Storage).
   repositorio. Las de «staging» las genera una sola persona, una vez.
 - **Sin los secretos de Vault** (el Supabase local, el CI) no se envía nada y los avisos se crean
   igual. `staging:reset` no borra Vault.
+- **En el dispositivo:** la aplicación ofrece activarlas la primera vez que se abren los avisos
+  (10-B), y se activan o desactivan en «Cuenta». Al cerrar sesión se desactivan en ese
+  dispositivo.
 - **Para probarlas** hace falta Chrome o Edge con el build (`npm run build && npm run preview`):
-  el Chromium de Playwright no trae el servicio push.
+  el Chromium de Playwright no trae el servicio push. Las pruebas de extremo a extremo lo simulan
+  con un punto de entrega que `enviar-push` no manda.
 
 ## Estructura
 
@@ -227,7 +254,7 @@ src/sw.js       service worker
 supabase/       config.toml, migraciones, pruebas pgTAP, funciones y seed de prueba
 scripts/        staging.mjs: la base de desarrollo sin Docker
 e2e/            pruebas de extremo a extremo, un archivo por caso de uso
-docs/           decisiones (adr), scrum, sprints, despliegue y pruebas
+docs/           decisiones (adr), scrum, sprints, despliegue, pruebas y técnica (RNF-17)
 ```
 
 Las convenciones de nombres, ramas, commits y migraciones, y las reglas de seguridad de la base
@@ -260,6 +287,10 @@ La Definition of Ready y la Definition of Done están en
 - **Edge Functions:** a «PROYECTO» también llegan al cierre del sprint, después de las
   migraciones y con el visto bueno del equipo. Las despliega una persona; el comando está en la
   misma guía.
+- **La v1.0,** paso por paso y en orden (migraciones, `enviar-push`, secretos, Vault, la variable
+  de Pages, las fusiones y las etiquetas):
+  [`docs/despliegue/produccion-v1.0.md`](docs/despliegue/produccion-v1.0.md). Cómo encajan las
+  piezas: [`docs/tecnica/despliegue.md`](docs/tecnica/despliegue.md).
 
 ## Licencias de terceros
 
