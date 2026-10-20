@@ -1,5 +1,9 @@
 # Producción de la v1.0 (cierre del Sprint 5)
 
+> **Ejecutada el 19 oct 2026, del paso 1 al 13.** Cómo fue, con sus comprobaciones y lo que no
+> salió como estaba escrito, está en [`docs/sprints/S5.md`](../sprints/S5.md), «Producción».
+> Quedan los pasos 14 a 16.
+
 La lista, en orden, para llevar el Sprint 5 a «PROYECTO» (`lyrdsmfalrchbdpmikmt`) y a la
 aplicación publicada. **La ejecuta una persona del equipo, con el OK de la review.** El agente no
 escribe en «PROYECTO» (en el Sprint 4 el modo de permisos tampoco se lo dejó). Prepara los

@@ -1446,11 +1446,12 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 16 a 18):
 
 Lo que queda por decidir o por hacer a mano (plan del Sprint 5, decisiones 38 a 43):
 
-- **El _subject_ de VAPID** (`mailto:`) lo define el equipo. En «staging» va el de quien hizo la
-  prueba corta; para «PROYECTO» hace falta el del equipo.
-- **«PROYECTO»:** una persona genera sus propias claves, pone los secretos de la función y los dos
-  de Vault, y despliega `enviar-push` (pasos en `docs/despliegue/supabase-auth.md`). Hasta
-  entonces, el webhook no envía nada y los avisos se crean igual.
+- **El _subject_ de VAPID** (`mailto:`) lo definió el equipo para «PROYECTO» el 19 oct. En
+  «staging» sigue el de quien hizo la prueba corta.
+- **«PROYECTO»: hecho el 19 oct.** Una persona generó sus claves, puso los secretos de la función
+  y los dos de Vault, y desplegó `enviar-push` (pasos en `docs/despliegue/supabase-auth.md` y
+  `docs/despliegue/produccion-v1.0.md`). `VAPID_SUBJECT` faltó en el archivo de claves y se agregó
+  después: lo mostró la lista de nombres de los secretos.
 - **En «staging»** el disparador ya llama a `enviar-push`: cada corrida de las e2e le manda
   pushes a las suscripciones que haya. Hay una real, la del administrador de prueba en el Chrome de
   la prueba corta; si molesta, se desactiva desde Cuenta. Las de las pruebas de CU-31 usan
@@ -1489,11 +1490,13 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
     - CU-23 se rompió con #42, que agregó una segunda región `aria-live`.
   - Las tres tienen su arreglo en #40 y #51. Y una vez por la aplicación: WebKit en #50
     (`4b2e472`, abajo).
-  - El 19 oct, en #39, «WebKit encountered an internal error» se repitió en el único reintento
-    del CI (CU-15), y hubo que volver a correr el trabajo.
+  - El 19 oct, «WebKit encountered an internal error» se repitió dos veces en el único reintento
+    del CI (en #39 y en `main` después de #52, las dos en CU-15), y hubo que volver a correr el
+    trabajo.
   - **Recomendación:** obligatorio, como dice #40, y requerido en la protección de `main` cuando
-    #51 esté adentro y una corrida de `main` salga en verde. Antes, subir a 2 los reintentos del
-    CI (`retries` en `playwright.config.js`), para que esa falla de WebKit no frene una fusión
+    #51 esté adentro y una corrida de `main` salga en verde; las dos cosas se cumplen desde el 19
+    oct (`d2b4ad3`, los cinco trabajos en verde). Antes, subir a 2 los reintentos del CI
+    (`retries` en `playwright.config.js`), para que esa falla de WebKit no frene una fusión
     ajena. Lo marca una persona.
 - **CU-31 fallaba a veces con todo el conjunto.** Un aviso de otra prueba llegaba a `enviar-push`.
   FCM respondía 404 al punto de entrega falso y la función borraba la fila, como pide CU-31 2a.

@@ -19,9 +19,8 @@ funcionales del SRS. Lo que trae el Sprint 5:
 - los avisos dentro de la aplicación y las notificaciones push;
 - la gestión del catálogo de tipos de falla.
 
-El Sprint 5 está en revisión y llega a `main` y a producción con
-[`docs/despliegue/produccion-v1.0.md`](docs/despliegue/produccion-v1.0.md). Hasta entonces, `main`
-y la aplicación publicada tienen los Sprints 1 a 4. El avance por sprint está en
+Está en `main` y en producción («PROYECTO» y la aplicación publicada) desde el 19 oct 2026, con
+[`docs/despliegue/produccion-v1.0.md`](docs/despliegue/produccion-v1.0.md). El avance por sprint está en
 [`docs/sprints/`](docs/sprints/), y la documentación técnica (RNF-17) en
 [`docs/tecnica/`](docs/tecnica/).
 
