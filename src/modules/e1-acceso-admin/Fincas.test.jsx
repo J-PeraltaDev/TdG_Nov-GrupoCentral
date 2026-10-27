@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   actualizarFinca,
+  actualizarRazonSocial,
   crearFinca,
+  crearRazonSocial,
   listarFincasConConteos,
   listarRazonesSociales,
 } from '../../core/supabase/repositorios/fincas.js'
@@ -17,11 +19,13 @@ vi.mock('../../core/supabase/repositorios/fincas.js', () => ({
   listarRazonesSociales: vi.fn(),
   crearFinca: vi.fn(),
   actualizarFinca: vi.fn(),
+  crearRazonSocial: vi.fn(),
+  actualizarRazonSocial: vi.fn(),
 }))
 
 const RAZONES = [
-  { id: 'rs-a', nombre: 'Razón social de prueba A' },
-  { id: 'rs-b', nombre: 'Razón social de prueba B' },
+  { id: 'rs-a', nombre: 'Razón social de prueba A', activo: true },
+  { id: 'rs-b', nombre: 'Razón social de prueba B', activo: true },
 ]
 
 const finca = (id, nombre, razon, cambios = {}) => ({
@@ -459,5 +463,77 @@ describe('Pantalla 30 · Desactivar y reactivar una finca (RF-04 / CU-04 3, 3a y
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No tienes permiso para esta acción.',
     )
+  })
+})
+
+describe('Pantalla 30 · Razones sociales (cambio 40)', () => {
+  const seccion = async () =>
+    within(await screen.findByRole('region', { name: 'Razones sociales' }))
+
+  it('cambio 40: lista las razones sociales con su estado y sus fincas activas', async () => {
+    abrir()
+
+    const razones = within((await seccion()).getByRole('list'))
+    const filas = razones.getAllByRole('listitem')
+    expect(filas.map((fila) => fila.textContent)).toEqual([
+      'Razón social de prueba AActiva1 finca activa',
+      'Razón social de prueba BActiva2 fincas activas',
+    ])
+  })
+
+  it('cambio 40: crea una razón social, avisa y recarga', async () => {
+    vi.mocked(crearRazonSocial).mockResolvedValue({ id: 'rs-c' })
+    abrir()
+
+    await userEvent.click((await seccion()).getByRole('button', { name: 'Nueva razón social' }))
+    const dialogo = within(screen.getByRole('dialog', { name: 'Nueva razón social' }))
+    await userEvent.type(
+      dialogo.getByRole('textbox', { name: 'Nombre de la razón social' }),
+      '  Agropecuaria Nueva S.A.S.  ',
+    )
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }))
+
+    expect(crearRazonSocial).toHaveBeenCalledExactlyOnceWith('Agropecuaria Nueva S.A.S.')
+    expect(await screen.findByRole('status')).toHaveTextContent('Razón social creada.')
+    expect(listarRazonesSociales).toHaveBeenCalledTimes(2)
+  })
+
+  it('cambio 40: no deja repetir un nombre, sin importar mayúsculas ni tildes', async () => {
+    abrir()
+
+    await userEvent.click(
+      (await seccion()).getByRole('button', { name: 'Renombrar Razón social de prueba B' }),
+    )
+    const dialogo = within(screen.getByRole('dialog', { name: 'Renombrar razón social' }))
+    const campo = dialogo.getByRole('textbox', { name: 'Nombre de la razón social' })
+    await userEvent.clear(campo)
+    await userEvent.type(campo, 'razon social de prueba a')
+    await userEvent.click(dialogo.getByRole('button', { name: 'Guardar' }))
+
+    expect(campo).toHaveAccessibleDescription('Ya existe una razón social con ese nombre')
+    expect(actualizarRazonSocial).not.toHaveBeenCalled()
+  })
+
+  it('cambio 40: desactivar es un toque, y la inactiva ya no se ofrece para fincas nuevas', async () => {
+    vi.mocked(actualizarRazonSocial).mockResolvedValue({ id: 'rs-a' })
+    vi.mocked(listarRazonesSociales)
+      .mockResolvedValueOnce(RAZONES)
+      .mockResolvedValue([{ ...RAZONES[0], activo: false }, RAZONES[1]])
+    abrir()
+
+    await userEvent.click(
+      (await seccion()).getByRole('button', { name: 'Desactivar Razón social de prueba A' }),
+    )
+    expect(actualizarRazonSocial).toHaveBeenCalledExactlyOnceWith('rs-a', { activo: false })
+    expect(await screen.findByRole('status')).toHaveTextContent('Razón social desactivada.')
+    expect(
+      await screen.findByRole('button', { name: 'Reactivar Razón social de prueba A' }),
+    ).toBeVisible()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Nueva finca' }))
+    const opciones = within(
+      within(screen.getByRole('dialog')).getByRole('combobox', { name: 'Razón social' }),
+    ).getAllByRole('option')
+    expect(opciones.map((opcion) => opcion.textContent)).not.toContain('Razón social de prueba A')
   })
 })

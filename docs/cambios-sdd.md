@@ -45,6 +45,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
 | 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
 | 39  | S5     | SDD 6.1.8, Tabla 21 y tipo `accion_auditoria`             | **Cambio:** `reactivar_tipo_falla` para los tipos desactivados; deshace «sin reactivar» del cambio 30, salvo para los fusionados                                      | Propuesto |
+| 40  | S5     | SRS RF-04; SDD 6.1.4 (Tabla 31) y Tabla 22                | **Cambio:** el administrador crea, renombra, desactiva y reactiva las razones sociales desde Fincas; `RAZON_SOCIAL_EXISTENTE`                                         | Propuesto |
 | 41  | S5     | SDD 6.1.7 y 5.2.5                                         | Complemento: las fotos se abren en un visor dentro de la aplicación, no en otra pestaña con la URL firmada                                                            | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 | 43  | S5     | SDD 5.3.5                                                 | Precisión: en Brave de escritorio, el error de activar las notificaciones dice qué ajuste encender                                                                    | Propuesto |
@@ -1318,6 +1319,22 @@ Migración `rf32_reactivar_tipo_falla`.
 **Texto propuesto (Tabla 21, fila nueva):**
 
 > `reactivar_tipo_falla` · `p_tipo_id` · Administrador
+
+## 40 · Razones sociales desde la aplicación (S5)
+
+**Sección:** SRS RF-04; SDD 6.1.4 (Tabla 31, fila `razon_social`) y Tabla 22.
+
+**Qué pasa.** Las razones sociales eran un catálogo precargado que solo cambiaba con SQL. Ahora,
+debajo de las fincas (pantalla 30, sin dibujo en Figma), el administrador las crea, las renombra,
+las desactiva y las reactiva, directamente en la tabla, como las fincas: `grant insert (nombre),
+update (nombre, activo)` y dos políticas para el rol 4. No se borran. Una desactivada no se
+ofrece para fincas nuevas; las que ya la tienen la conservan, y al editarlas sigue en el campo. El
+nombre repetido es `RAZON_SOCIAL_EXISTENTE` (lo arma el repositorio desde el 23505, como
+`FINCA_EXISTENTE`). Migración `rf04_razones_sociales`.
+
+**Texto propuesto (Tabla 31, fila `razon_social`):**
+
+> Lectura: usuarios activos. Inserción y actualización (nombre, activo): administrador.
 
 ## 41 · Visor de fotos (S5)
 

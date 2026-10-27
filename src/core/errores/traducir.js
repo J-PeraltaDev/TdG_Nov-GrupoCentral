@@ -40,6 +40,8 @@ const MENSAJES = {
   // Sprint 5, RF-32: el nombre ya es de otro tipo (cambio 30). La pantalla 31 lo convierte en
   // 31-B cuando el otro tipo está activo.
   TIPO_FALLA_DUPLICADO: 'Ya existe un tipo de falla con ese nombre. Elige otro nombre.',
+  // Cambio 40: lo arma el repositorio de fincas, como FINCA_EXISTENTE, y va bajo el campo.
+  RAZON_SOCIAL_EXISTENTE: 'Ya existe una razón social con ese nombre',
 }
 
 const MENSAJE_DE_RED = 'No hay conexión. Revisa tu internet e intenta de nuevo.'
