@@ -190,15 +190,20 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(await menuDelEscritorio()).toEqual(menu)
   })
 
-  it('en el teléfono la barra inferior tiene cuatro opciones', async () => {
-    abrir('/', 'aprobador')
+  it.each([
+    ['reportante', ['Novedades', 'Registrar', 'Avisos', 'Cuenta']],
+    ['aprobador', ['Bandeja', 'Historial', 'Cuenta']],
+    ['director', ['Escaladas', 'Historial', 'Panel', 'Cuenta']],
+    ['administrador', ['Panel', 'Historial', 'Usuarios', 'Más']],
+  ])('en el teléfono la barra inferior del %s tiene cuatro opciones', async (rol, opciones) => {
+    abrir('/', rol)
 
     const [, inferior] = await screen.findAllByRole('navigation', { name: 'Principal' })
     expect(
       within(inferior)
         .getAllByRole('link')
         .map((enlace) => enlace.textContent),
-    ).toEqual(['Bandeja', 'Historial', 'Avisos', 'Cuenta'])
+    ).toEqual(opciones)
   })
 
   it.each([
@@ -346,18 +351,21 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     })
 
     it.each([
-      ['director', '/escaladas', 'Director de prueba'],
-      ['administrador', '/usuarios', 'Administrador de prueba'],
+      ['reportante', '/novedades', 'Cuenta'],
+      ['aprobador', '/bandeja', 'Cuenta'],
+      ['director', '/escaladas', 'Cuenta'],
+      ['administrador', '/usuarios', 'Más'],
     ])(
-      'el %s no tiene «Cuenta» en la barra inferior: la abre desde su avatar de la barra superior, y ahí cierra la sesión',
+      'el %s abre «Cuenta» desde la barra inferior (cambio 37), y ahí cierra la sesión',
       async (rol, inicio, nombre) => {
         abrir(inicio, rol)
 
-        expect((await barraInferior()).queryByRole('link', { name: 'Cuenta' })).toBeNull()
-        const avatar = (await barraDelTelefono()).getByRole('link', { name: `Cuenta de ${nombre}` })
-        expect(avatar).toHaveAttribute('href', '/cuenta')
+        const enlace = (await barraInferior()).getByRole('link', { name: nombre })
+        expect(enlace).toHaveAttribute('href', '/cuenta')
+        // La barra superior ya no repite la cuenta con un avatar.
+        expect((await barraDelTelefono()).queryByRole('link', { name: /^Cuenta de/ })).toBeNull()
 
-        await userEvent.click(avatar)
+        await userEvent.click(enlace)
 
         expect(await screen.findByRole('heading', { level: 1, name: 'Cuenta' })).toBeVisible()
         // El de la página: la barra lateral del escritorio tiene otro, de solo ícono.
@@ -367,39 +375,23 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
       },
     )
 
-    it.each([
-      ['reportante', '/novedades'],
-      ['aprobador', '/bandeja'],
-    ])(
-      'el %s ya tiene «Cuenta» en la barra inferior: su barra superior no la repite',
-      async (rol, inicio) => {
-        abrir(inicio, rol)
-
-        expect((await barraInferior()).getByRole('link', { name: 'Cuenta' })).toBeVisible()
-        expect((await barraDelTelefono()).queryByRole('link', { name: /^Cuenta de/ })).toBeNull()
-      },
-    )
-
-    it('RF-02: el avatar del administrador avisa de las solicitudes que esperan un código', async () => {
+    it('RF-02: «Más» avisa al administrador de las solicitudes que esperan un código', async () => {
       vi.mocked(contarSolicitudesPendientes).mockResolvedValue(2)
       abrir('/usuarios', 'administrador')
 
       expect(
-        await (
-          await barraDelTelefono()
-        ).findByRole('link', {
-          name: 'Cuenta de Administrador de prueba, 2 solicitudes pendientes',
-        }),
+        await (await barraInferior()).findByRole('link', { name: 'Más, 2 solicitudes pendientes' }),
       ).toBeVisible()
     })
 
-    it('RF-02: sin solicitudes, el avatar no lleva insignia', async () => {
-      abrir('/usuarios', 'administrador')
+    it('RF-30: los avisos del director se abren con la campana, no desde la barra inferior', async () => {
+      abrir('/escaladas', 'director')
 
-      const avatar = (await barraDelTelefono()).getByRole('link', {
-        name: 'Cuenta de Administrador de prueba',
-      })
-      expect(avatar).not.toHaveTextContent(/pendiente/)
+      expect((await barraInferior()).queryByRole('link', { name: 'Avisos' })).toBeNull()
+      expect((await barraDelTelefono()).getByRole('link', { name: 'Avisos' })).toHaveAttribute(
+        'href',
+        '/avisos',
+      )
     })
   })
 

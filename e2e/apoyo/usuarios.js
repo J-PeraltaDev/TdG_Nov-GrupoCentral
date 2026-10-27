@@ -301,16 +301,16 @@ export async function desactivarUsuarioDePrueba(page, usuarioId) {
 }
 
 /**
- * En el teléfono, abre «Cuenta» desde el avatar de la barra superior. Es por donde entran el
- * director y el administrador: su barra inferior no la trae.
+ * En el teléfono, abre «Cuenta» desde la última opción de la barra inferior: «Cuenta» o, para el
+ * administrador, «Más» (cambio 37).
  *
  * @param {import('@playwright/test').Page} page
  */
-export async function abrirCuentaDesdeElAvatar(page) {
+export async function abrirCuentaEnElTelefono(page) {
   await page
-    .getByRole('banner')
+    .getByRole('navigation', { name: 'Principal' })
     .filter({ visible: true })
-    .getByRole('link', { name: /^Cuenta de / })
+    .getByRole('link', { name: /^(Cuenta|Más)/ })
     .click({ timeout: 20_000 })
   await page.waitForURL('**/cuenta')
 }

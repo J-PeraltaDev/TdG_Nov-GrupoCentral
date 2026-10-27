@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { enTelefono, registrarPorLaApi } from './apoyo/novedades.js'
 import { descripcionUnica } from './apoyo/registro.js'
 import {
-  abrirCuentaDesdeElAvatar,
+  abrirCuentaEnElTelefono,
   HAY_CLAVE,
   ingresarComo,
   leerDeLaApi,
@@ -30,9 +30,8 @@ test.describe('CU-04 · Gestionar fincas', () => {
   async function abrirFincas(page) {
     await ingresarComo(page, 'administrador')
     if (enTelefono(page)) {
-      // En el teléfono no cabe en la barra inferior: se llega desde «Cuenta», que el
-      // administrador abre con su avatar.
-      await abrirCuentaDesdeElAvatar(page)
+      // En el teléfono no cabe en la barra inferior: se llega desde «Más».
+      await abrirCuentaEnElTelefono(page)
       await page
         .getByRole('navigation', { name: 'Administración' })
         .getByRole('link', { name: 'Fincas' })

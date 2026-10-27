@@ -42,6 +42,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 34  | S5     | SDD 5.3.5 y 6.1.6                                         | Precisión: dónde se ofrece 10-B, el control de Cuenta, el cierre de sesión y el contenido del push sin la descripción (RNF-18)                                        | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 | 36  | S5     | SDD 5.2.5 (pantalla 04)                                   | Complemento: insignia en «Rechazadas» con las rechazadas que el reportante no ha visto (sus avisos de rechazo sin leer)                                               | Propuesto |
+| 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1265,6 +1266,23 @@ hace falta guardar nada nuevo: cada rechazo ya le crea un aviso (Tabla 33), así
 
 > La pestaña «Rechazadas» muestra cuántas novedades rechazadas tienen su aviso sin leer; al
 > abrirla, esos avisos quedan leídos.
+
+## 37 · «Cuenta» en la barra inferior de todos los roles (S5)
+
+**Sección:** SDD 5.2 («Navegación por rol») y Tabla 10. Reemplaza el cambio 16.
+
+**Qué pasa.** El equipo vio que en el teléfono el administrador no encontraba Fincas, Tipos de
+falla y Recuperación de contraseñas: solo se llegaba a ellas tocando el avatar de la barra
+superior. Ahora la última opción de la barra inferior es «Cuenta» para todos los roles; para el
+administrador se llama «Más» (ícono `menu`), porque además de la cuenta trae esas tres
+pantallas, y lleva la insignia de las solicitudes de recuperación. Para que quepa, «Avisos» sale
+de la barra inferior del aprobador, el director y el administrador: la campana de la barra
+superior, con su insignia, ya los abría. El avatar de la barra superior desaparece. En el
+escritorio no cambia nada.
+
+**Texto propuesto (Tabla 10, columna «Teléfono»):** aprobador: Bandeja, Historial, Panel y Cuenta;
+director: Escaladas, Historial, Panel y Cuenta; administrador: Panel, Historial, Usuarios y Más.
+Los avisos, en la campana de la barra superior.
 
 ## 42 · El logo de Grupo Central (S5)
 

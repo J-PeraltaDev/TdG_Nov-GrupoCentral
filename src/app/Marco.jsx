@@ -17,8 +17,8 @@ import { useInsignias } from './useInsignias.js'
 
 /*
  * Marco de las pantallas con sesión (SDD 5.2, «Navegación por rol»):
- *   teléfono    barra superior + contenido + barra inferior de cuatro opciones. Si «Cuenta»
- *               no es una de las cuatro (director y administrador), va en la barra superior;
+ *   teléfono    barra superior + contenido + barra inferior de cuatro opciones, la última
+ *               siempre «Cuenta» («Más» para el administrador; cambio 37);
  *   escritorio  barra lateral con el menú del rol + barra superior con el buscador por
  *               código, el indicador de conexión, los avisos y la cuenta.
  * Figma: 2:43 y 2:137 (teléfono), 3:588 y 3:616 (escritorio).
@@ -89,29 +89,7 @@ function titulosDelTelefono(perfil, ruta) {
   }
 }
 
-/**
- * El avatar que abre «Cuenta» desde la barra superior del teléfono, como el del escritorio. Es
- * para los roles cuya barra inferior no la trae: sin él no tendrían cómo cerrar la sesión ni,
- * el administrador, cómo llegar a las pantallas que solo caben en «Cuenta». Por eso lleva
- * también lo que esas pantallas tengan pendiente.
- */
-function CuentaDelTelefono({ perfil, pendientes }) {
-  return (
-    <Link
-      to="/cuenta"
-      className="relative flex size-12 flex-none items-center justify-center rounded-full"
-    >
-      <Avatar nombre={perfil.nombre} />
-      {/* El nombre del enlace: las iniciales son un adorno, y la insignia agrega lo suyo. */}
-      <span className="sr-only">Cuenta de {perfil.nombre}</span>
-      <span className="absolute top-1 right-0">
-        <Insignia cantidad={pendientes} />
-      </span>
-    </Link>
-  )
-}
-
-function BarraSuperiorDelTelefono({ perfil, ruta, cuenta, sinLeer }) {
+function BarraSuperiorDelTelefono({ perfil, ruta, sinLeer }) {
   const { titulo, subtitulo } = titulosDelTelefono(perfil, ruta)
 
   return (
@@ -133,7 +111,6 @@ function BarraSuperiorDelTelefono({ perfil, ruta, cuenta, sinLeer }) {
       <Conexion className="flex-none" />
       {/* En los avisos (Figma 10) la campana sobra. */}
       {ruta === '/avisos' ? null : <Campana sinLeer={sinLeer} />}
-      {cuenta}
     </header>
   )
 }
@@ -286,13 +263,14 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
   const { pathname: ruta, state } = useLocation()
   const items = MENU[perfil.rol_id] ?? []
   const insignias = useInsignias(perfil)
-  const enLaBarraInferior = items.filter((item) => !item.soloEscritorio)
-  // Figma no le da «Cuenta» a la barra inferior del director ni a la del administrador.
-  const cuentaEnLaBarraSuperior = !enLaBarraInferior.some((item) => item.ruta === '/cuenta')
-  // Lo pendiente en las pantallas que el teléfono solo ofrece dentro de «Cuenta».
-  const pendientesEnCuenta = items
-    .filter((item) => item.soloEscritorio)
-    .reduce((suma, item) => suma + (insignias[item.ruta] ?? 0), 0)
+  const enLaBarraInferior = items.filter((item) => !item.soloEscritorio && !item.enLaCampana)
+  // «Cuenta» lleva lo pendiente en las pantallas que el teléfono solo ofrece dentro de ella.
+  const insigniasDelTelefono = {
+    ...insignias,
+    '/cuenta': items
+      .filter((item) => item.soloEscritorio)
+      .reduce((suma, item) => suma + (insignias[item.ruta] ?? 0), 0),
+  }
   // En el detalle de una novedad, el menú deja marcada la pantalla desde la que se abrió.
   const origen = ruta.startsWith('/novedades/')
     ? rutaDeOrigen(state, perfil.rol_id).split('?')[0]
@@ -323,16 +301,7 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {enfocado || sinBarraSuperior ? null : (
-          <BarraSuperiorDelTelefono
-            perfil={perfil}
-            ruta={ruta}
-            sinLeer={insignias['/avisos']}
-            cuenta={
-              cuentaEnLaBarraSuperior ? (
-                <CuentaDelTelefono perfil={perfil} pendientes={pendientesEnCuenta} />
-              ) : null
-            }
-          />
+          <BarraSuperiorDelTelefono perfil={perfil} ruta={ruta} sinLeer={insignias['/avisos']} />
         )}
         <BarraSuperiorDelEscritorio perfil={perfil} ruta={ruta} sinLeer={insignias['/avisos']} />
 
@@ -343,7 +312,11 @@ export default function Marco({ enfocado = false, sinBarraSuperior = false }) {
         </main>
 
         {enfocado ? null : (
-          <NavegacionInferior items={enLaBarraInferior} origen={origen} insignias={insignias} />
+          <NavegacionInferior
+            items={enLaBarraInferior}
+            origen={origen}
+            insignias={insigniasDelTelefono}
+          />
         )}
       </div>
     </div>
