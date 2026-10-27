@@ -41,6 +41,14 @@ actualicen los documentos (lo exige la Definition of Done).
 | 33  | S5     | SDD 6.1.6, 5.3.4, 5.3.5 y 4.2.10                          | Precisión: webhook propio con `pg_net` y Vault, el contenido que envía, el encabezado secreto, `verify_jwt = false`, cifrado con Web Crypto y `TTL`                   | Propuesto |
 | 34  | S5     | SDD 5.3.5 y 6.1.6                                         | Precisión: dónde se ofrece 10-B, el control de Cuenta, el cierre de sesión y el contenido del push sin la descripción (RNF-18)                                        | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
+| 36  | S5     | SDD 5.2.5 (pantalla 04)                                   | Complemento: insignia en «Rechazadas» con las rechazadas que el reportante no ha visto (sus avisos de rechazo sin leer)                                               | Propuesto |
+| 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
+| 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
+| 39  | S5     | SDD 6.1.8, Tabla 21 y tipo `accion_auditoria`             | **Cambio:** `reactivar_tipo_falla` para los tipos desactivados; deshace «sin reactivar» del cambio 30, salvo para los fusionados                                      | Propuesto |
+| 40  | S5     | SRS RF-04; SDD 6.1.4 (Tabla 31) y Tabla 22                | **Cambio:** el administrador crea, renombra, desactiva y reactiva las razones sociales desde Fincas; `RAZON_SOCIAL_EXISTENTE`                                         | Propuesto |
+| 41  | S5     | SDD 6.1.7 y 5.2.5                                         | Complemento: las fotos se abren en un visor dentro de la aplicación, no en otra pestaña con la URL firmada                                                            | Propuesto |
+| 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
+| 43  | S5     | SDD 5.3.5                                                 | Precisión: en Brave de escritorio, el error de activar las notificaciones dice qué ajuste encender                                                                    | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1248,3 +1256,112 @@ Sprint 5, decisiones 44 a 47):
 **Qué pasa.** Mientras no existía el panel, el administrador entraba a «Usuarios». Desde el PR 4
 del Sprint 5 entra a `/panel`, como dice la Tabla 10 (plan del Sprint 5, decisión 28). No hay
 texto que proponer: la Tabla 10 ya dice «23 Panel de reportes».
+
+## 36 · Las rechazadas que el reportante no ha visto (S5)
+
+**Sección:** SDD 5.2.5, pantalla 04 · Mis novedades.
+
+**Qué pasa.** Lo pidió el equipo en la revisión del Sprint 5. La pastilla «Rechazadas» lleva una
+insignia, como la de los avisos, con cuántas novedades rechazadas no ha visto el reportante. No
+hace falta guardar nada nuevo: cada rechazo ya le crea un aviso (Tabla 33), así que «sin ver» es
+«con su aviso de rechazo sin leer». Abrir esa lista marca esos avisos como leídos con
+`marcar_avisos_leidos`; leerlos en «Avisos» también la apaga. Vale en todos los dispositivos.
+
+**Texto propuesto (5.2.5, pantalla 04, al final):**
+
+> La pestaña «Rechazadas» muestra cuántas novedades rechazadas tienen su aviso sin leer; al
+> abrirla, esos avisos quedan leídos.
+
+## 37 · «Cuenta» en la barra inferior de todos los roles (S5)
+
+**Sección:** SDD 5.2 («Navegación por rol») y Tabla 10. Reemplaza el cambio 16.
+
+**Qué pasa.** El equipo vio que en el teléfono el administrador no encontraba Fincas, Tipos de
+falla y Recuperación de contraseñas: solo se llegaba a ellas tocando el avatar de la barra
+superior. Ahora la última opción de la barra inferior es «Cuenta» para todos los roles; para el
+administrador se llama «Más» (ícono `menu`), porque además de la cuenta trae esas tres
+pantallas, y lleva la insignia de las solicitudes de recuperación. Para que quepa, «Avisos» sale
+de la barra inferior del aprobador, el director y el administrador: la campana de la barra
+superior, con su insignia, ya los abría. El avatar de la barra superior desaparece. En el
+escritorio no cambia nada.
+
+**Texto propuesto (Tabla 10, columna «Teléfono»):** aprobador: Bandeja, Historial, Panel y Cuenta;
+director: Escaladas, Historial, Panel y Cuenta; administrador: Panel, Historial, Usuarios y Más.
+Los avisos, en la campana de la barra superior.
+
+## 38 · El panel de reportes para el aprobador, solo de su área (S5)
+
+**Sección:** SRS RF-26 a RF-29 (actores); SDD 6.1.9, Tabla 10 y Tabla 21 (columna «Rol»).
+
+**Qué pasa.** Lo pidió el equipo: el aprobador de Mantenimiento o de Sistemas ve los cuatro
+indicadores de su área. Las cuatro `rpt_*` admiten el rol 2; siguen siendo `security invoker`,
+así que la RLS de `novedad` ya lo limita a su área, y además cada consulta filtra por
+`private.fn_area()` y la lista de áreas trae solo la suya. Un aprobador sin área recibe
+`SIN_PERMISO`. Como en todo el sistema, una novedad cuenta para el área que la tiene hoy: si se
+reasignó, el área anterior deja de verla. Migración `rf26_panel_del_aprobador`.
+
+**Texto propuesto (6.1.9, al final):**
+
+> El aprobador de área consulta los mismos indicadores, limitados a las novedades de su área.
+
+## 39 · Reactivar un tipo de falla desactivado (S5)
+
+**Sección:** SDD 6.1.8, Tabla 21 y el tipo `accion_auditoria`. Corrige en parte el cambio 30.
+
+**Qué pasa.** El cambio 30 decía «sin reactivar» (decisión 51 del plan del Sprint 5). El equipo
+pidió poder deshacer una desactivación. `reactivar_tipo_falla(p_tipo_id)` (administrador,
+`security definer`) vuelve a activar un tipo desactivado y lo audita con la acción nueva
+`reactivar`. Un tipo fusionado no se reactiva (`TIPO_FALLA_INVALIDO`): sus novedades ya son del
+destino y `resolver_tipo_falla` sigue la cadena de fusiones. En la pantalla 31, un tipo
+inactivo muestra «Reactivar» en lugar de las tres acciones deshabilitadas; no pide confirmación.
+Migración `rf32_reactivar_tipo_falla`.
+
+**Texto propuesto (Tabla 21, fila nueva):**
+
+> `reactivar_tipo_falla` · `p_tipo_id` · Administrador
+
+## 40 · Razones sociales desde la aplicación (S5)
+
+**Sección:** SRS RF-04; SDD 6.1.4 (Tabla 31, fila `razon_social`) y Tabla 22.
+
+**Qué pasa.** Las razones sociales eran un catálogo precargado que solo cambiaba con SQL. Ahora,
+debajo de las fincas (pantalla 30, sin dibujo en Figma), el administrador las crea, las renombra,
+las desactiva y las reactiva, directamente en la tabla, como las fincas: `grant insert (nombre),
+update (nombre, activo)` y dos políticas para el rol 4. No se borran. Una desactivada no se
+ofrece para fincas nuevas; las que ya la tienen la conservan, y al editarlas sigue en el campo. El
+nombre repetido es `RAZON_SOCIAL_EXISTENTE` (lo arma el repositorio desde el 23505, como
+`FINCA_EXISTENTE`). Migración `rf04_razones_sociales`.
+
+**Texto propuesto (Tabla 31, fila `razon_social`):**
+
+> Lectura: usuarios activos. Inserción y actualización (nombre, activo): administrador.
+
+## 41 · Visor de fotos (S5)
+
+**Sección:** SDD 6.1.7 y 5.2.5 (bloque «Evidencias»).
+
+**Qué pasa.** Tocar una foto abría su URL firmada en otra pestaña, con el token a la vista en la
+barra de direcciones. Ese token no es la clave de la API: es una firma que vale 5 minutos y solo
+para ese archivo. Aun así, la foto ahora se abre en un visor dentro de la aplicación, a toda la
+pantalla, con «anterior», «siguiente» (también con las flechas del teclado) y zoom (botón, toque
+en la foto o pellizco en el teléfono). La foto se sigue cargando con su URL firmada.
+
+## 42 · El logo de Grupo Central (S5)
+
+**Sección:** SDD 5.2 («Sistema de diseño»). Resuelve el punto 5 de `decisiones-pendientes.md`
+(ícono de la aplicación).
+
+**Qué pasa.** El equipo entregó el logo. Va en el ingreso (en lugar del ícono de hoja de Figma),
+en la barra lateral del escritorio, en el favicon y en los íconos de la aplicación instalada (192,
+512, 512 _maskable_ sobre blanco y 180 para iOS), que también usan las notificaciones push.
+
+## 43 · Notificaciones en Brave (S5)
+
+**Sección:** SDD 5.3.5.
+
+**Qué pasa.** Brave de escritorio apaga por omisión el servicio push de Google, y
+`pushManager.subscribe` falla con `AbortError` aunque el permiso esté concedido. No se arregla
+desde la aplicación: la persona debe activar «Usar los servicios de Google para la mensajería
+push» en `brave://settings/privacy` y reiniciar el navegador. La fila de Cuenta y 10-B ahora lo
+dicen así en lugar del error genérico. En Brave para Android ese ajuste no existe, y queda el
+mensaje genérico.

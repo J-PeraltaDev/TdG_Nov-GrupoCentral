@@ -17,8 +17,11 @@ export default defineConfig({
       filename: 'sw.js',
       registerType: 'prompt',
       injectRegister: false,
-      // El manifiesto y sus íconos los agrega el plugin al precaché por su cuenta.
-      includeAssets: ['iconos/apple-touch-icon.png'],
+      // El manifiesto lo agrega el plugin al precaché. Los íconos de 512 del logo pesan unos
+      // 300 KB y solo se piden al instalar la aplicación, con conexión: no se precachean
+      // (cambio 42). Sí el de 192, que usan las notificaciones, el de iOS y el favicon.
+      includeManifestIcons: false,
+      includeAssets: ['iconos/apple-touch-icon.png', 'iconos/icono-192.png', 'favicon.png'],
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
       },

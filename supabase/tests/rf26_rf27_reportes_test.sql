@@ -7,7 +7,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(29);
+select plan(30);
 
 -- Usuarios (como propietario) ----------------------------------------------------------
 
@@ -64,13 +64,15 @@ select throws_ok(
 );
 
 set local request.jwt.claims = '{"sub": "e6000000-0000-4000-8000-000000000002", "role": "authenticated"}';
-select throws_ok(
-  $$ select public.rpt_novedades_abiertas() $$, 'P0001', 'SIN_PERMISO',
-  'RF-26: el aprobador no recibe un panel recortado a su área: no lo ve'
+select is(
+  (select array_agg(a ->> 'id') from jsonb_array_elements(public.rpt_novedades_abiertas() -> 'areas') a),
+  array['e6000000-0000-4000-8000-0000000000b1'],
+  'RF-26 (cambio 38): el aprobador ve el panel solo de su área'
 );
-select throws_ok(
-  $$ select public.rpt_tiempos_atencion('2001-03-01', '2001-04-30') $$, 'P0001', 'SIN_PERMISO',
-  'RF-27: el aprobador tampoco ve los tiempos'
+select is(
+  (select array_agg(a ->> 'id') from jsonb_array_elements(public.rpt_tiempos_atencion('2001-03-01', '2001-04-30') -> 'areas') a),
+  array['e6000000-0000-4000-8000-0000000000b1'],
+  'RF-27 (cambio 38): y los tiempos, solo de su área'
 );
 
 set local request.jwt.claims = '{"sub": "e6000000-0000-4000-8000-000000000005", "role": "authenticated"}';
@@ -348,6 +350,19 @@ set local request.jwt.claims = '{"sub": "e6000000-0000-4000-8000-000000000004", 
 select lives_ok(
   $$ select public.rpt_tiempos_atencion('2001-03-01', '2001-04-30') $$,
   'RF-27: el administrador también ve los tiempos'
+);
+
+-- El panel del aprobador (cambio 38) ---------------------------------------------------
+
+set local request.jwt.claims = '{"sub": "e6000000-0000-4000-8000-000000000002", "role": "authenticated"}';
+select is(
+  (
+    select f -> 'por_area'
+    from jsonb_array_elements(public.rpt_novedades_abiertas() -> 'fincas') f
+    where f ->> 'id' = 'e6000000-0000-4000-8000-0000000000f1'
+  ),
+  '{"e6000000-0000-4000-8000-0000000000b1": 3}'::jsonb,
+  'RF-26 (cambio 38): al aprobador solo le cuentan las abiertas de su área'
 );
 
 select * from finish();

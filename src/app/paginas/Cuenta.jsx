@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router'
 import { usePendientes } from '../../core/offline/pendientes.js'
-import { activarPush, desactivarPush, estadoDelPush } from '../../core/push/suscripcion.js'
+import {
+  activarPush,
+  desactivarPush,
+  estadoDelPush,
+  textoDelFallo,
+} from '../../core/push/suscripcion.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil } from '../../core/sesion/roles.js'
 import { Icono } from '../../core/ui/Icono.jsx'
@@ -27,7 +32,7 @@ const ESTADO_DEL_PUSH = {
 function NotificacionesDelDispositivo({ usuarioId }) {
   const [estado, setEstado] = useState(null)
   const [ocupado, setOcupado] = useState(false)
-  const [fallo, setFallo] = useState(false)
+  const [fallo, setFallo] = useState(/** @type {string | null} */ (null))
 
   useEffect(() => {
     estadoDelPush().then(setEstado, () => setEstado('no-disponible'))
@@ -38,11 +43,11 @@ function NotificacionesDelDispositivo({ usuarioId }) {
 
   async function cambiar() {
     setOcupado(true)
-    setFallo(false)
+    setFallo(null)
     try {
       setEstado(estado === 'activadas' ? await desactivarPush() : await activarPush(usuarioId))
-    } catch {
-      setFallo(true)
+    } catch (error) {
+      setFallo(textoDelFallo(error, 'No se pudo cambiar. Revisa la conexión e intenta de nuevo.'))
     } finally {
       setOcupado(false)
     }
@@ -64,8 +69,8 @@ function NotificacionesDelDispositivo({ usuarioId }) {
         ) : null}
       </div>
       {fallo ? (
-        <p role="alert" className="text-cuerpo-pequeno text-error">
-          No se pudo cambiar. Revisa la conexión e intenta de nuevo.
+        <p role="alert" className="text-cuerpo-pequeno [overflow-wrap:anywhere] text-error">
+          {fallo}
         </p>
       ) : null}
     </div>

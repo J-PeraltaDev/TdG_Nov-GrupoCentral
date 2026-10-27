@@ -24,7 +24,7 @@ import { supabase } from '../cliente.js'
  * @property {string} id
  * @property {string} tipo_falla_id
  * @property {string | null} tipo_destino_id Solo en una fusión.
- * @property {'renombrar' | 'fusionar' | 'desactivar'} accion
+ * @property {'renombrar' | 'fusionar' | 'desactivar' | 'reactivar'} accion
  * @property {string | null} valor_anterior El nombre antes del cambio.
  * @property {string} fecha
  * @property {string | null} usuario
@@ -131,6 +131,14 @@ export const fusionarTiposFalla = (origenId, destinoId) =>
  */
 export const desactivarTipoFalla = (tipoId) =>
   llamar('desactivar_tipo_falla', { p_tipo_id: tipoId })
+
+/**
+ * Devuelve a las sugerencias un tipo desactivado; uno fusionado no (cambio 39).
+ *
+ * @param {string} tipoId
+ * @returns {Promise<TipoFalla>}
+ */
+export const reactivarTipoFalla = (tipoId) => llamar('reactivar_tipo_falla', { p_tipo_id: tipoId })
 
 /**
  * El tipo de una novedad cerrada (CU-32 1a). Devuelve la novedad.

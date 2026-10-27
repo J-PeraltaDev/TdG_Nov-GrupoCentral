@@ -27,6 +27,9 @@ export const TIPO_FALLA_NOMBRE_MAX_CARACTERES = 60
  */
 export const FINCA_NOMBRE_MAX_CARACTERES = 80
 
+/** Nombre de una razón social (cambio 40). Como el de la finca, solo limita el campo. */
+export const RAZON_SOCIAL_NOMBRE_MAX_CARACTERES = 80
+
 /** Código temporal de recuperación de contraseña (RF-02). Se usa en el Sprint 3. */
 export const CODIGO_RECUPERACION_VIGENCIA_MINUTOS = 30
 /** Códigos incorrectos que admite una solicitud antes de que su código deje de servir. El

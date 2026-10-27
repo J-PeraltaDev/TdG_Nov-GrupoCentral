@@ -21,7 +21,7 @@ import { supabase } from '../cliente.js'
 const COLUMNAS =
   'id, nombre, activo, razon_social_id, razon_social, novedades_abiertas, reportantes_activos'
 
-/** La restricción `finca_razon_social_nombre_unico` (CU-04 6a). */
+/** Las restricciones `finca_razon_social_nombre_unico` (CU-04 6a) y `razon_social_nombre_unico`. */
 const VIOLACION_DE_UNICIDAD = '23505'
 
 /**
@@ -29,9 +29,10 @@ const VIOLACION_DE_UNICIDAD = '23505'
  * de errores conoce.
  *
  * @param {{ code?: string }} error
+ * @param {string} [repetido] El código del nombre repetido.
  */
-const convertir = (error) =>
-  error.code === VIOLACION_DE_UNICIDAD ? new Error('FINCA_EXISTENTE') : error
+const convertir = (error, repetido = 'FINCA_EXISTENTE') =>
+  error.code === VIOLACION_DE_UNICIDAD ? new Error(repetido) : error
 
 /**
  * Todas las fincas, activas e inactivas, con su razón social y sus conteos. Son decenas de
@@ -49,19 +50,60 @@ export async function listarFincasConConteos() {
   return data
 }
 
+/** @typedef {{ id: string, nombre: string, activo: boolean }} RazonSocial */
+
 /**
- * Razones sociales activas, por nombre: las opciones del filtro y del formulario. Es un
- * catálogo precargado; la aplicación no lo edita.
+ * Todas las razones sociales, activas e inactivas, por nombre: la lista que las administra, el
+ * filtro y, solo las activas, el formulario de la finca (cambio 40).
  *
- * @returns {Promise<{ id: string, nombre: string }[]>}
+ * @returns {Promise<RazonSocial[]>}
  */
 export async function listarRazonesSociales() {
   const { data, error } = await supabase
     .from('razon_social')
-    .select('id, nombre')
-    .eq('activo', true)
+    .select('id, nombre, activo')
     .order('nombre')
   if (error) throw error
+  return data
+}
+
+/**
+ * Crea una razón social, que queda activa (cambio 40).
+ *
+ * @param {string} nombre
+ * @returns {Promise<{ id: string }>}
+ */
+export async function crearRazonSocial(nombre) {
+  const { data, error } = await supabase
+    .from('razon_social')
+    .insert({ nombre: nombre.trim() })
+    .select('id')
+    .single()
+  if (error) throw convertir(error, 'RAZON_SOCIAL_EXISTENTE')
+  return data
+}
+
+/**
+ * Cambia el nombre o el estado de una razón social. Solo se envía lo que llega.
+ *
+ * @param {string} id
+ * @param {{ nombre?: string, activo?: boolean }} cambios
+ * @returns {Promise<{ id: string }>}
+ */
+export async function actualizarRazonSocial(id, { nombre, activo }) {
+  const cambios = {}
+  if (nombre !== undefined) cambios.nombre = nombre.trim()
+  if (activo !== undefined) cambios.activo = activo
+
+  const { data, error } = await supabase
+    .from('razon_social')
+    .update(cambios)
+    .eq('id', id)
+    .select('id')
+    .maybeSingle()
+  if (error) throw convertir(error, 'RAZON_SOCIAL_EXISTENTE')
+  // Como en actualizarFinca: la política deja la consulta sin filas si ya no es administrador.
+  if (!data) throw new Error('SIN_PERMISO')
   return data
 }
 

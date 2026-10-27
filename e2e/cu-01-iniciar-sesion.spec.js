@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { enTelefono } from './apoyo/novedades.js'
 import {
-  abrirCuentaDesdeElAvatar,
+  abrirCuentaEnElTelefono,
   HAY_CLAVE,
   ingresarComo,
   ingresarPorElFormulario,
@@ -43,9 +43,12 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
         const usuario = await ingresarPorElFormulario(page, rol)
 
         await expect(page).toHaveURL(new RegExp(`${usuario.inicio}$`))
-        // En el escritorio la cuenta va en la barra superior, no en el menú lateral.
+        // En el escritorio la cuenta («Más» del administrador) va en la barra superior, no en el
+        // menú lateral; los avisos, en los dos formatos (en el teléfono, con la campana).
         const escritorio = page.viewportSize().width >= 1024
-        const opciones = usuario.menu.filter((opcion) => !(escritorio && opcion === 'Cuenta'))
+        const opciones = usuario.menu.filter(
+          (opcion) => !(escritorio && (opcion === 'Cuenta' || opcion === 'Más')),
+        )
         const menu = menuVisible(page)
         for (const opcion of opciones) {
           await expect(menu.getByRole('link', { name: opcion })).toBeVisible()
@@ -112,15 +115,14 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
       await expect(page).toHaveURL(/\/ingresar$/)
     })
 
-    test('RF-01 / CU-01 5 y 6: en el teléfono, el director cierra la sesión desde su avatar, porque «Cuenta» no está en su barra inferior', async ({
+    test('RF-01 / CU-01 5 y 6: en el teléfono, el director cierra la sesión desde «Cuenta», en su barra inferior', async ({
       page,
     }) => {
       test.skip(!enTelefono(page), 'En el escritorio la cuenta ya va en la barra superior.')
       // Con una sesión propia: al cerrarla no se le quita a las demás pruebas.
       await ingresarPorElFormulario(page, 'director')
-      await expect(menuVisible(page).getByRole('link', { name: 'Cuenta' })).toHaveCount(0)
 
-      await abrirCuentaDesdeElAvatar(page)
+      await abrirCuentaEnElTelefono(page)
       const cuenta = page.getByRole('main')
       await expect(cuenta.getByText(USUARIOS.director.nombre)).toBeVisible(ESPERA_DE_AUTH)
       await cuenta.getByRole('button', { name: 'Cerrar sesión' }).click()

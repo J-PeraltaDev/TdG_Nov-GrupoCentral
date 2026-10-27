@@ -4,7 +4,9 @@ import { traducirError } from '../../errores/traducir.js'
 import { supabase } from '../cliente.js'
 import {
   actualizarFinca,
+  actualizarRazonSocial,
   crearFinca,
+  crearRazonSocial,
   listarFincasConConteos,
   listarRazonesSociales,
 } from './fincas.js'
@@ -74,16 +76,39 @@ describe('Repositorio de fincas (RF-04 / CU-04)', () => {
     expect(pasos).toContainEqual(['order', 'nombre'])
   })
 
-  it('RF-04: lista las razones sociales activas, por nombre', async () => {
-    const razones = [{ id: 'rs-1', nombre: 'Razón social de prueba A' }]
+  it('cambio 40: lista todas las razones sociales, activas e inactivas, por nombre', async () => {
+    const razones = [{ id: 'rs-1', nombre: 'Razón social de prueba A', activo: false }]
     const pasos = simularConsulta({ data: razones, error: null })
 
     await expect(listarRazonesSociales()).resolves.toEqual(razones)
 
     expect(pasos[0]).toEqual(['from', 'razon_social'])
-    expect(pasos).toContainEqual(['select', 'id, nombre'])
-    expect(pasos).toContainEqual(['eq', 'activo', true])
+    expect(pasos).toContainEqual(['select', 'id, nombre, activo'])
+    expect(pasos.some(([metodo]) => metodo === 'eq')).toBe(false)
     expect(pasos).toContainEqual(['order', 'nombre'])
+  })
+
+  it('cambio 40: crea una razón social sin espacios sobrantes; el nombre repetido es RAZON_SOCIAL_EXISTENTE', async () => {
+    const pasos = simularConsulta({ data: { id: 'rs-9' }, error: null })
+    await expect(crearRazonSocial('  Agropecuaria S.A.S. ')).resolves.toEqual({ id: 'rs-9' })
+    expect(pasos).toContainEqual(['insert', { nombre: 'Agropecuaria S.A.S.' }])
+
+    simularConsulta({ data: null, error: NOMBRE_REPETIDO })
+    const fallo = await crearRazonSocial('Agropecuaria S.A.S.').catch((e) => e)
+    expect(traducirError(fallo)).toMatchObject({
+      codigo: 'RAZON_SOCIAL_EXISTENTE',
+      mensaje: 'Ya existe una razón social con ese nombre',
+    })
+  })
+
+  it('cambio 40: cambia solo lo que llega, y sin filas responde SIN_PERMISO', async () => {
+    const pasos = simularConsulta({ data: { id: 'rs-1' }, error: null })
+    await actualizarRazonSocial('rs-1', { activo: false })
+    expect(pasos).toContainEqual(['update', { activo: false }])
+    expect(pasos).toContainEqual(['eq', 'id', 'rs-1'])
+
+    simularConsulta({ data: null, error: null })
+    await expect(actualizarRazonSocial('rs-1', { nombre: 'Otra' })).rejects.toThrow('SIN_PERMISO')
   })
 
   it('RF-04 / CU-04 5 y 6: crea la finca con el nombre sin espacios sobrantes', async () => {

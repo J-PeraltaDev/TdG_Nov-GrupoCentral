@@ -6,6 +6,7 @@ import {
   fusionarTiposFalla,
   listarCambios,
   listarCatalogo,
+  reactivarTipoFalla,
   renombrarTipoFalla,
 } from '../../core/supabase/repositorios/tiposFalla.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
@@ -25,8 +26,9 @@ import { DialogoRenombrarTipo } from './DialogoRenombrarTipo.jsx'
 
 /*
  * Pantalla 31 · Tipos de falla (RF-32 / CU-32). Figma 6:2438, 31-B 6:2734 y 31-C 6:3019. El
- * administrador renombra, fusiona y desactiva los tipos que crean las áreas al resolver, para
- * que el indicador de fallas recurrentes agrupe bien. Abajo, el registro de cambios.
+ * administrador renombra, fusiona, desactiva y reactiva (cambio 39) los tipos que crean las áreas
+ * al resolver, para que el indicador de fallas recurrentes agrupe bien. Abajo, el registro de
+ * cambios.
  *
  * Figma la dibuja solo en el escritorio; en el teléfono se llega desde «Cuenta» (cambio 16) y
  * la tabla pasa a tarjetas (decisión 64).
@@ -34,8 +36,9 @@ import { DialogoRenombrarTipo } from './DialogoRenombrarTipo.jsx'
 
 /** @typedef {import('../../core/supabase/repositorios/tiposFalla.js').TipoDelCatalogo} TipoDelCatalogo */
 /** @typedef {import('../../core/supabase/repositorios/tiposFalla.js').CambioDelCatalogo} CambioDelCatalogo */
-/** @typedef {'renombrar' | 'fusionar' | 'desactivar'} Accion */
+/** @typedef {'renombrar' | 'fusionar' | 'desactivar' | 'reactivar'} Accion */
 
+/** Las de un tipo activo. */
 const ACCIONES = /** @type {Accion[]} */ (['renombrar', 'fusionar', 'desactivar'])
 
 const ENCABEZADO = 'py-2.5 text-left text-auxiliar-fuerte text-texto-secundario'
@@ -55,29 +58,45 @@ function EstadoDelTipo({ activo }) {
   )
 }
 
+const ENLACE =
+  'min-h-12 cursor-pointer rounded-control px-2 text-etiqueta-fuerte whitespace-nowrap text-primario enabled:hover:underline disabled:cursor-not-allowed disabled:text-deshabilitado lg:min-h-0 lg:px-0.5'
+
 /**
- * Renombrar, Fusionar y Desactivar, como enlaces de texto. En un tipo inactivo se ven
- * deshabilitadas (31): no se reactiva (decisión 51).
+ * Renombrar, Fusionar y Desactivar, como enlaces de texto. Un tipo inactivo (desactivado: los
+ * fusionados no están en la lista) solo se reactiva (cambio 39), sin confirmación: no afecta a
+ * nadie y se deshace desactivándolo.
  *
  * @param {object} props
  * @param {TipoDelCatalogo} props.tipo
  * @param {(accion: Accion) => void} props.alElegir
+ * @param {boolean} props.ocupado Se está reactivando.
  */
-function Acciones({ tipo, alElegir }) {
+function Acciones({ tipo, alElegir, ocupado }) {
   return (
     <div className="-mx-2 flex flex-wrap items-center lg:mx-0 lg:flex-nowrap lg:gap-1.5">
-      {ACCIONES.map((accion) => (
+      {tipo.activo ? (
+        ACCIONES.map((accion) => (
+          <button
+            key={accion}
+            type="button"
+            aria-label={`${NOMBRE_DE_ACCION[accion]} ${tipo.nombre}`}
+            onClick={() => alElegir(accion)}
+            className={ENLACE}
+          >
+            {NOMBRE_DE_ACCION[accion]}
+          </button>
+        ))
+      ) : (
         <button
-          key={accion}
           type="button"
-          disabled={!tipo.activo}
-          aria-label={`${NOMBRE_DE_ACCION[accion]} ${tipo.nombre}`}
-          onClick={() => alElegir(accion)}
-          className="min-h-12 cursor-pointer rounded-control px-2 text-etiqueta-fuerte whitespace-nowrap text-primario enabled:hover:underline disabled:cursor-not-allowed disabled:text-deshabilitado lg:min-h-0 lg:px-0.5"
+          disabled={ocupado}
+          aria-label={`Reactivar ${tipo.nombre}`}
+          onClick={() => alElegir('reactivar')}
+          className={ENLACE}
         >
-          {NOMBRE_DE_ACCION[accion]}
+          {ocupado ? 'Reactivando…' : 'Reactivar'}
         </button>
-      ))}
+      )}
     </div>
   )
 }
@@ -87,8 +106,9 @@ function Acciones({ tipo, alElegir }) {
  * @param {TipoDelCatalogo[]} props.lista
  * @param {string | undefined} props.marcado El del diálogo abierto, con fondo (31).
  * @param {(tipo: TipoDelCatalogo, accion: Accion) => void} props.alElegir
+ * @param {string | null} props.reactivando
  */
-function TablaDeTipos({ lista, marcado, alElegir }) {
+function TablaDeTipos({ lista, marcado, alElegir, reactivando }) {
   return (
     <div className={`relative overflow-x-auto ${TARJETA}`}>
       <table className="w-full min-w-[56rem] border-collapse">
@@ -135,7 +155,11 @@ function TablaDeTipos({ lista, marcado, alElegir }) {
                 <EstadoDelTipo activo={tipo.activo} />
               </td>
               <td className={`${CELDA} pr-5 pl-2`}>
-                <Acciones tipo={tipo} alElegir={(accion) => alElegir(tipo, accion)} />
+                <Acciones
+                  tipo={tipo}
+                  ocupado={reactivando === tipo.id}
+                  alElegir={(accion) => alElegir(tipo, accion)}
+                />
               </td>
             </tr>
           ))}
@@ -146,7 +170,7 @@ function TablaDeTipos({ lista, marcado, alElegir }) {
 }
 
 /** En el teléfono, cada tipo es una tarjeta. */
-function TarjetaDeTipo({ tipo, alElegir }) {
+function TarjetaDeTipo({ tipo, alElegir, ocupado }) {
   const idDelTitulo = useId()
   return (
     <li>
@@ -164,7 +188,7 @@ function TarjetaDeTipo({ tipo, alElegir }) {
           {cuantasNovedades(tipo.novedades)} · Creado por {tipo.creado_por ?? '—'} el{' '}
           <span className="whitespace-nowrap">{dia(tipo.creado_en)}</span>
         </p>
-        <Acciones tipo={tipo} alElegir={(accion) => alElegir(tipo, accion)} />
+        <Acciones tipo={tipo} ocupado={ocupado} alElegir={(accion) => alElegir(tipo, accion)} />
       </article>
     </li>
   )
@@ -263,7 +287,10 @@ export default function TiposDeFalla() {
       null
     ),
   )
-  const [aviso, setAviso] = useState(/** @type {string | null} */ (null))
+  const [aviso, setAviso] = useState(
+    /** @type {{ tipo: 'exito' | 'error', mensaje: string } | null} */ (null),
+  )
+  const [reactivando, setReactivando] = useState(/** @type {string | null} */ (null))
 
   // El catálogo y su registro no dependen entre sí: se piden en paralelo. Al recargar se
   // conserva lo que ya se ve hasta que llegue lo nuevo.
@@ -290,14 +317,27 @@ export default function TiposDeFalla() {
   /** Después de un cambio: se cierra el diálogo, se avisa y se trae el catálogo de nuevo. */
   function hecho(/** @type {string} */ mensaje) {
     setDialogo(null)
-    setAviso(mensaje)
+    setAviso({ tipo: 'exito', mensaje })
     recargar()
+  }
+
+  async function reactivar(/** @type {TipoDelCatalogo} */ tipo) {
+    setReactivando(tipo.id)
+    setAviso(null)
+    try {
+      await vigilarPermiso(() => reactivarTipoFalla(tipo.id))
+      hecho('Tipo de falla reactivado.')
+    } catch (error) {
+      setAviso({ tipo: 'error', mensaje: traducirError(error).mensaje })
+    } finally {
+      setReactivando(null)
+    }
   }
 
   const { tipos, cambios, fallo } = datos
   const lista = ordenarCatalogo(tipos, cambios)
   const elegir = (/** @type {TipoDelCatalogo} */ tipo, /** @type {Accion} */ accion) =>
-    setDialogo({ accion, tipo })
+    accion === 'reactivar' ? reactivar(tipo) : setDialogo({ accion, tipo })
   const abierto = (/** @type {Accion} */ accion) =>
     dialogo?.accion === accion ? dialogo.tipo : null
 
@@ -346,11 +386,21 @@ export default function TiposDeFalla() {
               Todavía no hay tipos de falla. Los crean las áreas al registrar soluciones.
             </p>
           ) : esEscritorio ? (
-            <TablaDeTipos lista={lista} marcado={dialogo?.tipo.id} alElegir={elegir} />
+            <TablaDeTipos
+              lista={lista}
+              marcado={dialogo?.tipo.id}
+              alElegir={elegir}
+              reactivando={reactivando}
+            />
           ) : (
             <ul aria-label="Tipos de falla" className="flex flex-col gap-2.5">
               {lista.map((tipo) => (
-                <TarjetaDeTipo key={tipo.id} tipo={tipo} alElegir={elegir} />
+                <TarjetaDeTipo
+                  key={tipo.id}
+                  tipo={tipo}
+                  alElegir={elegir}
+                  ocupado={reactivando === tipo.id}
+                />
               ))}
             </ul>
           )}
@@ -359,8 +409,8 @@ export default function TiposDeFalla() {
       ) : null}
 
       {aviso ? (
-        <AvisoTemporal tipo="exito" alTerminar={() => setAviso(null)} className={AVISO_SUELTO}>
-          {aviso}
+        <AvisoTemporal tipo={aviso.tipo} alTerminar={() => setAviso(null)} className={AVISO_SUELTO}>
+          {aviso.mensaje}
         </AvisoTemporal>
       ) : null}
 

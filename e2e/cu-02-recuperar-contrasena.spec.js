@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { enTelefono } from './apoyo/novedades.js'
 import {
-  abrirCuentaDesdeElAvatar,
+  abrirCuentaEnElTelefono,
   crearUsuarioDePrueba,
   desactivarUsuarioDePrueba,
   HAY_CLAVE,
@@ -76,7 +76,7 @@ const solicitudesDe = (page, usuarioId) =>
 /** El administrador abre la pantalla 32 por donde la tiene: el menú o, en el teléfono, «Cuenta». */
 async function abrirRecuperaciones(page) {
   if (enTelefono(page)) {
-    await abrirCuentaDesdeElAvatar(page)
+    await abrirCuentaEnElTelefono(page)
     await page
       .getByRole('navigation', { name: 'Administración' })
       .getByRole('link', { name: /^Recuperación de contraseñas/ })

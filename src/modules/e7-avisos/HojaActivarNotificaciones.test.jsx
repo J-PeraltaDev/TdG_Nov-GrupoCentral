@@ -6,6 +6,7 @@ import { activarPush, estadoDelPush } from '../../core/push/suscripcion.js'
 import { HojaActivarNotificaciones } from './HojaActivarNotificaciones.jsx'
 
 vi.mock('../../core/push/suscripcion.js', () => ({
+  textoDelFallo: (_error, generico) => generico,
   estadoDelPush: vi.fn(),
   activarPush: vi.fn(),
 }))

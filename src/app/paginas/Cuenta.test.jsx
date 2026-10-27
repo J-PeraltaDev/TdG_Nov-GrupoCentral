@@ -6,6 +6,7 @@ import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import { Cuenta } from './Cuenta.jsx'
 
 vi.mock('../../core/push/suscripcion.js', () => ({
+  textoDelFallo: (_error, generico) => generico,
   estadoDelPush: vi.fn(),
   activarPush: vi.fn(),
   desactivarPush: vi.fn(),

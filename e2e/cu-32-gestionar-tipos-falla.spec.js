@@ -120,7 +120,7 @@ test.describe('CU-32 · Tipos de falla', () => {
     await expect(page.getByRole('button', { name: `Renombrar ${segundo}` })).toHaveCount(0)
     await expect(page.getByText(`«${segundo}» → «${renombrado}»`)).toBeVisible()
 
-    // Desactivar el que queda: sus acciones quedan deshabilitadas.
+    // Desactivar el que queda: solo se puede reactivar, y vuelve a tener sus acciones (cambio 39).
     await page.getByRole('button', { name: `Desactivar ${renombrado}` }).click()
     dialogo = page.getByRole('dialog', { name: 'Desactivar tipo de falla' })
     await expect(dialogo).toContainText(
@@ -128,7 +128,10 @@ test.describe('CU-32 · Tipos de falla', () => {
     )
     await dialogo.getByRole('button', { name: 'Desactivar' }).click()
     await expect(page.getByText('Tipo de falla desactivado.')).toBeVisible()
-    await expect(page.getByRole('button', { name: `Renombrar ${renombrado}` })).toBeDisabled()
+    await expect(page.getByRole('button', { name: `Renombrar ${renombrado}` })).toHaveCount(0)
+    await page.getByRole('button', { name: `Reactivar ${renombrado}` }).click()
+    await expect(page.getByText('Tipo de falla reactivado.')).toBeVisible()
+    await expect(page.getByRole('button', { name: `Renombrar ${renombrado}` })).toBeEnabled()
   })
 
   test('CU-32 1a: corrige el tipo de una novedad cerrada y lo ve en la línea de tiempo', async ({

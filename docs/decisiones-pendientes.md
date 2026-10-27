@@ -104,7 +104,8 @@ Valores del plan, en `src/core/config/parametros.js` (ver `docs/adr/0006`): desc
 
 - **Ícono de la aplicación:** Figma no tiene uno. `public/favicon.svg` y `public/iconos/*.png`
   son marcadores (una «N» blanca sobre el verde primario). Hay que reemplazarlos por el ícono
-  definitivo en 192, 512, 512 _maskable_ y 180 px.
+  definitivo en 192, 512, 512 _maskable_ y 180 px. **Resuelto el 27 oct 2026:** el logo de Grupo
+  Central (cambio 42 de `cambios-sdd.md`).
 - **Íconos de la interfaz:** en Figma son texto con la fuente Material Symbols Rounded, no
   vectores, y el conector no los exporta como SVG limpios. Se usaron los SVG oficiales del mismo
   conjunto (Google, Apache 2.0), sin modificar. Detalle en `docs/adr/0009` y en
@@ -477,6 +478,11 @@ aviso: son `security invoker`, y la regla solo mira las `security definer`.
 ya tienen cuerpo y siguen sin aviso (`security invoker`). `private.tg_notificacion_push` es
 `security definer`, pero vive en `private` y es un disparador: tampoco genera aviso. En
 «PROYECTO» se esperan 20 después de #41 (los 15 de antes y las cinco funciones que escriben).
+
+**Al 27 oct 2026 (ajustes de la revisión del Sprint 5):** 22 en «staging», todos _WARN_. El
+nuevo es `reactivar_tipo_falla` (cambio 39), del mismo tipo que las otras funciones que escriben.
+El panel del aprobador (cambio 38) no agrega: los `rpt_*` siguen siendo `security invoker`; las
+políticas nuevas de `razon_social` (cambio 40) tampoco.
 
 ## 17 · Pruebas que necesitan ingresar
 

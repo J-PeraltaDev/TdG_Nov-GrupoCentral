@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { guardarMeta, leerMeta } from '../../core/offline/bd.js'
-import { activarPush, estadoDelPush } from '../../core/push/suscripcion.js'
+import { activarPush, estadoDelPush, textoDelFallo } from '../../core/push/suscripcion.js'
 import { ROL } from '../../core/sesion/roles.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -24,7 +24,7 @@ const YA_OFRECIDA = 'push-ofrecida'
 export function HojaActivarNotificaciones({ perfil }) {
   const [abierta, setAbierta] = useState(false)
   const [activando, setActivando] = useState(false)
-  const [fallo, setFallo] = useState(false)
+  const [fallo, setFallo] = useState(/** @type {string | null} */ (null))
 
   useEffect(() => {
     let vigente = true
@@ -47,12 +47,14 @@ export function HojaActivarNotificaciones({ perfil }) {
 
   async function activar() {
     setActivando(true)
-    setFallo(false)
+    setFallo(null)
     try {
       await activarPush(perfil.id)
       cerrar()
-    } catch {
-      setFallo(true)
+    } catch (error) {
+      setFallo(
+        textoDelFallo(error, 'No se pudieron activar. Revisa la conexión e intenta de nuevo.'),
+      )
     } finally {
       setActivando(false)
     }
@@ -77,7 +79,7 @@ export function HojaActivarNotificaciones({ perfil }) {
       </p>
       {fallo ? (
         <Aviso tipo="error" icono={iconoError} role="alert">
-          No se pudieron activar. Revisa la conexión e intenta de nuevo.
+          {fallo}
         </Aviso>
       ) : null}
       <div className="flex flex-col gap-1">

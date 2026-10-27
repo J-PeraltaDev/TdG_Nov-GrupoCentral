@@ -6,6 +6,7 @@ import {
   fusionarTiposFalla,
   listarCambios,
   listarCatalogo,
+  reactivarTipoFalla,
   renombrarTipoFalla,
 } from '../../core/supabase/repositorios/tiposFalla.js'
 import { simularPantalla } from '../../pruebas/pantalla.js'
@@ -19,6 +20,7 @@ vi.mock('../../core/supabase/repositorios/tiposFalla.js', () => ({
   renombrarTipoFalla: vi.fn(),
   fusionarTiposFalla: vi.fn(),
   desactivarTipoFalla: vi.fn(),
+  reactivarTipoFalla: vi.fn(),
 }))
 
 const tipo = (id, nombre, novedades, cambios = {}) => ({
@@ -108,16 +110,38 @@ describe('Pantalla 31 · Tipos de falla (RF-32 / CU-32)', () => {
     ).toEqual(['16', 'Jhon Fredy Mosquera', '14 abr 2026', 'Activo', 'RenombrarFusionarDesactivar'])
   })
 
-  it('RF-32 / decisión 51: un tipo inactivo tiene sus tres acciones deshabilitadas', async () => {
+  it('RF-32 / cambio 39: un tipo desactivado solo se reactiva, sin confirmación', async () => {
+    vi.mocked(reactivarTipoFalla).mockResolvedValue({})
     abrir()
 
     const fila = (await tablaDeTipos()).getByRole('row', { name: /^Radio de comunicación/ })
     expect(within(fila).getByText('Inactivo')).toBeVisible()
     for (const accion of ['Renombrar', 'Fusionar', 'Desactivar']) {
       expect(
-        within(fila).getByRole('button', { name: `${accion} Radio de comunicación` }),
-      ).toBeDisabled()
+        within(fila).queryByRole('button', { name: `${accion} Radio de comunicación` }),
+      ).not.toBeInTheDocument()
     }
+
+    await userEvent.click(
+      within(fila).getByRole('button', { name: 'Reactivar Radio de comunicación' }),
+    )
+
+    expect(reactivarTipoFalla).toHaveBeenCalledExactlyOnceWith('radio')
+    expect(await screen.findByText('Tipo de falla reactivado.')).toBeVisible()
+    expect(listarCatalogo).toHaveBeenCalledTimes(2)
+  })
+
+  it('RF-32 / cambio 39: si no se puede reactivar, lo dice', async () => {
+    vi.mocked(reactivarTipoFalla).mockRejectedValue({ message: 'TIPO_FALLA_INVALIDO' })
+    abrir()
+
+    await userEvent.click(
+      (await tablaDeTipos()).getByRole('button', { name: 'Reactivar Radio de comunicación' }),
+    )
+
+    expect(
+      await screen.findByText('Ese tipo de falla no está disponible. Elige otro.'),
+    ).toBeVisible()
   })
 
   it('RF-32: el registro de cambios dice fecha, usuario, acción y el antes y el después', async () => {

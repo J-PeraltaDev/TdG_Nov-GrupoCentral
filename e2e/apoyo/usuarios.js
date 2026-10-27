@@ -40,25 +40,25 @@ export const USUARIOS = {
     correo: 'aprobador.mantenimiento@novedades.test',
     nombre: 'Aprobador de prueba Mantenimiento',
     inicio: '/bandeja',
-    menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
+    menu: ['Bandeja', 'Historial', 'Panel', 'Cuenta'],
   },
   aprobadorSistemas: {
     correo: 'aprobador.sistemas@novedades.test',
     nombre: 'Aprobador de prueba Sistemas',
     inicio: '/bandeja',
-    menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
+    menu: ['Bandeja', 'Historial', 'Panel', 'Cuenta'],
   },
   director: {
     correo: 'director@novedades.test',
     nombre: 'Director de prueba',
     inicio: '/escaladas',
-    menu: ['Escaladas', 'Historial', 'Panel', 'Avisos'],
+    menu: ['Escaladas', 'Historial', 'Panel', 'Cuenta'],
   },
   administrador: {
     correo: 'administrador@novedades.test',
     nombre: 'Administrador de prueba',
     inicio: '/panel',
-    menu: ['Panel', 'Historial', 'Usuarios', 'Avisos'],
+    menu: ['Panel', 'Historial', 'Usuarios', 'Más'],
   },
   desactivado: { correo: 'desactivado@novedades.test' },
 }
@@ -301,16 +301,16 @@ export async function desactivarUsuarioDePrueba(page, usuarioId) {
 }
 
 /**
- * En el teléfono, abre «Cuenta» desde el avatar de la barra superior. Es por donde entran el
- * director y el administrador: su barra inferior no la trae.
+ * En el teléfono, abre «Cuenta» desde la última opción de la barra inferior: «Cuenta» o, para el
+ * administrador, «Más» (cambio 37).
  *
  * @param {import('@playwright/test').Page} page
  */
-export async function abrirCuentaDesdeElAvatar(page) {
+export async function abrirCuentaEnElTelefono(page) {
   await page
-    .getByRole('banner')
+    .getByRole('navigation', { name: 'Principal' })
     .filter({ visible: true })
-    .getByRole('link', { name: /^Cuenta de / })
+    .getByRole('link', { name: /^(Cuenta|Más)(,|$)/ })
     .click({ timeout: 20_000 })
   await page.waitForURL('**/cuenta')
 }

@@ -29,7 +29,8 @@ import { TiemposDeAtencion } from './TiemposDeAtencion.jsx'
 /*
  * Pantalla 23 en adelante · Panel de reportes (RF-26 a RF-29; Figma 5:783 y 5:1087). Una pestaña
  * por indicador, en la dirección (`?indicador=`), igual que su período; solo se pide la pestaña
- * que se ve. Solo lo ven el director de agricultura y el administrador, y requiere conexión.
+ * que se ve. Lo ven el director de agricultura y el administrador, y el aprobador solo de su área
+ * (cambio 38: el servidor lo recorta). Requiere conexión.
  */
 
 /**

@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
+import { Insignia } from '../../app/Insignia.jsx'
+import { pedirConteoDeInsignias } from '../../app/insignias.js'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { traducirError } from '../../core/errores/traducir.js'
 import { listarPendientes } from '../../core/offline/bd.js'
 import { useSincronizacion } from '../../core/offline/estadoDeSincronizacion.js'
 import { usePendientes } from '../../core/offline/pendientes.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
+import {
+  listarRechazosSinLeer,
+  marcarAvisosLeidos,
+} from '../../core/supabase/repositorios/avisos.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
@@ -26,6 +32,9 @@ import { SesionVencida } from '../e5-sin-conexion/SesionVencida.jsx'
  *
  * Sin conexión, la lista es la descargada, con su fecha (04-B). Las pendientes de sincronizar
  * van arriba de «Abiertas», con y sin conexión, y abren la pantalla 08 (decisión 14 del plan).
+ *
+ * «Rechazadas» lleva una insignia con las rechazadas que el reportante no ha visto: las de sus
+ * avisos de rechazo sin leer. Abrir esa lista los marca leídos (cambio 36).
  */
 
 /** Pestañas de Figma: agrupan los estados según lo que el reportante espera de cada caso. */
@@ -81,8 +90,30 @@ export default function MisNovedades() {
   const pendientes = usePendientes()
   const [enCola, setEnCola] = useState(/** @type {object[]} */ ([]))
   const { sesionVencida } = useSincronizacion()
+  const [rechazadasSinVer, setRechazadasSinVer] = useState(0)
 
   const consulta = `${pestana.id}:${intento}`
+
+  // Si falla, la insignia se queda como estaba: no es motivo para mostrar un error.
+  useEffect(() => {
+    let vigente = true
+    const enRechazadas = pestana.id === 'rechazadas'
+    listarRechazosSinLeer()
+      .then(async (avisos) => {
+        // Si ya cambió de lista antes de que llegaran, no las vio.
+        if (!vigente || !enRechazadas || avisos.length === 0) return avisos
+        await marcarAvisosLeidos(avisos.map(({ id }) => id))
+        pedirConteoDeInsignias()
+        return []
+      })
+      .then((avisos) => {
+        if (vigente) setRechazadasSinVer(new Set(avisos.map(({ novedad_id }) => novedad_id)).size)
+      })
+      .catch(() => {})
+    return () => {
+      vigente = false
+    }
+  }, [pestana, enLinea])
 
   // Las pendientes del usuario (RNF-10), cada vez que cambia la cola.
   useEffect(() => {
@@ -194,10 +225,12 @@ export default function MisNovedades() {
         </div>
       ) : null}
 
+      {/* El margen negativo va en la fila y no en cada botón: si los botones de 48 px se salen
+          de ella, `overflow-x-auto` pinta una barra vertical que corre las pastillas. */}
       <div
         role="group"
         aria-label="Filtrar por estado"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:px-0"
+        className="-mx-4 -my-[7px] flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:px-0"
       >
         {PESTANAS.map((opcion) => {
           const elegida = opcion.id === pestana.id
@@ -212,10 +245,10 @@ export default function MisNovedades() {
               type="button"
               aria-pressed={elegida}
               onClick={() => setPestana(opcion)}
-              className="group -my-[7px] flex min-h-12 flex-none cursor-pointer items-center outline-none"
+              className="group flex min-h-12 flex-none cursor-pointer items-center outline-none"
             >
               <span
-                className={`rounded-full px-[13px] py-[7px] whitespace-nowrap inset-ring group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primario ${
+                className={`flex items-center gap-1.5 rounded-full px-[13px] py-[7px] whitespace-nowrap inset-ring group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primario ${
                   elegida
                     ? 'bg-primario-contenedor text-etiqueta-fuerte text-primario inset-ring-primario'
                     : 'bg-superficie text-etiqueta text-texto inset-ring-borde'
@@ -223,6 +256,9 @@ export default function MisNovedades() {
               >
                 {opcion.nombre}
                 {conteo === null ? '' : ` (${conteo})`}
+                {opcion.id === 'rechazadas' ? (
+                  <Insignia cantidad={rechazadasSinVer} ruta="/novedades?lista=rechazadas" />
+                ) : null}
               </span>
             </button>
           )

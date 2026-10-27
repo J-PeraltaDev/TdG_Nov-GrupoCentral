@@ -3,7 +3,9 @@ import { traducirError } from '../../core/errores/traducir.js'
 import { vigilarPermiso } from '../../core/sesion/perfilVigente.js'
 import {
   actualizarFinca,
+  actualizarRazonSocial,
   crearFinca,
+  crearRazonSocial,
   listarFincasConConteos,
   listarRazonesSociales,
 } from '../../core/supabase/repositorios/fincas.js'
@@ -28,16 +30,19 @@ import { paginar } from '../../core/utils/paginar.js'
 import { sinTildes } from '../../core/utils/texto.js'
 import { DialogoDesactivarFinca } from './DialogoDesactivarFinca.jsx'
 import { DialogoFinca } from './DialogoFinca.jsx'
+import { DialogoRazonSocial } from './DialogoRazonSocial.jsx'
 
 /*
  * Pantalla 30 · Fincas (RF-04 / CU-04). Figma 6:1961 y 6:2194. El administrador crea, edita,
- * desactiva y reactiva las fincas; una finca no se borra.
+ * desactiva y reactiva las fincas; una finca no se borra. Debajo, las razones sociales, que
+ * administra de la misma forma (cambio 40; sin dibujo en Figma).
  *
  * Son decenas de filas: se traen todas y la búsqueda, los filtros y las páginas se resuelven
  * aquí. En el teléfono la tabla pasa a tarjetas (SDD 6.1.11).
  */
 
 /** @typedef {import('../../core/supabase/repositorios/fincas.js').Finca} Finca */
+/** @typedef {import('../../core/supabase/repositorios/fincas.js').RazonSocial} RazonSocial */
 
 /** Como las demás listas de la aplicación. */
 const FINCAS_POR_PAGINA = 20
@@ -119,27 +124,108 @@ function Tarjeta({ finca, acciones }) {
   )
 }
 
+/**
+ * Las razones sociales (cambio 40): renombrar, desactivar y reactivar, y «Nueva razón social».
+ * Desactivar y reactivar no piden confirmación: una razón social desactivada solo deja de
+ * ofrecerse para fincas nuevas, y se deshace con otro toque.
+ *
+ * @param {object} props
+ * @param {RazonSocial[]} props.razones
+ * @param {Finca[]} props.fincas Para contar las activas de cada una.
+ * @param {string | null} props.ocupada La que se está activando o desactivando.
+ * @param {(razon: RazonSocial | null) => void} props.alAbrir `null`: una nueva.
+ * @param {(razon: RazonSocial) => void} props.alCambiarEstado
+ */
+function RazonesSociales({ razones, fincas, ocupada, alAbrir, alCambiarEstado }) {
+  const idDelTitulo = useId()
+  return (
+    <section aria-labelledby={idDelTitulo} className="flex flex-col gap-3 pt-4 lg:pt-2">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="flex flex-col gap-1">
+          <h2 id={idDelTitulo} className="text-subtitulo text-texto">
+            Razones sociales
+          </h2>
+          <p className="text-cuerpo-pequeno text-texto-secundario">
+            Una razón social desactivada no aparece para fincas nuevas; las que ya la tienen la
+            conservan.
+          </p>
+        </div>
+        <Boton
+          tipo="secundario"
+          icono={iconoNueva}
+          onClick={() => alAbrir(null)}
+          className="flex-none"
+        >
+          Nueva razón social
+        </Boton>
+      </div>
+      <ul
+        aria-labelledby={idDelTitulo}
+        className="flex flex-col rounded-xl border border-borde bg-superficie"
+      >
+        {razones.map((razon) => {
+          const activas = fincas.filter(
+            (finca) => finca.activo && finca.razon_social_id === razon.id,
+          ).length
+          return (
+            <li
+              key={razon.id}
+              className="flex items-center gap-2 border-b border-borde py-2 pr-1.5 pl-4 last:border-b-0 lg:pl-5"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-1 lg:flex-row lg:items-center lg:gap-4">
+                <p className="text-etiqueta-fuerte break-words text-texto">{razon.nombre}</p>
+                <p className="flex items-center gap-2 text-auxiliar text-texto-secundario">
+                  <EstadoDeLaFinca activo={razon.activo} />
+                  {plural(activas, 'finca activa', 'fincas activas')}
+                </p>
+              </div>
+              <BotonDeIcono
+                icono={iconoEditar}
+                nombre={`Renombrar ${razon.nombre}`}
+                onClick={() => alAbrir(razon)}
+              />
+              <BotonDeIcono
+                icono={razon.activo ? iconoDesactivar : iconoReactivar}
+                nombre={`${razon.activo ? 'Desactivar' : 'Reactivar'} ${razon.nombre}`}
+                color={razon.activo ? 'text-error' : 'text-exito'}
+                disabled={ocupada === razon.id}
+                onClick={() => alCambiarEstado(razon)}
+              />
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
 export default function Fincas() {
   const esEscritorio = useEsEscritorio()
   const [intento, setIntento] = useState(0)
   const [datos, setDatos] = useState({
     cargados: false,
     fincas: /** @type {Finca[]} */ ([]),
-    razones: /** @type {{ id: string, nombre: string }[]} */ ([]),
+    razones: /** @type {RazonSocial[]} */ ([]),
     fallo: /** @type {import('../../core/errores/traducir.js').ErrorTraducido | null} */ (null),
   })
   const [busqueda, setBusqueda] = useState('')
   const [razonId, setRazonId] = useState('')
   const [estado, setEstado] = useState('activas')
   const [pagina, setPagina] = useState(0)
-  /** El diálogo abierto: una finca nueva, una que se edita o una que se va a desactivar. */
+  /**
+   * El diálogo abierto: una finca nueva, una que se edita o una que se va a desactivar; o una
+   * razón social, nueva (`razon` nula) o que se renombra.
+   */
   const [dialogo, setDialogo] = useState(
-    /** @type {{ tipo: 'nueva' | 'editar' | 'desactivar', finca: Finca | null } | null} */ (null),
+    /** @type {{ tipo: 'nueva' | 'editar' | 'desactivar', finca: Finca | null } | { tipo: 'razon', razon: RazonSocial | null } | null} */ (
+      null
+    ),
   )
   const [aviso, setAviso] = useState(
     /** @type {{ tipo: 'exito' | 'error', mensaje: string } | null} */ (null),
   )
   const [reactivando, setReactivando] = useState(/** @type {string | null} */ (null))
+  const [cambiandoRazon, setCambiandoRazon] = useState(/** @type {string | null} */ (null))
 
   // Las fincas y las razones sociales no dependen entre sí: se piden en paralelo. Al recargar
   // después de un cambio se conserva lo que ya se ve hasta que llegue lo nuevo.
@@ -202,6 +288,30 @@ export default function Fincas() {
     }
   }
 
+  async function guardarRazon(/** @type {string} */ nombre) {
+    const razon = dialogo?.tipo === 'razon' ? dialogo.razon : null
+    if (razon) {
+      await vigilarPermiso(() => actualizarRazonSocial(razon.id, { nombre }))
+      hecho('Razón social renombrada.')
+    } else {
+      await vigilarPermiso(() => crearRazonSocial(nombre))
+      hecho('Razón social creada.')
+    }
+  }
+
+  async function cambiarEstadoDeRazon(/** @type {RazonSocial} */ razon) {
+    setCambiandoRazon(razon.id)
+    setAviso(null)
+    try {
+      await vigilarPermiso(() => actualizarRazonSocial(razon.id, { activo: !razon.activo }))
+      hecho(razon.activo ? 'Razón social desactivada.' : 'Razón social reactivada.')
+    } catch (error) {
+      setAviso({ tipo: 'error', mensaje: traducirError(error).mensaje })
+    } finally {
+      setCambiandoRazon(null)
+    }
+  }
+
   const { fincas, razones, fallo } = datos
   const cargando = !datos.cargados && !fallo
   const buscada = sinTildes(busqueda)
@@ -252,7 +362,11 @@ export default function Fincas() {
           alCambiar={filtrar(setRazonId)}
           opciones={[
             { valor: '', nombre: 'Razón social: Todas' },
-            ...razones.map((razon) => ({ valor: razon.id, nombre: razon.nombre })),
+            // También las inactivas: sus fincas siguen en la lista.
+            ...razones.map((razon) => ({
+              valor: razon.id,
+              nombre: razon.activo ? razon.nombre : `${razon.nombre} (inactiva)`,
+            })),
           ]}
         />
         <Filtro
@@ -368,6 +482,16 @@ export default function Fincas() {
         />
       ) : null}
 
+      {datos.cargados ? (
+        <RazonesSociales
+          razones={razones}
+          fincas={fincas}
+          ocupada={cambiandoRazon}
+          alAbrir={(razon) => setDialogo({ tipo: 'razon', razon })}
+          alCambiarEstado={cambiarEstadoDeRazon}
+        />
+      ) : null}
+
       {aviso ? (
         <AvisoTemporal tipo={aviso.tipo} alTerminar={() => setAviso(null)} className={AVISO_SUELTO}>
           {aviso.mensaje}
@@ -377,7 +501,12 @@ export default function Fincas() {
       <DialogoFinca
         abierto={dialogo?.tipo === 'nueva' || dialogo?.tipo === 'editar'}
         finca={dialogo?.tipo === 'editar' ? dialogo.finca : null}
-        razones={razones}
+        // Las activas y, al editar, la de la finca aunque ya no lo esté: el campo no queda vacío.
+        razones={razones.filter(
+          (razon) =>
+            razon.activo ||
+            (dialogo?.tipo === 'editar' && razon.id === dialogo.finca?.razon_social_id),
+        )}
         fincas={fincas}
         alCerrar={cerrarDialogo}
         alGuardar={guardar}
@@ -386,6 +515,13 @@ export default function Fincas() {
         finca={dialogo?.tipo === 'desactivar' ? dialogo.finca : null}
         alCerrar={cerrarDialogo}
         alConfirmar={desactivar}
+      />
+      <DialogoRazonSocial
+        abierto={dialogo?.tipo === 'razon'}
+        razon={dialogo?.tipo === 'razon' ? dialogo.razon : null}
+        razones={razones}
+        alCerrar={cerrarDialogo}
+        alGuardar={guardarRazon}
       />
     </section>
   )

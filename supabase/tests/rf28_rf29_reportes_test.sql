@@ -104,13 +104,23 @@ select throws_ok(
 );
 
 set local request.jwt.claims = '{"sub": "e7000000-0000-4000-8000-000000000002", "role": "authenticated"}';
-select throws_ok(
-  $$ select public.rpt_escalamiento('2001-03-01', '2001-04-30') $$, 'P0001', 'SIN_PERMISO',
-  'RF-28: el aprobador no ve el escalamiento'
+select is(
+  (
+    select array_agg(distinct a.id order by a.id)
+    from (
+      select x ->> 'id' as id
+      from jsonb_array_elements(public.rpt_escalamiento('2001-03-01', '2001-04-30') -> 'areas') x
+      union all
+      select x ->> 'area_id'
+      from jsonb_array_elements(public.rpt_escalamiento('2001-03-01', '2001-04-30') -> 'novedades') x
+    ) a
+  ),
+  array['e7000000-0000-4000-8000-0000000000b1'],
+  'RF-28 (cambio 38): el aprobador ve el escalamiento solo de su área'
 );
-select throws_ok(
-  $$ select public.rpt_recurrencia('2001-06-01', '2001-07-31') $$, 'P0001', 'SIN_PERMISO',
-  'RF-29: el aprobador no ve la recurrencia'
+select lives_ok(
+  $$ select public.rpt_recurrencia('2001-06-01', '2001-07-31') $$,
+  'RF-29 (cambio 38): el aprobador ve la recurrencia (la RLS la limita a su área)'
 );
 
 set local request.jwt.claims = '{"sub": "e7000000-0000-4000-8000-000000000005", "role": "authenticated"}';
