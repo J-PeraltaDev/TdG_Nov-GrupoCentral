@@ -40,25 +40,25 @@ export const USUARIOS = {
     correo: 'aprobador.mantenimiento@novedades.test',
     nombre: 'Aprobador de prueba Mantenimiento',
     inicio: '/bandeja',
-    menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
+    menu: ['Bandeja', 'Historial', 'Panel', 'Cuenta'],
   },
   aprobadorSistemas: {
     correo: 'aprobador.sistemas@novedades.test',
     nombre: 'Aprobador de prueba Sistemas',
     inicio: '/bandeja',
-    menu: ['Bandeja', 'Historial', 'Avisos', 'Cuenta'],
+    menu: ['Bandeja', 'Historial', 'Panel', 'Cuenta'],
   },
   director: {
     correo: 'director@novedades.test',
     nombre: 'Director de prueba',
     inicio: '/escaladas',
-    menu: ['Escaladas', 'Historial', 'Panel', 'Avisos'],
+    menu: ['Escaladas', 'Historial', 'Panel', 'Cuenta'],
   },
   administrador: {
     correo: 'administrador@novedades.test',
     nombre: 'Administrador de prueba',
     inicio: '/panel',
-    menu: ['Panel', 'Historial', 'Usuarios', 'Avisos'],
+    menu: ['Panel', 'Historial', 'Usuarios', 'Más'],
   },
   desactivado: { correo: 'desactivado@novedades.test' },
 }
@@ -310,7 +310,7 @@ export async function abrirCuentaEnElTelefono(page) {
   await page
     .getByRole('navigation', { name: 'Principal' })
     .filter({ visible: true })
-    .getByRole('link', { name: /^(Cuenta|Más)/ })
+    .getByRole('link', { name: /^(Cuenta|Más)(,|$)/ })
     .click({ timeout: 20_000 })
   await page.waitForURL('**/cuenta')
 }

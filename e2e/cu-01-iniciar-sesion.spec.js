@@ -43,9 +43,12 @@ test.describe('CU-01 · Iniciar y cerrar sesión', () => {
         const usuario = await ingresarPorElFormulario(page, rol)
 
         await expect(page).toHaveURL(new RegExp(`${usuario.inicio}$`))
-        // En el escritorio la cuenta va en la barra superior, no en el menú lateral.
+        // En el escritorio la cuenta («Más» del administrador) va en la barra superior, no en el
+        // menú lateral; los avisos, en los dos formatos (en el teléfono, con la campana).
         const escritorio = page.viewportSize().width >= 1024
-        const opciones = usuario.menu.filter((opcion) => !(escritorio && opcion === 'Cuenta'))
+        const opciones = usuario.menu.filter(
+          (opcion) => !(escritorio && (opcion === 'Cuenta' || opcion === 'Más')),
+        )
         const menu = menuVisible(page)
         for (const opcion of opciones) {
           await expect(menu.getByRole('link', { name: opcion })).toBeVisible()
