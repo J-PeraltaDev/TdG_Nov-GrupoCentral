@@ -194,10 +194,12 @@ export default function MisNovedades() {
         </div>
       ) : null}
 
+      {/* El margen negativo va en la fila y no en cada botón: si los botones de 48 px se salen
+          de ella, `overflow-x-auto` pinta una barra vertical que corre las pastillas. */}
       <div
         role="group"
         aria-label="Filtrar por estado"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:px-0"
+        className="-mx-4 -my-[7px] flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:px-0"
       >
         {PESTANAS.map((opcion) => {
           const elegida = opcion.id === pestana.id
@@ -212,7 +214,7 @@ export default function MisNovedades() {
               type="button"
               aria-pressed={elegida}
               onClick={() => setPestana(opcion)}
-              className="group -my-[7px] flex min-h-12 flex-none cursor-pointer items-center outline-none"
+              className="group flex min-h-12 flex-none cursor-pointer items-center outline-none"
             >
               <span
                 className={`rounded-full px-[13px] py-[7px] whitespace-nowrap inset-ring group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primario ${
