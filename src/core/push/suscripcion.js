@@ -48,9 +48,44 @@ export async function estadoDelPush() {
   return suscripcion && Notification.permission === 'granted' ? 'activadas' : 'desactivadas'
 }
 
-/** @param {PushManager} manager */
-const suscribir = (manager) =>
-  manager.subscribe({ userVisibleOnly: true, applicationServerKey: deBase64Url(clavePublica()) })
+/**
+ * El texto para la persona cuando activar falla: el de Brave dice qué ajuste encender (cambio
+ * 43); cualquier otro fallo, el genérico de cada pantalla.
+ *
+ * @param {unknown} error
+ * @param {string} generico
+ */
+export const textoDelFallo = (error, generico) =>
+  /** @type {any} */ (error)?.name === 'ServicioPushApagado'
+    ? /** @type {Error} */ (error).message
+    : generico
+
+/**
+ * Suscribe el navegador. Brave de escritorio apaga por omisión el servicio push de Google y ahí
+ * `subscribe` falla con AbortError («push service error»): Chrome, con el mismo código, funciona.
+ * En Brave para Android ese ajuste no existe, así que allí queda el mensaje genérico.
+ *
+ * @param {PushManager} manager
+ */
+async function suscribir(manager) {
+  try {
+    return await manager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: deBase64Url(clavePublica()),
+    })
+  } catch (error) {
+    const esBraveDeEscritorio =
+      /** @type {any} */ (error)?.name === 'AbortError' &&
+      !/Android/i.test(navigator.userAgent) &&
+      (await /** @type {any} */ (navigator).brave?.isBrave?.().catch(() => false))
+    if (!esBraveDeEscritorio) throw error
+    const apagado = new Error(
+      'Brave tiene apagado el servicio de notificaciones. Abre brave://settings/privacy, activa «Usar los servicios de Google para la mensajería push», reinicia el navegador e intenta de nuevo.',
+    )
+    apagado.name = 'ServicioPushApagado'
+    throw apagado
+  }
+}
 
 /**
  * Pide el permiso, suscribe el navegador y guarda la suscripción a nombre del usuario.

@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { borrarSuscripcion, guardarSuscripcion } from '../supabase/repositorios/suscripciones.js'
-import { activarPush, desactivarPush, estadoDelPush, sePuedeActivar } from './suscripcion.js'
+import {
+  activarPush,
+  desactivarPush,
+  estadoDelPush,
+  sePuedeActivar,
+  textoDelFallo,
+} from './suscripcion.js'
 
 vi.mock('../supabase/repositorios/suscripciones.js', () => ({
   guardarSuscripcion: vi.fn(),
@@ -116,6 +122,30 @@ describe('Notificaciones push en el dispositivo (RF-31; decisiones 44 y 45)', ()
       'https://fcm.googleapis.com/fcm/send/nueva-1',
     ])
   })
+
+  it.each([
+    ['Brave de escritorio', 'Windows NT 10.0', true, 'brave://settings/privacy'],
+    ['Brave para Android', 'Android 14', true, 'genérico'],
+    ['Otro navegador', 'Windows NT 10.0', false, 'genérico'],
+  ])(
+    'cambio 43: si el servicio push rechaza la suscripción en %s, el texto lo explica',
+    async (_, sistema, esBrave, texto) => {
+      const { pushManager } = simularNavegador({ permiso: 'granted' })
+      pushManager.subscribe.mockRejectedValue(
+        new DOMException('Registration failed - push service error', 'AbortError'),
+      )
+      vi.stubGlobal('navigator', {
+        ...navigator,
+        userAgent: `Mozilla/5.0 (${sistema}) Chrome/130.0`,
+        brave: esBrave ? { isBrave: async () => true } : undefined,
+      })
+
+      const error = await activarPush('usuario-1').catch((e) => e)
+
+      expect(textoDelFallo(error, 'genérico')).toContain(texto)
+      expect(guardarSuscripcion).not.toHaveBeenCalled()
+    },
+  )
 
   it('RF-31: si guardar falla por la red, no toca la suscripción del navegador y lanza el error', async () => {
     const actual = suscripcionDelNavegador('https://fcm.googleapis.com/fcm/send/actual')

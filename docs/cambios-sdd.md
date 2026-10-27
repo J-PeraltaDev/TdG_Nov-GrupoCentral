@@ -46,6 +46,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
 | 39  | S5     | SDD 6.1.8, Tabla 21 y tipo `accion_auditoria`             | **Cambio:** `reactivar_tipo_falla` para los tipos desactivados; deshace «sin reactivar» del cambio 30, salvo para los fusionados                                      | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
+| 43  | S5     | SDD 5.3.5                                                 | Precisión: en Brave de escritorio, el error de activar las notificaciones dice qué ajuste encender                                                                    | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1325,3 +1326,14 @@ Migración `rf32_reactivar_tipo_falla`.
 **Qué pasa.** El equipo entregó el logo. Va en el ingreso (en lugar del ícono de hoja de Figma),
 en la barra lateral del escritorio, en el favicon y en los íconos de la aplicación instalada (192,
 512, 512 _maskable_ sobre blanco y 180 para iOS), que también usan las notificaciones push.
+
+## 43 · Notificaciones en Brave (S5)
+
+**Sección:** SDD 5.3.5.
+
+**Qué pasa.** Brave de escritorio apaga por omisión el servicio push de Google, y
+`pushManager.subscribe` falla con `AbortError` aunque el permiso esté concedido. No se arregla
+desde la aplicación: la persona debe activar «Usar los servicios de Google para la mensajería
+push» en `brave://settings/privacy` y reiniciar el navegador. La fila de Cuenta y 10-B ahora lo
+dicen así en lugar del error genérico. En Brave para Android ese ajuste no existe, y queda el
+mensaje genérico.
