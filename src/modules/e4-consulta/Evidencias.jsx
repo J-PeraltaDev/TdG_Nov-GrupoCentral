@@ -11,6 +11,7 @@ import iconoError from '../../core/ui/iconos/error.svg'
 import iconoFoto from '../../core/ui/iconos/image.svg'
 import iconoCandado from '../../core/ui/iconos/lock.svg'
 import { formatearCodigo } from '../../core/utils/codigo.js'
+import { VisorDeFotos } from './VisorDeFotos.jsx'
 
 /*
  * Las fotos de una novedad en el detalle (RF-08 / CU-08 y CU-18), para los cuatro roles. Figma:
@@ -22,6 +23,8 @@ import { formatearCodigo } from '../../core/utils/codigo.js'
  *   mientras la finca no la confirma, hasta 3 por solución (cambio 23; Figma no las dibuja).
  *
  * Sin conexión, cada foto es un recuadro gris (09-D, 14-B) y no se puede adjuntar (RF-25).
+ *
+ * Al tocar una miniatura, la foto se abre en el visor, dentro de la aplicación (cambio 41).
  */
 
 const RECUADRO = 'flex size-24 flex-none items-center justify-center rounded-control'
@@ -43,6 +46,7 @@ export function Fotos({ novedad, fotos, deLaSolucion = false, puedeAdjuntar, alA
   const selector = useRef(/** @type {HTMLInputElement | null} */ (null))
   const [subiendo, setSubiendo] = useState(false)
   const [fallo, setFallo] = useState(/** @type {string | null} */ (null))
+  const [vista, setVista] = useState(/** @type {number | null} */ (null))
 
   /** @param {import('react').ChangeEvent<HTMLInputElement>} evento */
   async function alElegir(evento) {
@@ -82,14 +86,17 @@ export function Fotos({ novedad, fotos, deLaSolucion = false, puedeAdjuntar, alA
         {fotos.map((evidencia, i) => (
           <li key={evidencia.id}>
             {evidencia.url ? (
-              // La foto completa, en otra pestaña.
-              <a href={evidencia.url} target="_blank" rel="noopener noreferrer" className="block">
+              <button
+                type="button"
+                onClick={() => setVista(i)}
+                className="block cursor-zoom-in rounded-control"
+              >
                 <img
                   src={evidencia.url}
                   alt={nombre(i)}
                   className={`${RECUADRO} bg-gris-200 object-cover`}
                 />
-              </a>
+              </button>
             ) : (
               <span
                 role="img"
@@ -139,6 +146,13 @@ export function Fotos({ novedad, fotos, deLaSolucion = false, puedeAdjuntar, alA
           {fallo}
         </Aviso>
       ) : null}
+      <VisorDeFotos
+        fotos={fotos}
+        indice={vista}
+        alCambiar={setVista}
+        alCerrar={() => setVista(null)}
+        nombre={nombre}
+      />
     </>
   )
 }

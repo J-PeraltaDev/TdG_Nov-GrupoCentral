@@ -58,15 +58,40 @@ describe('Bloque «Evidencias» del detalle (RF-08 / CU-08 y CU-18)', () => {
     enLinea?.mockRestore()
   })
 
-  it('RF-08 / CU-18: muestra cada foto, con su texto alternativo, y abre la foto completa', () => {
+  it('RF-08 / CU-18: muestra cada foto, con su texto alternativo', () => {
     abrir({ puedeAdjuntar: false, rol: 'aprobador' })
 
     const region = within(screen.getByRole('region', { name: 'Evidencias' }))
     const foto = region.getByRole('img', { name: 'Foto 1 de NOV-0145' })
     expect(foto).toHaveAttribute('src', 'https://firmada/1')
-    expect(foto.closest('a')).toHaveAttribute('href', 'https://firmada/1')
     expect(region.getByRole('img', { name: 'Foto 2 de NOV-0145' })).toBeVisible()
     expect(region.queryByRole('button', { name: 'Adjuntar foto' })).not.toBeInTheDocument()
+    // La URL firmada no se abre en otra pestaña (cambio 41).
+    expect(region.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('cambio 41: la foto se abre en el visor, que pasa a la siguiente y amplía', async () => {
+    abrir({ puedeAdjuntar: false, rol: 'aprobador' })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Foto 1 de NOV-0145' }))
+
+    const visor = within(screen.getByRole('dialog', { name: 'Foto 1 de NOV-0145' }))
+    expect(visor.getByText('Foto 1 de 2')).toBeVisible()
+
+    // Da la vuelta: antes de la primera está la última.
+    await userEvent.click(visor.getByRole('button', { name: 'Foto anterior' }))
+    const otra = within(screen.getByRole('dialog', { name: 'Foto 2 de NOV-0145' }))
+    expect(otra.getByRole('img', { name: 'Foto 2 de NOV-0145' })).toHaveAttribute(
+      'src',
+      'https://firmada/2',
+    )
+
+    const ampliar = otra.getByRole('button', { name: 'Ampliar' })
+    await userEvent.click(ampliar)
+    expect(ampliar).toHaveAttribute('aria-pressed', 'true')
+
+    await userEvent.click(otra.getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('RF-08 / CU-08: el reportante adjunta otra foto: se reduce, se sube a su nombre y se piden de nuevo', async () => {

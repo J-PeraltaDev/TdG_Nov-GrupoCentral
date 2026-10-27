@@ -45,6 +45,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
 | 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
 | 39  | S5     | SDD 6.1.8, Tabla 21 y tipo `accion_auditoria`             | **Cambio:** `reactivar_tipo_falla` para los tipos desactivados; deshace «sin reactivar» del cambio 30, salvo para los fusionados                                      | Propuesto |
+| 41  | S5     | SDD 6.1.7 y 5.2.5                                         | Complemento: las fotos se abren en un visor dentro de la aplicación, no en otra pestaña con la URL firmada                                                            | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 | 43  | S5     | SDD 5.3.5                                                 | Precisión: en Brave de escritorio, el error de activar las notificaciones dice qué ajuste encender                                                                    | Propuesto |
 
@@ -1317,6 +1318,16 @@ Migración `rf32_reactivar_tipo_falla`.
 **Texto propuesto (Tabla 21, fila nueva):**
 
 > `reactivar_tipo_falla` · `p_tipo_id` · Administrador
+
+## 41 · Visor de fotos (S5)
+
+**Sección:** SDD 6.1.7 y 5.2.5 (bloque «Evidencias»).
+
+**Qué pasa.** Tocar una foto abría su URL firmada en otra pestaña, con el token a la vista en la
+barra de direcciones. Ese token no es la clave de la API: es una firma que vale 5 minutos y solo
+para ese archivo. Aun así, la foto ahora se abre en un visor dentro de la aplicación, a toda la
+pantalla, con «anterior», «siguiente» (también con las flechas del teclado) y zoom (botón, toque
+en la foto o pellizco en el teléfono). La foto se sigue cargando con su URL firmada.
 
 ## 42 · El logo de Grupo Central (S5)
 
