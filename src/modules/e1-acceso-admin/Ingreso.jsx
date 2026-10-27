@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Cargando } from '../../app/Cargando.jsx'
+import logo from '../../assets/logo-grupo-central.webp'
 import { useEnLinea } from '../../core/conexion/useEnLinea.js'
 import { useSesion } from '../../core/sesion/ContextoSesion.js'
 import { rutaDeInicio } from '../../core/sesion/roles.js'
@@ -8,10 +9,8 @@ import { Aviso } from '../../core/ui/Aviso.jsx'
 import { Boton } from '../../core/ui/Boton.jsx'
 import { BotonVerContrasena } from '../../core/ui/BotonVerContrasena.jsx'
 import { CampoTexto } from '../../core/ui/CampoTexto.jsx'
-import { Icono } from '../../core/ui/Icono.jsx'
 import iconoListo from '../../core/ui/iconos/check_circle.svg'
 import iconoSinConexion from '../../core/ui/iconos/cloud_off.svg'
-import iconoMarca from '../../core/ui/iconos/eco.svg'
 import iconoError from '../../core/ui/iconos/error.svg'
 import iconoCandado from '../../core/ui/iconos/lock.svg'
 import iconoCorreo from '../../core/ui/iconos/mail.svg'
@@ -68,9 +67,9 @@ export function Ingreso() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[26rem] flex-col gap-6 px-4 pt-10 pb-6">
       <header className="flex flex-col items-center gap-3 text-center">
-        <span className="flex size-16 items-center justify-center rounded-[18px] bg-primario text-sobre-primario">
-          <Icono src={iconoMarca} tamano={36} />
-        </span>
+        {/* El logo de Grupo Central en lugar del ícono de Figma (cambio 42). El título ya lo
+            nombra: para el lector de pantalla es un adorno. */}
+        <img src={logo} alt="" width={202} height={256} className="h-24 w-auto" />
         <h1 className="text-titulo text-texto">Novedades · Grupo Central</h1>
         <p className="text-cuerpo text-texto-secundario">
           Reporta y sigue las novedades de tu finca

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import logo from '../assets/logo-grupo-central.webp'
 import { vigilarPendientes } from '../core/offline/pendientes.js'
 import { useSincronizacionAutomatica } from '../core/offline/sincronizador.js'
 import { useSesion } from '../core/sesion/ContextoSesion.js'
 import { descripcionDelPerfil, iniciales, rutaDeOrigen } from '../core/sesion/roles.js'
 import { AnuncioDeConexion, Conexion } from '../core/ui/Conexion.jsx'
 import { Icono } from '../core/ui/Icono.jsx'
-import iconoMarca from '../core/ui/iconos/eco.svg'
 import iconoSalir from '../core/ui/iconos/logout.svg'
 import iconoAvisos from '../core/ui/iconos/notifications.svg'
 import { BuscadorPorCodigo } from './BuscadorPorCodigo.jsx'
@@ -157,9 +157,7 @@ function BarraLateral({ perfil, items, insignias, origen, alSalir }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col gap-1 border-r border-borde bg-superficie px-4 py-6 lg:flex">
       <div className="flex items-center gap-2.5 px-2 pb-5">
-        <span className="flex size-9 items-center justify-center rounded-control bg-primario text-sobre-primario">
-          <Icono src={iconoMarca} tamano={22} />
-        </span>
+        <img src={logo} alt="" width={202} height={256} className="h-11 w-auto flex-none" />
         <p className="flex flex-col">
           <span className="text-cuerpo-fuerte text-texto">Novedades</span>
           <span className="text-auxiliar text-texto-secundario">Grupo Central</span>

@@ -41,6 +41,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 33  | S5     | SDD 6.1.6, 5.3.4, 5.3.5 y 4.2.10                          | Precisión: webhook propio con `pg_net` y Vault, el contenido que envía, el encabezado secreto, `verify_jwt = false`, cifrado con Web Crypto y `TTL`                   | Propuesto |
 | 34  | S5     | SDD 5.3.5 y 6.1.6                                         | Precisión: dónde se ofrece 10-B, el control de Cuenta, el cierre de sesión y el contenido del push sin la descripción (RNF-18)                                        | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
+| 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1248,3 +1249,12 @@ Sprint 5, decisiones 44 a 47):
 **Qué pasa.** Mientras no existía el panel, el administrador entraba a «Usuarios». Desde el PR 4
 del Sprint 5 entra a `/panel`, como dice la Tabla 10 (plan del Sprint 5, decisión 28). No hay
 texto que proponer: la Tabla 10 ya dice «23 Panel de reportes».
+
+## 42 · El logo de Grupo Central (S5)
+
+**Sección:** SDD 5.2 («Sistema de diseño»). Resuelve el punto 5 de `decisiones-pendientes.md`
+(ícono de la aplicación).
+
+**Qué pasa.** El equipo entregó el logo. Va en el ingreso (en lugar del ícono de hoja de Figma),
+en la barra lateral del escritorio, en el favicon y en los íconos de la aplicación instalada (192,
+512, 512 _maskable_ sobre blanco y 180 para iOS), que también usan las notificaciones push.
