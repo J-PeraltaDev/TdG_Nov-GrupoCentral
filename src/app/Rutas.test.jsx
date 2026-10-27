@@ -170,7 +170,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
 
   it.each([
     ['reportante', ['Novedades', 'Registrar', 'Avisos', 'Cuenta']],
-    ['aprobador', ['Bandeja', 'Historial', 'Avisos']],
+    ['aprobador', ['Bandeja', 'Historial', 'Panel de reportes', 'Avisos']],
     ['director', ['Escaladas', 'Historial', 'Panel de reportes', 'Avisos']],
     [
       'administrador',
@@ -192,7 +192,7 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
 
   it.each([
     ['reportante', ['Novedades', 'Registrar', 'Avisos', 'Cuenta']],
-    ['aprobador', ['Bandeja', 'Historial', 'Cuenta']],
+    ['aprobador', ['Bandeja', 'Historial', 'Panel', 'Cuenta']],
     ['director', ['Escaladas', 'Historial', 'Panel', 'Cuenta']],
     ['administrador', ['Panel', 'Historial', 'Usuarios', 'Más']],
   ])('en el teléfono la barra inferior del %s tiene cuatro opciones', async (rol, opciones) => {
@@ -210,7 +210,6 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     ['reportante', '/bandeja', 'Mis novedades'],
     ['reportante', '/usuarios', 'Mis novedades'],
     ['aprobador', '/registrar', 'Bandeja · Mantenimiento'],
-    ['aprobador', '/panel', 'Bandeja · Mantenimiento'],
     ['director', '/usuarios', 'Novedades escaladas'],
     ['reportante', '/fincas', 'Mis novedades'],
     ['aprobador', '/fincas', 'Bandeja · Mantenimiento'],
@@ -431,7 +430,12 @@ describe('Rutas y guardián de rol (RF-01 / CU-01, SDD 6.1.11)', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Bandeja · Mantenimiento' }),
     ).toBeVisible()
-    expect(await menuDelEscritorio()).toEqual(['Bandeja', 'Historial', 'Avisos'])
+    expect(await menuDelEscritorio()).toEqual([
+      'Bandeja',
+      'Historial',
+      'Panel de reportes',
+      'Avisos',
+    ])
   })
 
   it('RF-03: si le cambian la finca, vuelve a su inicio y las listas se piden de nuevo', async () => {

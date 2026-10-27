@@ -48,9 +48,11 @@ export const MENU = {
     AVISOS,
     CUENTA,
   ],
+  // El panel del aprobador es el de su área (cambio 38).
   [ROL.APROBADOR_AREA]: [
     { ruta: '/bandeja', etiqueta: 'Bandeja', icono: iconoBandeja },
     HISTORIAL,
+    PANEL,
     AVISOS_EN_LA_CAMPANA,
     CUENTA_DEL_TELEFONO,
   ],

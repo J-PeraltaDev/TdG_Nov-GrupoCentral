@@ -43,6 +43,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
 | 36  | S5     | SDD 5.2.5 (pantalla 04)                                   | Complemento: insignia en «Rechazadas» con las rechazadas que el reportante no ha visto (sus avisos de rechazo sin leer)                                               | Propuesto |
 | 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
+| 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1283,6 +1284,21 @@ escritorio no cambia nada.
 **Texto propuesto (Tabla 10, columna «Teléfono»):** aprobador: Bandeja, Historial, Panel y Cuenta;
 director: Escaladas, Historial, Panel y Cuenta; administrador: Panel, Historial, Usuarios y Más.
 Los avisos, en la campana de la barra superior.
+
+## 38 · El panel de reportes para el aprobador, solo de su área (S5)
+
+**Sección:** SRS RF-26 a RF-29 (actores); SDD 6.1.9, Tabla 10 y Tabla 21 (columna «Rol»).
+
+**Qué pasa.** Lo pidió el equipo: el aprobador de Mantenimiento o de Sistemas ve los cuatro
+indicadores de su área. Las cuatro `rpt_*` admiten el rol 2; siguen siendo `security invoker`,
+así que la RLS de `novedad` ya lo limita a su área, y además cada consulta filtra por
+`private.fn_area()` y la lista de áreas trae solo la suya. Un aprobador sin área recibe
+`SIN_PERMISO`. Como en todo el sistema, una novedad cuenta para el área que la tiene hoy: si se
+reasignó, el área anterior deja de verla. Migración `rf26_panel_del_aprobador`.
+
+**Texto propuesto (6.1.9, al final):**
+
+> El aprobador de área consulta los mismos indicadores, limitados a las novedades de su área.
 
 ## 42 · El logo de Grupo Central (S5)
 
