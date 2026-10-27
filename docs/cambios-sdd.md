@@ -44,6 +44,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 36  | S5     | SDD 5.2.5 (pantalla 04)                                   | Complemento: insignia en «Rechazadas» con las rechazadas que el reportante no ha visto (sus avisos de rechazo sin leer)                                               | Propuesto |
 | 37  | S5     | SDD 5.2 («Navegación por rol») y Tabla 10                 | **Cambio:** «Cuenta» en la barra inferior de todos los roles («Más» para el administrador) y los avisos en la campana. Reemplaza el cambio 16                         | Propuesto |
 | 38  | S5     | SRS RF-26 a RF-29; SDD 6.1.9 y Tablas 10 y 21             | **Cambio:** el aprobador de área ve el panel de reportes, solo de su área                                                                                             | Propuesto |
+| 39  | S5     | SDD 6.1.8, Tabla 21 y tipo `accion_auditoria`             | **Cambio:** `reactivar_tipo_falla` para los tipos desactivados; deshace «sin reactivar» del cambio 30, salvo para los fusionados                                      | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1299,6 +1300,22 @@ reasignó, el área anterior deja de verla. Migración `rf26_panel_del_aprobador
 **Texto propuesto (6.1.9, al final):**
 
 > El aprobador de área consulta los mismos indicadores, limitados a las novedades de su área.
+
+## 39 · Reactivar un tipo de falla desactivado (S5)
+
+**Sección:** SDD 6.1.8, Tabla 21 y el tipo `accion_auditoria`. Corrige en parte el cambio 30.
+
+**Qué pasa.** El cambio 30 decía «sin reactivar» (decisión 51 del plan del Sprint 5). El equipo
+pidió poder deshacer una desactivación. `reactivar_tipo_falla(p_tipo_id)` (administrador,
+`security definer`) vuelve a activar un tipo desactivado y lo audita con la acción nueva
+`reactivar`. Un tipo fusionado no se reactiva (`TIPO_FALLA_INVALIDO`): sus novedades ya son del
+destino y `resolver_tipo_falla` sigue la cadena de fusiones. En la pantalla 31, un tipo
+inactivo muestra «Reactivar» en lugar de las tres acciones deshabilitadas; no pide confirmación.
+Migración `rf32_reactivar_tipo_falla`.
+
+**Texto propuesto (Tabla 21, fila nueva):**
+
+> `reactivar_tipo_falla` · `p_tipo_id` · Administrador
 
 ## 42 · El logo de Grupo Central (S5)
 

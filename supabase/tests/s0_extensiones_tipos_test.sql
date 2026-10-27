@@ -60,8 +60,8 @@ select ok(
 select enum_has_labels(
   'public',
   'accion_auditoria',
-  array['renombrar', 'fusionar', 'desactivar'],
-  'S0: accion_auditoria tiene las tres acciones de RF-32'
+  array['renombrar', 'fusionar', 'desactivar', 'reactivar'],
+  'S0: accion_auditoria tiene las acciones de RF-32, con reactivar (cambio 39)'
 );
 
 select * from finish();

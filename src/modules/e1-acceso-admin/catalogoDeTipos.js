@@ -12,6 +12,7 @@ export const NOMBRE_DE_ACCION = {
   renombrar: 'Renombrar',
   fusionar: 'Fusionar',
   desactivar: 'Desactivar',
+  reactivar: 'Reactivar',
 }
 
 /**
@@ -85,7 +86,7 @@ function nombreDespuesDe(tipoId, fecha, tipos, cambios) {
 
 /**
  * La columna «Cambio» de 31: ««internet» → «Conectividad a internet»» en un renombre, el
- * origen y el destino en una fusión y el tipo en una desactivación.
+ * origen y el destino en una fusión y el tipo en una desactivación o una reactivación.
  *
  * @param {CambioDelCatalogo} cambio
  * @param {TipoDelCatalogo[]} tipos
@@ -93,7 +94,7 @@ function nombreDespuesDe(tipoId, fecha, tipos, cambios) {
  */
 export function textoDelCambio(cambio, tipos, cambios) {
   const { accion, tipo_falla_id, tipo_destino_id, valor_anterior, fecha } = cambio
-  if (accion === 'desactivar') return `«${valor_anterior}»`
+  if (accion === 'desactivar' || accion === 'reactivar') return `«${valor_anterior}»`
   const nuevo = nombreDespuesDe(
     accion === 'renombrar' ? tipo_falla_id : (tipo_destino_id ?? ''),
     fecha,

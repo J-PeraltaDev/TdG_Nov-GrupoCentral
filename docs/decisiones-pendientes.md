@@ -479,6 +479,11 @@ ya tienen cuerpo y siguen sin aviso (`security invoker`). `private.tg_notificaci
 `security definer`, pero vive en `private` y es un disparador: tampoco genera aviso. En
 «PROYECTO» se esperan 20 después de #41 (los 15 de antes y las cinco funciones que escriben).
 
+**Al 27 oct 2026 (ajustes de la revisión del Sprint 5):** 22 en «staging», todos _WARN_. El
+nuevo es `reactivar_tipo_falla` (cambio 39), del mismo tipo que las otras funciones que escriben.
+El panel del aprobador (cambio 38) no agrega: los `rpt_*` siguen siendo `security invoker`; las
+políticas nuevas de `razon_social` (cambio 40) tampoco.
+
 ## 17 · Pruebas que necesitan ingresar
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,

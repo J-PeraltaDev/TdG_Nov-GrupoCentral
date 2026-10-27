@@ -947,6 +947,23 @@ export type Database = {
         }[]
       }
       marcar_avisos_leidos: { Args: { p_ids?: string[] }; Returns: number }
+      reactivar_tipo_falla: {
+        Args: { p_tipo_id: string }
+        Returns: {
+          activo: boolean
+          creado_en: string
+          creado_por: string
+          id: string
+          nombre: string
+          nombre_normalizado: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tipo_falla"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reasignar_novedad: {
         Args: {
           p_area_destino_id: string
@@ -1161,7 +1178,7 @@ export type Database = {
       }
     }
     Enums: {
-      accion_auditoria: "renombrar" | "fusionar" | "desactivar"
+      accion_auditoria: "renombrar" | "fusionar" | "desactivar" | "reactivar"
       estado_novedad:
         | "registrada"
         | "asignada"
@@ -1299,7 +1316,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      accion_auditoria: ["renombrar", "fusionar", "desactivar"],
+      accion_auditoria: ["renombrar", "fusionar", "desactivar", "reactivar"],
       estado_novedad: [
         "registrada",
         "asignada",
