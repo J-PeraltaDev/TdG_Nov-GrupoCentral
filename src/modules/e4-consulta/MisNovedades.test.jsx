@@ -3,6 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { listarPendientes } from '../../core/offline/bd.js'
+import {
+  listarRechazosSinLeer,
+  marcarAvisosLeidos,
+} from '../../core/supabase/repositorios/avisos.js'
 import { contarNovedades, listarNovedades } from '../../core/supabase/repositorios/novedades.js'
 import { pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import MisNovedades from './MisNovedades.jsx'
@@ -11,6 +15,10 @@ vi.mock('../../core/supabase/repositorios/novedades.js', () => ({
   NOVEDADES_POR_PAGINA: 20,
   listarNovedades: vi.fn(),
   contarNovedades: vi.fn(),
+}))
+vi.mock('../../core/supabase/repositorios/avisos.js', () => ({
+  listarRechazosSinLeer: vi.fn(),
+  marcarAvisosLeidos: vi.fn().mockResolvedValue(0),
 }))
 // La cola de pendientes del dispositivo (RF-21): aquí solo importa cómo se ven.
 vi.mock('../../core/offline/bd.js', async (original) => ({
@@ -71,6 +79,7 @@ describe('Pantalla 04 · Mis novedades (RF-18)', () => {
   beforeEach(() => {
     vi.mocked(listarNovedades).mockReset()
     vi.mocked(contarNovedades).mockReset()
+    vi.mocked(listarRechazosSinLeer).mockResolvedValue([])
   })
 
   it('RF-18: lista las novedades abiertas con código, estado, prioridad, área y antigüedad', async () => {
@@ -152,6 +161,25 @@ describe('Pantalla 04 · Mis novedades (RF-18)', () => {
 
     expect(await screen.findByText('No hay novedades en esta lista.')).toBeVisible()
     expect(listarNovedades).toHaveBeenLastCalledWith({ estados: ['cerrada'] })
+  })
+
+  it('RF-18: «Rechazadas» cuenta las rechazadas sin ver y abrirla las marca vistas', async () => {
+    conNovedades()
+    vi.mocked(listarRechazosSinLeer).mockResolvedValue([
+      { id: 'aviso-1', novedad_id: 'n-130' },
+      { id: 'aviso-2', novedad_id: 'n-131' },
+    ])
+    abrir()
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Rechazadas, 2 rechazadas sin ver' }),
+    )
+
+    expect(marcarAvisosLeidos).toHaveBeenCalledWith(['aviso-1', 'aviso-2'])
+    expect(await screen.findByRole('button', { name: 'Rechazadas' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
   })
 
   it('RF-18: el filtro queda en la dirección y se respeta al abrirla', async () => {
@@ -236,6 +264,7 @@ describe('Pantalla 04-B · Consulta sin conexión (RF-24 / CU-24)', () => {
   beforeEach(() => {
     vi.mocked(listarNovedades).mockReset()
     vi.mocked(contarNovedades).mockReset()
+    vi.mocked(listarRechazosSinLeer).mockResolvedValue([])
     vi.mocked(listarPendientes).mockResolvedValue([])
   })
 

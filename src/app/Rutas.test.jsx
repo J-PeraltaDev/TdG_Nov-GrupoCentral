@@ -115,6 +115,7 @@ vi.mock('../core/supabase/repositorios/avisos.js', () => ({
   AVISOS_POR_PAGINA: 20,
   listarAvisos: vi.fn().mockResolvedValue({ avisos: [], total: 0 }),
   contarAvisosSinLeer: vi.fn().mockResolvedValue(0),
+  listarRechazosSinLeer: vi.fn().mockResolvedValue([]),
   marcarAvisosLeidos: vi.fn(),
 }))
 vi.mock('../core/supabase/repositorios/suscripciones.js', () => ({

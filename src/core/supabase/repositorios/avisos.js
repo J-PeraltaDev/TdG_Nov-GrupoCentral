@@ -66,6 +66,22 @@ export async function contarAvisosSinLeer() {
 }
 
 /**
+ * Los avisos de rechazo sin leer del usuario: la insignia de «Rechazadas» en Mis novedades. El
+ * rechazo es final, así que cada uno es de una novedad que sigue rechazada.
+ *
+ * @returns {Promise<{ id: string, novedad_id: string }[]>}
+ */
+export async function listarRechazosSinLeer() {
+  const { data, error } = await supabase
+    .from('notificacion')
+    .select('id, novedad_id')
+    .eq('leida', false)
+    .eq('estado_nuevo', 'rechazada')
+  if (error) throw error
+  return data
+}
+
+/**
  * Marca como leídos esos avisos, o todos los del usuario si `ids` es nulo, y devuelve cuántos.
  *
  * @param {string[] | null} [ids]

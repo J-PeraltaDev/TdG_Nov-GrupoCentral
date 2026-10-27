@@ -2,7 +2,8 @@
  * Insignias del menú y de la campana: cuántas cosas esperan a la persona en una pantalla. Los
  * avisos sin leer (RF-30), las novedades por atender del aprobador y, para el administrador, las
  * solicitudes de recuperación: una solicitud no genera un aviso, porque no es de una novedad, así
- * que la insignia es la única señal de que llegó.
+ * que la insignia es la única señal de que llegó. También la pastilla «Rechazadas» del
+ * reportante, con las rechazadas que no ha visto (cambio 36).
  */
 
 /** Qué cuenta la insignia de cada pantalla, en singular y en plural, para el lector de pantalla. */
@@ -10,6 +11,7 @@ const TEXTOS = {
   '/avisos': ['aviso sin leer', 'avisos sin leer'],
   '/bandeja': ['novedad por atender', 'novedades por atender'],
   '/recuperacion': ['solicitud pendiente', 'solicitudes pendientes'],
+  '/novedades?lista=rechazadas': ['rechazada sin ver', 'rechazadas sin ver'],
 }
 
 /**

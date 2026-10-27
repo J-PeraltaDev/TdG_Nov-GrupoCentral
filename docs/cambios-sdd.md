@@ -41,6 +41,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 33  | S5     | SDD 6.1.6, 5.3.4, 5.3.5 y 4.2.10                          | Precisión: webhook propio con `pg_net` y Vault, el contenido que envía, el encabezado secreto, `verify_jwt = false`, cifrado con Web Crypto y `TTL`                   | Propuesto |
 | 34  | S5     | SDD 5.3.5 y 6.1.6                                         | Precisión: dónde se ofrece 10-B, el control de Cuenta, el cierre de sesión y el contenido del push sin la descripción (RNF-18)                                        | Propuesto |
 | 35  | S5     | SDD 5.2, Tabla 10                                         | Cierra el temporal del cambio 14: el administrador entra a `/panel`                                                                                                   | Propuesto |
+| 36  | S5     | SDD 5.2.5 (pantalla 04)                                   | Complemento: insignia en «Rechazadas» con las rechazadas que el reportante no ha visto (sus avisos de rechazo sin leer)                                               | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
@@ -1249,6 +1250,21 @@ Sprint 5, decisiones 44 a 47):
 **Qué pasa.** Mientras no existía el panel, el administrador entraba a «Usuarios». Desde el PR 4
 del Sprint 5 entra a `/panel`, como dice la Tabla 10 (plan del Sprint 5, decisión 28). No hay
 texto que proponer: la Tabla 10 ya dice «23 Panel de reportes».
+
+## 36 · Las rechazadas que el reportante no ha visto (S5)
+
+**Sección:** SDD 5.2.5, pantalla 04 · Mis novedades.
+
+**Qué pasa.** Lo pidió el equipo en la revisión del Sprint 5. La pastilla «Rechazadas» lleva una
+insignia, como la de los avisos, con cuántas novedades rechazadas no ha visto el reportante. No
+hace falta guardar nada nuevo: cada rechazo ya le crea un aviso (Tabla 33), así que «sin ver» es
+«con su aviso de rechazo sin leer». Abrir esa lista marca esos avisos como leídos con
+`marcar_avisos_leidos`; leerlos en «Avisos» también la apaga. Vale en todos los dispositivos.
+
+**Texto propuesto (5.2.5, pantalla 04, al final):**
+
+> La pestaña «Rechazadas» muestra cuántas novedades rechazadas tienen su aviso sin leer; al
+> abrirla, esos avisos quedan leídos.
 
 ## 42 · El logo de Grupo Central (S5)
 
