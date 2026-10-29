@@ -111,8 +111,9 @@ test.describe('CU-10 · Tomar novedad para atención', () => {
     await expect(primera.getByText('Novedad tomada. Ya está En atención.')).toBeVisible()
 
     // La segunda llega tarde: el servidor responde TRANSICION_INVALIDA y el detalle se recarga.
+    // El aviso no trae «Reintentar», así que se cierra con «Cerrar» (cambio 47).
     await segunda.getByRole('button', { name: 'Tomar para atención' }).click()
-    await expect(segunda.getByRole('alert')).toHaveText('La novedad cambió de estado.')
+    await expect(segunda.getByRole('alert')).toHaveText('La novedad cambió de estado.Cerrar')
     await expect(
       segunda.getByRole('group', { name: 'Datos de la novedad' }).getByText('En atención'),
     ).toBeVisible()
