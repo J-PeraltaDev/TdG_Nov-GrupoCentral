@@ -8,7 +8,8 @@ import { vi } from 'vitest'
  */
 export function simularPantalla(tipo) {
   vi.stubGlobal('matchMedia', (consulta) => ({
-    matches: tipo === 'escritorio',
+    // Solo el ancho: otras consultas, como la de la app instalada (`display-mode`), no coinciden.
+    matches: tipo === 'escritorio' && consulta.includes('min-width'),
     media: consulta,
     addEventListener: () => {},
     removeEventListener: () => {},

@@ -49,6 +49,10 @@ actualicen los documentos (lo exige la Definition of Done).
 | 41  | S5     | SDD 6.1.7 y 5.2.5                                         | Complemento: las fotos se abren en un visor dentro de la aplicación, no en otra pestaña con la URL firmada                                                            | Propuesto |
 | 42  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: el logo de Grupo Central en el ingreso, la barra lateral, el favicon y los íconos de la aplicación                                                       | Propuesto |
 | 43  | S5     | SDD 5.3.5                                                 | Precisión: en Brave de escritorio, el error de activar las notificaciones dice qué ajuste encender                                                                    | Propuesto |
+| 44  | S5     | SDD 7.3 (Tabla 39)                                        | Complemento: riesgos de seguridad que la v1.0 acepta (código de recuperación, equipo compartido, subidas sin fila, CORS y contraseñas filtradas)                      | Propuesto |
+| 45  | S5     | Figma 01 (invitación a instalar) y SRS RNF-03             | Precisión: en el escritorio, la invitación a instalar dice «computador» en lugar de «teléfono»                                                                        | Propuesto |
+| 46  | S5     | Figma 03 (1:672) y CU-02, paso 8                          | **Cambio:** el correo que llega de la pantalla 02 se muestra en solo lectura; si no llega, se escribe como antes                                                      | Propuesto |
+| 47  | S5     | SDD 5.2 («Sistema de diseño»): aviso temporal             | Complemento: el aviso de error que no trae acción muestra «Cerrar» (punto 52 de las decisiones)                                                                       | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1365,3 +1369,82 @@ desde la aplicación: la persona debe activar «Usar los servicios de Google par
 push» en `brave://settings/privacy` y reiniciar el navegador. La fila de Cuenta y 10-B ahora lo
 dicen así en lugar del error genérico. En Brave para Android ese ajuste no existe, y queda el
 mensaje genérico.
+
+## 44 · Riesgos de seguridad que la v1.0 acepta (S5)
+
+**Sección:** SDD 7.3, Tabla 39 (filas nuevas).
+
+**Qué pasa.** La auditoría externa de la v1.0 (punto 50 de `decisiones-pendientes.md`) señaló
+riesgos que el diseño acepta sin nombrarlos. No cambian nada del sistema, pero conviene que el SDD
+los diga y que se validen:
+
+- **Intentos del código de recuperación.** `restablecer-contrasena` no exige sesión: quien conozca
+  el correo de alguien con un código vigente puede gastarle los cinco intentos. No bloquea a la
+  persona: esa solicitud deja de estar abierta, se pide otra y el administrador genera un código
+  nuevo. No hay límite por IP: la función vive en Supabase, fuera de una zona de Cloudflare del
+  equipo, y Supabase no limita las Edge Functions; uno propio exigiría una tabla nueva. Con un
+  millón de códigos y cinco intentos, adivinar uno es improbable.
+- **Pendientes en un dispositivo compartido.** La cola `pendientes` se conserva al cerrar sesión
+  (RNF-07) y solo la envía su dueño cuando vuelve a ingresar. Mientras tanto, otra persona en el
+  mismo navegador puede leerla con las herramientas de desarrollo. Se supone que cada reportante
+  usa su propio teléfono.
+- **Subidas sin fila al bucket `evidencias`.** La política de subida cuenta filas de `evidencia`,
+  no archivos: quien suba fotos sin crear su fila no tiene límite (punto 33).
+- **Orígenes de desarrollo en el CORS de producción** (cambio 10). El CORS no protege a las
+  funciones: lo hacen el token y el código temporal.
+- **Contraseñas filtradas.** La comprobación de Supabase Auth es del plan de pago (punto 16 y
+  RNF-15).
+
+**Texto propuesto (Tabla 39, filas nuevas):**
+
+> Intentos del código de recuperación · Cinco por código; un tercero que conozca el correo puede
+> agotarlos, y la persona pide otra solicitud; sin límite por IP · Administradores · 6.1.10
+>
+> Pendientes en un dispositivo compartido · Se conservan al cerrar sesión y solo las envía su
+> dueño; se pueden leer en ese navegador hasta que se sincronizan · Gerente del proyecto · 6.1.5
+>
+> Archivos sin fila en el bucket de evidencias · Se aceptan; nadie los lee sin su fila y se borran
+> desde el panel de Supabase · Asesora y gerente del proyecto · 6.1.7
+>
+> Orígenes de desarrollo en el CORS de producción · Se mantienen para el servidor de desarrollo y
+> las pruebas · Asesora y gerente del proyecto · 5.3.4
+>
+> Contraseñas filtradas · Sin comprobación: es del plan de pago (RNF-15) · Asesora y gerente del
+> proyecto · 6.1.10
+
+## 45 · La invitación a instalar, también en el computador (S5)
+
+**Sección:** Figma 01 (el «Aviso neutro» del ingreso) y SRS RNF-03.
+
+**Qué pasa.** Figma escribe «Instala la app en este teléfono para registrar novedades aunque no
+haya internet», y el aviso salía igual en el computador. RNF-03 pide que la aplicación se pueda
+instalar «en celulares y computadores». Desde `lg`, el ancho del escritorio en toda la interfaz,
+el texto dice «en este computador»; una tableta acostada también lo lee así. El ícono sigue
+siendo `install_mobile`: el de escritorio (`install_desktop`) no está entre los SVG locales.
+
+**En Figma:** la pantalla 01 de escritorio, con «computador».
+
+## 46 · El correo de la pantalla 03, en solo lectura (S5)
+
+**Sección:** Figma 03 (1:672) y CU-02, paso 8.
+
+**Qué pasa.** La pantalla 03 recibía el correo de la 02 en un campo que se podía cambiar. Ahora,
+cuando llega de la 02 («Ingresar código» o «Ya tengo un código» con el correo escrito), se muestra
+en solo lectura, con la caja gris (`CampoTexto` con `readOnly`). Para corregirlo, «Volver» lleva a
+la 02 con el correo puesto. Sigue siendo un campo con `autocomplete="username"`, para que el
+gestor de contraseñas guarde la contraseña nueva con su cuenta. Si se llega sin correo (escribiendo
+la dirección), la persona lo escribe como antes: `restablecer-contrasena` lo necesita.
+
+**En Figma:** la pantalla 03 con el correo en solo lectura.
+
+## 47 · «Cerrar» en el aviso de error sin acción (S5)
+
+**Sección:** SDD 5.2 («Sistema de diseño»): aviso temporal (Figma 3:1276). Resuelve el punto 52
+de `decisiones-pendientes.md`.
+
+**Qué pasa.** El aviso temporal de error se queda hasta que la persona actúa, porque suele traer
+«Reintentar». Cuando no trae acción, ahora muestra «Cerrar», con el mismo estilo: los errores de
+Fincas, Usuarios, Tipos de falla y Recuperación de contraseñas, y los que no son de red en las
+acciones sobre una novedad. El de éxito sigue quitándose solo.
+
+**En Figma:** la variante de error del aviso temporal con «Cerrar».

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AvisoTemporal, DURACION_DEL_AVISO_MS } from './AvisoTemporal.jsx'
@@ -29,6 +29,26 @@ describe('Aviso temporal (Figma 3:1276 y 13-B)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
 
     expect(alPulsar).toHaveBeenCalledOnce()
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+  })
+
+  it('decisión 52: un error sin acción se cierra con «Cerrar»', async () => {
+    const alTerminar = vi.fn()
+    render(
+      <AvisoTemporal tipo="error" alTerminar={alTerminar}>
+        No pudimos reactivar la finca.
+      </AvisoTemporal>,
+    )
+
+    await userEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Cerrar' }))
+
+    expect(alTerminar).toHaveBeenCalledOnce()
+  })
+
+  it('la confirmación no lleva «Cerrar»: se quita sola', () => {
+    render(<AvisoTemporal alTerminar={vi.fn()}>Finca reactivada.</AvisoTemporal>)
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('la confirmación se quita sola cuando cumple su tiempo', () => {

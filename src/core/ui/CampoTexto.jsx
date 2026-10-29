@@ -3,7 +3,8 @@ import { Icono } from './Icono.jsx'
 
 /**
  * Campo de texto con etiqueta (Figma: «Campo» con su «Caja»). El borde va como sombra
- * interior para que el campo mida lo mismo en reposo, con foco y con error.
+ * interior para que el campo mida lo mismo en reposo, con foco y con error. Con `readOnly`, la
+ * caja va gris: se lee, pero no se escribe.
  *
  * @param {object} props
  * @param {string} props.etiqueta
@@ -40,7 +41,9 @@ export function CampoTexto({
         ) : null}
       </label>
       <div
-        className={`flex items-center gap-2 rounded-control bg-superficie px-3.5 py-[13px] ${
+        className={`flex items-center gap-2 rounded-control px-3.5 py-[13px] ${
+          resto.readOnly ? 'bg-gris-100' : 'bg-superficie'
+        } ${
           conError
             ? // El error se sigue viendo con el foco: el foco va como contorno exterior.
               'inset-ring-2 inset-ring-error focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primario'

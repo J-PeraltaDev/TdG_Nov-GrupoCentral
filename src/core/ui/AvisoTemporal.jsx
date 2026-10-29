@@ -17,7 +17,8 @@ export const DURACION_DEL_AVISO_MS = 6000
 /**
  * Aviso temporal (Figma 3:1276 y 13-B): confirma el resultado de una acción sin interrumpir.
  * El de éxito se quita solo; el de error se queda hasta que la persona actúe, porque trae lo
- * que debe hacer («Reintentar»). Nunca se comunica solo con el color: lleva ícono y texto.
+ * que debe hacer («Reintentar») o, si no trae nada, «Cerrar» (decisión 52). Nunca se comunica
+ * solo con el color: lleva ícono y texto.
  *
  * No decide dónde va: quien lo usa lo ubica con `className`.
  *
@@ -25,12 +26,15 @@ export const DURACION_DEL_AVISO_MS = 6000
  * @param {TipoDeAvisoTemporal} [props.tipo]
  * @param {import('react').ReactNode} props.children El mensaje.
  * @param {{ texto: string, alPulsar: () => void }} [props.accion]
- * @param {() => void} [props.alTerminar] Se llama cuando el aviso de éxito cumple su tiempo.
+ * @param {() => void} [props.alTerminar] Se llama cuando el aviso de éxito cumple su tiempo, o
+ *   cuando la persona cierra un error que no trae acción.
  * @param {string} [props.className]
  */
 export function AvisoTemporal({ tipo = 'exito', children, accion, alTerminar, className = '' }) {
   const { fondo, icono } = TIPOS[tipo]
   const seQuitaSolo = tipo === 'exito' && Boolean(alTerminar)
+  const boton =
+    accion ?? (tipo === 'error' && alTerminar ? { texto: 'Cerrar', alPulsar: alTerminar } : null)
 
   useEffect(() => {
     if (!seQuitaSolo) return undefined
@@ -47,13 +51,13 @@ export function AvisoTemporal({ tipo = 'exito', children, accion, alTerminar, cl
     >
       <Icono src={icono} tamano={20} />
       <p className="min-w-0 flex-1 break-words">{children}</p>
-      {accion ? (
+      {boton ? (
         <button
           type="button"
-          onClick={accion.alPulsar}
+          onClick={boton.alPulsar}
           className="relative flex-none cursor-pointer rounded-sm text-etiqueta-fuerte whitespace-nowrap outline-offset-4 outline-sobre-primario after:absolute after:-inset-3.5"
         >
-          {accion.texto}
+          {boton.texto}
         </button>
       ) : null}
     </div>

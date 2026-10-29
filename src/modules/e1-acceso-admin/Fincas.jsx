@@ -414,7 +414,7 @@ export default function Fincas() {
 
       {visibles.length > 0 ? (
         esEscritorio ? (
-          <div className="overflow-clip rounded-xl border border-borde bg-superficie">
+          <div className="overflow-x-auto rounded-xl border border-borde bg-superficie">
             <table className="w-full border-collapse">
               <caption className="sr-only">Fincas</caption>
               <thead className="bg-gris-100">

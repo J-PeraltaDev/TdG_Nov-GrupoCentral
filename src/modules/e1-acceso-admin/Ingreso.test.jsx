@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { simularPantalla } from '../../pruebas/pantalla.js'
 import { PERFILES, pintarConSesion } from '../../pruebas/sesionDePrueba.jsx'
 import { Ingreso } from './Ingreso.jsx'
 
@@ -28,6 +29,7 @@ async function llenarYEnviar(
 describe('Pantalla 01 · Iniciar sesión (RF-01 / CU-01)', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
   })
 
   it('muestra los textos de Figma: marca, campos, botón y recuperación', () => {
@@ -59,6 +61,17 @@ describe('Pantalla 01 · Iniciar sesión (RF-01 / CU-01)', () => {
     expect(
       screen.getByText(
         'Instala la app en este teléfono para registrar novedades aunque no haya internet',
+      ),
+    ).toBeVisible()
+  })
+
+  it('RNF-03: en el escritorio invita a instalarla en el computador', () => {
+    simularPantalla('escritorio')
+    abrir()
+
+    expect(
+      screen.getByText(
+        'Instala la app en este computador para registrar novedades aunque no haya internet',
       ),
     ).toBeVisible()
   })

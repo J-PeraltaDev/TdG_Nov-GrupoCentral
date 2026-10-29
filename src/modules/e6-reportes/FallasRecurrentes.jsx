@@ -243,7 +243,7 @@ function Combinaciones({ datos }) {
               </span>
               <Link
                 to={historial(datos, celda.finca_id, celda.tipo_falla_id)}
-                className="text-auxiliar-fuerte text-primario hover:underline"
+                className="relative text-auxiliar-fuerte text-primario hover:underline after:absolute after:inset-x-0 after:-inset-y-4"
               >
                 Ver novedades{' '}
                 <span className="sr-only">{`de ${celda.finca} · ${celda.tipo_falla}`}</span>

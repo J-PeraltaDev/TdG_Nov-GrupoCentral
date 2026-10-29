@@ -75,6 +75,15 @@ describe('Tokens de diseño (Figma, nodo 1:63)', () => {
     expect(contraste('estado-escalada-texto', 'estado-escalada-fondo')).toBeGreaterThanOrEqual(4.5)
   })
 
+  // Hallazgo de la auditoría de la v1.0: «Mantenimiento» sobre el gris de su etiqueta da 4,28:1.
+  // Como «escalada», se corrige primero en Figma (docs/decisiones-pendientes.md, punto 51).
+  it.fails(
+    'área Mantenimiento: el texto contrasta al menos 4,5:1 con el gris de su etiqueta',
+    () => {
+      expect(contraste('area-mantenimiento', 'gris-100')).toBeGreaterThanOrEqual(4.5)
+    },
+  )
+
   it.each(['critico', 'alto', 'normal', 'bajo'])(
     'prioridad %s: el texto blanco contrasta al menos 4,5:1 con su fondo',
     (prioridad) => {
@@ -96,6 +105,7 @@ describe('Tokens de diseño (Figma, nodo 1:63)', () => {
     ['error', 'error-suave'],
     ['advertencia', 'advertencia-suave'],
     ['info', 'info-suave'],
+    ['area-sistemas', 'gris-100'],
   ])('%s sobre %s contrasta al menos 4,5:1', (texto, fondo) => {
     expect(contraste(texto, fondo)).toBeGreaterThanOrEqual(4.5)
   })
