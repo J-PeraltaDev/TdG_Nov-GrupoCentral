@@ -92,6 +92,40 @@ describe('Pestañas (Figma 3:329 y 3:636)', () => {
     expect(alElegir).toHaveBeenCalledExactlyOnceWith('en_atencion')
   })
 
+  it('las pastillas traen a la vista la elegida, también al pintarse, y las demás variantes no', () => {
+    // jsdom no implementa scrollIntoView.
+    const traer = vi.fn()
+    Element.prototype.scrollIntoView = traer
+    try {
+      const { rerender } = render(
+        <Pestanas
+          etiqueta="Bandeja"
+          pestanas={PESTANAS}
+          elegida="en_espera"
+          alElegir={() => {}}
+          idDelPanel="lista"
+          variante="pastillas"
+        />,
+      )
+      expect(traer).toHaveBeenCalledExactlyOnceWith({ block: 'nearest', inline: 'nearest' })
+      expect(traer.mock.contexts[0]).toBe(screen.getByRole('tab', { name: 'En espera' }))
+
+      rerender(
+        <Pestanas
+          etiqueta="Bandeja"
+          pestanas={PESTANAS}
+          elegida="en_espera"
+          alElegir={() => {}}
+          idDelPanel="lista"
+          variante="segmentada"
+        />,
+      )
+      expect(traer).toHaveBeenCalledOnce()
+    } finally {
+      delete Element.prototype.scrollIntoView
+    }
+  })
+
   it.each(['segmentada', 'subrayada'])(
     'la variante «%s» conserva el mismo comportamiento',
     (variante) => {

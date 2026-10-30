@@ -53,6 +53,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 45  | S5     | Figma 01 (invitación a instalar) y SRS RNF-03             | Precisión: en el escritorio, la invitación a instalar dice «computador» en lugar de «teléfono»                                                                        | Propuesto |
 | 46  | S5     | Figma 03 (1:672) y CU-02, paso 8                          | **Cambio:** el correo que llega de la pantalla 02 se muestra en solo lectura; si no llega, se escribe como antes                                                      | Propuesto |
 | 47  | S5     | SDD 5.2 («Sistema de diseño»): aviso temporal             | Complemento: el aviso de error que no trae acción muestra «Cerrar» (punto 52 de las decisiones)                                                                       | Propuesto |
+| 48  | S5     | SRS RF-09 y CU-09; SDD 5.2.3 y 6.1.11; Figma 11 y 12      | **Cambio:** la bandeja del área suma «Finalizadas», con las rechazadas y las cerradas, de la más reciente a la más antigua                                            | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1448,3 +1449,62 @@ Fincas, Usuarios, Tipos de falla y Recuperación de contraseñas, y los que no s
 acciones sobre una novedad. El de éxito sigue quitándose solo.
 
 **En Figma:** la variante de error del aviso temporal con «Cerrar».
+
+## 48 · «Finalizadas» en la bandeja del área (S5)
+
+**Sección:** SRS RF-09 y CU-09; SDD 5.2.3 («Interfaz C: Aprobador de área») y 6.1.11 («Bandeja
+del área»); Figma 11 y 12.
+
+**Qué pasa.** RF-09 muestra al aprobador solo las novedades abiertas de su área: en cuanto una se
+rechazaba o se cerraba, salía de la bandeja y solo se encontraba en el historial. El equipo pidió
+que la bandeja también las muestre (29 oct 2026).
+
+**Qué se hizo (cambio):**
+
+- Una cuarta pestaña, «Finalizadas», con las rechazadas y las cerradas del área, después de «En
+  espera».
+- Va de la más reciente a la más antigua por fecha de registro, como «Cerradas» y «Rechazadas» en
+  Mis novedades. El orden por prioridad sirve para lo que espera atención; en una lista que solo
+  crece, dejaría lo último en la última página. Sin conexión se arma con el mismo orden.
+- Las finalizadas no son pendientes: los contadores del teléfono, la insignia del menú y la
+  bandeja vacía (11-C) siguen contando solo las abiertas. «Finalizadas» vacía dice «No hay
+  novedades en esta lista.».
+- En el teléfono, cuatro pestañas no caben en el control segmentado a 360 px: pasan a pastillas
+  que se desplazan de lado, como las del panel de reportes (Figma 27). La fila llega a los bordes
+  de la pantalla, para que asome la que no cabe, y la elegida se trae a la vista (también al
+  volver del detalle, y en el panel).
+- El subtítulo del escritorio cambia en esa pestaña («Novedades rechazadas y cerradas de tu área,
+  de la más reciente a la más antigua») y la explicación del teléfono suma «Finalizadas:
+  rechazadas y cerradas.». La vista previa de una finalizada no ofrece acciones.
+- Sin migración: la política `novedad_lectura` ya deja al aprobador leer todas las novedades de su
+  área. El índice de la bandeja sirve al filtro por área y estado; el orden por fecha se resuelve
+  sobre las finalizadas de un área.
+
+**Texto propuesto (RF-09, descripción y reglas):**
+
+> El sistema debe mostrar al aprobador de área las novedades de su área: las abiertas y, aparte,
+> las finalizadas (rechazadas y cerradas).
+>
+> Ordena las novedades abiertas por prioridad (crítico, alto, normal, bajo) y luego por
+> antigüedad; las finalizadas, de la más reciente a la más antigua.
+
+**Texto propuesto (CU-09, paso 2):**
+
+> Obtiene las novedades abiertas del área y las ordena por prioridad (crítico, alto, normal, bajo)
+> y luego por antigüedad. Las finalizadas (rechazadas y cerradas) se consultan aparte, de la más
+> reciente a la más antigua.
+
+**Texto propuesto (SDD 5.2.3, en lugar de «la bandeja se divide en tres pestañas…»):**
+
+> la bandeja se divide en cuatro pestañas: Por atender (asignadas y aprobadas por el director), En
+> atención, En espera (escaladas y resueltas sin confirmar) y Finalizadas (rechazadas y cerradas,
+> de la más reciente a la más antigua).
+
+**Texto propuesto (SDD 6.1.11, viñeta «Bandeja del área»):**
+
+> Bandeja del área (RF-09): cuatro pestañas: Por atender (asignada y aprobada), En atención, En
+> espera (escalada y resuelta) y Finalizadas (rechazada y cerrada). Orden: prioridad (crítico,
+> alto, normal, bajo) y luego fecha_registro ascendente; en Finalizadas, fecha_registro
+> descendente.
+
+**En Figma:** la pestaña «Finalizadas» en 12 y las pastillas en 11.

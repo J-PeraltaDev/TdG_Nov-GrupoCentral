@@ -137,9 +137,15 @@ test.describe('CU-15 · Confirmar resolución', () => {
     await expect(page.getByText(descripcion)).toBeVisible(ESPERA_DE_SESION)
     await contexto.close()
 
-    // CU-15 6: el área recibe el aviso del cierre.
+    // CU-15 6: el área recibe el aviso del cierre y la ve en «Finalizadas», en la primera página
+    // porque es la más reciente (RF-09, cambio 48).
     const aprobador = await sesionDe(browser, 'aprobador')
     expect((await avisosDe(aprobador.page, novedad)).at(-1)).toEqual({ estado_nuevo: 'cerrada' })
+    await aprobador.page.goto('/bandeja?pestana=finalizadas')
+    await expect(novedadesDeLaLista(aprobador.page).filter({ hasText: descripcion })).toHaveCount(
+      1,
+      ESPERA_DE_SESION,
+    )
     await aprobador.contexto.close()
   })
 

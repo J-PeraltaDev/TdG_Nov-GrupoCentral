@@ -39,7 +39,8 @@ import { VistaPrevia } from './VistaPrevia.jsx'
  *
  * La base de datos limita la lista al área del aprobador (RNF-11) y la entrega ya ordenada
  * por prioridad y antigüedad. Sin conexión, la bandeja es la descargada, con su fecha (11-B,
- * Figma 3:407; RF-24).
+ * Figma 3:407; RF-24). «Finalizadas», con las rechazadas y las cerradas, no está en Figma: es
+ * el cambio 48.
  */
 
 const ID_DE_LA_LISTA = 'bandeja-lista'
@@ -50,10 +51,13 @@ const ICONO_DE_LA_PESTANA = {
   en_espera: iconoEnEspera,
 }
 
+/** Lo que sigue abierto: solo eso cuentan los contadores y la bandeja vacía (11-C). */
+const PENDIENTES = PESTANAS.filter(({ final }) => !final)
+
 function Contadores({ conteos }) {
   return (
     <dl className="flex gap-2">
-      {PESTANAS.map(({ id, nombre }) => (
+      {PENDIENTES.map(({ id, nombre }) => (
         <div
           key={id}
           className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-xl border border-borde bg-superficie px-2 py-3 min-[390px]:px-3"
@@ -177,7 +181,7 @@ export default function Bandeja() {
     const filtro = { areaId, fincaId }
     const otras = PESTANAS.filter((otra) => otra !== pestana)
     Promise.all([
-      listarBandeja({ ...filtro, estados: pestana.estados }),
+      listarBandeja({ ...filtro, estados: pestana.estados, recientes: pestana.final }),
       ...otras.map((otra) => contarBandeja({ ...filtro, estados: otra.estados })),
     ])
       .then(([pagina, ...cantidades]) => {
@@ -240,6 +244,7 @@ export default function Bandeja() {
         areaId,
         fincaId,
         estados: pestana.estados,
+        recientes: pestana.final,
         pagina: siguiente,
       })
       // Si entre tanto cambió la pestaña o el filtro, esta página ya no corresponde.
@@ -264,8 +269,10 @@ export default function Bandeja() {
   const hayMas = lista.novedades.length < lista.total
   const vacia = !cargando && !fallo && lista.novedades.length === 0
   // 11-C: no queda nada pendiente en el área. Si solo está vacía esta pestaña (o el filtro
-  // no deja ver ninguna), no se puede decir que el área no tiene pendientes.
-  const sinPendientes = vacia && !fincaId && PESTANAS.every(({ id }) => (conteos?.[id] ?? 0) === 0)
+  // no deja ver ninguna), no se puede decir que el área no tiene pendientes. En «Finalizadas»
+  // tampoco: lo vacío es esa lista.
+  const sinPendientes =
+    vacia && !fincaId && !pestana.final && PENDIENTES.every(({ id }) => (conteos?.[id] ?? 0) === 0)
   const elegida = lista.novedades.find(({ id }) => id === elegidaId) ?? lista.novedades[0] ?? null
   // Con la lista a la vista, el reintento es volver a pedir la página que faltó.
   const reintentar = lista.novedades.length > 0 ? verMas : () => setIntento((n) => n + 1)
@@ -281,14 +288,18 @@ export default function Bandeja() {
   const nombreDeLaPestana = ({ id, nombre }) =>
     esEscritorio && conteos ? `${nombre} (${conteos[id]})` : nombre
   const pestanas = PESTANAS.map((opcion) => ({ id: opcion.id, nombre: nombreDeLaPestana(opcion) }))
+  // En el teléfono las cuatro no caben en el control segmentado de Figma 11: van en pastillas
+  // que se desplazan de lado, como las del panel (Figma 27). La fila llega a los bordes de la
+  // pantalla, como en Mis novedades, para que asome la que no cabe.
   const selectorDePestanas = (
     <Pestanas
       etiqueta="Novedades de la bandeja"
-      variante={esEscritorio ? 'subrayada' : 'segmentada'}
+      variante={esEscritorio ? 'subrayada' : 'pastillas'}
       pestanas={pestanas}
       elegida={pestana.id}
       alElegir={(id) => cambiarParametro('pestana', id === PESTANAS[0].id ? null : id)}
       idDelPanel={ID_DE_LA_LISTA}
+      className="max-lg:-mx-4 max-lg:scroll-px-4 max-lg:px-4"
     />
   )
 
@@ -297,7 +308,9 @@ export default function Bandeja() {
       <header className="sr-only lg:not-sr-only lg:flex lg:flex-col lg:gap-1">
         <h1 className="text-display text-texto">Bandeja · {area}</h1>
         <p className="text-cuerpo text-texto-secundario">
-          Novedades no cerradas de tu área, por prioridad y antigüedad
+          {pestana.final
+            ? 'Novedades rechazadas y cerradas de tu área, de la más reciente a la más antigua'
+            : 'Novedades no cerradas de tu área, por prioridad y antigüedad'}
         </p>
       </header>
 
@@ -330,7 +343,7 @@ export default function Bandeja() {
           {selectorDePestanas}
           <p className="text-auxiliar text-texto-secundario">
             Por atender: asignadas y aprobadas por el director. En espera: escaladas y resueltas sin
-            confirmar.
+            confirmar. Finalizadas: rechazadas y cerradas.
           </p>
         </>
       )}

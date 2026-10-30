@@ -315,31 +315,35 @@ const filtroDeBandeja =
 
 /**
  * Página de la bandeja del área: por prioridad (crítico, alto, normal, bajo: el orden del
- * tipo `prioridad_novedad`) y, dentro de cada una, de la más antigua a la más reciente.
+ * tipo `prioridad_novedad`) y, dentro de cada una, de la más antigua a la más reciente. Con
+ * `recientes` (las finalizadas, cambio 48), de la más reciente a la más antigua, como Mis
+ * novedades.
  *
- * @param {FiltroDeBandeja & { pagina?: number }} opciones `pagina` empieza en 0.
+ * @param {FiltroDeBandeja & { pagina?: number, recientes?: boolean }} opciones `pagina`
+ *   empieza en 0.
  * @returns {Promise<{ novedades: object[], total: number, descargadaEn?: string }>}
  */
-export async function listarBandeja({ pagina = 0, ...filtro }) {
+export async function listarBandeja({ pagina = 0, recientes = false, ...filtro }) {
   const desde = pagina * NOVEDADES_POR_PAGINA
   const lista = {
     clave: claveDeBandeja(filtro),
     filtro: filtroDeBandeja(filtro),
-    orden: ORDEN.porPrioridad,
+    orden: recientes ? ORDEN.recientes : ORDEN.porPrioridad,
   }
   return conRespaldo(
     async () => {
-      const { data, error, count } = await consultarBandeja(
-        COLUMNAS_DE_LA_BANDEJA,
-        { count: 'exact' },
-        filtro,
-      )
-        .order('prioridad', { ascending: true })
-        .order('fecha_registro', { ascending: true })
-        // Desempate estable: sin él, dos novedades con la misma fecha podrían repetirse o
-        // perderse entre una página y la siguiente.
-        .order('codigo', { ascending: true })
-        .range(desde, desde + NOVEDADES_POR_PAGINA - 1)
+      const consulta = consultarBandeja(COLUMNAS_DE_LA_BANDEJA, { count: 'exact' }, filtro)
+      // El código es el desempate estable: sin él, dos novedades con la misma fecha podrían
+      // repetirse o perderse entre una página y la siguiente.
+      const ordenada = recientes
+        ? consulta
+            .order('fecha_registro', { ascending: false })
+            .order('codigo', { ascending: false })
+        : consulta
+            .order('prioridad', { ascending: true })
+            .order('fecha_registro', { ascending: true })
+            .order('codigo', { ascending: true })
+      const { data, error, count } = await ordenada.range(desde, desde + NOVEDADES_POR_PAGINA - 1)
       if (error) throw error
       return { novedades: data, total: count ?? data.length }
     },
