@@ -78,6 +78,11 @@ const EN_ESPERA = [
   { ...POR_ATENDER[0], id: 'n-140', codigo: 140, estado: 'escalada' },
   { ...POR_ATENDER[2], id: 'n-141', codigo: 141, estado: 'resuelta' },
 ]
+// Como las entrega el servidor: la más reciente primero (cambio 48).
+const FINALIZADAS = [
+  { ...POR_ATENDER[2], id: 'n-151', codigo: 151, estado: 'rechazada' },
+  { ...POR_ATENDER[1], id: 'n-138', codigo: 138, estado: 'cerrada' },
+]
 
 const TRANSICIONES = [
   { id: 1, novedad_id: 'n-147', estado_nuevo: 'asignada', area_anterior: null },
@@ -104,13 +109,16 @@ function conBandeja({
   porAtender = POR_ATENDER,
   enAtencion = EN_ATENCION,
   enEspera = EN_ESPERA,
+  finalizadas = FINALIZADAS,
 } = {}) {
   const grupo = ({ estados, fincaId }) => {
     const todas = estados.includes('asignada')
       ? porAtender
       : estados.includes('en_atencion')
         ? enAtencion
-        : enEspera
+        : estados.includes('cerrada')
+          ? finalizadas
+          : enEspera
     return fincaId ? todas.filter((novedad) => novedad.finca_id === fincaId) : todas
   }
   vi.mocked(listarBandeja).mockImplementation(async (filtro) => ({
@@ -205,15 +213,56 @@ describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () 
     ])
   })
 
-  it('RF-09: explica qué agrupa cada pestaña, con el texto de Figma', async () => {
+  it('RF-09: explica qué agrupa cada pestaña, con el texto de Figma y el de «Finalizadas»', async () => {
     conBandeja()
     abrir()
 
     expect(
       await screen.findByText(
-        'Por atender: asignadas y aprobadas por el director. En espera: escaladas y resueltas sin confirmar.',
+        'Por atender: asignadas y aprobadas por el director. En espera: escaladas y resueltas sin confirmar. Finalizadas: rechazadas y cerradas.',
       ),
     ).toBeVisible()
+  })
+
+  it('RNF-01 (cambio 48): las cuatro pestañas van en pastillas que se desplazan de lado', async () => {
+    conBandeja()
+    abrir()
+    await screen.findAllByRole('listitem')
+
+    const pestanas = screen.getByRole('tablist', { name: 'Novedades de la bandeja' })
+    expect(pestanas).toHaveAttribute('data-variante', 'pastillas')
+    expect(
+      within(pestanas)
+        .getAllByRole('tab')
+        .map((pestana) => pestana.textContent),
+    ).toEqual(['Por atender', 'En atención', 'En espera', 'Finalizadas'])
+  })
+
+  it('RF-09 (cambio 48): «Finalizadas» pide las rechazadas y las cerradas, de la más reciente a la más antigua', async () => {
+    conBandeja()
+    abrir()
+    await screen.findAllByRole('listitem')
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Finalizadas' }))
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'NOV-0151' })).toBeVisible()
+    expect(listarBandeja).toHaveBeenLastCalledWith({
+      areaId: 'area-m',
+      fincaId: null,
+      estados: ['rechazada', 'cerrada'],
+      recientes: true,
+    })
+    expect(codigos()).toEqual(['NOV-0151', 'NOV-0138'])
+    expect(screen.getByText('Rechazada')).toBeVisible()
+    expect(screen.getByText('Cerrada')).toBeVisible()
+  })
+
+  it('RF-09 (cambio 48): «Finalizadas» vacía no dice que el área no tiene pendientes', async () => {
+    conBandeja({ porAtender: [], enAtencion: [], enEspera: [], finalizadas: [] })
+    abrir('/bandeja?pestana=finalizadas')
+
+    expect(await screen.findByText('No hay novedades en esta lista.')).toBeVisible()
+    expect(screen.queryByText(/No hay novedades pendientes/)).not.toBeInTheDocument()
   })
 
   it('RF-09: al cambiar de pestaña pide los estados de esa pestaña', async () => {
@@ -280,6 +329,7 @@ describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () 
   })
 
   it('Pantalla 11-C / CU-09 2b: sin novedades pendientes lo informa, con el nombre del área', async () => {
+    // Las finalizadas no son pendientes: aunque las haya, el área no tiene nada por atender.
     conBandeja({ porAtender: [], enAtencion: [], enEspera: [] })
     abrir()
 
@@ -429,6 +479,7 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
       'Por atender (3)',
       'En atención (1)',
       'En espera (2)',
+      'Finalizadas (2)',
     ])
     // Los contadores son del teléfono: en el escritorio el conteo va en la pestaña.
     expect(screen.getAllByRole('term').map((nombre) => nombre.textContent)).toEqual([
@@ -447,6 +498,24 @@ describe('Pantalla 12 · Bandeja del área en el escritorio (RF-09 / CU-09)', ()
     expect(within(segunda).getByText('Aprobada por el director')).toBeVisible()
     expect(within(primera).queryByText(/Reasignada|Aprobada por/)).not.toBeInTheDocument()
     expect(listarTransicionesDeBandeja).toHaveBeenCalledExactlyOnceWith(['n-153', 'n-147', 'n-152'])
+  })
+
+  it('RF-09 (cambio 48): en «Finalizadas» el subtítulo dice qué hay y en qué orden, y la vista previa no ofrece acciones', async () => {
+    conBandeja()
+    abrir('/bandeja?pestana=finalizadas')
+    await filas()
+
+    expect(
+      screen.getByText(
+        'Novedades rechazadas y cerradas de tu área, de la más reciente a la más antigua',
+      ),
+    ).toBeVisible()
+    const vista = within(screen.getByRole('complementary', { name: 'Vista previa de NOV-0151' }))
+    expect(vista.getByText('Rechazada')).toBeVisible()
+    expect(vista.queryByRole('button')).not.toBeInTheDocument()
+    expect(vista.getAllByRole('link').map((enlace) => enlace.textContent)).toEqual([
+      'Ver detalle completo',
+    ])
   })
 
   it('RF-09: la vista previa muestra la primera novedad y lleva a su detalle', async () => {

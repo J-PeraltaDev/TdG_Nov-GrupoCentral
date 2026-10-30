@@ -39,7 +39,7 @@ test.describe('CU-11 · Rechazar novedad', () => {
   const primerPaso = (page) =>
     page.getByRole('region', { name: 'Línea de tiempo' }).getByRole('listitem').first()
 
-  test('RF-11 / CU-11: el aprobador rechaza una novedad asignada con su motivo; queda Rechazada, sale de la bandeja y la finca ve el motivo', async ({
+  test('RF-11 / CU-11: el aprobador rechaza una novedad asignada con su motivo; queda Rechazada, pasa a «Finalizadas» y la finca ve el motivo', async ({
     browser,
   }, testInfo) => {
     const descripcion = descripcionUnica(testInfo, 'Se necesitan dos cajas de guantes')
@@ -69,10 +69,16 @@ test.describe('CU-11 · Rechazar novedad', () => {
     await expect(page.getByRole('button', { name: 'Rechazar', exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Tomar para atención' })).toHaveCount(0)
 
-    // Sale de la bandeja: rechazada es un estado final.
+    // Rechazada es un estado final: sale de «Por atender» y queda en «Finalizadas», en la
+    // primera página porque es la más reciente (RF-09, cambio 48).
     await page.goto('/bandeja')
     await cargarTodaLaLista(page)
     await expect(novedadesDeLaLista(page).filter({ hasText: descripcion })).toHaveCount(0)
+    await page.goto('/bandeja?pestana=finalizadas')
+    await expect(novedadesDeLaLista(page).filter({ hasText: descripcion })).toHaveCount(
+      1,
+      ESPERA_DE_SESION,
+    )
     const historial = await leerDeLaApi(
       page,
       `historial_transicion?select=estado_anterior,estado_nuevo,observacion&novedad_id=eq.${novedad.id}&estado_nuevo=eq.rechazada`,

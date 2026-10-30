@@ -5,20 +5,20 @@ import { notaDelEstado, PESTANAS, resumirTransiciones } from './reglasDeBandeja.
 const ABIERTOS_DEL_AREA = ['asignada', 'en_atencion', 'escalada', 'aprobada', 'resuelta']
 
 describe('Reglas de la bandeja del área (RF-09, SDD 6.1.11)', () => {
-  it('RF-09 / CU-09 2: las pestañas agrupan los estados como dice el SDD', () => {
+  it('RF-09 / CU-09 2: las pestañas agrupan los estados como dice el SDD, más «Finalizadas» (cambio 48)', () => {
     expect(PESTANAS.map(({ nombre, estados }) => [nombre, estados])).toEqual([
       ['Por atender', ['asignada', 'aprobada']],
       ['En atención', ['en_atencion']],
       ['En espera', ['escalada', 'resuelta']],
+      ['Finalizadas', ['rechazada', 'cerrada']],
     ])
   })
 
-  it('RF-09: entre las tres cubren los estados abiertos del área, sin repetir ni incluir los finales', () => {
-    const estados = PESTANAS.flatMap((pestana) => pestana.estados)
+  it('RF-09: las pendientes cubren los estados abiertos del área sin repetir; la final, los finales', () => {
+    const pendientes = PESTANAS.filter(({ final }) => !final).flatMap(({ estados }) => estados)
 
-    expect(estados.toSorted()).toEqual(ABIERTOS_DEL_AREA.toSorted())
-    expect(estados).not.toContain('rechazada')
-    expect(estados).not.toContain('cerrada')
+    expect(pendientes.toSorted()).toEqual(ABIERTOS_DEL_AREA.toSorted())
+    expect(PESTANAS.filter(({ final }) => final).map(({ id }) => id)).toEqual(['finalizadas'])
   })
 
   it('RF-17: una novedad reasignada dice de qué área llegó', () => {

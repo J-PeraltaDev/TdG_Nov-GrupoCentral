@@ -60,6 +60,20 @@ describe('Consultas de la bandeja del área (RF-09)', () => {
     ])
   })
 
+  it('RF-09 (cambio 48): las finalizadas van de la más reciente a la más antigua, con el mismo desempate', async () => {
+    const pasos = simularConsulta({ data: [], error: null, count: 0 })
+
+    await listarBandeja({ areaId: 'area-m', estados: ['rechazada', 'cerrada'], recientes: true })
+
+    expect(pasos.slice(1)).toEqual([
+      ['eq', 'area_id', 'area-m'],
+      ['in', 'estado', ['rechazada', 'cerrada']],
+      ['order', 'fecha_registro', { ascending: false }],
+      ['order', 'codigo', { ascending: false }],
+      ['range', 0, 19],
+    ])
+  })
+
   it('RNF-06: pide solo las columnas que la bandeja muestra', async () => {
     const pasos = simularConsulta({ data: [], error: null, count: 0 })
 

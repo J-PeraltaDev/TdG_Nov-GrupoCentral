@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 /** @typedef {'segmentada' | 'subrayada' | 'pastillas'} VarianteDePestanas */
 
 /** @type {Record<VarianteDePestanas, { lista: string, pestana: string, elegida: string, otra: string }>} */
@@ -59,6 +61,16 @@ export function Pestanas({
   className = '',
 }) {
   const estilo = VARIANTES[variante]
+  const lista = useRef(null)
+
+  // Las pastillas se desplazan de lado: la elegida se trae a la vista, también cuando llega en
+  // la dirección (al volver del detalle) y quedaría fuera de la pantalla.
+  useEffect(() => {
+    if (variante !== 'pastillas') return
+    lista.current
+      .querySelector('[aria-selected="true"]')
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  }, [variante, elegida])
 
   function alTeclear(evento) {
     const todas = [...evento.currentTarget.parentElement.querySelectorAll('[role="tab"]')]
@@ -76,6 +88,7 @@ export function Pestanas({
 
   return (
     <div
+      ref={lista}
       role="tablist"
       aria-label={etiqueta}
       data-variante={variante}

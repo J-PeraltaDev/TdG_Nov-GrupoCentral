@@ -3,13 +3,17 @@
  */
 
 /**
- * Las tres pestañas: separan lo que depende del aprobador de lo que espera a otra persona.
- * El orden es el de Figma y el primer elemento es la pestaña inicial.
+ * Las pestañas: separan lo que depende del aprobador de lo que espera a otra persona y de lo
+ * que ya terminó. El orden es el de Figma, más «Finalizadas» al final (cambio 48), y el primer
+ * elemento es la pestaña inicial.
  */
 export const PESTANAS = [
   { id: 'por_atender', nombre: 'Por atender', estados: ['asignada', 'aprobada'] },
   { id: 'en_atencion', nombre: 'En atención', estados: ['en_atencion'] },
   { id: 'en_espera', nombre: 'En espera', estados: ['escalada', 'resuelta'] },
+  // Los estados finales ya no esperan a nadie: no son pendientes y van de la más reciente a la
+  // más antigua.
+  { id: 'finalizadas', nombre: 'Finalizadas', estados: ['rechazada', 'cerrada'], final: true },
 ]
 
 /**

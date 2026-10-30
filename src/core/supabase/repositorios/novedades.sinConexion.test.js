@@ -89,6 +89,27 @@ describe('Lecturas con respaldo en el dispositivo (RF-24 / CU-24)', () => {
     expect(conteo).toBe(1)
   })
 
+  it('RF-24 (cambio 48): sin conexión, las finalizadas descargadas siguen de la más reciente a la más antigua', async () => {
+    const finalizadas = { areaId: 'area-m', estados: ['rechazada', 'cerrada'], recientes: true }
+    const reciente = novedad(160, {
+      estado: 'cerrada',
+      prioridad: 'bajo',
+      fecha_registro: '2026-09-25T12:40:00+00:00',
+    })
+    responder({
+      data: [reciente, novedad(150, { estado: 'rechazada', prioridad: 'critico' })],
+      error: null,
+      count: 2,
+    })
+    await listarBandeja(finalizadas)
+
+    conexion.enLinea = false
+    const descargada = await listarBandeja(finalizadas)
+
+    // Por prioridad, la crítica iría primero.
+    expect(descargada.novedades.map(({ codigo }) => codigo)).toEqual([160, 150])
+  })
+
   it('RF-24 (04-B y 11-B): sin conexión, cada conteo es el de la última descarga, aunque esa pestaña no se haya abierto', async () => {
     const enAtencion = { ...BANDEJA, estados: ['en_atencion'] }
     responder({ data: null, error: null, count: 2 })
