@@ -29,7 +29,7 @@ import { PantallaDeAcceso } from './PantallaDeAcceso.jsx'
  * La persona escribe el código que le entregó el administrador y su contraseña nueva. La
  * validez la da el código: la pantalla no tiene sesión. Nada de lo que se escribe aquí se
  * guarda en el navegador ni va en la dirección; el correo llega de la pantalla anterior por el
- * estado de la navegación.
+ * estado de la navegación y aquí solo se lee (cambio 46): para corregirlo se vuelve a 02.
  */
 
 /** Lo que dice cada campo cuando falta o no sirve. */
@@ -86,6 +86,8 @@ export default function CrearContrasena() {
   const campoContrasena = useRef(null)
   const campoConfirmacion = useRef(null)
   const [correo, setCorreo] = useState(typeof state?.correo === 'string' ? state.correo : '')
+  // Si se llegó sin él (por la dirección, por ejemplo), la persona lo escribe aquí.
+  const correoFijo = esCorreoValido(state?.correo)
   const [codigo, setCodigo] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [confirmacion, setConfirmacion] = useState('')
@@ -240,6 +242,7 @@ export default function CrearContrasena() {
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
+            readOnly={correoFijo}
             value={correo}
             onChange={(evento) => escribir('correo', setCorreo)(evento.target.value)}
             conError={'correo' in errores}

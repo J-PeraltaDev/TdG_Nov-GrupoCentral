@@ -8,15 +8,18 @@ import {
 } from '../../core/pwa/instalacion.js'
 import { Aviso } from '../../core/ui/Aviso.jsx'
 import iconoInstalar from '../../core/ui/iconos/install_mobile.svg'
+import { useEsEscritorio } from '../../core/ui/useEsEscritorio.js'
 
 /**
  * Invitación a instalar la aplicación (RNF-03 · pantalla 01, «Aviso neutro»). Donde el
  * navegador lo permite abre su diálogo de instalación; en iPhone y iPad muestra cómo
- * agregarla a la pantalla de inicio. No aparece si la aplicación ya está instalada.
+ * agregarla a la pantalla de inicio. No aparece si la aplicación ya está instalada. En el
+ * escritorio habla del computador, no del teléfono (cambio 45).
  */
 export function InvitacionAInstalar() {
   const instalable = useSyncExternalStore(suscribirInstalacion, sePuedeInstalar, () => false)
   const [verPasos, setVerPasos] = useState(false)
+  const esEscritorio = useEsEscritorio()
 
   if (estaInstalada()) return null
 
@@ -35,7 +38,8 @@ export function InvitacionAInstalar() {
   return (
     <div className="flex w-full flex-col gap-2">
       <Aviso icono={iconoInstalar} accion={accion}>
-        Instala la app en este teléfono para registrar novedades aunque no haya internet
+        Instala la app en este {esEscritorio ? 'computador' : 'teléfono'} para registrar novedades
+        aunque no haya internet
       </Aviso>
       {verPasos ? (
         <p role="status" className="px-3.5 text-cuerpo-pequeno text-texto-secundario">

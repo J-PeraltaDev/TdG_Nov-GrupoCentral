@@ -170,6 +170,8 @@ function Panel({ novedad, alDecidir, enCurso }) {
   // Sin conexión (RF-25; Figma no dibuja al director sin red: decisión 17 del plan).
   const sinRed = !useEnLinea()
   const idSinRed = useId()
+  // La última vez que salió de la observación, faltaba: desde ahí el campo se marca inválido.
+  const [salioSinEscribir, setSalioSinEscribir] = useState(false)
 
   return (
     <section
@@ -201,8 +203,11 @@ function Panel({ novedad, alDecidir, enCurso }) {
           ayuda="Opcional al aprobar, obligatoria al rechazar"
           aria-required={eleccion === 'rechazar' || undefined}
           value={observacion}
-          // 20-B: con «Rechazar» elegido, el campo dice qué falta para poder confirmar.
+          // 20-B: con «Rechazar» elegido, el campo dice qué falta para poder confirmar. No se
+          // anuncia «no válido» hasta que la persona sale de él sin escribirla (decisión 53).
           error={error ?? (falta ? 'Escribe la observación para rechazar' : null)}
+          invalido={Boolean(error) || (falta && salioSinEscribir)}
+          onBlur={() => setSalioSinEscribir(falta)}
           onChange={(evento) => escribir(evento.target.value)}
         />
 

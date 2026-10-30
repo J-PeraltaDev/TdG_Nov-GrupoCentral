@@ -93,10 +93,24 @@ describe('Pantalla 03 · Crear contraseña nueva (RF-02 / CU-02 8)', () => {
     )
   })
 
-  it('sin correo de la pantalla anterior, lo pide', () => {
-    abrir(null)
+  it('cambio 46: el correo que viene de la pantalla anterior se lee, pero no se cambia', async () => {
+    abrir()
+
+    expect(correo()).toHaveAttribute('readonly')
+    await userEvent.type(correo(), 'otro')
+    expect(correo()).toHaveValue(CORREO)
+  })
+
+  it.each([
+    ['por la dirección', null],
+    ['por «Ya tengo un código» sin escribirlo', { correo: '' }],
+  ])('sin correo de la pantalla anterior (%s), lo pide', async (_caso, estado) => {
+    abrir(estado)
 
     expect(correo()).toHaveValue('')
+    expect(correo()).not.toHaveAttribute('readonly')
+    await userEvent.type(correo(), CORREO)
+    expect(correo()).toHaveValue(CORREO)
   })
 
   it('WCAG 3.3.8: ofrece los campos al gestor de contraseñas y deja pegar', async () => {

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { enTelefono } from './apoyo/novedades.js'
 
 // RNF-01, RNF-03 y RNF-05: la aplicación abre, es instalable y abre sin red.
 test.describe('Aplicación instalable', () => {
@@ -44,9 +45,11 @@ test.describe('Aplicación instalable', () => {
   test('RNF-03: invita a instalar la aplicación en el ingreso', async ({ page }) => {
     await page.goto('/ingresar')
 
+    // En el escritorio habla del computador (cambio 45).
+    const dispositivo = enTelefono(page) ? 'teléfono' : 'computador'
     await expect(
       page.getByText(
-        'Instala la app en este teléfono para registrar novedades aunque no haya internet',
+        `Instala la app en este ${dispositivo} para registrar novedades aunque no haya internet`,
       ),
     ).toBeVisible()
   })

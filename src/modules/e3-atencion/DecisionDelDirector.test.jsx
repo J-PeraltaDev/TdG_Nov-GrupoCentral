@@ -128,13 +128,29 @@ describe('Pantallas 20 y 20-B · «Tu decisión» en el escritorio (RF-13 / CU-1
     await userEvent.click(rechazar())
 
     expect(confirmar()).toBeDisabled()
-    expect(observacion()).toBeInvalid()
     expect(observacion()).toHaveAccessibleDescription('Escribe la observación para rechazar')
+    // Decisión 53: nadie ha pasado por el campo, así que todavía no se anuncia «no válido».
+    expect(observacion()).not.toBeInvalid()
 
     // Solo espacios no es una observación.
     await userEvent.type(observacion(), '   ')
     expect(confirmar()).toBeDisabled()
+    // Al salir del campo sin escribirla, sí.
+    await userEvent.tab()
+    expect(observacion()).toBeInvalid()
     expect(decidirEscalamiento).not.toHaveBeenCalled()
+  })
+
+  it('decisión 53: pasar por la observación al aprobar no la marca inválida al cambiar a rechazar', async () => {
+    pintar()
+
+    await userEvent.click(aprobar())
+    await userEvent.click(observacion())
+    await userEvent.tab()
+    await userEvent.click(rechazar())
+
+    expect(observacion()).toHaveAccessibleDescription('Escribe la observación para rechazar')
+    expect(observacion()).not.toBeInvalid()
   })
 
   it('RF-13 / CU-13 5 y 6: rechaza con la observación, avisa y recarga el detalle', async () => {

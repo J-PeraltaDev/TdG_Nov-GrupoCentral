@@ -165,7 +165,7 @@ export function Ingreso() {
         <p>Tus datos se tratan conforme a la Ley 1581 de 2012</p>
         <Link
           to="/tratamiento-de-datos"
-          className="inline-flex min-h-6 items-center text-auxiliar-fuerte text-primario hover:text-primario-hover"
+          className="-my-3 inline-flex min-h-12 items-center text-auxiliar-fuerte text-primario hover:text-primario-hover"
         >
           Política de tratamiento de datos
         </Link>

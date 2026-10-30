@@ -16,6 +16,8 @@ import iconoError from './iconos/error.svg'
  * @param {number} [props.maximo] Máximo de caracteres; muestra el contador «45/500».
  * @param {string} [props.ayuda] Texto de apoyo bajo el campo.
  * @param {string | null} [props.error] Mensaje de error; reemplaza a la ayuda.
+ * @param {boolean} [props.invalido] Marca el campo inválido para los lectores de pantalla. Por
+ *   omisión, cuando hay `error`.
  * @param {import('react').Ref<HTMLTextAreaElement>} [props.ref]
  * @param {string} [props.className]
  * @param {import('react').TextareaHTMLAttributes<HTMLTextAreaElement>} [props.resto]
@@ -27,6 +29,7 @@ export function AreaDeTexto({
   maximo,
   ayuda,
   error = null,
+  invalido = Boolean(error),
   ref,
   className = '',
   ...resto
@@ -54,7 +57,7 @@ export function AreaDeTexto({
         value={value}
         required={obligatorio || undefined}
         maxLength={maximo}
-        aria-invalid={error ? true : undefined}
+        aria-invalid={invalido || undefined}
         aria-describedby={descritoPor}
         className={`block min-h-18 w-full resize-y rounded-control bg-superficie px-[15px] py-[13px] text-cuerpo text-texto placeholder:text-texto-secundario ${
           error

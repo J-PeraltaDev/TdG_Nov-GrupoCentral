@@ -53,6 +53,11 @@ tomó la opción más conservadora y se dejó anotada para que Mateo y Juan la c
 | 47  | Notificaciones push en el servidor (RF-31)         | El `mailto:` de VAPID y los pasos de «PROYECTO», por hacer                                       | El equipo         |
 | 48  | Notificaciones push en el cliente (10-B y Cuenta)  | Cuenta sin dibujo, 10-B para los demás roles; la prueba en un teléfono, por hacer                | El equipo (Figma) |
 | 49  | Cierre del Sprint 5 y v1.0                         | El trabajo e2e del CI, obligatorio y requerido después de #51; las pruebas que fallaron          | El equipo         |
+| 50  | Auditoría externa de la v1.0 (19 oct)              | Revisada el 28 oct; ese día se corrigieron los defectos y se aplicaron 52 y 53                   | El equipo         |
+| 51  | Contraste del área «Mantenimiento»                 | Se dejó el color de Figma (4,28:1); `tokens.test.js` lo marca como falla conocida                | El equipo (Figma) |
+| 52  | Avisos de error que no se pueden cerrar            | «Cerrar» en el aviso de error que no trae acción (cambio 47)                                     | El equipo (Figma) |
+| 53  | Observación del director marcada inválida (20-B)   | `aria-invalid` solo al salir del campo; el asterisco de 20-C, pendiente de Figma                 | El equipo (Figma) |
+| 54  | Cabeceras de seguridad en Pages (CSP)              | Sin CSP en la v1.0; la que propuso la auditoría ocultaría los íconos                             | El equipo         |
 
 ## 1 · Lista oficial de fincas y razones sociales
 
@@ -121,6 +126,9 @@ No se cambió, porque el color se corrige primero en Figma. La prueba
 
 **Propuesta:** `estado/escalada/texto` = `#955a06` (5,04:1), que conserva el tono, o `#854d0e`
 (6,15:1). Se cambia en Figma y en `tokens.css`.
+
+**19 oct 2026:** la auditoría externa (punto 50) llegó a la misma propuesta. El área
+«Mantenimiento» tiene el mismo problema sobre el gris de su etiqueta (punto 51).
 
 ## 7 · Service worker propio o con Workbox
 
@@ -350,6 +358,10 @@ El borde `#d6dbd3` sobre blanco da 1,41:1. WCAG 1.4.11 pide 3:1 para los límite
 cuando son lo único que lo identifica; aquí el botón se reconoce por su texto, así que no es un
 incumplimiento claro. Se anota por si quieren oscurecerlo en Figma. Lo mismo pasa con el borde
 punteado de «Pendiente de sincronizar» (`#94a3b8`, 2,56:1).
+
+**Los campos de texto** (auditoría externa, punto 50) usan el mismo borde en su «Caja», y en una
+hoja o un diálogo quedan blancos sobre blanco: ahí el borde es lo único que los delimita, y 1.4.11
+aplica con más claridad que en el botón. Va a Figma con lo anterior.
 
 ## 13 · Detalles de las pantallas 04, 05 y 06
 
@@ -1129,6 +1141,13 @@ El orden de una foto es: registrar la novedad, subir el archivo y después inser
   rechazada, un archivo que no es JPEG y uno de más de 1 MB rechazados, URLs firmadas para el
   reportante y el aprobador del área y no para el reportante de otra finca ni sin sesión, ningún
   borrado y ninguna URL pública. Quedó la novedad NOV-2939 con tres fotos de 134 bytes.
+- **Subidas sin fila, a propósito** (auditoría externa, punto 50). La política de subida cuenta
+  las filas de `evidencia`, no los archivos: quien suba fotos sin crear su fila no tiene límite.
+  Cada archivo pesa como máximo 1 MB, es JPEG y solo entra en una novedad abierta de su finca (o
+  de su área, en las fotos de la solución). Se acepta por ahora: son usuarios internos y con nombre
+  (cambio 44 de `cambios-sdd.md`). Si hiciera falta, la política contaría también los archivos de
+  la ruta con una función auxiliar `security definer` en `private`: una consulta normal no ve los
+  huérfanos, porque la lectura exige la fila.
 
 ## 34 · Detalles del indicador de conexión (RF-23)
 
@@ -1522,3 +1541,167 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
   lista de chequeo del punto 48 en un iPhone lo diría.
 - **El atajo de `rf28_rf29_reportes.sql:117`** dice `shortcut:` en vez de `atajo:`. Se deja: la
   migración ya está aplicada en «staging».
+
+## 50 · Auditoría externa de la v1.0 (19 oct 2026)
+
+El 19 oct 2026 se auditó la v1.0 con Antigravity: interfaz, accesibilidad, responsividad,
+seguridad y arquitectura. El informe no está en el repositorio. El 28 oct se revisó cada hallazgo
+contra `main` (con el #54 incluido), contra este documento y contra los ADR, con una segunda
+opinión de Gemini.
+
+**Ya estaban decididos** (no cambian):
+
+- El contraste de «escalada»: punto 6. La auditoría propone el mismo `#955a06`.
+- El `hover` de los botones que no son el primario: punto 9.
+- El borde de 1,41:1: punto 12, ampliado a los campos de texto.
+- La comprobación de contraseñas filtradas, que es del plan de pago: punto 16.
+- Los archivos huérfanos de `evidencias`: punto 33, ampliado con las subidas sin fila.
+- Los orígenes `localhost` en el CORS de las Edge Functions: a propósito, para el servidor de
+  desarrollo y las e2e (cambio 10 de `cambios-sdd.md`). El CORS no es lo que protege a las
+  funciones.
+- La cola `pendientes` sobrevive al cierre de sesión: lo pide el SDD (6.1.5, RNF-07). El supuesto
+  del dispositivo compartido va en el cambio 44.
+
+**Nuevos, con una decisión pendiente:** puntos 51 a 54.
+
+**Defectos por corregir** (no hace falta decidir nada):
+
+- La tabla de Fincas usa `overflow-clip`; las demás tablas, `overflow-x-auto`. Si no cabe, corta
+  la columna de acciones en lugar de desplazarse.
+- Dos áreas táctiles de menos de 48 px en el teléfono: el enlace «Política de tratamiento de
+  datos» del ingreso (24 px) y «Ver novedades» en las combinaciones de fallas recurrentes (16 px).
+  WCAG 2.5.8 pide 24 px, pero la regla del proyecto es 48.
+
+**28 oct:** corregidos los dos. La tabla de Fincas se desplaza como las demás, y las dos áreas
+táctiles miden 48 px sin que cambie lo que se ve.
+
+**Ciertos, pero de poco valor** (opcionales):
+
+- `ErrorDeCampo` repetido en `RegistrarNovedad.jsx` y `RegistrarSolucion.jsx`; las clases del
+  botón, copiadas en siete enlaces; `Correo`, repetido en `Usuarios.jsx` y `Recuperaciones.jsx`.
+- El ícono de sincronizar no gira. `CampoTexto` ignora un `id` externo, aunque nadie le pasa uno.
+- Las filas de las tablas se nombran solo con el código; WCAG 2.4.4 se cumple por el contexto.
+- Los contadores de la bandeja van justos a 360 px: con letra más grande, o a 320 px, el texto
+  puede salirse de la tarjeta.
+- El aviso de versión nueva tapa la barra inferior del teléfono hasta que se responde.
+- Con un diálogo abierto, arrastrar sobre el fondo desplaza la página de atrás.
+- El catálogo y la auditoría de tipos de falla se piden sin `.range()`: PostgREST corta en 1000
+  filas, algo lejano.
+- La neutralización de fórmulas del CSV ya sigue la lista de OWASP (cambio 32); se le podría
+  sumar el salto de línea.
+- `modules/` importa de `app/` en siete lugares (`insignias.js`, `Insignia.jsx` y `Cargando.jsx`);
+  el #54 agregó los dos de `MisNovedades`. Se resuelve moviendo esos tres archivos a `core/`.
+
+**Descartados:**
+
+- Mover `plantillas.js`, `validaciones.js` y `deBase64Url` de `supabase/functions/_shared/` a
+  `src/core/`. Una función no puede importar de `src/` (ADR 0012): para tener una sola copia, el
+  cliente importa de `_shared/`.
+- Dividir `repositorios/novedades.js` y las pantallas grandes. Las pruebas simulan el repositorio
+  por su ruta: sería un cambio grande sin efecto para el usuario.
+- HSTS en `public/_headers` (punto 54) y un límite por IP «en Cloudflare o Supabase» para
+  `restablecer-contrasena` (cambio 44).
+
+**Lo que el informe afirma y no es así:**
+
+- `AreaDeTexto` no anuncia el error con `role="alert"`: va en un `<span>` sin rol.
+- Las tarjetas no tienen un `aria-label` con la finca y el estado: su nombre es el código.
+- Los siete enlaces con forma de botón primario sí tienen `hover:bg-primario-hover`.
+- Los números de la paginación solo se muestran desde `lg`: no son áreas táctiles del teléfono.
+- El aviso fijo de la bandeja (`w-96`) solo aparece con las acciones de la vista previa, que es
+  del escritorio.
+- Con la fórmula de `tokens.test.js` los contrastes cambian un poco (4,28 y no 4,31; 5,73 y no
+  5,62), sin cambiar ninguna conclusión.
+
+**Por hacer, fuera del código:**
+
+- **Comprobar que «PROYECTO» tiene las migraciones del #54** (`rf26_panel_del_aprobador`,
+  `rf32_reactivar_tipo_falla` y `rf04_razones_sociales`). Pages ya publica ese frontend: sin ellas
+  fallarían el panel del aprobador, «Reactivar» y las razones sociales. El simulacro de
+  `docs/despliegue/produccion-v1.0.md` las lista. Lo corre una persona: el entorno no deja que el
+  agente lea «PROYECTO».
+- **La política de tratamiento de datos** sigue siendo el marcador en producción: el enlace del
+  ingreso dice «Esta pantalla llega en el Sprint 3». El texto y su punto 26 están en el PR #19, en
+  borrador.
+- **El MCP de Supabase** de cada persona va contra «staging» y con `read_only=true`. Con escritura
+  sobre «PROYECTO», un agente podría cambiar producción sin pasar por la regla 9 de `CLAUDE.md`.
+  **28 oct:** la copia donde se hizo esta revisión ya quedó así; cada persona revisa la suya.
+- **`npm run format:check` falla en la copia local** por lo que no está versionado: `.mcp.json`,
+  `.claude/` y los worktrees de Claude Code. Prettier lee `.gitignore` pero no
+  `.git/info/exclude`: conviene agregarlos a `.gitignore` y borrar los worktrees viejos.
+  **28 oct:** ya están en `.gitignore`. Los worktrees viejos no le estorban a Prettier, pero
+  siguen ahí.
+
+## 51 · Contraste del área «Mantenimiento» en su etiqueta
+
+`EtiquetaDeArea` escribe el área con su color sobre el gris de `Etiqueta` (`gris-100`, `#eef1ec`),
+en texto de 12 px. «Sistemas» (`#3b5bdb`) da 4,97:1; **«Mantenimiento» (`#a85f12`) da 4,28:1**,
+bajo el 4,5:1 de WCAG 1.4.3 (sobre blanco daría 4,87:1). Lo encontró la auditoría externa (punto
+50); `src/styles/tokens.test.js` no probaba ese par.
+
+Como «escalada» (punto 6), se corrige primero en Figma. La auditoría propone `#9c5710`, que da
+4,87:1 sobre el gris y conserva el ocre; cambiaría también el color del área en los gráficos del
+panel. Mientras tanto, el par puede entrar a `tokens.test.js` como falla conocida (`it.fails`).
+
+**28 oct:** el par ya está en `tokens.test.js` como falla conocida, y «Sistemas» sobre el mismo
+gris, entre los que pasan. Cuando cambie el token, la prueba fallará y habrá que moverla.
+
+## 52 · Avisos de error que no se pueden cerrar
+
+`AvisoTemporal` deja el aviso de error hasta que la persona actúe, porque suele traer
+«Reintentar». En Fincas, Usuarios, Tipos de falla y Recuperación de contraseñas, el error de una
+acción que se ejecuta sin diálogo (reactivar, cambiar el estado de una razón social o generar un
+código) llega sin acción: no tiene botón, no se quita solo y queda sobre la pantalla hasta la
+siguiente acción. La auditoría lo vio en Recuperación de contraseñas; pasa en las cuatro.
+
+Dos salidas, las dos con un texto que Figma no trae:
+
+1. **Recomendada:** cuando un error no trae acción, `AvisoTemporal` muestra «Cerrar». Se arregla
+   en un solo lugar.
+2. Que ese error también se quite solo. Un error que desaparece puede no alcanzar a leerse.
+
+**28 oct:** se aplicó la salida 1 (cambio 47 de `cambios-sdd.md`). Alcanza también a los errores
+sin «Reintentar» de las acciones sobre una novedad (`useAccion`), que tenían el mismo problema.
+
+## 53 · Observación del director marcada inválida (20-B)
+
+En el panel «Tu decisión» del escritorio, al elegir «Rechazar» la observación vacía muestra de
+inmediato «Escribe la observación para rechazar», como dibuja 20-B, y «Confirmar decisión» se
+deshabilita. El texto explica por qué, pero el campo queda con `aria-invalid`: un lector de
+pantalla dice «no válido» al llegar a él, antes de que la persona escriba. No es un incumplimiento
+claro de WCAG (el error se identifica con texto), pero marcar inválido un campo que nadie ha
+tocado es una mala práctica conocida. La auditoría dijo además que se anunciaba con
+`role="alert"`; no es así.
+
+**Propuesta, sin cambiar lo que se ve:** el mismo texto, pero `aria-invalid` solo cuando la
+persona sale del campo sin escribir. Y, si Figma lo admite, el asterisco de obligatorio al elegir
+«Rechazar», como en la hoja del teléfono (20-C): hoy el panel solo pasa `aria-required`.
+
+**28 oct:** se aplicó la primera parte. `AreaDeTexto` acepta `invalido`, y el panel marca el
+campo solo después de que la persona sale de él; lo que se ve no cambia. El asterisco sigue
+pendiente de Figma.
+
+## 54 · Cabeceras de seguridad en Cloudflare Pages
+
+`public/_headers` envía `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y
+`Permissions-Policy` (comprobado en producción el 28 oct), pero no `Content-Security-Policy`. Una
+CSP limita el daño de un XSS, y aquí la sesión vive en `localStorage` y los datos sin conexión en
+IndexedDB. La v1.0 salió sin ella.
+
+La que propuso la auditoría no sirve tal cual:
+
+- **Ocultaría los íconos.** Al construir, Vite incrusta los SVG pequeños como `data:`, e `Icono`
+  los usa como `mask-image`, que se rige por `img-src`; la propuesta no permite `data:`. En
+  `npm run dev` no se nota: ahí los íconos van por URL.
+- **`connect-src` e `img-src` deben aceptar las dos bases** (o `https://*.supabase.co`): `_headers`
+  es el mismo para producción y para las vistas previas, que usan «staging». Las fotos firmadas
+  salen de ahí, y la foto que se va a enviar se muestra como `blob:`.
+
+Si se decide, se prueba en la vista previa de Pages de un PR, porque las e2e usan `vite preview`,
+que no lee `_headers`. Primero como `Content-Security-Policy-Report-Only`, revisando la consola en
+las pantallas de cada rol, y después en firme. Sin un servicio que reciba los reportes, ese modo
+solo avisa en la consola de quien prueba.
+
+**HSTS no hace falta** mientras el dominio sea `*.pages.dev`: todo `.dev` está en la lista de
+precarga HSTS de los navegadores, así que ya va solo por HTTPS (RNF-13). Con un dominio propio sí
+conviene.
