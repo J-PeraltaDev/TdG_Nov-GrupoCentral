@@ -257,6 +257,32 @@ describe('Pantalla 11 · Bandeja del área en el teléfono (RF-09 / CU-09)', () 
     expect(screen.getByText('Cerrada')).toBeVisible()
   })
 
+  it('RNF-06 (cambio 48): «Ver más» en «Finalizadas» pide la página siguiente con el mismo orden', async () => {
+    // Si la página 2 llegara por prioridad, unas se repetirían y otras no saldrían nunca.
+    vi.mocked(contarBandeja).mockResolvedValue(0)
+    vi.mocked(listarBandeja).mockImplementation(async ({ pagina = 0 }) => ({
+      novedades: Array.from({ length: pagina === 0 ? 20 : 5 }, (_, i) => ({
+        ...FINALIZADAS[0],
+        id: `n-${pagina * 100 + i}`,
+        codigo: pagina * 100 + i,
+      })),
+      total: 25,
+    }))
+    abrir('/bandeja?pestana=finalizadas')
+    await screen.findAllByRole('listitem')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ver más' }))
+
+    expect(await screen.findAllByRole('listitem')).toHaveLength(25)
+    expect(listarBandeja).toHaveBeenLastCalledWith({
+      areaId: 'area-m',
+      fincaId: null,
+      estados: ['rechazada', 'cerrada'],
+      recientes: true,
+      pagina: 1,
+    })
+  })
+
   it('RF-09 (cambio 48): «Finalizadas» vacía no dice que el área no tiene pendientes', async () => {
     conBandeja({ porAtender: [], enAtencion: [], enEspera: [], finalizadas: [] })
     abrir('/bandeja?pestana=finalizadas')
