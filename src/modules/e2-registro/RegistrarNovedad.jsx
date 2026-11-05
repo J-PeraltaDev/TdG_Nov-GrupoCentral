@@ -283,7 +283,7 @@ export default function RegistrarNovedad() {
                 <span id="ayuda-descripcion" className="min-w-0 flex-1">
                   Describe lo que ves: qué equipo o lugar, dónde está y desde cuándo.
                 </span>
-                <span className="flex-none">
+                <span className="flex-none tabular-nums">
                   <span className="sr-only">Caracteres: </span>
                   {descripcion.length}/{DESCRIPCION_MAX_CARACTERES}
                 </span>
@@ -425,7 +425,7 @@ export default function RegistrarNovedad() {
 
         {/* En el teléfono la barra de acciones queda fija abajo; en el escritorio cierra el
             formulario. */}
-        <div className="sticky bottom-0 flex flex-col gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-4px_6px_rgb(0_0_0/0.06)] lg:static lg:border-t-0 lg:bg-transparent lg:px-8 lg:pt-0 lg:pb-8 lg:shadow-none">
+        <div className="sticky bottom-0 flex flex-col gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-barra lg:static lg:border-t-0 lg:bg-transparent lg:px-8 lg:pt-0 lg:pb-8 lg:shadow-none">
           <p className="text-center text-auxiliar text-texto-secundario">
             {enLinea
               ? 'Se registrará con la fecha y hora actual y tu usuario'

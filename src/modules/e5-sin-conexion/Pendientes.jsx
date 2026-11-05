@@ -34,13 +34,14 @@ import { SesionVencida } from './SesionVencida.jsx'
 /** Cómo va cada una: fondo, color, ícono y texto de la fila de Figma. */
 const SITUACIONES = {
   enviada: { clases: 'bg-exito-suave text-exito', icono: iconoEnviada },
-  enviando: { clases: 'bg-gris-100 text-info', icono: iconoEnviando },
+  // Las flechas giran mientras se envía, como en el indicador de conexión.
+  enviando: { clases: 'bg-gris-100 text-info', icono: iconoEnviando, animacion: 'animate-girar' },
   error: { clases: 'bg-error-suave text-error', icono: iconoError },
   espera: { clases: 'bg-gris-100 text-texto-secundario', icono: iconoEnEspera },
 }
 
 function Pendiente({ numero, pendiente, situacion, disponible, alReintentar }) {
-  const { clases, icono } = SITUACIONES[situacion]
+  const { clases, icono, animacion } = SITUACIONES[situacion]
   const fecha = pendiente.fecha_registro
   const texto = {
     enviada: `Enviada · código ${formatearCodigo(pendiente.codigo)}`,
@@ -72,7 +73,7 @@ function Pendiente({ numero, pendiente, situacion, disponible, alReintentar }) {
       <p
         className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-etiqueta-fuerte ${clases}`}
       >
-        <Icono src={icono} tamano={18} />
+        <Icono src={icono} tamano={18} className={animacion} />
         {texto}
       </p>
       {situacion === 'error' ? (

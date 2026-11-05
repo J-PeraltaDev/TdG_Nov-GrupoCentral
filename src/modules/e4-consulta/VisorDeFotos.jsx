@@ -59,7 +59,7 @@ export function VisorDeFotos({ fotos, indice, alCambiar, alCerrar, nombre }) {
       aria-label={foto ? nombre(indice) : undefined}
       onClose={alCerrar}
       onKeyDown={alTeclear}
-      className="m-0 h-dvh max-h-none w-full max-w-full bg-overlay p-0 text-sobre-primario backdrop:bg-overlay"
+      className="m-0 h-dvh max-h-none w-full max-w-full bg-overlay p-0 text-sobre-primario backdrop:bg-overlay open:animate-aparecer"
     >
       {foto ? (
         <div className="flex size-full flex-col">

@@ -52,7 +52,7 @@ export default function NovedadGuardada() {
       </div>
 
       <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 pt-8 pb-6 lg:px-8">
-        <span className="flex size-22 items-center justify-center rounded-full bg-advertencia-suave text-advertencia">
+        <span className="flex size-22 animate-sello items-center justify-center rounded-full bg-advertencia-suave text-advertencia">
           <Icono src={iconoSinConexion} tamano={44} />
         </span>
         <h1 ref={titulo} tabIndex={-1} className="text-center text-titulo text-texto outline-none">

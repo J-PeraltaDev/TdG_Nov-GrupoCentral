@@ -822,7 +822,10 @@ Lo que Figma no dibuja o deja abierto:
   «Tomar para atención» para una asignada.
 - **Área táctil de los campos de una línea.** En la fecha y en el tipo de falla solo el texto
   recibe el toque, no todo el recuadro de 50 px. Es el mismo `CampoTexto` del ingreso (Sprint 1):
-  conviene resolverlo ahí, para todos los campos, en un cambio aparte.
+  conviene resolverlo ahí, para todos los campos, en un cambio aparte. **5 nov 2026:** resuelto.
+  En `CampoTexto` y en el selector de tipo de falla el relleno vertical pasó al `input`, y
+  `CampoDeBusqueda` es un `<label>`, como el buscador por código: toda la caja recibe el toque y
+  nada cambia de dibujo.
 
 ## 25 · Tipos de falla de prueba en «staging»
 
@@ -1591,6 +1594,9 @@ táctiles miden 48 px sin que cambie lo que se ve.
   sumar el salto de línea.
 - `modules/` importa de `app/` en siete lugares (`insignias.js`, `Insignia.jsx` y `Cargando.jsx`);
   el #54 agregó los dos de `MisNovedades`. Se resuelve moviendo esos tres archivos a `core/`.
+
+**5 nov 2026:** con el movimiento de la interfaz (cambio 49 de `cambios-sdd.md`), el ícono de
+sincronizar gira y, con un diálogo abierto, el teléfono ya no desplaza la página de atrás.
 
 **Descartados:**
 

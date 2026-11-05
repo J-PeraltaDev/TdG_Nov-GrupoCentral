@@ -40,7 +40,7 @@ export function VistaPrevia({ novedad, resumen, origen, accion }) {
     <aside
       id={ID_DE_LA_VISTA_PREVIA}
       aria-label={`Vista previa de ${codigo}`}
-      className="flex w-full flex-col gap-3.5 rounded-xl border border-borde bg-superficie p-5 xl:w-[300px] xl:flex-none min-[90rem]:w-[340px]"
+      className="flex w-full animate-aparecer flex-col gap-3.5 rounded-xl border border-borde bg-superficie p-5 xl:w-[300px] xl:flex-none min-[90rem]:w-[340px]"
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <h2 className="text-subtitulo text-texto" translate="no">

@@ -209,7 +209,7 @@ function NavegacionInferior({ items, origen, insignias }) {
           {({ isActive }) => (
             <>
               <span
-                className={`flex items-center gap-0.5 rounded-2xl px-4 py-1 ${
+                className={`flex items-center gap-0.5 rounded-2xl px-4 py-1 transition-[color,background-color] ${
                   isActive || ruta === origen
                     ? 'bg-primario-contenedor text-primario'
                     : 'text-texto-secundario'

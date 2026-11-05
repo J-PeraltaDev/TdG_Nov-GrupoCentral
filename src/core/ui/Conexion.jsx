@@ -73,7 +73,12 @@ export function Conexion({ estado, pendientes, className = '' }) {
   const contenido = (
     <>
       {variante.icono ? (
-        <Icono src={variante.icono} tamano={16} />
+        // Mientras envía, las flechas giran: el texto lo dice y el ícono lo muestra.
+        <Icono
+          src={variante.icono}
+          tamano={16}
+          className={actual === 'sincronizando' ? 'animate-girar' : ''}
+        />
       ) : (
         <img src={punto} alt="" width={8} height={8} className="flex-none" />
       )}

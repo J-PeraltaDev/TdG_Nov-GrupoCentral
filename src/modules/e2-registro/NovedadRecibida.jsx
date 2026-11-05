@@ -59,8 +59,9 @@ export default function NovedadRecibida() {
       </div>
 
       <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 pt-10 pb-6 lg:px-8">
-        <span className="flex size-22 items-center justify-center rounded-full bg-exito-suave text-exito">
-          <Icono src={iconoRecibida} tamano={44} />
+        {/* La constancia se sella: el círculo llega y el chulo se dibuja. */}
+        <span className="flex size-22 animate-sello items-center justify-center rounded-full bg-exito-suave text-exito">
+          <Icono src={iconoRecibida} tamano={44} className="animate-trazo" />
         </span>
         <h1 className="text-center text-titulo text-texto">Novedad recibida</h1>
 

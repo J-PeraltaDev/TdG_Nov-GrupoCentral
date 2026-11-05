@@ -355,7 +355,10 @@ export default function Bandeja() {
         className="flex flex-col gap-2.5 lg:gap-6"
       >
         {cargando ? (
-          <p role="status" className="py-6 text-center text-cuerpo-pequeno text-texto-secundario">
+          <p
+            role="status"
+            className="animate-cargando py-6 text-center text-cuerpo-pequeno text-texto-secundario"
+          >
             Cargando…
           </p>
         ) : null}
@@ -378,6 +381,8 @@ export default function Bandeja() {
                 alElegir={setElegidaId}
               />
               <VistaPrevia
+                // Otra fila, otra vista previa: se vuelve a montar y llega con un fundido.
+                key={elegida.id}
                 novedad={elegida}
                 resumen={resumenes[elegida.id]}
                 origen={origen}

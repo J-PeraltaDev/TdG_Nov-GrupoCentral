@@ -110,7 +110,8 @@ export function Pestanas({
             className={`group cursor-pointer outline-none ${estilo.pestana}`}
           >
             <span
-              className={`whitespace-nowrap group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primario ${FORMA[variante]} ${estaElegida ? estilo.elegida : estilo.otra}`}
+              // Solo el color se transiciona: el contorno del foco aparece sin esperar.
+              className={`whitespace-nowrap transition-[color,background-color] group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primario ${FORMA[variante]} ${estaElegida ? estilo.elegida : estilo.otra}`}
             >
               {nombre}
             </span>

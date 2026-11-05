@@ -174,7 +174,10 @@ export default function Avisos() {
           ) : null}
 
           {lista === null && !fallo ? (
-            <p role="status" className="py-6 text-center text-cuerpo-pequeno text-texto-secundario">
+            <p
+              role="status"
+              className="animate-cargando py-6 text-center text-cuerpo-pequeno text-texto-secundario"
+            >
               Cargando…
             </p>
           ) : null}

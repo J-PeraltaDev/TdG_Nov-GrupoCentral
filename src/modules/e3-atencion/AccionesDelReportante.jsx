@@ -155,7 +155,7 @@ export default function AccionesDelReportante({ novedad, acciones, alCambiar, es
         data-barra-de-acciones={botones ? '' : undefined}
         className={
           botones
-            ? 'sticky bottom-0 z-10 mt-auto flex flex-wrap gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] drop-shadow-[0_-4px_6px_rgb(0_0_0/0.06)]'
+            ? 'sticky bottom-0 z-10 mt-auto flex flex-wrap gap-2.5 border-t border-borde bg-superficie px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-barra'
             : undefined
         }
       >

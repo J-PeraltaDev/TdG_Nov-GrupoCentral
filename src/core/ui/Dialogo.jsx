@@ -54,7 +54,7 @@ export function Dialogo({
         // El fondo (::backdrop) es el propio diálogo; el contenido va en un hijo.
         if (cierraConElFondo && evento.target === evento.currentTarget) alCerrar()
       }}
-      className={`m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-superficie p-0 text-texto backdrop:bg-overlay/50 ${ancho}`}
+      className={`m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-superficie p-0 text-texto backdrop:bg-overlay/50 open:animate-dialogo ${ancho}`}
     >
       {abierto ? (
         <div className="flex flex-col gap-4 p-6">

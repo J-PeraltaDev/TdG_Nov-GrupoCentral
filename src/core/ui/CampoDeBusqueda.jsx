@@ -13,7 +13,9 @@ import iconoBuscar from './iconos/search.svg'
  */
 export function CampoDeBusqueda({ nombre, value, alCambiar, className = '' }) {
   return (
-    <div
+    // Es un <label>, como el buscador por código: toda la caja enfoca el campo. El nombre sigue
+    // siendo el `aria-label` del input.
+    <label
       className={`flex h-12 items-center gap-2 rounded-control bg-superficie px-3.5 inset-ring inset-ring-borde focus-within:inset-ring-2 focus-within:inset-ring-primario lg:h-10 lg:w-80 ${className}`}
     >
       <Icono src={iconoBuscar} tamano={20} className="flex-none text-texto-secundario" />
@@ -27,6 +29,6 @@ export function CampoDeBusqueda({ nombre, value, alCambiar, className = '' }) {
         onChange={(evento) => alCambiar(evento.target.value)}
         className="min-w-0 flex-1 bg-transparent text-cuerpo-pequeno text-texto outline-none placeholder:text-texto-secundario"
       />
-    </div>
+    </label>
   )
 }
