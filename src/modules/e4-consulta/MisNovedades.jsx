@@ -267,7 +267,10 @@ export default function MisNovedades() {
 
       <div className="flex flex-col gap-2.5">
         {cargando ? (
-          <p role="status" className="py-6 text-center text-cuerpo-pequeno text-texto-secundario">
+          <p
+            role="status"
+            className="animate-cargando py-6 text-center text-cuerpo-pequeno text-texto-secundario"
+          >
             Cargando…
           </p>
         ) : null}
@@ -326,7 +329,7 @@ export default function MisNovedades() {
       {sinAbiertas ? null : (
         <Link
           to="/registrar"
-          className={`${BOTON_REGISTRAR} fixed right-4 bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+4.8125rem)] z-10 inline-flex rounded-2xl shadow-[0_8px_12px_rgb(15_20_18/0.16)] lg:hidden`}
+          className={`${BOTON_REGISTRAR} fixed right-4 bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+4.8125rem)] z-10 inline-flex rounded-2xl shadow-flotante lg:hidden`}
         >
           <Icono src={iconoRegistrar} tamano={20} />
           Registrar novedad

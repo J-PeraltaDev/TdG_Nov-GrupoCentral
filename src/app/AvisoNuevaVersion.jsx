@@ -25,7 +25,7 @@ export function AvisoNuevaVersion() {
   return (
     <div role="status">
       {hayVersionNueva ? (
-        <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-md flex-col gap-3 rounded-control bg-superficie p-4 shadow-lg inset-ring inset-ring-borde">
+        <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-md animate-subir flex-col gap-3 rounded-control bg-superficie p-4 shadow-lg inset-ring inset-ring-borde">
           <p className="text-cuerpo-pequeno text-texto">
             Hay una versión nueva de la aplicación. Actualiza para usarla.
           </p>

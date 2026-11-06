@@ -47,7 +47,8 @@ export function AvisoTemporal({ tipo = 'exito', children, accion, alTerminar, cl
       // Un error se anuncia de inmediato; una confirmación, cuando el lector termine.
       role={tipo === 'error' ? 'alert' : 'status'}
       data-aviso-temporal={tipo}
-      className={`flex items-center gap-2.5 overflow-clip rounded-control px-4 py-3 text-cuerpo-pequeno text-sobre-primario shadow-[0_8px_24px_rgb(15_20_18/0.16)] ${fondo} ${className}`}
+      // Llega subiendo un poco desde donde se ancla: la barra de acciones o la navegación.
+      className={`flex animate-subir items-center gap-2.5 overflow-clip rounded-control px-4 py-3 text-cuerpo-pequeno text-sobre-primario shadow-[0_8px_24px_rgb(15_20_18/0.16)] ${fondo} ${className}`}
     >
       <Icono src={icono} tamano={20} />
       <p className="min-w-0 flex-1 break-words">{children}</p>

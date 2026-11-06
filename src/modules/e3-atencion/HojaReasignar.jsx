@@ -122,7 +122,10 @@ function Formulario({ novedad, alCerrar, alConfirmar, enCurso }) {
           <span className="sr-only">pasa a</span>
 
           {areas === undefined ? (
-            <p role="status" className={`${TARJETA} text-cuerpo-pequeno text-texto-secundario`}>
+            <p
+              role="status"
+              className={`animate-cargando ${TARJETA} text-cuerpo-pequeno text-texto-secundario`}
+            >
               Cargando…
             </p>
           ) : destinos.length === 0 ? (

@@ -35,7 +35,9 @@ export function Panel({ abierto, alCerrar, titulo, children }) {
       ref={dialogo}
       aria-labelledby={idDelTitulo}
       onClose={alCerrar}
-      className="m-0 h-dvh max-h-none w-full max-w-full overflow-y-auto overscroll-contain bg-superficie p-0 text-texto backdrop:bg-overlay/50 lg:ml-auto lg:w-[480px]"
+      // En el escritorio entra por la derecha, de donde se despliega; en el teléfono, que lo
+      // ocupa todo, sube un poco al aparecer.
+      className="m-0 h-dvh max-h-none w-full max-w-full overflow-y-auto overscroll-contain bg-superficie p-0 text-texto backdrop:bg-overlay/50 open:animate-subir lg:ml-auto lg:w-[480px] lg:open:animate-panel"
     >
       {abierto ? (
         <div className="flex min-h-full flex-col gap-5 px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:px-6 lg:pt-5 lg:pb-6">

@@ -130,6 +130,84 @@
 
   /* Radio de botones y campos (componente Botón de Figma: 10 px) */
   --radius-control: 0.625rem;
+
+  /* Sombras de los componentes de Figma que se repiten: la barra de acciones fija del teléfono
+     y lo que flota sobre la lista (el botón «Registrar novedad», las sugerencias). */
+  --shadow-barra: 0 -4px 6px rgb(0 0 0 / 0.06);
+  --shadow-flotante: 0 8px 12px rgb(15 20 18 / 0.16);
+
+  /*
+   * Movimiento (Figma no lo define; docs/cambios-sdd.md, cambio 49). Solo explica: la hoja sube
+   * desde la barra que la abrió, el diálogo y el aviso llegan, lo que sincroniza gira, y la
+   * constancia de la novedad recibida se sella. Llegan desacelerando, sin rebote; no hay salida
+   * animada: el contenido se desmonta al cerrar.
+   */
+  --animate-aparecer: aparecer 200ms ease-out both;
+  --animate-subir: subir 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-hoja: hoja 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-dialogo: dialogo 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-panel: panel 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-sello: sello 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-trazo: trazo 350ms ease-out 200ms both;
+  /* «Cargando…» solo aparece si la espera pasa de 300 ms: una carga rápida no parpadea. */
+  --animate-cargando: aparecer 200ms ease-out 300ms both;
+  --animate-girar: girar 1.2s linear infinite;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+@keyframes hoja {
+  from {
+    translate: 0 100%;
+  }
+}
+@keyframes dialogo {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+  }
+}
+@keyframes panel {
+  from {
+    translate: 100% 0;
+  }
+}
+@keyframes sello {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+/* El chulo se dibuja de izquierda a derecha, como a mano. El final va explícito: `clip-path`
+   no interpola hacia `none`, y sin él el chulo saltaría entero a mitad del tiempo. */
+@keyframes trazo {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+/* Hacia la izquierda, como las flechas del ícono «sync». */
+@keyframes girar {
+  to {
+    rotate: -1turn;
+  }
+}
+@keyframes latido {
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @layer base {
@@ -140,6 +218,27 @@
     /* El diseño solo tiene tema claro: los controles nativos no deben pasar a oscuro. */
     color-scheme: light;
     -webkit-text-size-adjust: 100%;
+    /* Las superficies del navegador también llevan la paleta: las barras de desplazamiento del
+       escritorio, la selección de texto y el cursor de los campos. */
+    scrollbar-color: var(--color-gris-300) transparent;
+  }
+
+  ::selection {
+    background-color: var(--color-primario-contenedor);
+    color: var(--color-texto);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-primario);
+  }
+
+  /* Con una hoja o un diálogo abierto, arrastrar sobre el fondo no desplaza la página de atrás.
+     Solo en el teléfono: en el escritorio quitar la barra de desplazamiento correría la página. */
+  @media (width < 64rem) {
+    html:has(dialog[open]) {
+      overflow: hidden;
+    }
   }
 
   body {
@@ -152,6 +251,11 @@
   h2,
   h3 {
     text-wrap: balance;
+  }
+
+  /* Sin una palabra sola en la última línea de un párrafo («…aunque no haya / internet»). */
+  p {
+    text-wrap: pretty;
   }
 
   /* Sin la espera del doble toque en los controles táctiles */
@@ -170,13 +274,48 @@
     outline-offset: 2px;
   }
 
+  a,
+  button {
+    text-underline-offset: 0.2em;
+  }
+
+  /*
+   * Los cambios de color de los controles (pasar el ratón, presionar, elegir) se suavizan en
+   * 150 ms; al presionar el cambio es inmediato y al soltar se suaviza. El contorno y la sombra
+   * no se transicionan: el foco y los anillos de los campos aparecen sin esperar.
+   */
+  :where(a, button, label, summary, select, [role='tab'], [role='option']) {
+    transition-property: color, background-color, border-color, text-decoration-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+  :where(a, button, label, summary, [role='tab'], [role='option']):active {
+    transition-duration: 0ms;
+  }
+
+  /* El fondo de las hojas, los diálogos, el panel y el visor llega con un fundido. */
+  dialog[open]::backdrop {
+    animation: aparecer 200ms ease-out;
+  }
+
+  /*
+   * Movimiento reducido (WCAG 2.3.3): nada se desplaza ni gira, pero lo que aparece se sigue
+   * viendo llegar con un fundido y lo que sincroniza late, para no parecer detenido. Cada
+   * animación nueva de @theme que desplace algo necesita aquí su reemplazo.
+   */
   @media (prefers-reduced-motion: reduce) {
+    :root {
+      --animate-subir: aparecer 200ms ease-out both;
+      --animate-hoja: aparecer 200ms ease-out both;
+      --animate-dialogo: aparecer 200ms ease-out both;
+      --animate-panel: aparecer 200ms ease-out both;
+      --animate-sello: aparecer 200ms ease-out both;
+      --animate-girar: latido 2s ease-in-out infinite;
+    }
+
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }

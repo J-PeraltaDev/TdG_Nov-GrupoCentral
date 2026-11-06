@@ -29,8 +29,9 @@ import { cuantasNovedades } from '../../core/utils/texto.js'
 /** Espera entre la última tecla y la consulta, para no pedir una por letra. */
 export const ESPERA_DE_BUSQUEDA_MS = 250
 
+// Sin relleno vertical: en el campo lo lleva el input, para que toda la caja reciba el toque.
 const CAJA =
-  'flex items-center gap-2 rounded-control bg-superficie px-[15px] py-[13px] text-cuerpo text-texto'
+  'flex items-center gap-2 rounded-control bg-superficie px-[15px] text-cuerpo text-texto'
 const ETIQUETA = 'flex-none rounded-md px-2 py-0.5 text-auxiliar-fuerte whitespace-nowrap'
 
 const arreglar = (texto) => texto.trim().replace(/\s+/g, ' ')
@@ -85,7 +86,11 @@ export function SelectorDeTipoDeFalla({ valor, alCambiar, error = null, ref }) {
             *
           </span>
         </p>
-        <div role="group" aria-labelledby={id} className={`${CAJA} inset-ring inset-ring-borde`}>
+        <div
+          role="group"
+          aria-labelledby={id}
+          className={`${CAJA} py-[13px] inset-ring inset-ring-borde`}
+        >
           <Icono src={iconoTipo} tamano={20} className="flex-none text-texto-secundario" />
           <span className="min-w-0 flex-1 break-words">{valor.nombre}</span>
           <span className={`${ETIQUETA} bg-gris-100 text-texto-secundario`}>
@@ -223,7 +228,7 @@ export function SelectorDeTipoDeFalla({ valor, alCambiar, error = null, ref }) {
             setActiva(-1)
           }}
           onKeyDown={alTeclear}
-          className="min-w-0 flex-1 bg-transparent text-cuerpo text-texto outline-none placeholder:text-texto-secundario"
+          className="min-w-0 flex-1 bg-transparent py-[13px] text-cuerpo text-texto outline-none placeholder:text-texto-secundario"
         />
         {texto ? (
           <button
@@ -249,7 +254,7 @@ export function SelectorDeTipoDeFalla({ valor, alCambiar, error = null, ref }) {
         role="listbox"
         aria-label="Tipos de falla"
         hidden={!listaVisible}
-        className="flex flex-col overflow-clip rounded-control bg-superficie shadow-[0_8px_12px_rgb(15_20_18/0.16)] inset-ring inset-ring-borde"
+        className="flex flex-col overflow-clip rounded-control bg-superficie shadow-flotante inset-ring inset-ring-borde"
       >
         {opciones.map((opcion, indice) => {
           const esActiva = indice === activa

@@ -40,8 +40,9 @@ export function CampoTexto({
           </span>
         ) : null}
       </label>
+      {/* El relleno vertical va en el input: así toda la caja de 50 px recibe el toque. */}
       <div
-        className={`flex items-center gap-2 rounded-control px-3.5 py-[13px] ${
+        className={`flex items-center gap-2 rounded-control px-3.5 ${
           resto.readOnly ? 'bg-gris-100' : 'bg-superficie'
         } ${
           conError
@@ -58,7 +59,7 @@ export function CampoTexto({
           required={obligatorio || undefined}
           aria-invalid={conError || undefined}
           aria-describedby={descritoPor}
-          className="min-w-0 flex-1 bg-transparent text-cuerpo text-texto outline-none placeholder:text-texto-secundario"
+          className="min-w-0 flex-1 bg-transparent py-[13px] text-cuerpo text-texto outline-none placeholder:text-texto-secundario"
         />
         {accion}
       </div>

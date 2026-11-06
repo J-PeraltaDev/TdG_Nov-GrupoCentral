@@ -54,6 +54,7 @@ actualicen los documentos (lo exige la Definition of Done).
 | 46  | S5     | Figma 03 (1:672) y CU-02, paso 8                          | **Cambio:** el correo que llega de la pantalla 02 se muestra en solo lectura; si no llega, se escribe como antes                                                      | Propuesto |
 | 47  | S5     | SDD 5.2 («Sistema de diseño»): aviso temporal             | Complemento: el aviso de error que no trae acción muestra «Cerrar» (punto 52 de las decisiones)                                                                       | Propuesto |
 | 48  | S5     | SRS RF-09 y CU-09; SDD 5.2.3 y 6.1.11; Figma 11 y 12      | **Cambio:** la bandeja del área suma «Finalizadas», con las rechazadas y las cerradas, de la más reciente a la más antigua                                            | Propuesto |
+| 49  | S5     | SDD 5.2 («Sistema de diseño»)                             | Complemento: la interfaz se mueve solo para explicar un cambio, con su alternativa de movimiento reducido; la selección y el cursor llevan la paleta                  | Propuesto |
 
 ## 1 · Service worker sin librerías de Workbox (S0)
 
@@ -1508,3 +1509,46 @@ que la bandeja también las muestre (29 oct 2026).
 > descendente.
 
 **En Figma:** la pestaña «Finalizadas» en 12 y las pastillas en 11.
+
+## 49 · Movimiento de la interfaz (S5)
+
+**Sección:** SDD 5.2 («Sistema de diseño»). Figma no define movimiento (el análisis de movimiento
+del archivo no devuelve nada): ninguna pantalla cambia de dibujo.
+
+**Qué pasa.** La interfaz se mueve solo para explicar un cambio, y nunca hace esperar:
+
+- **Hojas, diálogos y panel.** En el teléfono, la hoja sube desde abajo (300 ms), desde la barra
+  de acciones que la abrió. En el escritorio, la hoja y el diálogo llegan con un fundido y un leve
+  escalado (200 ms), y el panel lateral entra por la derecha (300 ms). El fondo y el visor de
+  fotos llegan con un fundido. No hay salida animada: el contenido se desmonta al cerrar. Con una
+  hoja o un diálogo abierto, el teléfono ya no desplaza la página de atrás.
+- **Avisos.** El aviso temporal y el de versión nueva suben 12 px al aparecer (220 ms).
+- **Sincronización.** El ícono «sync» gira mientras se envían las pendientes, en el indicador de
+  conexión y en la pantalla 08.
+- **Constancia.** En la 06 el círculo llega y el chulo se dibuja (450 ms); en la 07 llega el
+  círculo.
+- **Bandeja del escritorio.** Al elegir otra fila, la vista previa llega con un fundido.
+- **Carga.** «Cargando…» aparece solo si la espera pasa de 300 ms: una carga rápida no parpadea.
+- **Color.** Los cambios de color que ya había (el `hover` del primario, el elemento del menú y la
+  pestaña elegidos) se suavizan en 150 ms. El foco no se transiciona.
+- **Movimiento reducido.** Con `prefers-reduced-motion`, nada se desplaza ni gira: lo que aparece
+  llega con un fundido y el ícono de sincronizar late. Reemplaza el bloque que dejaba todas las
+  animaciones en 0,01 ms.
+
+**Superficies del navegador.** La selección de texto usa `primario-contenedor`, el cursor de los
+campos el primario y las barras de desplazamiento del escritorio `gris-300`; el subrayado de los
+enlaces se separa un poco del texto. Los párrafos no dejan una palabra sola en la última línea
+(`text-wrap: pretty`, como el `balance` de los títulos).
+
+**Sin cambio:** el `hover` y el estado presionado de los demás botones siguen esperando a Figma
+(punto 9 de `decisiones-pendientes.md`).
+
+**Peso:** 0,6 KB de CSS y 0,1 KB de JavaScript comprimidos (gzip), sin dependencias nuevas.
+
+**Texto propuesto (SDD 5.2, al final):**
+
+> Movimiento: la interfaz solo se mueve para explicar un cambio (una hoja que sube, un diálogo o un
+> aviso que llega, lo que se sincroniza), en 150 a 450 ms y con CSS. Con movimiento reducido no
+> hay desplazamientos: los cambios llegan con un fundido.
+
+**En Figma:** nada; si se documenta, una nota en «00 · Sistema de diseño».

@@ -59,7 +59,8 @@ export function Hoja({ abierta, alCerrar, titulo, icono, centrada = false, child
         // El fondo (::backdrop) es el propio diálogo; el contenido va en un hijo.
         if (evento.target === evento.currentTarget) alCerrar()
       }}
-      className="m-0 mt-auto max-h-[92dvh] w-full max-w-full overflow-y-auto overscroll-contain rounded-t-[20px] bg-superficie p-0 text-texto backdrop:bg-overlay/50 lg:m-auto lg:max-w-md lg:rounded-2xl"
+      // Sube desde la barra de acciones que la abrió; en el escritorio llega como el `Dialogo`.
+      className="m-0 mt-auto max-h-[92dvh] w-full max-w-full overflow-y-auto overscroll-contain rounded-t-[20px] bg-superficie p-0 text-texto backdrop:bg-overlay/50 open:animate-hoja lg:m-auto lg:max-w-md lg:rounded-2xl lg:open:animate-dialogo"
     >
       {abierta ? (
         <div className="flex flex-col gap-4 px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:p-6">

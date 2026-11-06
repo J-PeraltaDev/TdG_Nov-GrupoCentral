@@ -78,7 +78,7 @@ export function AreaDeTexto({
             </span>
           )}
           {maximo ? (
-            <span className="flex-none">
+            <span className="flex-none tabular-nums">
               <span className="sr-only">Caracteres: </span>
               {value.length}/{maximo}
             </span>
