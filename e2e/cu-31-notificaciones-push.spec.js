@@ -57,6 +57,25 @@ async function simularPush(contexto) {
   })
 }
 
+/**
+ * Abre /ingresar y espera a que el service worker quede activo antes de ingresar. `ingresarComo`
+ * navega apenas carga /ingresar, cuando el service worker todavía se instala, y en WebKit
+ * `navigator.serviceWorker.ready` a veces no se resolvía nunca en la página siguiente. Sin navegar
+ * mientras se instala, WebKit sí lo activa.
+ */
+async function abrirConServiceWorkerActivo(page) {
+  await page.goto('/ingresar')
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          async () => (await navigator.serviceWorker.getRegistration())?.active?.state ?? null,
+        ),
+      { timeout: 20_000 },
+    )
+    .toBe('activated')
+}
+
 const endpointDePrueba = (page) =>
   page.evaluate(() => sessionStorage.getItem('push-de-prueba:endpoint'))
 
@@ -74,8 +93,8 @@ test.describe('CU-31 · Notificaciones push', () => {
     page,
   }) => {
     await simularPush(context)
+    await abrirConServiceWorkerActivo(page)
     await ingresarComo(page, 'reportante')
-    await page.evaluate(() => navigator.serviceWorker.ready)
     await page.goto('/avisos')
 
     const hoja = page.getByRole('dialog', { name: 'Activa las notificaciones' })
@@ -117,8 +136,8 @@ test.describe('CU-31 · Notificaciones push', () => {
 
   test('CU-31: «Ahora no» no vuelve a preguntar en este dispositivo', async ({ context, page }) => {
     await simularPush(context)
+    await abrirConServiceWorkerActivo(page)
     await ingresarComo(page, 'aprobador')
-    await page.evaluate(() => navigator.serviceWorker.ready)
     await page.goto('/avisos')
 
     const hoja = page.getByRole('dialog', { name: 'Activa las notificaciones' })
