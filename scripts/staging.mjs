@@ -57,7 +57,7 @@ function consultar(sql) {
     ])
     const texto = /[{[]/.test(salida) ? salida : error
     const json = leerJson(texto)
-    // En una terminal el CLI imprime solo el arreglo de filas; cuando lo llama un agente,
+    // En una terminal el CLI imprime solo el arreglo de filas; cuando su salida no va a una terminal,
     // las envuelve en un objeto { rows, warning }.
     if (Array.isArray(json)) return { filas: json }
     if (json._tag === 'Error') return { fallo: limpiarError(json.error?.message ?? texto) }

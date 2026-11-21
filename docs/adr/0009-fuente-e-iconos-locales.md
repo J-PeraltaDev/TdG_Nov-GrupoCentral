@@ -8,7 +8,7 @@
 
 El stack pide Public Sans autoalojada, para que funcione sin red, e íconos «exportados de Figma
 como SVG locales, sin librería de íconos». Al revisar Figma se encontró que los íconos no son
-vectores: son texto con la fuente Material Symbols Rounded, y el conector no los exporta como SVG
+vectores: son texto con la fuente Material Symbols Rounded, y Figma no los exporta como SVG
 limpios (salen recortados al contorno del glifo y con el fondo del lienzo).
 
 ## Decisión

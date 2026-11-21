@@ -3,7 +3,7 @@
 Generado a partir del SRS (ficha de cada RF), la especificación de casos de uso (cursos normal y
 alternos), la Tabla 36 del SDD (pantallas) y el archivo de Figma (nodos). Es el contenido que irá
 al tablero de GitHub Projects cuando el equipo lo autorice: una historia por issue, con sus etiquetas
-de épica, prioridad y urgencia y su milestone de sprint. `backlog.json` trae lo mismo en forma de datos.
+de épica, prioridad y urgencia y su milestone de sprint.
 
 Los criterios de aceptación de cada historia son el curso normal y los cursos alternos de su CU.
 La estimación en puntos (Fibonacci) se llena en el refinamiento; sin ella la historia no cumple la DoR.

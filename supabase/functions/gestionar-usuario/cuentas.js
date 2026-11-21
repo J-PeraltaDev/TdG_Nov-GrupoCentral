@@ -1,7 +1,7 @@
 /*
  * Las cuentas sobre supabase-js: lo que las acciones de gestionar-usuario necesitan de Auth y
  * de la base de datos (SDD 6.1.10). Recibe el cliente ya armado con la clave de servicio, que
- * salta las políticas RLS; por eso vive solo en la función (CLAUDE.md, regla 8).
+ * salta las políticas RLS; por eso vive solo en la función (docs/tecnica/convenciones.md, regla 8).
  *
  * Módulo puro: no importa nada de Deno, y se prueba con un cliente simulado (docs/adr/0012).
  */

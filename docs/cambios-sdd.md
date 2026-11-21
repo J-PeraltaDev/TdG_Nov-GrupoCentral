@@ -285,7 +285,7 @@ que precisarlo (plan del Sprint 3, decisiones 1 a 6 y 14). No cambia el diseño.
 ## 11 · Funciones del Sprint 3 (S3)
 
 **Sección:** SDD 5.3.2, Tablas 21 y 22; 6.1.3 (reglas de las funciones); 6.1.4, Tabla 31; y la
-regla 2 de `CLAUDE.md`.
+regla 2 de `docs/tecnica/convenciones.md`.
 
 **Qué pasa.** Al publicar los contratos del sprint (plan del Sprint 3, decisiones 7, 8, 10 y 13)
 hubo que precisar tres firmas y agregar dos funciones que la Tabla 21 no tiene.

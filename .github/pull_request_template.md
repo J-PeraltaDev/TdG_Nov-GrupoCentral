@@ -36,9 +36,9 @@
 ## Revisión propia antes de pedir la del compañero
 
 - [ ] **Diferencias:** revisé `git diff main...HEAD` completo.
-- [ ] **Estándares:** cumple las convenciones de `CLAUDE.md` (nombres del SDD, ramas, commits y migraciones).
+- [ ] **Estándares:** cumple las convenciones de `docs/tecnica/convenciones.md` (nombres del SDD, ramas, commits y migraciones).
 - [ ] **Especificación:** cubre el RF y todos los cursos alternos de su CU, cada uno con su prueba, y no trae nada fuera del alcance del sprint.
-- [ ] **SQL:** cumple las reglas de `CLAUDE.md` (RLS, `security definer`, `security_invoker`, `GRANT` explícitos) y el asesor de Supabase no muestra alertas nuevas.
+- [ ] **SQL:** cumple las reglas de `docs/tecnica/convenciones.md` (RLS, `security definer`, `security_invoker`, `GRANT` explícitos) y el asesor de Supabase no muestra alertas nuevas.
 - [ ] **Interfaz:** revisada contra las guías de interfaz web y la lista de accesibilidad (foco visible, 48 px en el teléfono, nada comunicado solo con color).
 
 ## Definition of Done

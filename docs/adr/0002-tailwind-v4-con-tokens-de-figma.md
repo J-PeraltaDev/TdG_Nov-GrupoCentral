@@ -6,7 +6,7 @@
 ## Contexto
 
 El diseño está cerrado en Figma: 47 variables de color, 12 estilos de texto en Public Sans y
-cuatro componentes base con 28 variantes. El conector de Figma entrega código de referencia en
+cuatro componentes base con 28 variantes. Figma entrega código de referencia en
 React y Tailwind, lo que acelera pasar las 69 pantallas sin una librería de componentes pesada.
 
 ## Decisión

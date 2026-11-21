@@ -42,8 +42,8 @@ Las cifras coinciden con las del cierre del Sprint 2. Diferencias y datos nuevos
   fallar. Se restauró con `npm install`, que respeta el archivo de bloqueo, y el servidor siguió
   respondiendo. Quedaron tres carpetas temporales dentro de `node_modules` (no se suben): se van con
   el próximo `npm ci` hecho con el servidor cerrado.
-- **Los puntos del Sprint 2 no están en `docs/S2-informe`.** `backlog.md` y `backlog.json` los
-  tienen solo en la rama `docs/S2-plan` (PR #8), que sale de `main` y no forma parte de la cadena.
+- **Los puntos del Sprint 2 no están en `docs/S2-informe`.** `backlog.md` los
+  tiene solo en la rama `docs/S2-plan` (PR #8), que sale de `main` y no forma parte de la cadena.
   Llegan a `main` cuando se fusione el #8.
 - **«staging»** tiene hoy 7 usuarios, 3 fincas, 114 novedades y 6 tipos de falla (los que crearon
   las pruebas), PostgreSQL 17.11 y `pgcrypto` 1.3 en el esquema `extensions`. Sus tokens de sesión
@@ -53,17 +53,17 @@ Las cifras coinciden con las del cierre del Sprint 2. Diferencias y datos nuevos
 
 ## Antes de empezar
 
-| Necesidad                                                               | Para qué                                                                                     | Estado al 9 oct 2026                                                                                                       |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Aprobar este plan, los puntos y las decisiones del final                | Sin eso no se escribe código del sprint                                                      | **Hecho.** Las decisiones quedaron a criterio de la implementación                                                         |
-| **Revisar y fusionar el Sprint 2 (#8 a #17), en su orden**              | El Sprint 3 edita los mismos archivos; ver «Base de las ramas»                               | **Pendiente, y es de una persona.** El equipo se lo encargó al agente, pero el entorno no le permite fusionar sin revisión |
-| Empezar antes del 26 oct                                                | El calendario dice 26–30 oct                                                                 | **Hecho:** el equipo pidió continuar                                                                                       |
-| Desplegar Edge Functions en «staging»                                   | Es la primera vez; se hace con `npm run staging:functions` y solo en «staging»               | Se hace en el PR 1                                                                                                         |
-| `deno check` en el CI (herramienta nueva, solo en el CI)                | En los equipos no hay Deno: es la única revisión estática de las funciones                   | **Sí** (decisión 2)                                                                                                        |
-| Decir si el agente corre las pruebas que ingresan o las corre el equipo | Las e2e y la prueba de `gestionar-usuario` con la sesión del administrador de prueba         | **Pendiente.** Mientras tanto quedan escritas y sin correr                                                                 |
-| Política de tratamiento de datos (Ley 1581)                             | `/tratamiento-de-datos` deja de ser un marcador (decisión 30)                                | El equipo pidió redactarla. **Faltan los datos de contacto del responsable y la validación de la empresa**                 |
-| Avisar antes de un `staging:reset`                                      | No se prevé ninguno: las migraciones entran con `staging:push`. Sigue el de antes de la demo | —                                                                                                                          |
-| Cambios en Figma que quedan anotados (decisiones 31 a 47)               | Figma no se edita desde aquí                                                                 | Pendiente del equipo                                                                                                       |
+| Necesidad                                                  | Para qué                                                                                     | Estado al 9 oct 2026                                                                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Aprobar este plan, los puntos y las decisiones del final   | Sin eso no se escribe código del sprint                                                      | **Hecho.** Las decisiones quedaron a criterio de la implementación                                         |
+| **Revisar y fusionar el Sprint 2 (#8 a #17), en su orden** | El Sprint 3 edita los mismos archivos; ver «Base de las ramas»                               | **Pendiente, y es de una persona.** Ninguna fusión entra sin revisión                                      |
+| Empezar antes del 26 oct                                   | El calendario dice 26–30 oct                                                                 | **Hecho:** el equipo pidió continuar                                                                       |
+| Desplegar Edge Functions en «staging»                      | Es la primera vez; se hace con `npm run staging:functions` y solo en «staging»               | Se hace en el PR 1                                                                                         |
+| `deno check` en el CI (herramienta nueva, solo en el CI)   | En los equipos no hay Deno: es la única revisión estática de las funciones                   | **Sí** (decisión 2)                                                                                        |
+| Decidir quién corre las pruebas que ingresan               | Las e2e y la prueba de `gestionar-usuario` con la sesión del administrador de prueba         | **Pendiente.** Mientras tanto quedan escritas y sin correr                                                 |
+| Política de tratamiento de datos (Ley 1581)                | `/tratamiento-de-datos` deja de ser un marcador (decisión 30)                                | El equipo pidió redactarla. **Faltan los datos de contacto del responsable y la validación de la empresa** |
+| Avisar antes de un `staging:reset`                         | No se prevé ninguno: las migraciones entran con `staging:push`. Sigue el de antes de la demo | —                                                                                                          |
+| Cambios en Figma que quedan anotados (decisiones 31 a 47)  | Figma no se edita desde aquí                                                                 | Pendiente del equipo                                                                                       |
 
 Nada de este plan toca «PROYECTO». Lo que le llega al cierre está en «Cierre del sprint».
 
@@ -80,9 +80,8 @@ El Sprint 2 no está en `main`. Hay dos caminos:
 2. **Seguir sin esperar.** Las ramas salen de `docs/S2-informe` y cada PR va en borrador con
    «Depende de #17», como en el Sprint 2.
 
-**Decidido el 9 oct 2026:** el equipo eligió el primer camino y le encargó la fusión al agente. El
-entorno no se lo permite (rechaza una fusión sin revisión, que es también lo que `CLAUDE.md` reserva
-a las personas). Hasta que una persona fusione el Sprint 2, el sprint avanza por el segundo camino:
+**Decidido el 9 oct 2026:** el equipo eligió el primer camino, pero una fusión sin revisión no
+entra (las convenciones la reservan a una persona, después de la review). Hasta que una persona fusione el Sprint 2, el sprint avanza por el segundo camino:
 las ramas salen de `docs/S2-informe`, en borrador y con «Depende de #17»; cuando el Sprint 2 esté
 en `main`, se les trae `main` y quedan con su diferencia propia.
 
@@ -90,33 +89,11 @@ Hay dos cosas que no dependen del Sprint 2 y pueden salir de `main`: este plan
 (como el #8) y el **PR 1**, la base de las Edge Functions, que además es el mayor riesgo técnico y
 conviene despejarlo primero.
 
-## Skills del entorno
+## Notas del plan
 
-Están en la lista: `supabase`, `supabase-postgres-best-practices`, `vitest`,
-`vercel-react-best-practices`, `accessibility`, `web-design-guidelines`, `webapp-testing`,
-`cloudflare:web-perf`, `wrangler`, `docx`, `pdf`, `chrome-browser`, `built-in-browser` y
-`code-review`. Ninguna se instala ni se copia al repositorio.
-
-| Skill                              | Uso en este sprint                                                                                            |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `supabase`                         | **Ya se usó para este plan:** variables de las funciones, `verify_jwt`, CORS, `deno.json`, lista de seguridad |
-| `supabase-postgres-best-practices` | Antes de cada migración y de cada prueba pgTAP (PR 2, 3, 4, 6 y 7)                                            |
-| `vitest`                           | Pantallas, repositorios y la lógica pura de las Edge Functions (entorno `node`)                               |
-| `vercel-react-best-practices`      | Rutas perezosas por rol y peso de la ruta de ingreso; listas de 19, 28, 30 y 32                               |
-| `accessibility`                    | Formularios 29 y 30-B, diálogos 28-B, 30 y 09-C, hojas 09-B y 20-C, el código de 03 y las contraseñas         |
-| `web-design-guidelines`            | Revisión de la interfaz en cada PR con pantallas                                                              |
-| `webapp-testing`                   | Capturas a 360 × 800 y 1280 × 800 con el servidor simulado                                                    |
-| `cloudflare:web-perf`              | Peso y Lighthouse de la ruta de ingreso al cierre                                                             |
-| `built-in-browser`                 | Ingresar en la vista previa de Pages de un PR con un usuario de prueba, si el equipo lo autoriza              |
-| `code-review`                      | Revisión propia de cada PR, además de los dos ejes                                                            |
-
-- **`figma-design-to-code`** no está en la lista; el conector de Figma la entrega como recurso y ya
-  se cargó. Para este plan se revisó la captura de las 19 pantallas; `get_design_context` se pide
-  pantalla por pantalla al construirlas.
 - **Lo que la documentación de Supabase recomienda y este plan no adopta:** el paquete
   `@supabase/server` (`withSupabase`) para las Edge Functions. Es una dependencia nueva; se usa
   `@supabase/supabase-js`, que alcanza (decisión 6).
-- El conector de Cloudflare sigue sin autorizar. No bloquea.
 - La Figura 19 del SDD (secuencia de la recuperación) no quedó en el Markdown y no hizo falta: el
   flujo sale de SDD 6.1.10, la Tabla 23 y CU-02.
 
@@ -138,7 +115,7 @@ docs/S3-informe (PR 8)
 - Después, lo que cierra el ciclo y reutiliza la base del Sprint 2 (HU-13 y HU-15), luego fincas
   (sin servidor nuevo) y al final las dos historias con Edge Functions: HU-03 y después HU-02, que
   necesita usuarios creados por la aplicación para sus pruebas.
-- Si lo hace una sola persona (o el agente), va en serie: 1 → 2 → 3 → 4 → 5 → 6 → 7.
+- Si lo hace una sola persona, va en serie: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 - Las migraciones van en el orden de los PR: comparten «staging» y su historial.
 - **Review:** una persona revisa los PR 1, 2, 6 y 7 (servidor y seguridad); la otra, los PR 3, 4
   y 5.
@@ -164,7 +141,7 @@ Reparto sugerido: quien hizo el servidor en el Sprint 2 hace ahora el cliente, y
 | HU-02     | RF-02 · Recuperar contraseña | 13     | Función sin sesión, código de un solo uso, intentos, segunda Edge Function y seis pantallas                |
 | **Total** |                              | **41** | El Sprint 2 fueron 38                                                                                      |
 
-Adoptados el 9 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
+Adoptados el 9 oct 2026 y anotados en `docs/scrum/backlog.md`.
 
 ---
 
@@ -738,7 +715,7 @@ Lo pidió el equipo el 9 oct 2026 (decisión 30). No depende de los demás PR de
   «staging».
 - **Antes de abrir el PR:** lint, formato, unitarias, build, **peso de la ruta de ingreso**,
   capturas a 360 × 800 y 1280 × 800 en `docs/sprints/evidencias/S3/` (datos de prueba y servidor
-  simulado), revisión con las skills y revisión propia en dos ejes.
+  simulado) y revisión propia en dos ejes.
 - **e2e que ingresan:** quedan escritas y se corren solo con permiso en ese momento. Crean sus datos
   por la API con la sesión de cada rol, nunca con la clave secreta. **Nunca cambian la contraseña de
   un usuario del seed ni desactivan a ninguno, ni desactivan una finca del seed:** CU-02 y CU-03

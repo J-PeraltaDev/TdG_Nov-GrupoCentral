@@ -1,7 +1,7 @@
 # Supabase · configuración de Auth y de la API de datos
 
 Valores que debe tener el proyecto remoto «PROYECTO» (`lyrdsmfalrchbdpmikmt`). Se ponen a mano en
-el panel; un agente no los cambia sin que el equipo se lo pida, porque «PROYECTO» es producción.
+el panel, y solo con el OK del equipo, porque «PROYECTO» es producción.
 El entorno local ya los tiene en `supabase/config.toml`.
 
 Fuente: SDD 5.3.1 («registro público deshabilitado, confirmación por correo deshabilitada y
@@ -106,7 +106,7 @@ npx supabase link --project-ref lyrdsmfalrchbdpmikmt
 ```
 
 `link` pide la contraseña de la base de datos (Project Settings → Database). Se escribe en la
-terminal; no se guarda en ningún archivo del repositorio. Para un agente o para el CI es mejor un
+terminal; no se guarda en ningún archivo del repositorio. Para el CI es mejor un
 token personal con alcance limitado a este proyecto (Account → Access Tokens) en la variable
 `SUPABASE_ACCESS_TOKEN`.
 

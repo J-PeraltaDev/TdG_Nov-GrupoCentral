@@ -173,7 +173,7 @@ El esquema `private` no se expone por la API.
 - **Asesor de Supabase:** 21 avisos _WARN_ en «staging», todos de tipos conocidos (punto 16 de las
   decisiones pendientes). Ninguno de nivel de error.
 
-Las razones están en el ADR 0010 y en las reglas 1 a 6 de `CLAUDE.md`.
+Las razones están en el ADR 0010 y en las reglas 1 a 6 de [`convenciones.md`](convenciones.md).
 
 ## En el dispositivo (IndexedDB)
 

@@ -7,7 +7,7 @@ import { manejar } from './manejar.js'
 import { crearRecuperacion } from './recuperacion.js'
 
 // La plataforma inyecta estas variables. La clave secreta salta las políticas RLS: vive solo
-// aquí, nunca en el cliente ni en el repositorio (CLAUDE.md, regla 8).
+// aquí, nunca en el cliente ni en el repositorio (docs/tecnica/convenciones.md, regla 8).
 const url = Deno.env.get('SUPABASE_URL')!
 const claveSecreta = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!)['default']
 
