@@ -13,14 +13,14 @@ instalable.
 
 ## Antes de empezar
 
-| Necesidad                                                                  | Para qué                                                         | Quién                       |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------- |
-| Docker Desktop **o** el OK para crear «staging»                            | Aplicar migraciones y correr pgTAP: sin esto no hay PR 1 ni PR 2 | El equipo                   |
-| Correr `npm run db:reset && npm run test:db` con la migración del Sprint 0 | Confirmar que lo ya escrito funciona                             | El agente, apenas haya base |
-| `npx playwright install chromium webkit`                                   | Pruebas e2e y capturas                                           | El equipo autoriza          |
-| Aprobar `idb` y `fake-indexeddb`                                           | Ya están en el stack; se instalan en el PR 3                     | —                           |
-| Sprint 0 en `main` y proyecto de Pages creado                              | Vistas previas para la review                                    | El equipo                   |
-| DoR: estimar las cinco historias                                           | Sprint Planning del 13 oct                                       | El equipo                   |
+| Necesidad                                                                  | Para qué                                                         | Quién              |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| Docker Desktop **o** el OK para crear «staging»                            | Aplicar migraciones y correr pgTAP: sin esto no hay PR 1 ni PR 2 | El equipo          |
+| Correr `npm run db:reset && npm run test:db` con la migración del Sprint 0 | Confirmar que lo ya escrito funciona                             | Apenas haya base   |
+| `npx playwright install chromium webkit`                                   | Pruebas e2e y capturas                                           | El equipo autoriza |
+| Aprobar `idb` y `fake-indexeddb`                                           | Ya están en el stack; se instalan en el PR 3                     | —                  |
+| Sprint 0 en `main` y proyecto de Pages creado                              | Vistas previas para la review                                    | El equipo          |
+| DoR: estimar las cinco historias                                           | Sprint Planning del 13 oct                                       | El equipo          |
 
 ## Orden de los PR
 
@@ -63,7 +63,7 @@ el cliente (PR 3 y 4).
   vacía y de máximo 500 caracteres; `CHECK` de que `resuelta` y `cerrada` exigen `tipo_falla_id`,
   `solucion` y `fecha_ejecucion`.
 - `historial_transicion.id` es `bigint` secuencial. Las demás claves son `uuid`, como dice el
-  SDD, aunque la skill sugiera otra estrategia.
+  SDD, aunque las buenas prácticas de Postgres sugieran otra.
 - `tipo_falla.nombre_normalizado` único; el envoltorio IMMUTABLE de `unaccent` es del Sprint 2.
 - **Corrección al SDD (Tabla 31):** la lectura de `usuario` se permite a cualquier usuario
   autenticado y activo, con privilegios por columna (`id, nombre, rol_id, finca_id, area_id,

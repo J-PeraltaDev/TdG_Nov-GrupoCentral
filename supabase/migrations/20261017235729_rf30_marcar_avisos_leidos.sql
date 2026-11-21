@@ -1,6 +1,6 @@
 -- RF-30 (Sprint 5): implementación de marcar_avisos_leidos y fin de la escritura directa en
 -- notificacion.
--- Fuente: SDD 5.3.2 (Tabla 21) y 6.1.6, y la regla 1 de CLAUDE.md: el cliente nunca escribe en
+-- Fuente: SDD 5.3.2 (Tabla 21) y 6.1.6, y la regla 1 de docs/tecnica/convenciones.md: el cliente nunca escribe en
 -- notificacion. Las Tablas 20 y 31 del SDD le daban al destinatario un PATCH de leida y leida_en;
 -- desde aquí esa es la única forma de marcar (plan del Sprint 5, decisión 29; cambio 26).
 -- Reemplaza el cuerpo del contrato; la firma y los privilegios no cambian.

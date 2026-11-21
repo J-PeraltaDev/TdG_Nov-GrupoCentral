@@ -1,5 +1,5 @@
 -- RF-30 / CU-30 · marcar_avisos_leidos y la escritura en notificacion (SDD 6.1.6; plan del
--- Sprint 5, decisión 29). El cliente ya no escribe en notificacion: la regla 1 de CLAUDE.md.
+-- Sprint 5, decisión 29). El cliente ya no escribe en notificacion: la regla 1 de docs/tecnica/convenciones.md.
 -- Se prueba a través del RPC, con el rol y el JWT de cada usuario. Los datos se crean dentro de
 -- la transacción y no dependen del seed.
 begin;

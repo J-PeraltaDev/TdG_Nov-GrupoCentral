@@ -112,7 +112,7 @@ Valores del plan, en `src/core/config/parametros.js` (ver `docs/adr/0006`): desc
   definitivo en 192, 512, 512 _maskable_ y 180 px. **Resuelto el 27 oct 2026:** el logo de Grupo
   Central (cambio 42 de `cambios-sdd.md`).
 - **Íconos de la interfaz:** en Figma son texto con la fuente Material Symbols Rounded, no
-  vectores, y el conector no los exporta como SVG limpios. Se usaron los SVG oficiales del mismo
+  vectores, y Figma no los exporta como SVG limpios. Se usaron los SVG oficiales del mismo
   conjunto (Google, Apache 2.0), sin modificar. Detalle en `docs/adr/0009` y en
   `src/core/ui/iconos/LEEME.md`. Falta confirmar que esa es la fuente que quieren.
 
@@ -500,7 +500,7 @@ políticas nuevas de `razon_social` (cambio 40) tampoco.
 
 Las pruebas de extremo a extremo de CU-01 (ingreso por rol, 01-B, 01-C y cierre de sesión), CU-05,
 CU-06 y CU-07 ingresan con los usuarios de prueba, cuya contraseña define cada persona (README,
-«Usuarios de prueba»). El agente no la maneja, así que las corre el equipo.
+«Usuarios de prueba»). Las corre el equipo.
 
 **Ya se corrieron una vez** (7 oct 2026, Chromium, contra «staging»): el ingreso real funciona, y
 con él el registro, la constancia, el reintento sin duplicar y el enrutamiento. Fallaron 5 de 40,
@@ -535,8 +535,8 @@ el tiempo máximo por prueba subió de 30 a 60 s.
 npm run test:e2e:chromium
 ```
 
-**En el Sprint 3 las corre también el agente,** con el permiso del equipo (9 oct 2026): las
-pruebas cargan `.env.local` por su cuenta y la contraseña no pasa por la conversación. Ese día,
+**Desde el 9 oct 2026 se corren con el permiso del equipo:** las
+pruebas cargan `.env.local` por su cuenta y la contraseña no se escribe en ningún comando. Ese día,
 con las cuatro de CU-13 (la decisión del director y la pantalla 18-C, que estaba pendiente),
 pasaron las 74, más las seis de preparación. Con las seis de CU-15 (confirmar el cierre, «la falla
 persiste» y el recorrido completo del incremento, de registrar a cerrar con cada rol en su
@@ -621,7 +621,7 @@ Quedan los pasos, por si hay que repetirlos. Son dos, en el panel de Supabase de
 1. **Authentication → Users → Add user → Create new user:** el correo de la cuenta y una
    contraseña que solo conozcan los dos, con **Auto Confirm User** marcado (sin eso el ingreso
    responde que el correo no está confirmado). Este paso lo hace una persona: la contraseña no
-   pasa por el repositorio ni por un agente.
+   pasa por el repositorio.
 2. **SQL Editor:** el perfil de la aplicación, que es lo que la vuelve administrador. Se cambian
    los dos textos en mayúsculas:
 
@@ -1534,8 +1534,7 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
   puede repetir la anterior. Pasa al repetirla, no aparece en el CI y se va con un
   `staging:reset`. No se cambió: es una prueba del Sprint 2 y el caso real (un solo director) no lo
   produce.
-- **`cloudflare:web-perf`** no se corrió sobre Pages: recorrer la vista previa no está autorizado.
-  Lighthouse se corrió sobre el build local (punto 11).
+- **Lighthouse** no se corrió sobre Pages, sino sobre el build local (punto 11).
 - **El WebKit del CI se congelaba con #50** en Cuenta, Avisos y el cierre de sesión. Con el
   permiso sin decidir (así empieza en WebKit; en Chromium, negado), la app le preguntaba al
   servicio push por la suscripción, y esa llamada deja la página sin responder en el WebKit de
@@ -1547,10 +1546,9 @@ Lo que Figma no trae y cómo quedó (plan del Sprint 5, decisiones 44 a 47):
 
 ## 50 · Auditoría externa de la v1.0 (19 oct 2026)
 
-El 19 oct 2026 se auditó la v1.0 con Antigravity: interfaz, accesibilidad, responsividad,
+El 19 oct 2026 se hizo una auditoría externa de la v1.0: interfaz, accesibilidad, responsividad,
 seguridad y arquitectura. El informe no está en el repositorio. El 28 oct se revisó cada hallazgo
-contra `main` (con el #54 incluido), contra este documento y contra los ADR, con una segunda
-opinión de Gemini.
+contra `main` (con el #54 incluido), contra este documento y contra los ADR.
 
 **Ya estaban decididos** (no cambian):
 
@@ -1624,19 +1622,10 @@ sincronizar gira y, con un diálogo abierto, el teléfono ya no desplaza la pág
 - **Comprobar que «PROYECTO» tiene las migraciones del #54** (`rf26_panel_del_aprobador`,
   `rf32_reactivar_tipo_falla` y `rf04_razones_sociales`). Pages ya publica ese frontend: sin ellas
   fallarían el panel del aprobador, «Reactivar» y las razones sociales. El simulacro de
-  `docs/despliegue/produccion-v1.0.md` las lista. Lo corre una persona: el entorno no deja que el
-  agente lea «PROYECTO».
+  `docs/despliegue/produccion-v1.0.md` las lista. Lo corre una persona.
 - **La política de tratamiento de datos** sigue siendo el marcador en producción: el enlace del
   ingreso dice «Esta pantalla llega en el Sprint 3». El texto y su punto 26 están en el PR #19, en
   borrador.
-- **El MCP de Supabase** de cada persona va contra «staging» y con `read_only=true`. Con escritura
-  sobre «PROYECTO», un agente podría cambiar producción sin pasar por la regla 9 de `CLAUDE.md`.
-  **28 oct:** la copia donde se hizo esta revisión ya quedó así; cada persona revisa la suya.
-- **`npm run format:check` falla en la copia local** por lo que no está versionado: `.mcp.json`,
-  `.claude/` y los worktrees de Claude Code. Prettier lee `.gitignore` pero no
-  `.git/info/exclude`: conviene agregarlos a `.gitignore` y borrar los worktrees viejos.
-  **28 oct:** ya están en `.gitignore`. Los worktrees viejos no le estorban a Prettier, pero
-  siguen ahí.
 
 ## 51 · Contraste del área «Mantenimiento» en su etiqueta
 

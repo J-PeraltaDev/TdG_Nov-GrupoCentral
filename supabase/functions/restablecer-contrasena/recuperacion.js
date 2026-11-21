@@ -1,7 +1,7 @@
 /*
  * La recuperación sobre supabase-js: lo que restablecer-contrasena necesita de la base de datos
  * y de Auth (SDD 6.1.10). Recibe el cliente ya armado con la clave de servicio; por eso vive
- * solo en la función (CLAUDE.md, regla 8).
+ * solo en la función (docs/tecnica/convenciones.md, regla 8).
  *
  * Módulo puro: no importa nada de Deno, y se prueba con un cliente simulado (docs/adr/0012).
  */

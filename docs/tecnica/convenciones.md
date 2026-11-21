@@ -1,4 +1,4 @@
-# Novedades Grupo Central
+# Convenciones del código
 
 PWA que centraliza el registro, el enrutamiento, la aprobación en dos instancias, el seguimiento
 y el cierre de las novedades de infraestructura física y tecnológica de las fincas de Grupo
@@ -11,8 +11,7 @@ rediseñarlo.** Si algo obliga a apartarse del diseño, se pregunta primero y se
 
 ## Fuentes de verdad
 
-Están en `docs/fuentes/` (fuera del repo: contienen datos de personas y de la empresa) y, para
-leerlas, convertidas a Markdown en `docs/fuentes/md/`.
+Están fuera del repositorio, porque contienen datos de personas y de la empresa.
 
 | Documento                                                             | Decide                           |
 | --------------------------------------------------------------------- | -------------------------------- |
@@ -46,13 +45,12 @@ npm run staging:usuarios    # pone CLAVE_USUARIOS_DE_PRUEBA (.env.local) a los u
 npm run staging:functions   # despliega en «staging» las Edge Functions (sin Docker, ADR 0012)
 ```
 
-Las e2e levantan su propio build en el 4173 y no reutilizan un servidor que ya esté ahí: si otra
-sesión lo ocupa, Playwright se detiene con «is already used». Espera a que termine o cierra ese
+Las e2e levantan su propio build en el 4173 y no reutilizan un servidor que ya esté ahí: si otro
+proceso lo ocupa, Playwright se detiene con «is already used». Espera a que termine o cierra ese
 servidor. No cambies el puerto: las Edge Functions solo aceptan 5173 y 4173.
 
 Los equipos no tienen Docker: la base de desarrollo es el proyecto «staging»
-(`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). En la terminal del
-agente, los comandos del CLI que preguntan van con `--yes < /dev/null`. Los scripts `db:*` y
+(`qxjnnanjidytbyihanet`), siempre a través de `scripts/staging.mjs` (ADR 0011). Los scripts `db:*` y
 `test:db` (Supabase local) quedan para el CI y para quien tenga Docker. El CI corre lint, formato,
 unitarias, build, pgTAP y `deno check` de las Edge Functions, y las pruebas de extremo a extremo en
 Chromium y WebKit contra Supabase local (desde el Sprint 4; obligatorias desde el Sprint 5).
@@ -96,7 +94,7 @@ src/
 supabase/             # config.toml, migrations/, tests/ (pgTAP), functions/, seed.sql (solo pruebas)
 scripts/staging.mjs   # base de desarrollo sin Docker (ADR 0011)
 e2e/                  # Playwright, un archivo por caso de uso; ayudas en e2e/apoyo/
-docs/                 # adr/, scrum/, sprints/, despliegue/, pruebas/
+docs/                 # adr/, scrum/, sprints/, despliegue/, pruebas/, tecnica/
 ```
 
 ## Convenciones
@@ -118,8 +116,8 @@ docs/                 # adr/, scrum/, sprints/, despliegue/, pruebas/
 - **Commits:** Conventional Commits con el RF como alcance: `feat(RF-05): registrar novedad`.
 - **Migraciones:** `supabase migration new rf05_registrar_novedad` (el archivo lo crea el CLI).
 - **Pruebas:** llevan el RF y el CU en el nombre: `RF-05 / CU-05 4a: señala los campos faltantes`.
-- **Merge:** squash merge a `main` hecho por una persona después de la revisión del compañero. Un
-  agente no hace merge, no fuerza un push y no escribe en la base de producción sin confirmación.
+- **Merge:** squash merge a `main` hecho por una persona después de la revisión del compañero. Nadie
+  fuerza un push ni escribe en la base de producción sin la confirmación del equipo.
 - **Interfaz:** componentes y tokens de `src/core/ui/` y `tokens.css` antes que marcado nuevo;
   imports directos, sin archivos `index.js` que reexporten; 48 px de área táctil en el teléfono;
   foco visible; nada comunicado solo con color; «escritorio» es el punto de quiebre `lg`.
@@ -210,8 +208,8 @@ entrega como HTTP 400 con `code`, `message`, `details` y `hint`, y `core/errores
 5. **Políticas:** `TO authenticated` siempre con un predicado de alcance; `(select auth.uid())` y
    `(select private.fn_rol())` para que se evalúen una vez; todo `UPDATE` con `USING` y `WITH
 CHECK`; nunca `user_metadata` para autorizar.
-6. **Asesor:** después de cada migración corre `npm run staging:advisors` (o `get_advisors` del
-   MCP) y no dejes alertas nuevas.
+6. **Asesor:** después de cada migración corre `npm run staging:advisors` y no dejes alertas
+   nuevas.
 7. **El service worker no cachea nada de Supabase.** Los datos sin conexión viven en IndexedDB,
    no en `localStorage`; la sesión de `supabase-js` queda en su almacenamiento por defecto.
 8. **Secretos:** el repositorio es público. En el cliente solo va la clave publicable
@@ -221,7 +219,7 @@ CHECK`; nunca `user_metadata` para autorizar.
 9. **«PROYECTO» (`lyrdsmfalrchbdpmikmt`) es producción.** Solo recibe migraciones al cierre de
    cada sprint, después de la review y con el OK del equipo. Se trabaja contra «staging»
    (`qxjnnanjidytbyihanet`), que es compartido: avisa antes de un `staging:reset`.
-10. **Migraciones a mano**, con `supabase migration new`. No uses `apply_migration` del MCP.
+10. **Migraciones a mano**, con `supabase migration new`. No se aplica SQL directamente sobre la base.
 
 ## Definition of Done
 

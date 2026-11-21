@@ -1,7 +1,7 @@
 # 0013 · `solicitar_recuperacion` se puede ejecutar sin sesión
 
 - **Estado:** Aceptada el 9 oct 2026 (plan del Sprint 3, decisión 7). Es una **excepción** a la
-  regla 2 de `CLAUDE.md`.
+  regla 2 de `docs/tecnica/convenciones.md`.
 - **Requerimientos:** RF-02, RNF-11 · SDD 5.3.2 (Tabla 21) y 6.1.10 · CU-02
 
 ## Contexto
@@ -11,7 +11,7 @@ sin sesión. El SDD lo dice dos veces: la Tabla 21 pone a `solicitar_recuperacio
 sesión», y la sección 6.1.10, que «la solicitud se registra mediante una función que no exige
 sesión y que siempre responde con el mismo mensaje».
 
-La regla 2 de `CLAUDE.md`, que vale para todas las demás funciones, dice lo contrario: toda función
+La regla 2 de `docs/tecnica/convenciones.md`, que vale para todas las demás funciones, dice lo contrario: toda función
 `security definer` le quita `execute` a `anon`. Y la función tiene que ser `security definer`,
 porque nadie escribe directamente en `solicitud_recuperacion`.
 

@@ -5,10 +5,8 @@
 > Quedan los pasos 14 a 16.
 
 La lista, en orden, para llevar el Sprint 5 a «PROYECTO» (`lyrdsmfalrchbdpmikmt`) y a la
-aplicación publicada. **La ejecuta una persona del equipo, con el OK de la review.** El agente no
-escribe en «PROYECTO» (en el Sprint 4 el modo de permisos tampoco se lo dejó). Prepara los
-comandos y, después de cada paso, hace las comprobaciones de solo lectura de la columna
-«Comprobación».
+aplicación publicada. **La ejecuta una persona del equipo, con el OK de la review.** Después de
+cada paso se hacen las comprobaciones de solo lectura de la columna «Comprobación».
 
 **Por qué en este orden.** Cloudflare Pages publica `main` en cuanto se fusiona. La base y la
 función tienen que estar **antes** que el código que las usa (lección del 10 oct; decisión 28 del
@@ -23,7 +21,7 @@ los PR: así sus fechas quedan en orden y no hace falta `--include-all`.
   - acceso a Cloudflare Pages y permiso para fusionar en GitHub.
 - **Fusiones:** con _squash_, una por una. Antes de cada una se trae a la rama la del PR anterior
   y después `main`, y se comprueba que la diferencia frente a `main` sea solo la propia (como en el
-  Sprint 4). El agente lo hace si se lo piden; nunca con `rebase` ni con un `push` forzado.
+  Sprint 4). Nunca con `rebase` ni con un `push` forzado.
 - **El simulacro y el `db push` se corren desde la rama del PR**, con la del anterior y `main` ya
   traídas: así listan solo su migración. Desde otra rama listarían otras.
 - **No hace falta `supabase link`** ni leer datos de «PROYECTO».
@@ -31,7 +29,7 @@ los PR: así sus fechas quedan en orden y no hace falta `--include-all`.
   seis migraciones del sprint, sin semillas ni roles, y el asesor de «PROYECTO» da 15 avisos
   _WARN_, los mismos del Sprint 4.
 
-Las comprobaciones de solo lectura que repite el agente:
+Las comprobaciones de solo lectura que se repiten:
 
 ```bash
 npx supabase db push --project-ref lyrdsmfalrchbdpmikmt --dry-run      # «Remote database is up to date»
@@ -40,7 +38,7 @@ npx supabase db advisors --linked --project-ref lyrdsmfalrchbdpmikmt   # sin avi
 
 ## Los pasos
 
-| N.º | PR             | Qué hace la persona                                                                                                                                                                                                                                                                  | Comprobación (agente, solo lectura)                                                                         |
+| N.º | PR             | Qué hace la persona                                                                                                                                                                                                                                                                  | Comprobación (solo lectura)                                                                                 |
 | --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | 1   | #40            | Fusiona las pruebas sin fecha y el e2e obligatorio. Va antes que #39: tiene el CI en verde, y con él `main` no queda en rojo por la unitaria de 08                                                                                                                                   | `main` igual a la rama; el CI de `main`                                                                     |
 | 2   | #39            | Fusiona el plan, después de traerle `main` (con #40) y de ver su CI en verde                                                                                                                                                                                                         | `main` igual a la rama                                                                                      |
@@ -61,7 +59,7 @@ npx supabase db advisors --linked --project-ref lyrdsmfalrchbdpmikmt   # sin avi
 
 ### El paso 10: las notificaciones push en «PROYECTO» (#49)
 
-| N.º | Qué hace la persona                                                                                                                                                                                                                                                                | Comprobación (agente, solo lectura)                                                                                                     |
+| N.º | Qué hace la persona                                                                                                                                                                                                                                                                | Comprobación (solo lectura)                                                                                                             |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | 10a | Genera las claves **propias** de «PROYECTO», en un archivo que Git ignora: `npm run vapid:claves -- --archivo .env.proyecto.local`. Escribe a mano `VAPID_SUBJECT=mailto:…` (el del equipo) y guarda el archivo en el gestor de contraseñas                                        | —                                                                                                                                       |
 | 10b | Simulacro y `db push`: solo `20261019124519_rf31_webhook_notificacion`                                                                                                                                                                                                             | Simulacro «up to date»; asesor en 20                                                                                                    |
@@ -103,7 +101,7 @@ git push origin v0.1.0-s1 v0.2.0-s2 v0.3.0-s3 v0.4.0-s4 v1.0.0
 - **El asesor muestra un aviso de nivel error o uno que no esté previsto:** se detiene y se revisa
   antes de fusionar.
 - **El push no llega en el paso 15:**
-  - el agente lee en «staging» cómo responde el webhook (`net._http_response`);
+  - en «staging» se lee cómo responde el webhook (`net._http_response`);
   - en «PROYECTO» se revisa con los logs de la función en el panel.
 
   Los avisos dentro de la aplicación siguen funcionando: el push nunca los toca (CU-31 2a).

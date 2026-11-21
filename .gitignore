@@ -32,7 +32,3 @@ test-results
 
 # Service worker en desarrollo (vite-plugin-pwa)
 dev-dist
-
-# Configuración local de Claude Code (con sus worktrees) y del MCP de cada persona
-.claude/
-.mcp.json

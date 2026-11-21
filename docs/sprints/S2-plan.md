@@ -30,32 +30,16 @@ Las cifras coinciden con las del cierre del Sprint 1. No hay diferencias que rep
 
 ## Antes de empezar
 
-| Necesidad                                                             | Para qué                                                                   | Quién     |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------- |
-| Aprobar este plan y responder las decisiones del final                | Sin eso no se escribe código del sprint                                    | El equipo |
-| DoR: estimar las siete historias (hay una propuesta abajo)            | Sprint Planning                                                            | El equipo |
-| CLI de GitHub (`gh`) con sesión                                       | **Resuelto el 8 oct:** instalado; el agente abre los PR con `gh pr create` | El equipo |
-| Repetir `npm run test:e2e:chromium` (deben pasar las 40 del Sprint 1) | Empezar con las e2e en verde (`decisiones-pendientes.md`, punto 17)        | El equipo |
-| Decir si el agente corre las e2e que ingresan o las corre el equipo   | Usan `CLAVE_USUARIOS_DE_PRUEBA`; el agente no lee `.env.local`             | El equipo |
-| Revisar entre los dos lo que ya está en `main`                        | Los PR #2 a #6 se fusionaron sin review                                    | El equipo |
-| Avisar antes de un `staging:reset`                                    | Solo se prevé uno, en el PR 8 (tipos de falla del seed)                    | El equipo |
-| OK para empezar antes del 19 oct                                      | El calendario dice 19–23 oct                                               | El equipo |
-
-## Skills del entorno
-
-Están disponibles `supabase`, `supabase-postgres-best-practices`, `vitest`,
-`vercel-react-best-practices`, `accessibility`, `web-design-guidelines`, `webapp-testing` (hay
-Python 3.14), `cloudflare:web-perf`, `wrangler`, `chrome-browser`, `built-in-browser` y `docx`.
-
-- **`figma-design-to-code`** no aparece en la lista de skills, pero el conector de Figma la entrega
-  como recurso (`skill://figma/figma-design-to-code/SKILL.md`): se carga desde ahí antes de cada
-  `get_design_context`.
-- **`pdf-reading`** no está; existe `pdf`, que sirve para lo mismo (solo si `docs/fuentes/md/` no
-  alcanza).
-- **`code-review`** sí está en este entorno, aunque el plan de arranque la daba por faltante. Se
-  puede usar en la revisión propia, además de la revisión en dos ejes.
-- El conector de Cloudflare (MCP) está sin autorizar. No bloquea: el peso se mide con el build y,
-  si hace falta consultar Pages, se usa `wrangler` por línea de comandos.
+| Necesidad                                                             | Para qué                                                             | Quién     |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------- | --------- |
+| Aprobar este plan y responder las decisiones del final                | Sin eso no se escribe código del sprint                              | El equipo |
+| DoR: estimar las siete historias (hay una propuesta abajo)            | Sprint Planning                                                      | El equipo |
+| CLI de GitHub (`gh`) con sesión                                       | **Resuelto el 8 oct:** instalado; los PR se abren con `gh pr create` | El equipo |
+| Repetir `npm run test:e2e:chromium` (deben pasar las 40 del Sprint 1) | Empezar con las e2e en verde (`decisiones-pendientes.md`, punto 17)  | El equipo |
+| Decidir quién corre las e2e que ingresan                              | Usan `CLAVE_USUARIOS_DE_PRUEBA`, que vive en `.env.local`            | El equipo |
+| Revisar entre los dos lo que ya está en `main`                        | Los PR #2 a #6 se fusionaron sin review                              | El equipo |
+| Avisar antes de un `staging:reset`                                    | Solo se prevé uno, en el PR 8 (tipos de falla del seed)              | El equipo |
+| OK para empezar antes del 19 oct                                      | El calendario dice 19–23 oct                                         | El equipo |
 
 ## Orden de los PR
 
@@ -69,9 +53,9 @@ PR 3 detalle (RF-18) ───────┴──► PR 4 tomar (RF-10) + base
 ```
 
 - **Cada PR apunta a `main`.** Si depende de uno sin fusionar, sale de esa rama, va en borrador y
-  dice «Depende de #N». Nadie fusiona sin la review del compañero; el agente no fusiona.
+  dice «Depende de #N». Nadie fusiona sin la review del compañero.
 - Los PR 1, 2 y 3 no dependen entre sí en el servidor, pero el 2 y el 3 comparten la tarjeta de
-  novedad y `fechas.js`. Si los hace una sola persona (o el agente), van en serie: 1 → 2 → 3.
+  novedad y `fechas.js`. Si los hace una sola persona, van en serie: 1 → 2 → 3.
 - Las migraciones de los PR 4 a 8 van en orden (4 → 5 → 6 → 7 → 8): comparten «staging» y su
   historial de migraciones.
 - **Review:** una persona revisa los PR 1, 4 y 8; la otra, los PR 2, 3, 5, 6 y 7.
@@ -99,7 +83,7 @@ Reparto sugerido: una persona el servidor y la otra el cliente, al revés que en
 | HU-14     | RF-14 · Registrar solución | 8      | Normalización, `resolver_tipo`, sugerencias, autocompletado y fecha en Colombia     |
 | **Total** |                            | **38** |                                                                                     |
 
-Aprobados el 8 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
+Aprobados el 8 oct 2026 y anotados en `docs/scrum/backlog.md`.
 
 ---
 
@@ -522,9 +506,9 @@ la aplicación. Queda con Vitest y pgTAP, y la e2e se escribe en el Sprint 3.
   de tipos va en el mismo commit) y `staging:advisors`, resumido en el PR.
 - **Antes del PR:** lint, formato, unitarias, build, capturas a 360 × 800 y 1280 × 800 en
   `docs/sprints/evidencias/S2/`, peso de la ruta de ingreso y revisión propia en dos ejes
-  (estándares del repositorio; fidelidad al RF y al CU), con `accessibility` y
-  `web-design-guidelines` en los que tienen interfaz.
-- **e2e que ingresan:** el agente las deja escritas y las corre solo si se le autoriza en ese
+  (estándares del repositorio; fidelidad al RF y al CU), con las pautas de
+  accesibilidad (WCAG 2.2) y de interfaz web en los que tienen interfaz.
+- **e2e que ingresan:** quedan escritas y se corren solo con permiso en ese
   momento. Crean sus precondiciones por la API con la sesión de cada rol, nunca con una clave
   privilegiada, y usan descripciones únicas: «staging» acumula novedades de otras corridas.
 - **Capturas:** con datos de prueba y el servidor simulado, como en el Sprint 1.
@@ -545,9 +529,9 @@ e2e en el CI y WebKit: solo si el equipo lo pide.
 | Siete historias en cinco días                                 | El miércoles no está el PR 4                     | Recortar primero el filtro por finca y el panel de 12, luego RF-17 (prioridad media); nunca las pruebas |
 | Los PR 5 a 8 dependen del 4                                   | El PR 4 se demora en la review                   | Revisarlo primero; los PR siguientes van en borrador sobre su rama                                      |
 | Una migración ya aplicada en «staging» cambia en la review    | Comentario sobre el SQL de un PR abierto         | Migración correctiva; un `staging:reset` solo con aviso                                                 |
-| El agente no puede abrir los PR ni correr las e2e             | No hay `gh`; las e2e necesitan la contraseña     | Instalar `gh` o abrir el PR con el enlace; el equipo corre las e2e o las autoriza                       |
+| No se pueden abrir los PR ni correr las e2e                   | No hay `gh`; las e2e necesitan la contraseña     | Instalar `gh` o abrir el PR con el enlace; el equipo corre las e2e                                      |
 | PostgREST no une `historial_transicion` con `usuario_publico` | Error al pedir los nombres de la línea de tiempo | Dos consultas en paralelo (historial y usuarios), sin objetos nuevos en la base                         |
-| El autocompletado no queda accesible                          | Revisión con `accessibility`                     | Patrón _combobox_ de la guía ARIA, con pruebas de teclado                                               |
+| El autocompletado no queda accesible                          | Revisión de accesibilidad                        | Patrón _combobox_ de la guía ARIA, con pruebas de teclado                                               |
 | WebKit sigue sin verificar                                    | RNF-04 pide Safari                               | Solo API estándar (`<dialog>` existe desde Safari 15.4); e2e en el CI si el equipo lo pide              |
 | `unaccent` también convierte la ñ en n                        | «Año» y «Ano» serían el mismo tipo               | Es lo que pide SDD 6.1.8; se deja anotado                                                               |
 

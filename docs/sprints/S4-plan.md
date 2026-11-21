@@ -49,7 +49,7 @@ Las cifras coinciden con las del cierre del Sprint 3. Datos nuevos:
   migraciones vuelven a crear las políticas. Por eso la migración del bucket tiene que poder correr
   sobre un bucket que ya existe (decisión 19).
 - **La Figura 18 del SDD** (secuencia del registro sin conexión y la sincronización) no quedó en el
-  Markdown. Se sacó del `.docx` con la skill `docx`: coincide con el seudocódigo de 6.1.5 (registro
+  Markdown. Se sacó del `.docx`: coincide con el seudocódigo de 6.1.5 (registro
   con `tx.done`, ciclo en orden de `fecha_registro`, 401 que conserva la cola y error de red que
   detiene). No trae nada que el texto no diga.
 - **«staging» crece:** 566 novedades, casi todas de las pruebas. La prueba intermitente de CU-11
@@ -58,18 +58,17 @@ Las cifras coinciden con las del cierre del Sprint 3. Datos nuevos:
 
 ## Antes de empezar
 
-| Necesidad                                                      | Para qué                                                                                                             | Estado al 13 oct 2026                              |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Aprobar este plan, los puntos y las decisiones del final       | Sin eso no se escribe código del sprint                                                                              | **Hecho** (13 oct)                                 |
-| Fechas reales                                                  | El calendario dice 3–6 nov; se propone empezar desde el 14 oct                                                       | **Hecho:** 14–19 oct                               |
-| Autorizar que el agente corra las e2e que ingresan             | RNF-07 a RNF-09 se demuestran con una sincronización real. Cargan `.env.local` solas; la contraseña no pasa por aquí | **Hecho** (13 oct)                                 |
-| Autorizar o no que el agente recorra una vista previa de Pages | Ingresar con un usuario de prueba en la vista previa de un PR (`built-in-browser`)                                   | Sin respuesta: no se hace                          |
-| **Descargar cinco íconos** de Google                           | `download`, `photo_camera`, `image`, `add_a_photo` y `delete` (Figma 05-B, 05, 05-D y 09) no están en `iconos/`      | **Hecho** (13 oct)                                 |
-| Cuándo se aplica la migración del bucket en «PROYECTO»         | Tiene que estar antes de fusionar su PR (decisión 28)                                                                | Con la recomendación; el OK se pide en ese momento |
-| Qué dispositivos reales hay                                    | Android de gama media e iPhone, para la lista de chequeo (decisión 29)                                               | **A criterio de la implementación:** ver la 29     |
-| El trabajo de e2e en el CI                                     | WebKit sigue sin verificar (decisión 27)                                                                             | **Sí** (con la recomendación)                      |
-| Lo que sigue abierto del Sprint 3                              | #19 (la empresa), las etiquetas y reflejar en Figma las decisiones 31 a 47                                           | Pendiente del equipo                               |
-| Avisar antes de un `staging:reset`                             | No se prevé ninguno: el bucket entra con `staging:push`. Sigue el de antes de la demo                                | —                                                  |
+| Necesidad                                                | Para qué                                                                                                             | Estado al 13 oct 2026                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Aprobar este plan, los puntos y las decisiones del final | Sin eso no se escribe código del sprint                                                                              | **Hecho** (13 oct)                                 |
+| Fechas reales                                            | El calendario dice 3–6 nov; se propone empezar desde el 14 oct                                                       | **Hecho:** 14–19 oct                               |
+| Autorizar que se corran las e2e que ingresan             | RNF-07 a RNF-09 se demuestran con una sincronización real. Cargan `.env.local` solas; la contraseña no pasa por aquí | **Hecho** (13 oct)                                 |
+| **Descargar cinco íconos** de Google                     | `download`, `photo_camera`, `image`, `add_a_photo` y `delete` (Figma 05-B, 05, 05-D y 09) no están en `iconos/`      | **Hecho** (13 oct)                                 |
+| Cuándo se aplica la migración del bucket en «PROYECTO»   | Tiene que estar antes de fusionar su PR (decisión 28)                                                                | Con la recomendación; el OK se pide en ese momento |
+| Qué dispositivos reales hay                              | Android de gama media e iPhone, para la lista de chequeo (decisión 29)                                               | **A criterio de la implementación:** ver la 29     |
+| El trabajo de e2e en el CI                               | WebKit sigue sin verificar (decisión 27)                                                                             | **Sí** (con la recomendación)                      |
+| Lo que sigue abierto del Sprint 3                        | #19 (la empresa), las etiquetas y reflejar en Figma las decisiones 31 a 47                                           | Pendiente del equipo                               |
+| Avisar antes de un `staging:reset`                       | No se prevé ninguno: el bucket entra con `staging:push`. Sigue el de antes de la demo                                | —                                                  |
 
 **Los íconos.** `src/core/ui/iconos/LEEME.md` manda bajarlos de
 `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<nombre>/default/20px.svg`
@@ -84,42 +83,7 @@ Nada de este plan toca «PROYECTO» sin el OK del equipo. Lo que le llega está 
 
 Los Sprints 1 a 3 están en `main`: todo sale de `main` al día. Un PR cuya base no esté fusionada
 sale de la rama de ese PR, va en borrador y dice «Depende de #N»; al fusionarse la base, se le trae
-`main`. Recordatorio: el entorno no deja que el agente fusione; lo hace una persona después de la
-review.
-
-## Skills del entorno
-
-Están en la lista y se usan así. Ninguna se instala ni se copia al repositorio: nada de
-`npx skills add`, `.claude/skills/`, `.agents/` ni `skills-lock.json`; los archivos se agregan por
-nombre.
-
-| Skill                                         | Uso en este sprint                                                                                                                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `supabase`                                    | **Ya se usó para este plan:** bucket por SQL, políticas de `storage.objects`, URLs firmadas, `db reset --linked` (leído en el código del CLI). Su lista de seguridad en los PR 6 y 7 |
-| `supabase-postgres-best-practices`            | **Ya se usó** para elegir el disparador con bloqueo de fila (decisión 20). Antes de escribir la migración del bucket y cada prueba pgTAP                                             |
-| `vitest`                                      | Cola y sincronizador con `fake-indexeddb`; monitor con temporizadores y `fetch` simulados; Web Locks y `BroadcastChannel` simulados; cálculo de la reducción; pantallas              |
-| `vercel-react-best-practices`                 | **Ya se usó:** un solo oyente global (`client-event-listeners`), hooks que devuelven un booleano (`rerender-derived-state`), carga condicional del reductor (`bundle-conditional`)   |
-| `accessibility`                               | Anuncio del indicador, acciones deshabilitadas que se explican, campo de foto y 05-D, errores de la cola, foco en 07 y 08-B                                                          |
-| `web-design-guidelines`                       | Revisión de la interfaz en cada PR con pantallas                                                                                                                                     |
-| `webapp-testing`                              | Playwright sobre el build con service worker: `context.setOffline(true)`, cerrar y reabrir, capturas a 360 × 800 y 1280 × 800                                                        |
-| `cloudflare:web-perf`                         | Al cierre: Lighthouse (instalable, abre sin red) y peso de la ruta de ingreso. Si pide una herramienta que no está, se pregunta antes                                                |
-| `wrangler`                                    | Solo para consultar despliegues y vistas previas de Pages. No se despliega con él (ADR 0004)                                                                                         |
-| `built-in-browser`                            | Recorrer la vista previa de un PR con un usuario de prueba, si el equipo lo autoriza                                                                                                 |
-| `docx`                                        | **Ya se usó** para sacar la Figura 18 del SDD                                                                                                                                        |
-| `figma-design-to-code` (recurso del conector) | **Ya se cargó.** Para este plan se pidieron 04-B, 05-B, 05-D, 07, 08, 08-B, el campo Foto de 05 y «Evidencias» de 09; 09-D, 11-B y 14-B como captura                                 |
-| `code-review`                                 | Revisión propia de cada PR, además de los dos ejes                                                                                                                                   |
-| `ponytail` (pedida por el equipo)             | Activa en todo el sprint: el cambio más chico que resuelve todo, sin abstracciones de más. Cada atajo con límite conocido lleva su comentario (decisión 41)                          |
-| `ponytail-review`                             | Segunda revisión de cada PR: lógica, seguridad, carga real y cada línea necesaria                                                                                                    |
-| `ponytail-debt`                               | Al cierre: la lista de atajos que quedaron, para el informe                                                                                                                          |
-| `security-review`                             | En los PR 6 y 7 (bucket, políticas y archivos de los usuarios)                                                                                                                       |
-
-- `pdf` no hizo falta: `docs/fuentes/md/Plan.md` alcanzó.
-- **Conectores:** Supabase, solo contra «staging» y para leer (`search_docs`, `get_advisors`,
-  `list_tables`); nunca `apply_migration` ni «PROYECTO». Figma, solo para leer. Cloudflare, opcional
-  y solo para consultar.
-- **No aplican:** `frontend-design`, `dataviz`, `skill-creator`, `find-skills`, `deep-research`,
-  `docs`, `pptx`, `xlsx`, `computer-use` y las de Cloudflare para Workers, Durable Objects, Agents,
-  Turnstile, correo o Next.js.
+`main`. Recordatorio: fusiona una persona, después de la review.
 
 ## Orden de los PR
 
@@ -145,7 +109,7 @@ docs/S4-informe
   una lleva la cola (2 → 3) y la otra la consulta y el bloqueo (4 → 5). El 5 va después del 4
   porque los dos tocan `DetalleNovedad.jsx` (14-B es el detalle sin conexión).
 - **PR 0 (opcional):** las e2e en el CI, con Chromium y WebKit. Si se atasca un día, se deja.
-- Si lo hace una sola persona (o el agente), va en serie: 6 → 1 → 2 → 3 → 4 → 5 → 7 (el 0 al
+- Si lo hace una sola persona, va en serie: 6 → 1 → 2 → 3 → 4 → 5 → 7 (el 0 al
   principio, si se aprueba).
 - **Review:** una persona revisa los PR 0, 3, 6 y 7 (sincronización, servidor y seguridad); la
   otra, los PR 1, 2, 4 y 5.
@@ -177,7 +141,7 @@ la línea de corte, como dice el plan de arranque («planear esos sprints con me
 velocidad del Sprint 3 (≈ 8 puntos por día), cuatro días dan unos 33. Si al terminar el día 3 no
 están el PR 3 y el PR 4, RF-08 sale; nunca las pruebas de RF-21 a RF-25.
 
-Adoptados el 13 oct 2026 y anotados en `docs/scrum/backlog.md` y `backlog.json`.
+Adoptados el 13 oct 2026 y anotados en `docs/scrum/backlog.md`.
 
 ---
 
@@ -475,8 +439,8 @@ En el repositorio no van fotos reales: las imágenes las genera la prueba.
 - **Antes de abrir el PR:** lint, `format:check`, unitarias, build, **peso de la ruta de ingreso**
   (si pasa de 200 KB, se detiene y se avisa), capturas a 360 × 800 y 1280 × 800 en
   `docs/sprints/evidencias/S4/` (servidor simulado y datos de prueba; las de sin conexión, con la
-  red cortada en Playwright), revisión con las skills (`code-review`, `ponytail-review`,
-  `accessibility`, `web-design-guidelines`) y revisión propia en dos ejes: estándares del
+  red cortada en Playwright), revisión de código, de
+  accesibilidad y de la interfaz, y revisión propia en dos ejes: estándares del
   repositorio y fidelidad al RF y al CU.
 - **e2e sin conexión** sobre el build con service worker (`build` y `preview`, como la de RNF-10).
 - **Datos de las pruebas:** por la API con la sesión de cada rol, nunca con la clave secreta; nada
@@ -619,7 +583,7 @@ del 2 al 7 y el 9, con la red cortada desde el sistema):
 | 38  | 13, 14, 20, 20-C, 22                                    | «Evidencias» sin «Adjuntar foto»                                                                            | Solo lectura para el aprobador, el director y el administrador; «Adjuntar foto» solo el reportante, en estados no finales (Tabla 35)                                                  |
 | 39  | `useInsignias.js`, `AvisoNuevaVersion.jsx`, `sesion.js` | Leen `navigator.onLine` directamente                                                                        | Se dejan: preguntan si el navegador cree tener red, y el monitor arranca con ese mismo valor. Cambiarlos no arregla nada                                                              |
 | 40  | `Cuenta.jsx`                                            | La advertencia de cerrar sesión cuenta las pendientes de todos los usuarios del dispositivo                 | Solo las del usuario (RNF-10), en el PR 1                                                                                                                                             |
-| 41  | Atajos con límite conocido                              | `ponytail` pide marcar cada atajo con un comentario `shortcut:`; el código del repositorio va en español    | Comentario en español con la misma forma: `atajo: <límite>, <cuándo cambiarlo>`. Al cierre se listan con una búsqueda de `atajo:` para el informe                                     |
+| 41  | Atajos con límite conocido                              | Los atajos se marcaban con un comentario `shortcut:`; el código del repositorio va en español               | Comentario en español con la misma forma: `atajo: <límite>, <cuándo cambiarlo>`. Al cierre se listan con una búsqueda de `atajo:` para el informe                                     |
 
 Los textos que Figma no trae (2a, 2b, 3a, la línea de tiempo no descargada, el aviso de 19 sin red,
 el director sin red, 06 con una foto que no subió, el máximo de fotos, los dos códigos nuevos) se
@@ -649,7 +613,7 @@ revisión propia y etiqueta `v0.4.0-s4`); `docs/sprints/S4-demo.md` con el guion
 registrar → cerrar la aplicación → volver con red → la novedad sincronizada con su código, su fecha
 real y sin duplicado; una pendiente con error y su reintento; 08-B; 04-B y 11-B; 14-B y 09-D; la
 foto con conexión, la no válida y el intento sin conexión); capturas finales; peso de la ruta de
-ingreso y Lighthouse (`cloudflare:web-perf`); la lista de atajos (`ponytail-debt`); `README.md`
+ingreso y Lighthouse; la lista de atajos (`atajo:`); `README.md`
 (estado, sin conexión y Storage), `docs/decisiones-pendientes.md` y `docs/cambios-sdd.md` al día.
 
 Queda para las personas, y el informe lo lista con sus pasos: review y fusión de cada PR; aplicar

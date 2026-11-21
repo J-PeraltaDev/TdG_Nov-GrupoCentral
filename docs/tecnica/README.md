@@ -11,4 +11,4 @@ y lo que cambie en el piloto (plan del Sprint 5, decisión 56).
 | Modelo de datos         | [`modelo-de-datos.md`](modelo-de-datos.md): tablas, vistas, funciones, disparadores, acceso y lo que guarda el dispositivo                                     |
 | Despliegue              | [`despliegue.md`](despliegue.md): dónde vive cada pieza, las variables y los secretos, y cómo llega un cambio a producción                                     |
 | Pruebas                 | Por nivel y por caso de uso, en cada informe de [`docs/sprints/`](../sprints/); la del Sprint 5 es [`S5.md`](../sprints/S5.md)                                 |
-| Convenciones del código | [`CLAUDE.md`](../../CLAUDE.md): nombres, ramas, commits, migraciones y las reglas de seguridad de la base                                                      |
+| Convenciones del código | [`convenciones.md`](convenciones.md): nombres, ramas, commits, migraciones y las reglas de seguridad de la base                                                |

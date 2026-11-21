@@ -258,7 +258,7 @@ docs/           decisiones (adr), scrum, sprints, despliegue, pruebas y técnica
 ```
 
 Las convenciones de nombres, ramas, commits y migraciones, y las reglas de seguridad de la base
-de datos, están en [`CLAUDE.md`](CLAUDE.md).
+de datos, están en [`docs/tecnica/convenciones.md`](docs/tecnica/convenciones.md).
 
 ## Forma de trabajo
 

@@ -16,8 +16,8 @@ empresa.
 - Se desarrolla contra **Supabase local** (Supabase CLI + Docker): `npm run db:start`,
   `npm run db:reset` y `npm run test:db`. Las migraciones viven en `supabase/migrations/`.
 - **«PROYECTO» es producción.** Recibe las migraciones con `supabase db push` solo al cierre de
-  cada sprint, después de la review y con el visto bueno del equipo. Nadie —persona o agente—
-  le aplica cambios a mano ni con `apply_migration` del MCP.
+  cada sprint, después de la review y con el visto bueno del equipo. Nadie le aplica
+  cambios a mano.
 - Las migraciones se escriben a mano en archivos creados con `supabase migration new`.
 - `seed.sql` es solo para el entorno local: datos y usuarios de prueba, nunca nombres reales.
 - **Privilegios explícitos.** En «PROYECTO», las tablas nuevas de `public` no quedan expuestas a

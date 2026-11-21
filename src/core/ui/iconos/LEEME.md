@@ -5,7 +5,7 @@ SVG locales, sin librería de íconos. Se usan con `Icono.jsx`, que los pinta co
 ## De dónde salen
 
 En Figma los íconos no son vectores: son texto con la fuente **Material Symbols Rounded**
-(peso 400, sin relleno). El conector de Figma no los exporta como SVG limpios, así que estos
+(peso 400, sin relleno). Figma no los exporta como SVG limpios, así que estos
 archivos se descargaron del mismo conjunto oficial de Google, sin modificarlos:
 
 `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/<nombre>/default/20px.svg`
